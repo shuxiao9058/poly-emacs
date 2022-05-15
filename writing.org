@@ -650,6 +650,7 @@ do not already have one."
 				("2" "Show Work GTD & meeting appointment" todo ""
 				 ((org-agenda-files '(,+org-capture-work-gtd-file
 						      ,+org-capture-work-meeting-file))))))
+  (org-id-locations-file (expand-file-name "org-id-locations" poly-cache-dir))
   :config
   (appt-activate 1)
   ;; (org-agenda-to-appt)
