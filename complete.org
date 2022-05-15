@@ -357,7 +357,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		("<backtab>" . corfu-previous)
 		("RET"     . corfu-insert)
 		("<return>"  . corfu-insert)
-		;; ("<escape>" . corfu-reset)
+		("<escape>" . corfu-quit)
 		;; ("ESC"    . corfu-reset)
 		;; ("SPC" . corfu-move-to-minibuffer)
 		;; ("<space>" . corfu-move-to-minibuffer)
