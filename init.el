@@ -30,8 +30,10 @@
 (global-set-key (kbd "<f12>") 'poly-refresh)
 
 ;; Load main configuration
+
+(poly-load-org-config "project")
+(poly-load-org-config "complete")
 (poly-load-org-config "editor")
 (poly-load-org-config "writing")
 (poly-load-org-config "programming")
 (poly-load-org-config "addons" t)
-

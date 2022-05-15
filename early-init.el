@@ -7,8 +7,8 @@
 (setq user-emacs-directory (file-name-directory (or load-file-name buffer-file-name)))
 
 (defun poly/file-mod-time(file)
-(when (file-exists-p file)
-  (nth 5 (file-attributes file)))
+  (when (file-exists-p file)
+    (nth 5 (file-attributes file)))
   )
 
 ;; Define configuration loader helper
@@ -21,13 +21,13 @@ If FORCE-TANGLE is non-nil, always tangle before load."
   (let* ((source (expand-file-name (format "%s.org" config-name) user-emacs-directory))
 	 (tangle-dir (expand-file-name "tangle" user-emacs-directory))
 	 (target (expand-file-name (format "%s.el" config-name) tangle-dir))
-  (target-mod-time (poly/file-mod-time target))
-  (source-mod-time (poly/file-mod-time source)))
+         (target-mod-time (poly/file-mod-time target))
+         (source-mod-time (poly/file-mod-time source)))
     (when (file-exists-p source)
       (make-directory tangle-dir t)
       (when (or force-tangle
-       (not (file-exists-p target))
-       (time-less-p target-mod-time source-mod-time))
+                (not (file-exists-p target))
+                (time-less-p target-mod-time source-mod-time))
 	(require 'org)
 	(require 'ob)
 	(org-babel-tangle-file source target)
@@ -46,17 +46,12 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 
 ;; (setq stack-trace-on-error t)
 
-;; core declare
+;; core configurations
 (poly-load-org-config "core")
-
 ;; straight package
 (poly-load-org-config "package")
-
+(poly-load-org-config "ui")
 (poly-load-org-config "keybindings")
-
-(poly-load-org-config "project")
-
-(poly-load-org-config "complete")
 
 ;; Load configurations
 (poly-load-org-config "private")

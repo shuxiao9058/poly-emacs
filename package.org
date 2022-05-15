@@ -33,29 +33,13 @@
       ;; Tell straight.el about the profiles we are going to be using.
       straight-profiles
       '((nil . "default.el")
-  ;; Packages which are pinned to a specific commit.
-  (pinned . "pinned.el"))
+        ;; Packages which are pinned to a specific commit.
+        (pinned . "pinned.el"))
       ;; ;; Set package.el variables just in case to avoid polluting
       ;; ;; the root directory.
       ;; package-enable-at-startup nil
       ;; straight-check-for-modifications '(find-when-checking check-on-save)
-      use-package-always-demand t
-      )
-
-; ;; Setup straight as package manager
-; (defvar bootstrap-version)
-; (let ((bootstrap-file
-;        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-;       (bootstrap-version 5))
-;   (unless (file-exists-p bootstrap-file)
-;     (with-current-buffer
-;         (url-retrieve-synchronously
-;          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-;          'silent 'inhibit-cookies)
-;       (goto-char (point-max))
-;       (eval-print-last-sexp)))
-;   (load bootstrap-file nil 'nomessage))
-
+      use-package-always-demand t)
 
 (eval-when-compile
   (defvar bootstrap-version)
@@ -90,7 +74,81 @@
 (setq straight-vc-git-default-clone-depth 1)
 #+end_src
 
+** env
 
+#+begin_src emacs-lisp
+
+(use-package exec-path-from-shell
+  :straight t
+  :ensure t
+  :if IS-MAC
+  :config
+  ;; (setq shell-default-term-shell "/bin/zsh")
+  ;; (setq exec-path-from-shell-shell-name "/bin/zsh")
+  ;; ;; (setq exec-path-from-shell-shell-name "/run/current-system/sw/bin/zsh")
+  ;; (setq exec-path-from-shell-arguments '("-l"))
+  ;; (when (file-executable-p "/usr/local/bin/fish")
+  ;;   (setq exec-path-from-shell-shell-name "/usr/local/bin/fish"
+  ;;         exec-path-from-shell-debug nil))
+
+  ;; (setq exec-path-from-shell-arguments '("-l"))
+  (setq exec-path-from-shell-variables
+	'("PATH"
+          "PYENV_ROOT"
+          "JAVA_HOME"
+          "GOPATH"
+          "GOINSECURE"
+          "GOINSECURE"
+          "SDKMAN_DIR"
+	  "EMACS_MODULE_HEADER_ROOT"
+	  "LIBRIME_ROOT"))
+
+  (setenv "GOPROXY" "")
+  (setenv "COLORTERM" "truecolor")
+
+  ;; Load path from zsh login shell
+  (when (or IS-LINUX IS-MAC)
+    (defvar zsh-executable  "/opt/local/bin/zsh")
+    ;; (defvar zsh-executable  "/usr/bin/env zsh")
+    (let* ((zshpath (shell-command-to-string
+                     (concat zsh-executable " -lc 'printenv PATH'")))
+           (pathlst (split-string zshpath ":")))
+      (setq exec-path pathlst)
+      (setq eshell-path-env zshpath)
+      ;; (princ zshpath)
+      (setenv "PATH" zshpath))
+
+    ;; use zsh as default shell
+    (setenv "SHELL" "zsh"))
+
+  (exec-path-from-shell-initialize)
+
+  ;; (setenv "LIBRARY_PATH" "/opt/local/lib/gcc11/")
+  (if (and poly-enable-native-comp
+	   (fboundp 'native-comp-available-p)
+           (native-comp-available-p))
+      (progn
+	(message "Native comp is available")
+	;; Using Emacs.app/Contents/MacOS/bin since it was compiled with
+	;; ./configure --prefix="$PWD/nextstep/Emacs.app/Contents/MacOS"
+	(add-to-list 'exec-path (concat invocation-directory "bin") t)
+	(setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
+				       (when (getenv "LIBRARY_PATH")
+					 ":")
+				       ;; This is where Homebrew puts gcc libraries.
+				       (car (file-expand-wildcards
+					     (expand-file-name "/opt/local/lib/gcc11/")))))
+
+	(setenv "DYLD_LIBRARY_PATH" (concat (getenv "DYLD_LIBRARY_PATH")
+					    (when (getenv "DYLD_LIBRARY_PATH") ":")
+					    ;; This is where Homebrew puts gcc libraries.
+					    (car (file-expand-wildcards
+						  (expand-file-name "/opt/local/lib/gcc11/")))))
+	;; Only set after LIBRARY_PATH can find gcc libraries.
+	(setq comp-deferred-compilation t))
+    (message "Native comp is *not* available"))
+  )
+#+end_src
 
 ** core packages
 
@@ -99,17 +157,17 @@
 (unless (display-graphic-p)
   (advice-add #'tty-run-terminal-initialization :override #'ignore)
   (add-hook 'window-setup-hook
-      (lambda ()
-        (advice-remove #'tty-run-terminal-initialization #'ignore)
-        (tty-run-terminal-initialization (selected-frame) nil t))))
+            (lambda ()
+              (advice-remove #'tty-run-terminal-initialization #'ignore)
+              (tty-run-terminal-initialization (selected-frame) nil t))))
 
 
 (use-package recentf
   :straight nil
   :commands (recentf-mode
-       recentf-add-file
-       recentf-apply-filename-handlers
-       recentf-open-files)
+             recentf-add-file
+             recentf-apply-filename-handlers
+             recentf-open-files)
   ;; :defines no-littering-etc-directory no-littering-var-directory quelpa-packages-dir
   ;; :after no-littering
   :hook (after-init . recentf-mode)
@@ -126,22 +184,22 @@
   (recentf-auto-save-timer (run-with-idle-timer 600 t 'recentf-save-list))
   ;; exclude ** from recentfiles buffer
   (recentf-exclude `(;; ,@(cl-loop  for f in `(
-             ;; ,package-user-dir
-                                           ;; ,quelpa-packages-dir
-                                           ;; ,no-littering-var-directory
-                                           ;; ,no-littering-etc-directory)
-                        ;;        collect (abbreviate-file-name f))
-         "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\)$"
-         "^/tmp/" "^/ssh:" "\\.?ido\\.last$" "\\.revive$" "/TAGS$"
-         "^/var/folders\\.*" "\\.git/config" "\\.git/COMMIT_EDITMSG"
-         "COMMIT_MSG"
-         "[0-9a-f]\\{32\\}-[0-9a-f]\\{32\\}\\.org"
-         "github.*txt$"
-         "COMMIT_EDITMSG\\'"
-         ".*-autoloads\\.el\\'"
-         "recentf"
-         ".*pang$" ".*cache$"
-         "[/\\]\\.elpa/"
+                     ;; ,package-user-dir
+                     ;; ,quelpa-packages-dir
+                     ;; ,no-littering-var-directory
+                     ;; ,no-littering-etc-directory)
+                     ;;        collect (abbreviate-file-name f))
+                     "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\)$"
+                     "^/tmp/" "^/ssh:" "\\.?ido\\.last$" "\\.revive$" "/TAGS$"
+                     "^/var/folders\\.*" "\\.git/config" "\\.git/COMMIT_EDITMSG"
+                     "COMMIT_MSG"
+                     "[0-9a-f]\\{32\\}-[0-9a-f]\\{32\\}\\.org"
+                     "github.*txt$"
+                     "COMMIT_EDITMSG\\'"
+                     ".*-autoloads\\.el\\'"
+                     "recentf"
+                     ".*pang$" ".*cache$"
+                     "[/\\]\\.elpa/"
                      ;; Folders on MacOS start
                      "^/private/tmp/"
                      "^/var/folders/"
@@ -152,7 +210,7 @@
                      "^/usr/include/"
                      "/TAGS\\'"
                      ;; "COMMIT_EDITMSG\\'"
-         ))
+                     ))
   ;; :config
   ;; (setq recentf-max-saved-items nil
   ;;  recentf-max-menu-items 60
@@ -173,8 +231,8 @@
   :init
   (if IS-WINDOWS
       (progn
-  (setq server-use-tcp t)
-  (setq server-use-socket nil))
+        (setq server-use-tcp t)
+        (setq server-use-socket nil))
     (setq server-use-tcp nil)
     (setq server-use-socket t))
 
@@ -213,9 +271,9 @@
 ;; https://gitlab.com/ideasman42/emacs-undo-fu
 (use-package undo-fu
   :straight (undo-fu
-       :host gitlab
-       :repo "ideasman42/emacs-undo-fu"
-       :files ("undo-fu.el"))
+             :host gitlab
+             :repo "ideasman42/emacs-undo-fu"
+             :files ("undo-fu.el"))
   :ensure t
   :demand t
   :custom
@@ -337,15 +395,15 @@
   :straight t
   :bind
   (:map transient-map
-  ([escape] . transient-quit-one)
-  ("q" . transient-quit-one)))
+        ([escape] . transient-quit-one)
+        ("q" . transient-quit-one)))
 
 (use-package multiple-cursors
   :straight t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
-   ("C-<" . mc/mark-next-like-this)
-   ("C->" . mc/mark-previous-like-this)
-   ("C-c C-<" . mc/mark-all-like-this)))
+         ("C-<" . mc/mark-next-like-this)
+         ("C->" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
 
 ;; required by core-hammerspoon
 (use-package dash
@@ -360,12 +418,12 @@
                                         ".+and \d{1,10} more errors.+"
                                         "Wrote "
                                         "Liberime: start with shared dir" ;;; liberime
-          ".+Starting new Ispell process.+" ;;; ispell
-          "Package cl is deprecated"
-          "Loading[\s\w\/\.-]+\(module\).+"
-          ".+search-failed.+"
-          ;; "Loading[\w\/\d\W]+\(module\).+" ;;; module load
-          "For information about GNU Emacs and the GNU system.+"
+                                        ".+Starting new Ispell process.+" ;;; ispell
+                                        "Package cl is deprecated"
+                                        "Loading[\s\w\/\.-]+\(module\).+"
+                                        ".+search-failed.+"
+                                        ;; "Loading[\w\/\d\W]+\(module\).+" ;;; module load
+                                        "For information about GNU Emacs and the GNU system.+"
                                         )
   "filter formatted message string to remove noisy messages"
   :type '(list string)
@@ -376,14 +434,14 @@
       ad-do-it
     (let ((formatted-string (apply 'format (ad-get-args 0))))
       (if (and (stringp formatted-string)
-         (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
-    (let ((inhibit-read-only t))
+               (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
+          (let ((inhibit-read-only t))
             (with-current-buffer "*Messages*"
-        (goto-char (point-max))
-        (insert formatted-string "\n")))
-  (progn
-    (ad-set-args 0 `("%s" ,formatted-string))
-    ad-do-it)))))
+              (goto-char (point-max))
+              (insert formatted-string "\n")))
+        (progn
+          (ad-set-args 0 `("%s" ,formatted-string))
+          ad-do-it)))))
 
 ;; Michael Hoffman at the comment of
 ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html

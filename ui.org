@@ -1,6 +1,11 @@
 #+title: ui
 
 #+begin_src emacs-lisp
+  ;;; -*- lexical-binding: t -*-
+#+end_src
+
+** Core UI configuration
+#+begin_src emacs-lisp
 
 
   ;; Hide the mouse while typing:
@@ -95,4 +100,33 @@
   (winner-mode 1))
 
   (setq mode-line-compact t)
+#+end_src
+
+**  since emacs 28
+
+#+begin_src emacs-lisp
+  (setq use-short-answers t)
+  (setq create-lockfiles nil)
+#+end_src
+
+***  initial frame
+#+begin_src emacs-lisp
+
+  ;; Disable most GUI widgets early on
+  (setq default-frame-alist '((horizontal-scroll-bars . nil)
+                              (alpha . (0.90 0.90))
+                              (ns-appearance . dark)
+                              (ns-transparent-titlebar . t)
+                              (drag-internal-border . 1)
+                              (drag-with-tab-line . t)
+                              (internal-border-width . 0)
+                              ;; (internal-border-width . 5)
+                              (vertical-scroll-bars . nil)
+                              (menu-bar-lines . 0)
+                              (tool-bar-lines . 0)
+                              (fullscreen . maximized)
+                              (height . 50)
+                              (width . 95)
+                              (undecorated . t) ;; remove title bar
+                              ))
 #+end_src

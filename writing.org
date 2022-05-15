@@ -655,140 +655,677 @@ do not already have one."
   ;; (org-agenda-to-appt)
   )
 #+end_src
+**  Write codes in org-mode
+#+begin_src emacs-lisp
+  (use-package org-src
+  :straight nil
+  :ensure nil
+  :after org
+  :hook (org-babel-after-execute . org-redisplay-inline-images)
+  :bind (:map org-src-mode-map
+              ;; consistent with separedit/magit
+              ("C-c C-c" . org-edit-src-exit))
+  :custom
+  (org-src-fontify-natively t)
+  (org-src-tab-acts-natively t)
+  (org-src-preserve-indentation t)
+  (org-src-window-setup 'current-window)
+  (org-confirm-babel-evaluate nil)
+  (org-edit-src-content-indentation 0)
+  (org-src-lang-modes '(("C"      . c)
+                        ("C++"    . c++)
+                        ("bash"   . sh)
+                        ("cpp"    . c++)
+                        ("dot"    . graphviz-dot)
+                        ("elisp"  . emacs-lisp)
+                        ("ocaml"  . tuareg)
+                        ("shell"  . sh)
+                        ("sqlite" . sql)))
+  (org-babel-load-languages '((awk        . t)
+                              (C          . t)
+                              (calc       . t)
+                              (dot        . t)
+                              (emacs-lisp . t)
+                              (eshell     . t)
+                              (gnuplot    . t)
+                              (ocaml      . t)
+                              (python     . t)
+                              (shell      . t)
+                              (sql        . t))))
+
+(use-package ob
+  :straight nil
+  :after org
+  :config
+  (require 'ob-clojure)
+  (setq org-babel-clojure-backend 'cider))
+#+end_src
+** org-habbit
+#+begin_src emacs-lisp
+       (use-package org-habit
+         :straight nil
+         :ensure nil
+         :after org
+         :custom
+         (org-habit-show-habits t)
+         (org-habit-show-all-today t))
+#+end_src
+** task
+#+begin_src emacs-lisp
+(use-package ox-taskjuggler
+  :straight (:type built-in)
+  :after (org osx)
+  :custom
+  (org-taskjuggler-process-command  "tj3 --silent --no-color --output-dir %o %f && open %o/Plan.html")
+  :init
+  (setq org-taskjuggler-default-global-properties
+	"shift s39 \"Full time shift\" {
+	   workinghours mon-fri 9:00-12:00,13:00-19:00
+	}")
+  (setq org-duration-units `(("min" . 1)
+			     ("h" . 60)
+			     ("d" . ,(* 60 8))
+			     ("w" . ,(* 60 8 5))
+			     ("m" . ,(* 60 8 5 4))
+			     ("y" . ,(* 60 8 5 4 10))))
+  (org-duration-set-regexps)
+  :hook (org-mode . (lambda()
+		      (require 'ox-taskjuggler)))
+  :config
+  (add-to-list 'org-export-backends 'taskjuggler)
+  ;; (require 'ox-taskjuggler)
+  ;; (require 'ox-taskjuggler)
+  ;; (require 'taskjuggler-mode)
+  ;; (setq org-export-taskjuggler-target-version 3.6
+  ;;	org-export-taskjuggler-project-tag "project"
+  ;;	org-export-taskjuggler-resource-tag "resource"
+  ;;	org-export-taskjuggler-default-project-duration 16256
+  ;;	org-export-taskjuggler-default-global-properties "rversion")
+  ;; ;; (setq org-taskjuggler-default-reports '("include \"/Users/chenlong/.emacs.d/lisp/reports.tji\""))
+  )
+#+end_src
+
+** bullet
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :straight t
+  :commands (org-bullets-mode org-bullets)
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("⊢" "⋮" "⋱" "⋱" "⋱"))
+  ;; (setq org-bullets-bullet-list '("🐳" "🐬" "🐠" "🐟" "🐤"))
+  ;; (setq )
+  ;; (setq org-bullets-bullet-list '("①" "②" "③" "④" "⑤" "⑥" "⑦" "⑧" "⑨"))
+  )
+#+end_src
+
+** kanban
+#+begin_src emacs-lisp
+(use-package org-kanban
+  :straight t
+  :commands (org-kanban/initialize-at-end)
+  ;; :ensure t
+  ;; :defer t
+  :after org
+  :config
+  (setq-default org-kanban/layout '("..." . 30))
+  )
+#+end_src
+
+** org-crypt
+#+begin_src emacs-lisp
+(use-package org-crypt
+  :straight nil
+  :after org
+  :config
+  (org-crypt-use-before-save-magic)
+  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+  ;; (setq org-crypt-disable-auto-save 'encrypt)
+  (setq org-crypt-disable-auto-save t)
+  ;; GPG key to use for encryption
+  ;; Either the Key ID or set to nil to use symmetric encryption.
+  (setq org-crypt-key "FC6BDB92CD5BEB22")
+  :bind
+  (:map org-mode-map
+	("C-c e" . org-encrypt-entry)
+	("C-c E" . org-encrypt-entries)
+	("C-c d" . org-decrypt-entry)
+	("C-c D" . org-decrypt-entries)
+	;; ("C-c I" . org-insert-epa-file-local-variables)
+	))
+#+end_src
 ** Toggle markup visibility with visible mode
 #+begin_src emacs-lisp
   (with-eval-after-load "org"
     (define-key org-mode-map (kbd "C-c v") 'visible-mode))
 #+end_src
-** Org Roam
+
+** org-dashboard
 #+begin_src emacs-lisp
-  (straight-use-package 'org-roam)
-
-  (setq org-roam-directory (expand-file-name "~/Org"))
-
-  (defvar org-roam-keymap
-    (let ((keymap (make-keymap)))
-      (define-key keymap "l" 'org-roam-buffer-toggle)
-      (define-key keymap "f" 'org-roam-node-find)
-      (define-key keymap "g" 'org-roam-graph)
-      (define-key keymap "i" 'org-roam-node-insert)
-      (define-key keymap "c" 'org-roam-capture)
-      (define-key keymap "s" 'org-roam-db-sync)
-      keymap))
-
-  (defalias 'org-roam-keymap org-roam-keymap)
-
-  (global-set-key (kbd "C-c r") 'org-roam-keymap)
-
-  (with-eval-after-load "org-roam"
-    (org-roam-setup))
+(use-package org-dashboard
+  :straight t
+  :after org
+  )
 #+end_src
 
-** Good old template shortcut
-
 #+begin_src emacs-lisp
-  (with-eval-after-load "org"
-    (require 'org-tempo))
+(defun org-unlinkify ()
+  "Replace an org-link with the path, or description."
+  (interactive)
+  (let ((eop (org-element-context)))
+    (when (eq (org-element-type eop) 'link)
+      (save-excursion
+	(let* ((start (org-element-property :begin eop))
+	       (end (org-element-property :end eop))
+	       (contents-begin (org-element-property :contents-begin eop))
+	       (contents-end (org-element-property :contents-end eop))
+	       (path (org-element-property :path eop))
+	       (desc (and contents-begin
+			  contents-end
+			  (buffer-substring contents-begin contents-end))))
+	  (setf (buffer-substring start end) (or desc path)))))))
+
+(defalias 'org-delinkify 'org-unlinkify)
+
+(defun org-refile-and-link ()
+  "Refile heading, adding a link to the new location.
+Prefix arguments are interpreted by `org-refile'."
+  (interactive)
+  (when (member current-prefix-arg '(3 (4) (16)))
+    (user-error "Linking is incompatible with that prefix argument"))
+  (let ((heading  (org-get-heading t t))
+	(orig-file (buffer-file-name)))
+    (call-interactively #'org-refile)
+    (let* ((refile-file
+	    (bookmark-get-filename
+	     (assoc (plist-get org-bookmark-names-plist :last-refile)
+		    bookmark-alist)))
+	   (same-file (string= orig-file refile-file))
+	   (link (if same-file
+		     (concat "*" heading)
+		   (concat refile-file "::*" heading)))
+	   (desc heading))
+      (open-line 1)
+      (insert (org-make-link-string link desc)))))
+
+(defun my-org-insert-last-stored-link (arg)
+  "Insert the last link stored in `org-stored-links' like
+`org-insert-last-stored-link', but without a trailing newline."
+  (interactive "p")
+  (org-insert-all-links arg "" ""))
+
+(bind-key [remap org-insert-last-stored-link]  #'my-org-insert-last-stored-link 'org-mode-map)
 #+end_src
 
-** Using variable pitch font
 
-Enable ~variable-pitch-mode~.
+** org-present
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'variable-pitch-mode)
-
-  (with-eval-after-load "org"
-    ;; Use fixed pitch for table and code
-    (custom-set-faces
-     '(org-table ((t :inherit 'fixed-pitch-serif)))
-     '(org-code ((t :inherit 'fixed-pitch-serif)))
-     '(org-block ((t :inherit 'fixed-pitch-serif)))
-     '(org-checkbox ((t :inherit 'fixed-pitch :background nil :box nil)))
-     '(org-latex-and-related ((t (:inherit 'fixed-pitch-serif))))))
+(use-package org-present
+  :straight t
+  :after org
+  :config
+  (add-hook 'org-present-mode-hook
+            (lambda ()
+	      (org-present-big)
+	      (org-display-inline-images)
+	      (global-linum-mode -1)
+	      (global-hl-line-mode -1)))
+  (add-hook 'org-present-mode-quit-hook
+            (lambda ()
+	      (org-present-small)
+	      (org-remove-inline-images)
+	      (global-linum-mode)
+	      (global-hl-line-mode 1))))
 #+end_src
 
-** Better structure indication with org-visual-outline
-
-~org-visual-outline~ provides a better visual feedback for document structure.
-
+** others
 #+begin_src emacs-lisp
-  ;; (straight-use-package '(org-visual-outline
-  ;;                         :repo "legalnonsense/org-visual-outline"
-  ;;                         :host github
-  ;;                         :type git))
+  (use-package org-ref
+    :straight t
+    :after org
+    :config
+    (setq
+     org-latex-prefer-user-labels t
+     ;; open pdf inside emacs
+     bibtex-completion-pdf-open-function 'find-file
+     ;; open pdf outside emacs
+     ;; bibtex-completion-pdf-open-function 'org-open-file
+     org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-helm-bibtex
+     ;; reftex-default-bibliography (list zot_bib)
+     ;; org-ref-default-bibliography (list zot_bib)
+     ;; org-ref-bibliography-notes (concat org_notes "notes.org")
+     org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
+     ;; org-ref-notes-directory org_notes
+     org-ref-notes-function 'orb-edit-notes
+     ))
 
-  ;; (custom-set-faces
-  ;;  '(org-visual-indent-pipe-face ((t :foreground "gray50" :background "gray50" :height .1))))
+(use-package bibtex
+  :straight t
+  :after org
+  :config
+  (setq
+   ;; org-ref-completion-library 'org-ref-ivy-cite
+   ;; bibtex-completion-notes-path org_notes
+   ;; bibtex-completion-bibliography zot_bib
+   bibtex-completion-pdf-field "file"
+   bibtex-completion-additional-search-fields '(tags)
+   bibtex-completion-notes-template-multiple-files (concat
+						    "#+TITLE: ${title}\n"
+						    "#+ROAM_KEY: cite:${=key=}\n"
+						    "* TODO Notes\n"
+						    ":PROPERTIES:\n"
+						    ":Custom_ID: ${=key=}\n"
+						    ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+						    ":AUTHOR: ${author-abbrev}\n"
+						    ":JOURNAL: ${journaltitle}\n"
+						    ":DATE: ${date}\n"
+						    ":YEAR: ${year}\n"
+						    ":DOI: ${doi}\n"
+						    ":URL: ${url}\n"
+						    ":END:\n\n"
+						    )
+   ;; bibtex-completion-display-formats
+   ;;     '((article       . "${author:36} ${title:*} ${journal:40} ${year:4} ${=has-pdf=:1}${=has-note=:1} ${=type=:3}")
+   ;;       (inbook        . "${author:36} ${title:*} Chapter ${chapter:32} ${year:4} ${=has-pdf=:1}${=has-note=:1} ${=type=:3}")
+   ;;       (incollection  . "${author:36} ${title:*} ${booktitle:40} ${year:4} ${=has-pdf=:1}${=has-note=:1} ${=type=:3}")
+   ;;       (inproceedings . "${author:36} ${title:*} ${booktitle:40} ${year:4} ${=has-pdf=:1}${=has-note=:1} ${=type=:3}")
+   ;;       (t             . "${author:36} ${title:*} ${year:4} ${=has-pdf=:1}${=has-note=:1} ${=type=:3}"))
 
-  ;; (autoload 'org-visual-indent-mode "org-visual-indent")
+   ))
 
-  ;; (add-hook 'org-mode-hook 'org-visual-indent-mode)
+;; org-noter
+(use-package org-noter
+  :after org
+  :straight t
+  :config
+  (setq
+   ;; The WM can handle splits
+   ;; org-noter-notes-window-location 'other-frame
+   ;; todo frame jump
+   ;; Please stop opening frames
+   ;; org-noter-always-create-frame nil
+   org-noter-always-create-frame nil
+   org-noter-auto-save-last-location t
+   ;; org-noter-notes-window-location 'other-frame
+   ;; I want to see the whole file
+   org-noter-hide-other nil
+   ;; Everything is relative to the main notes file
+   ;; org-noter-notes-search-path (list org_notes)
+   )
+  )
 
-  (add-hook 'org-mode-hook 'org-indent-mode)
+(use-package mixed-pitch
+  :straight t
+  :hook
+  (text-mode . mixed-pitch-mode))
+
+(use-package org-analyzer
+  :straight t
+  :after org
+  :custom
+  (org-analyzer-org-directory org-beorg-directory))
+
+
+;; devonthink
+(use-package org-devonthink
+  :straight (:host github :repo "lasvice/org-devonthink"))
 #+end_src
 
-** Ricing markups
+* Clocking
 
 #+begin_src emacs-lisp
-  (defun meomacs--org-prettify-symbols ()
-    (setq-local prettify-symbols-alist
-                '(("#+begin_src" . "»")
-                  ("#+end_src" . "«")
-                  ("#+begin_example" . "❯")
-                  ("#+end_example" . "❮")
-                  ("#+begin_quote" . "‟")
-                  ("#+end_quote" . "‟")
-                  ("[X]" . "☑")
-                  ("[ ]" . "☐")))
-    (prettify-symbols-mode 1))
+(use-package org-clock
+  :straight nil
+  ;; ensure we always run org-clock-persistence-insinuate below
+  :demand t
+  :after (org alert)
+  :custom
+  (org-clock-persist 'history)
+  (org-clock-persist-file (expand-file-name "org-clock-save.el" poly-cache-dir))
+  (org-clock-sound t)
+  (org-clock-in-resume t)
+  (org-clock-idle-time 10)
+  (org-clock-into-drawer t)
+  (org-clock-out-when-done t)
+  (org-clock-history-length 20)
+  (org-clock-mode-line-total 'today)
+  (org-clock-display-default-range 'thisweek)
+  (org-clock-in-switch-to-state "DOING")
+  ;; (org-clock-out-switch-to-state "WAIT")
+  (org-clock-out-remove-zero-time-clocks t)
+  (org-clock-report-include-clocking-task t)
+  (org-clock-clocked-in-display 'mode-line)
+  ;; (org-clock-clocked-in-display nil)
+  :config
+  (org-clock-persistence-insinuate)
+  (setq org-show-notification-handler
+	'(lambda (m)
+	   (let ((ring-bell-function nil))
+	     (org-clock-play-sound org-clock-sound)
+	     (alert m :timeout 1200 :title "Org Clock Notify" :severity 'high))))
+  :bind
+  ("C-c C-x C-i" . org-clock-in)
+  ("C-c C-x C-o" . org-clock-out)
+  ("C-c C-x C-x" . org-clock-in-last))
 
-  (add-hook 'org-mode-hook 'meomacs--org-prettify-symbols)
+(use-package org-clock-budget
+  :straight (org-clock-budget
+             :host github
+             :repo "Fuco1/org-clock-budget"
+             )
+  :commands (org-clock-budget-report)
+  :init
+  (defun my-buffer-face-mode-org-clock-budget ()
+    "Sets a fixed width (monospace) font in current buffer"
+    (interactive)
+    ;; (setq buffer-face-mode-face '(:family "Iosevka" :height 1.0))
+    (buffer-face-mode)
+    (setq-local line-spacing nil))
+  :config
+  (add-hook 'org-clock-budget-report-mode-hook (lambda()
+						 (progn
+						   (toggle-truncate-lines 1)
+						   (my-buffer-face-mode-org-clock-budget)
+						   )
+						 ))
+  )
 
-  (setq org-hide-emphasis-markers t)
+;; (use-package secretaria
+;;   :straight t
+;;   :after (alert f s)
+;;   :custom
+;;   (secretaria-clocked-task-save-file
+;;    (expand-file-name "secretaria-clocked-task" poly-cache-dir))
+;;   ;; remind me about every 10 minutes
+;;   (secretaria-clocked-in-reminder-every-minutes 10)
+;;   (secretaria-today-unknown-time-appt-remind-every 10)
+;;   :config
+;;   ;; use this for getting a reminder every 30 minutes of those tasks scheduled
+;;   ;; for today and which have no time of day defined.
+;;   (add-hook 'after-init-hook #'secretaria-unknown-time-always-remind-me))
 
-  (with-eval-after-load "org"
-    (add-to-list 'org-emphasis-alist '("=" (:box (:line-width -2 :color "gray50" :style released-button) :inherit org-verbatim))))
+(use-package org-mru-clock
+  :straight t
+  :after (org org-clock)
+  :bind (("C-c C-x C-j" . org-clock-goto)
+         ("C-c C-x C-k" . org-mru-clock-in))
+  :custom
+  (org-mru-clock-how-many 100)
+  (org-mru-clock-keep-formatting t)
+  (org-mru-clock-predicate nil))
+
+(defvar poly/previously-clocking '())
+
+(defun poly/temporarily-clock-out ()
+  (interactive)
+  (save-window-excursion
+    (if (org-clocking-p)
+        (progn
+          (org-clock-goto)
+          (add-to-list 'poly/previously-clocking
+		       (cons org-clock-heading (org-id-get-create)))
+          (org-clock-out))
+      (message "No clock is active now.")
+      )))
+
+(defun poly/mark-clocking-task-as-todo-and-clock-out ()
+  (interactive)
+  (save-window-excursion
+    (if (org-clocking-p)
+        (progn
+          (org-clock-goto)
+          (add-to-list 'poly/previously-clocking
+		       (cons org-clock-heading (org-id-get-create)))
+          (org-todo 'todo)
+          (org-clock-out)
+          (save-buffer))
+      (message "No clock is active now."))))
+
+(defun poly/resume-previous-clock (id)
+  (interactive)
+  (save-window-excursion
+    (org-id-goto id)
+    (org-clock-in)
+    (poly/remove-previous-clock id)))
+
+(defun poly/remove-previous-clock (id)
+  (when (not (null id))
+    (setq poly/previously-clocking
+          (--remove (s-equals? id (cdr it)) poly/previously-clocking))))
+
+(defun poly/mark-clocking-task-as-done ()
+  "Find current clocking task and mark it as done."
+  (interactive)
+  (save-window-excursion
+    (if (org-clocking-p)
+        (progn
+          (org-clock-goto)
+          (org-todo 'done)
+          (poly/remove-previous-clock (org-id-get))
+          (save-buffer))
+      (message "No clock is active now."))))
+
+(bind-key "C-c C-x C-d" 'poly/mark-clocking-task-as-done)
+(bind-key "C-c C-x C-d" 'poly/mark-clocking-task-as-done org-mode-map)
 #+end_src
 
-** Babel
+
+* org-roam
 
 #+begin_src emacs-lisp
-  (setq org-confirm-babel-evaluate nil)
+;; https://github.com/iecaser/Configurations/blob/a7e61c25c49556b33d7888599a853da9d4c9cb95/.doom.d/note.el
+;; https://www.orgroam.com/manual/Installation-_00281_0029.html#Installation-_00281_0029
+(use-package org-roam
+  :straight t
+  ;; ;; :straight (:files (:defaults "extensions/*"))
+  ;; :straight (:host github :repo "org-roam/org-roam"
+  ;; 		     :files (:defaults "extensions/*"))
+  :ensure t
+  :hook
+  (after-init . org-roam-mode)
+  :init
+  (setq org-roam-v2-ack t)
+  :commands (org-roam-buffer-toggle-display
+             org-roam-find-file
+             org-roam-graph
+             org-roam-insert
+             org-roam-switch-to-buffer
+             org-roam-dailies-date
+             org-roam-dailies-today
+             org-roam-dailies-tomorrow
+             org-roam-dailies-yesterday)
+  :after org
+  :custom
+  (org-roam-file-exclude-regexp ".pdf$|.tex$|.bib$|.html$|.log$|.out$|.xml$|agendas.org$")
+  (org-roam-verbose nil)  ; https://youtu.be/fn4jIlFwuLU
+  (org-roam-buffer-no-delete-other-windows t); make org-roam buffer sticky
+  ;; org-roam-graph-viewer "google-chrome-stable"
+  (org-roam-completion-system 'default)
+  (org-roam-completion-everywhere t)
+  :config
+  (setq org-roam-directory (expand-file-name "Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/" "~"))
+  ;; For org-roam to update LAST_MODIFIED field
+  (require 'time-stamp)
+  (add-hook 'write-file-functions 'time-stamp) ; update when saving
+  ;; for org-roam-buffer-toggle
+  ;; Recommendation in the official manual
+  (add-to-list 'display-buffer-alist
+	       '("\\*org-roam\\*"
+                 (display-buffer-in-direction)
+                 (direction . right)
+                 (window-width . 0.33)
+                 (window-height . fit-window-to-buffer)))
 
-  (with-eval-after-load "org"
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((R . t)
-       (dot . t))))
+  ;; #+LATEX_HEADER: \\addbibresource{~/Cloud/Documents/bib/zotLib.bib}
+  ;;     (setq org-roam-capture-templates
+  ;; 	  (quote
+  ;; 	   (("d" "default" plain
+  ;; 		 (function org-roam-capture--get-point)
+  ;; 		 "%?" :file-name "%<%Y%m%d%H%M%S>-${slug}"
+  ;; 		 :head "#+LATEX_HEADER: \\usepackage[citestyle=authoryear-icomp,bibstyle=authoryear, hyperref=true,backref=true,maxcitenames=3,url=true,backend=bibtex,natbib=true] {biblatex}
+  ;; #+SETUPFILE: ~/.config/emacs/.local/etc/org-html-themes/setup/theme-readtheorg.setup
+  ;; #+TITLE: ${title}
+  ;; #+CREATED: %u
+  ;; Time-stamp: <>
+  ;; - tags ::
+  ;; " :unnarrowed t))))
 
-  (defun meomacs-after-babel-execute ()
-    (when org-inline-image-overlays
-      (org-redisplay-inline-images)))
+  (setq org-roam-capture-templates
+	'((
+	   "d" "default" plain
+	   "%?"
+	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
+	   :unnarrowed t
+	   )
+          (
+	   "l" "programming language" plain
+	   "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+	   :unnarrowed t
+	   )
+          ("b" "book notes" plain
+	   "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+	   :unnarrowed t
+	   )
+          ("p" "project" plain
+	   "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n*Dates\n\n"
+	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:Project")
+	   :unnarrowed t
+	   ))
+	org-roam-dailies-capture-templates '(
+                                             (
+					      "d" "default" entry
+					      "* %<%I:%M %p>: %?"
+					      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")
+					      ))
+	;; ;; optimise local variable evaluate and babel
+	;; enable-local-variables :all
+	;; ;; remote zsh related
+	;; shell-prompt-pattern '"^[^#$%>\n]*~?[#$%>] *"
+	)
 
-  (add-hook 'org-babel-after-execute-hook 'meomacs-after-babel-execute)
+  ;; ;; Normally, the org-roam buffer doesn't open until you explicitly call
+  ;; ;; `org-roam'. If `+org-roam-open-buffer-on-find-file' is non-nil, the
+  ;; ;; org-roam buffer will be opened for you when you use `org-roam-find-file'
+  ;; ;; (but not `find-file', to limit the scope of this behavior).
+  ;; (add-hook 'find-file-hook
+  ;; 	    (defun +org-roam-open-buffer-maybe-h ()
+  ;; 	      (and +org-roam-open-buffer-on-find-file
+  ;; 		   (memq 'org-roam-buffer--update-maybe post-command-hook)
+  ;; 		   (not (window-parameter nil 'window-side)) ; don't proc for popups
+  ;; 		   (not (eq 'visible (org-roam-buffer--visibility)))
+  ;; 		   (with-current-buffer (window-buffer)
+  ;; 		     (org-roam-buffer--get-create)))))
+  (add-hook 'org-roam-buffer-prepare-hook #'hide-mode-line-mode)
+  (require 'org-roam-protocol)
+  (require 'org-roam-dailies)
+  (org-roam-setup) ;; can cause failure of dump
+  ;; :bind (("C-c z l" . org-roam-buffer-toggle)
+  ;;        ("C-c z f" . org-roam-node-find)
+  ;;        ("C-c z i" . org-roam-node-insert)
+  ;;        ("C-c z r" . org-roam-node-random)
+  ;;        :map org-mode-map
+  ;;        (("C-M-i" . completion-at-point)
+  ;;         ("C-c z t" . org-roam-tag-add)
+  ;;         ("C-c z a" . org-roam-alias-add)
+  ;;         ("C-c z I" . org-roam-node-insert-immediate))
+  ;;        :map org-roam-dailies-map
+  ;;        ("Y" . org-roam-dailies-capture-yesterday)
+  ;;        ("T" . org-roam-dailies-capture-tomorrow))
+  ;; :bind-keymap
+  ;; ("C-c z d" . org-roam-dailies-map)
+  )
+
+
+(use-package org-roam-ui
+  :straight (:type git :host github :repo "org-roam/org-roam-ui" :files ("*.el" "out"))
+  :after org-roam
+  :custom
+  (org-roam-ui-sync-theme t)
+  (org-roam-ui-follow t)
+  (org-roam-ui-update-on-save t)
+  (org-roam-ui-open-on-start t))
+
+;; required by org-roam-ui
+(use-package websocket
+  :straight t)
+
+;; (unless (server-running-p)
+;;   (org-roam-server-mode))
+
+;; (use-package company-org-roam
+;;   :straight t
+;;   :after org
+;;   :ensure t
+;;   :after '(org-roam company)
+;;   :config
+;;   (add-to-list 'company-backends 'company-org-roam)
+;;   ;; :config
+;;   ;; (push 'company-org-roam company-backends)
+;;   )
 #+end_src
 
-** Latex
+* org-mind
+
+  This is an Emacs package that creates graphviz directed graphs from  the headings of an org file
+
 #+begin_src emacs-lisp
-  (with-eval-after-load "org"
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 4.0)))
+(use-package org-mind-map
+    :straight t
+    :init
+    (require 'ox-org)
+    :ensure t
+    ;; Uncomment the below if 'ensure-system-packages` is installed
+    ;;:ensure-system-package (gvgen . graphviz)
+    ;; :config
+    :custom
+    (org-mind-map-engine "dot")
+    ;; (setq org-mind-map-engine "dot")       ; Default. Directed Graph
+    ;; (setq org-mind-map-engine "neato")  ; Undirected Spring Graph
+    ;; (setq org-mind-map-engine "twopi")  ; Radial Layout
+    ;; (setq org-mind-map-engine "fdp")    ; Undirected Spring Force-Directed
+    ;; (setq org-mind-map-engine "sfdp")   ; Multiscale version of fdp for the layout of large graphs
+    ;; (setq org-mind-map-engine "twopi")  ; Radial layouts
+    ;; (setq org-mind-map-engine "circo")  ; Circular Layout
+    )
+
 #+end_src
 
-** Agenda
+* markdown
 
 #+begin_src emacs-lisp
-  (setq org-agenda-files (list (expand-file-name "~/Org")))
-#+end_src
-* Markdown
+(use-package markdown-mode
+    :straight t
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :custom
+    (markdown-command "multimarkdown")
+    (markdown-enable-math t)
+    (markdown-enable-wiki-links t)
+    (markdown-asymmetric-header t)
+    (markdown-italic-underscore t)
+    (markdown-fontify-code-blocks-natively t)
+    (markdown-fontify-code-block-default-mode t)
+    (markdown-make-gfm-checkboxes-buttons t)
+    (markdown-gfm-uppercase-checkbox t)
+    )
 
-#+begin_src emacs-lisp
-  (straight-use-package 'markdown-mode)
-#+end_src
+(use-package markdown-toc
+    :straight t
+    :commands markdown-toc-generate-toc)
 
-** Keybindings
+(use-package edit-indirect
+    :straight t)
 
-#+begin_src emacs-lisp
-  (with-eval-after-load "markdown-mode"
-    (define-key markdown-mode-map (kbd "C-c v") 'markdown-toggle-markup-hiding))
+(use-package grip-mode
+    :straight t
+    :bind (:map markdown-mode-command-map
+                ("g" . grip-mode)))
+
+(use-package mmm-mode
+    :straight t
+    :hook (markdown-mode . mmm-mode))
 #+end_src
