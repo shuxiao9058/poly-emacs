@@ -4,6 +4,195 @@
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+** selectrum
+
+#+begin_src emacs-lisp
+(use-package selectrum
+  :straight t
+  :hook (after-init . selectrum-mode)
+  :custom
+  (selectrum-fix-vertical-window-height t)
+  (selectrum-extend-current-candidate-highlight t)
+  (selectrum-count-style 'current/matches)
+  (selectrum-highlight-candidates-function #'orderless-highlight-matches)
+  (selectrum-refine-candidates-function #'orderless-filter)
+  ;; (selectrum-num-candidates-displayed 15)
+  (selectrum-max-window-height 15)
+  :config
+  (selectrum-mode t)
+  :bind (;; ([remap yank-pop] . my/selectrum-yank-kill-ring)
+	 :map selectrum-minibuffer-map
+	 ;; ("DEL" . selectrum-backward-kill-sexp)
+	 ("<S-backspace>" . selectrum-backward-kill-sexp)
+	 ("<down>" . selectrum-next-candidate)
+	 ("C-j"  .  selectrum-next-candidate)
+	 ("<up>" .  selectrum-previous-candidate)
+	 ("C-k"  .  selectrum-previous-candidate)
+	 ("<backtab>" . selectrum-previous-candidate)
+	 ))
+#+end_src
+
+** marginalia
+
+#+begin_src emacs-lisp
+(use-package marginalia
+  :straight t
+  :after selectrum
+  :ensure t
+  :demand t
+  :defer 1
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy
+                           marginalia-annotators-light))
+  :init
+  (setq marginalia-command-categories
+        '((imenu . imenu)
+	  (projectile-find-file . project-file)
+	  ;; (projectile-find-file . project)
+          (projectile-find-dir . project-file)
+	  ;; (projectile-find-dir . project)
+	  ;; (projectile-switch-project . project)
+          (projectile-switch-project . file)
+	  (projectile-switch-open-project . file)
+	  (projectile-recentf . project-file)
+	  (projectile-display-buffer . project-buffer)
+	  (projectile-switch-to-buffer . project-buffer)
+	  ;; (projectile-commander . project)
+	  ))
+  :bind (;; ("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :config
+  (marginalia-mode)
+
+  ;; Display more annotations - e.g. docstring with M-x
+  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+
+  ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
+  (advice-add #'marginalia-cycle :after
+	      (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit)))))
+
+;; -----------------------------------------------------------------------------
+;; Marginalia doesn't remember the this-command when switching projects using
+;; projectile, since it uses multiple minibuffers. In order to classify project
+;; completions properly, we keep track of when we're in the process of switching
+;; projects and make sure to return the correct category
+
+(defvar c/switching-project? nil)
+(defun c/projectile-before-switch-project ()
+  (setq c/switching-project? t))
+(defun c/projectile-after-switch-project ()
+  (setq c/switching-project? nil))
+
+(after-load (projectile marginalia)
+  (add-hook 'projectile-before-switch-project-hook #'c/projectile-before-switch-project)
+  (add-hook 'projectile-after-switch-project-hook #'c/projectile-after-switch-project)
+
+  (advice-add 'marginalia-classify-by-prompt :around
+	      (lambda (orig-fun &rest args)
+                (if c/switching-project?
+		    'project
+                  (apply orig-fun args)))))
+#+end_src
+
+** all-the-icons-completion
+
+#+begin_src emacs-lisp
+(use-package all-the-icons-completion
+  :straight t
+  :after marginalia
+  :commands all-the-icons-completion-marginalia-setup
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init
+  (all-the-icons-completion-mode))
+#+end_src
+
+** Orderless
+
+This is a completion style, it's a back-end for completion and is used by a  front-end that provides a completion UI.
+
+#+begin_src emacs-lisp
+;; ordering of narrowed candidates
+(use-package orderless
+  :straight t
+  :after selectrum
+  :config
+  (setq completion-styles '(orderless))
+  (setq orderless-skip-highlighting (lambda () selectrum-is-active)))
+
+;; (use-package orderless
+;;   :straight t
+;;   :ensure t
+;;   :after icomplete
+;;   :custom
+;;   (orderless-component-separator " +")
+;;   (orderless-matching-styles
+;;    '(;; The characters of the component should appear in that order in the
+;;      ;; candidate, but not necessarily consecutively. This maps 'abc' to
+;;      ;; 'a.*b.*c'.
+;;      orderless-flex
+;;      ;; orderless-initialism = each character of the component should
+;;      ;; appear as the beginning of a word in the candidate, in order. This
+;;      ;; maps 'abc' to '\<a.*\<b.*\c'.
+;;      ;; orderless-strict-initialism = like initialism but only allow
+;;      ;; non-letters in between the matched words. 'fb' would match
+;;      ;; 'foo-bar' but not 'foo-qux-bar'.
+;;      ;; orderless-strict-leading-initialism = like strict-initialism but
+;;      ;; require the first initial to match the candidate’s first word. 'bb'
+;;      ;; would match 'bar-baz' but not 'foo-bar-baz'.
+;;      ;; orderless-strict-full-initialism = like strict-initialism but
+;;      ;; require the first initial to match the candidate’s first word. 'bb'
+;;      ;; would match 'bar-baz' but not 'foo-bar-baz'.
+;;      orderless-strict-leading-initialism
+;;      ;; The component is treated as a regexp that must match somewhere in
+;;      ;; the candidate.
+;;      orderless-regexp
+;;      ;; The component is split at word endings and each piece must match at
+;;      ;; a word boundary in the candidate, occurring in that order.
+;;      orderless-prefixes
+;;      ;; The component is treated as a literal string that must occur in the
+;;      ;; candidate.
+;;      orderless-literal))
+;;   (orderless-skip-highlighting (lambda () selectrum-is-active))
+;;   :config
+;;   (defun my/match-components-literally ()
+;;     "Components match literally for the rest of the session."
+;;     (interactive)
+;;     (setq-local
+;;      orderless-matching-styles '(orderless-literal)
+;;      completion-styles '(orderless)
+;;      ;; orderless-matching-styles '(orderless-strict-initialism)
+;;      orderless-style-dispatchers nil))
+;;   :bind
+;;   (:map minibuffer-local-completion-map
+;; 	("C-l" . my/match-components-literally)))
+
+;; ;; '=' at the end of a component will make this component match as a literal.
+;; (defun my/orderless-literal-dispatcher (pattern _index _total)
+;;   (when (string-suffix-p "=" pattern)
+;;     `(orderless-literal . ,(substring pattern 0 -1))))
+
+;; ;; ',' at the end of a component will make this component match as a strict
+;; ;; leading initialism.
+;; (defun my/orderless-initialism-dispatcher (pattern _index _total)
+;;   (when (string-suffix-p "," pattern)
+;;     `(orderless-strict-leading-initialism . ,(substring pattern 0 -1))))
+
+;; (setq orderless-style-dispatchers
+;;       '(my/orderless-literal-dispatcher
+;;         my/orderless-initialism-dispatcher))
+#+end_src
+
+** selectrum-prescient
+
+#+begin_src  emacs-lisp
+(use-package selectrum-prescient
+  :straight t
+  :after selectrum
+  :config
+  (selectrum-prescient-mode t)
+  (prescient-persist-mode))
+#+end_src
 
 ** Consult without consultation fees
 
@@ -336,7 +525,6 @@
       (apply #'consult-completion-in-region completion-in-region--data)))
   (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
-
   (use-package corfu-doc
     :ensure t
     :straight t
@@ -394,9 +582,9 @@
      #'cape-file
      (cape-capf-buster
       (cape-super-capf
-       #'tempel-expand
-       arg-capf
+       ;; #'tempel-expand 
        #'tabnine-completion-at-point
+       arg-capf
        )
       )
      ;; #'cape-dabbrev
@@ -404,11 +592,14 @@
 
   (defun my/set-basic-capf ()
     (setq completion-category-defaults nil)
-    (setq-local completion-at-point-functions (my/convert-super-capf (car completion-at-point-functions))))
+    (setq-local completion-at-point-functions
+		(my/convert-super-capf
+		 (car completion-at-point-functions))))
 
   (defun my/set-lsp-capf ()
     (setq completion-category-defaults nil)
-    (setq-local completion-at-point-functions (my/convert-super-capf (if poly-use-lsp-mode
-                                                                         #'lsp-completion-at-point
-                                                                       #'eglot-completion-at-point))))
+    (setq-local completion-at-point-functions
+		(my/convert-super-capf (if poly-use-lsp-mode
+					   #'lsp-completion-at-point
+					 #'eglot-completion-at-point))))
 #+end_src

@@ -15,8 +15,117 @@ Bind some keys for quick operations.
 
 * Better defaults
 
+This is consulted on every `require', `load' and various path/io functions.  You get a minor speed up by nooping this.
+
+#+begin_src emacs-lisp
+(unless noninteractive
+  (setq file-name-handler-alist nil))
+#+end_src
+
+Disable startup-screen and message
+#+begin_src emacs-lisp
+(setq inhibit-startup-screen t)
+#+end_src
+
+Makes *scratch* empty.
+#+begin_src emacs-lisp
+(setq initial-scratch-message nil)
+#+end_src
+
+Don't show *Buffer list* when opening multiple files at the same time.
+
+#+begin_src emacs-lisp
+(setq inhibit-startup-buffer-menu t)
+#+end_src
+
+ Delete trailing whitespace before save
+
+#+begin_src emacs-lisp
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook 'whitespace-cleanup)
+#+end_src
 
 * Line numbers with display-line-numbers-mode
+
+#+begin_src emacs-lisp
+
+(defun should-use-minimum-resource ()
+  (and buffer-file-name
+       (string-match-p "\.\\(mock\\|min\\)\.js" buffer-file-name)))
+
+;; http://stackoverflow.com/questions/3875213/turning-on-linum-mode-when-in-python-c-mode
+(setq linum-mode-inhibit-modes-list
+      '(eshell-mode
+	shell-mode
+	profiler-report-mode
+	ffip-diff-mode
+	dictionary-mode
+	erc-mode
+	dired-mode
+	help-mode
+	text-mode
+	fundamental-mode
+	jabber-roster-mode
+	jabber-chat-mode
+	inferior-js-mode
+	inferior-python-mode
+	ivy-occur-grep-mode ; better performance
+	ivy-occur-mode ; better performance
+	twittering-mode
+	compilation-mode
+	weibo-timeline-mode
+	woman-mode
+	Info-mode
+	calc-mode
+	calc-trail-mode
+	comint-mode
+	gnus-group-mode
+	gud-mode
+	org-mode
+	vc-git-log-edit-mode
+	log-edit-mode
+	vterm-mode
+	term-mode
+	w3m-mode
+	speedbar-mode
+	gnus-summary-mode
+	gnus-article-mode
+	company-mode
+	magit-status-mode
+	messages-buffer-mode
+	calendar-mode
+	telega-chat-mode
+	telega-root-mode))
+
+(cond
+ ;; ((fbounp 'linum-mode))
+ (nil;; (fboundp 'global-display-line-numbers-mode)
+  (defun display-line-numbers-mode-hook-setup ()
+    (setq display-line-numbers (if (or (memq major-mode linum-mode-inhibit-modes-list)
+				       ;; don't show line number for certain file extensions
+				       (should-use-minimum-resource))
+				   nil
+				 t)))
+  (add-hook 'display-line-numbers-mode-hook 'display-line-numbers-mode-hook-setup)
+  (global-display-line-numbers-mode t))
+ (t
+  (global-linum-mode t)
+
+  (defadvice linum-on (around linum-on-inhibit-for-modes)
+    "Stop the load of linum-mode for some major modes."
+    (unless (member major-mode linum-mode-inhibit-modes-list)
+      ad-do-it))
+  (ad-activate 'linum-on)
+
+  ;; update line number every second so `linum-mode' won't slow down Emacs
+  ;; @see https://lists.gnu.org/archive/html/bug-gnu-emacs/2013-04/msg00577.html
+  ;; package like `nlinum-mode' has better performance but `git-gutter' is dependent
+  ;; on `linum-mode'.
+  ;; So we have to use `linum-mode'.
+  (setq linum-delay t)
+  (defadvice linum-schedule (around my-linum-schedule () activate)
+    (run-with-idle-timer 2 nil #'linum-update-current))))
+#+end_src
 
 * Completion for key sequence
 
@@ -40,6 +149,26 @@ Enable orderless for minibuffer completion.
 Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=.
 
 * Project management
+
+** perspective
+
+#+begin_src emacs-lisp
+(use-package perspective
+  :straight t
+  :demand t
+  :commands
+  (persp-mode)
+  :config
+  (persp-mode)
+  :bind
+  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  )
+
+(use-package persp-projectile
+  :straight t)
+#+end_src
 
 ** project.el
 
@@ -77,11 +206,11 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 (defun my/projectile-ignored-project-function(project-root)
   (member t (mapcar
-             #'(lambda (dir)
-                 (string-prefix-p dir project-root)
-                 )
-             find-project-ignore-dir
-             )))
+	     #'(lambda (dir)
+		 (string-prefix-p dir project-root)
+		 )
+	     find-project-ignore-dir
+	     )))
 
 
 (defun projectile-selection-at-point ()
@@ -129,7 +258,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   (defun my/projectile-dynamic-change-index-method()
     (when (projectile-project-p)
       (if (eq (projectile-project-vcs) 'none)
-          (setq projectile-indexing-method 'native)
+	  (setq projectile-indexing-method 'native)
   (setq projectile-indexing-method 'hybrid))))
 
   (add-hook 'find-file-hook #'my/projectile-dynamic-change-index-method)
@@ -147,8 +276,8 @@ current buffer's, reload dir-locals."
   ;; `ibuffer-projectile'
   (add-hook 'ibuffer-hook
       (lambda ()
-        (ibuffer-projectile-set-filter-groups)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
+	(ibuffer-projectile-set-filter-groups)
+	(unless (eq ibuffer-sorting-mode 'alphabetic)
     (ibuffer-do-sort-by-alphabetic))))
 
   (my/projectile-ignored-project-function "/usr/bin")
@@ -164,52 +293,52 @@ current buffer's, reload dir-locals."
 
   (setq projectile-cache-file (expand-file-name "projectile.cache" poly-cache-dir)
   projectile-known-projects-file (concat poly-cache-dir "projectile-bookmarks.eld"))
-  (setq projectile-globally-ignored-directories 
-            '(".idea"
-              ".ensime_cache"
-              ".eunit"
-              ".extension"
-              ".git"
-              ".hg"
-              ".fslckout"
-              "_FOSSIL_"
-              ".bzr"
-              ".vagrant"
-              "_darcs"
-              "archive-contents"
-              "cache"
-              "target"
-              "coverage"
-              ".tox"
-              ".settings"
-              ".svn"
-              ".github"
-              ".metals"
-              ".bloop"
-              ".ccls-cache"
-              ".stack-work"
-              "doc"
-              "docs"
-              "elpa"
-              "log"
-              "logs"
-              "node_modules"
-              "sorbet"
-              "straight"
-              "tmp"
-              "vendor/assets")
-        projectile-globally-ignored-file-suffixes '("*.pyc" "*.class" "*.project" "*.jar")
+  (setq projectile-globally-ignored-directories
+	    '(".idea"
+	      ".ensime_cache"
+	      ".eunit"
+	      ".extension"
+	      ".git"
+	      ".hg"
+	      ".fslckout"
+	      "_FOSSIL_"
+	      ".bzr"
+	      ".vagrant"
+	      "_darcs"
+	      "archive-contents"
+	      "cache"
+	      "target"
+	      "coverage"
+	      ".tox"
+	      ".settings"
+	      ".svn"
+	      ".github"
+	      ".metals"
+	      ".bloop"
+	      ".ccls-cache"
+	      ".stack-work"
+	      "doc"
+	      "docs"
+	      "elpa"
+	      "log"
+	      "logs"
+	      "node_modules"
+	      "sorbet"
+	      "straight"
+	      "tmp"
+	      "vendor/assets")
+	projectile-globally-ignored-file-suffixes '("*.pyc" "*.class" "*.project" "*.jar")
   projectile-globally-ignored-files '("TAGS" "*.log"))
   ;; Use the faster searcher to handle project files: ripgrep `rg'.
   (when (and (not (executable-find "fd"))
-             (executable-find "rg"))
+	     (executable-find "rg"))
     (setq projectile-generic-command
-          (let ((rg-cmd ""))
-            (dolist (dir projectile-globally-ignored-directories)
-        (setq rg-cmd (format "%s --glob '!%s'" rg-cmd dir)))
-            (dolist (extfs projectile-globally-ignored-file-suffixes)
-        (setq rg-cmd (format "%s -g '!%s'" rg-cmd extfs)))
-            (concat "rg -0 --files --color=never --hidden" rg-cmd))))
+	  (let ((rg-cmd ""))
+	    (dolist (dir projectile-globally-ignored-directories)
+	(setq rg-cmd (format "%s --glob '!%s'" rg-cmd dir)))
+	    (dolist (extfs projectile-globally-ignored-file-suffixes)
+	(setq rg-cmd (format "%s -g '!%s'" rg-cmd extfs)))
+	    (concat "rg -0 --files --color=never --hidden" rg-cmd))))
   (projectile-global-mode)
   :bind (
    :map projectile-command-map
@@ -250,3 +379,326 @@ current buffer's, reload dir-locals."
 ** COMMENT deadgrep
 
 ** rg.el
+* tab-bar
+
+Tab bar represents a named persistent window configuration.
+
+#+begin_src emacs-lisp
+(use-package tab-bar
+  :straight nil
+  :custom
+  (tab-bar-close-button-show nil)
+  (tab-bar-close-last-tab-choice 'tab-bar-mode-disable)
+  (tab-bar-close-tab-select 'recent)
+  ;; Start a new tab with the current buffer.
+  (tab-bar-new-tab-choice t)
+  (tab-bar-new-tab-to 'right)
+  (tab-bar-position nil)
+  ;; Keep tab-bar hidden.
+  (tab-bar-show t)
+  (tab-bar-tab-hints t)
+  ;; (tab-bar-tab-name-function 'tab-bar-tab-name-all)
+  (tab-bar-border 0)
+  (tab-bar-close-button nil)
+  (tab-bar-back-button nil)
+  (tab-bar-new-button nil)
+  (tab-bar-format '(tab-bar-format-tabs))
+  (tab-bar-tab-name-format-function '+tab-bar-tab-format-function)
+  :config
+  ;; Enable `tab-bar-mode' by default.
+  (tab-bar-mode t)
+  (global-tab-line-mode -1)
+  ;; Check `winner-mode' that keeps track of layout changes.
+  (tab-bar-history-mode -1)
+
+  (defun my/tab-bar-select-tab-dwim ()
+    "Do-What-I-Mean function for getting to a `tab-bar-mode' tab.
+If no other tab exists, create one and switch to it.  If there is
+one other tab (so two in total) switch to it without further
+questions.  Else use completion to select the tab to switch to."
+    (interactive)
+    (let ((tabs (mapcar (lambda (tab)
+			  (alist-get 'name tab))
+			(tab-bar--tabs-recent))))
+      (cond ((eq tabs nil)
+	     (tab-new))
+	    ((eq (length tabs) 1)
+	     (tab-next))
+	    (t
+	     (tab-bar-switch-to-tab (completing-read "Select tab: " tabs))))))
+
+  (defun +tab-bar-switch-project ()
+    "Switch to project in a new tab, project name will be used as tab name.
+No tab will created if the command is cancelled."
+    (interactive)
+    (let (succ)
+      (unwind-protect
+	  (progn
+	    (tab-bar-new-tab)
+	    (call-interactively #'project-switch-project)
+	    (when-let ((proj (project-current)))
+	      (tab-bar-rename-tab (format "%s" (file-name-nondirectory (directory-file-name (cdr proj)))))
+	      (setq succ t)))
+	(unless succ
+	  (tab-bar-close-tab)))))
+
+  (defun +tab-bar-tab-format-function (tab i)
+    (let ((current-p (eq (car tab) 'current-tab)))
+      (concat
+       (propertize (concat
+		    " "
+		    (alist-get 'name tab)
+		    " ")
+		   'face
+		   (funcall tab-bar-tab-face-function tab))
+       " ")))
+
+  (global-set-key (kbd "C-x t .") #'tab-bar-rename-tab)
+  (global-set-key (kbd "C-x t l") #'+tab-bar-switch-project)
+
+  (tab-bar-mode 1)
+  :bind
+  ("H-t" . an/hydra-window-management/body)
+  ("C-x t t" . my/tab-bar-select-tab-dwim)
+  ("s-t" . tab-new)
+  ("s-<left>" . tab-previous)
+  ("s-<right>" . tab-next)
+  ;; monkey-with-hammer.png
+  ("s-1" .  (lambda () (interactive) (tab-bar-select-tab 1)))
+  ("s-2" .  (lambda () (interactive) (tab-bar-select-tab 2)))
+  ("s-3" .  (lambda () (interactive) (tab-bar-select-tab 3)))
+  ("s-4" .  (lambda () (interactive) (tab-bar-select-tab 4)))
+  ("s-5" .  (lambda () (interactive) (tab-bar-select-tab 5)))
+  ("s-6" .  (lambda () (interactive) (tab-bar-select-tab 6)))
+  ("s-7" .  (lambda () (interactive) (tab-bar-select-tab 7)))
+  ("s-8" .  (lambda () (interactive) (tab-bar-select-tab 8)))
+  ("s-9" .  (lambda () (interactive) (tab-bar-select-tab 9))))
+
+;; use project name as default tab name
+(defun toy/set-tab-name-default ()
+  (interactive)
+  (if (buffer-file-name (current-buffer))
+      (let ((proj-name (projectile-project-name)))
+	(unless (or (= (length proj-name) 0) (string= proj-name "-"))
+	  ;; (message proj-name)
+	  (tab-bar-rename-tab proj-name)))))
+
+(advice-add 'tab-bar-new-tab :after (lambda (&rest x) (toy/set-tab-name-default)))
+(advice-add 'tab-bar-tab-name-format-function :after (lambda (&rest x) (toy/set-tab-name-default)))
+(add-hook 'window-setup-hook #'toy/set-tab-name-default)
+#+end_src
+
+
+* Window Management
+
+** ace
+
+#+begin_src emacs-lisp
+(use-package ace-window
+  :straight t
+  :ensure t
+  :defer t
+  :init
+  (global-set-key [remap other-window] #'ace-window)
+  :custom
+  (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (aw-scope 'global)
+  (aw-background t)
+  :bind
+  (("C-x o" . ace-window)))
+#+end_src
+
+** windswap
+
+#+begin_src emacs-lisp
+(use-package windswap
+  :straight t
+  ;; https://github.com/amnn/windswap
+  ;; windswap-left|right|up|down
+  :commands (windswap-up windswap-down windswap-left windswap-right))
+#+end_src
+
+** move frame to side
+
+#+begin_src emacs-lisp
+
+(defun current-monitor-pixel-dimensions ()
+  (let* ((monitor-attributes (display-monitor-attributes-list
+			      (frame-parameter nil 'display))))
+    (list (nth 3 (assq 'geometry (nth 0 monitor-attributes)))
+	  (nth 4 (assq 'geometry (nth 0 monitor-attributes))))))
+
+;; (defun current-monitor-pixel-width ()
+;;   (car (current-monitor-pixel-dimensions)))
+
+;; (defun current-monitor-pixel-height ()
+;;   (nth 1 (current-monitor-pixel-dimensions )))
+
+(defun move-frame-left-or-right-side (left)
+  (when (display-graphic-p)
+    (let* ((monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
+	   (monitor-width (car monitor-width-height-in-pixel))
+	   (monitor-height (nth 1 monitor-width-height-in-pixel)))
+
+      (set-frame-width (selected-frame) (- (/ monitor-width 2) 31) nil t)
+      (set-frame-height (selected-frame) (- monitor-height  55) nil t)
+      (if left
+	  (set-frame-position (selected-frame) 0 0)
+	;; (set-frame-position (selected-frame) (/ (display-pixel-width) 2) 0)
+	(let* ((frame (selected-frame))
+	       (frame-width-pixel (frame-native-width frame))
+	       (screen-width-pixel (display-pixel-width)))
+	  (set-frame-position frame (- monitor-width frame-width-pixel 30) 0))))))
+
+(defun move-frame-to-left-side ()
+  "Move frame to left side."
+  (interactive)
+  (if (display-graphic-p)
+      (move-frame-left-or-right-side t)))
+
+(defun move-frame-to-right-side ()
+  "Move frame to right side."
+  (interactive)
+  (if (display-graphic-p)
+      (move-frame-left-or-right-side nil)))
+
+;; preserve smartparens's shortcut
+;; (bind-key "C-M-<left>" #'move-frame-to-left-side)
+;; (bind-key "C-M-<right>" #'move-frame-to-right-side)
+
+(bind-key "C-M-s-<left>" #'move-frame-to-left-side)
+(bind-key "C-M-s-<right>" #'move-frame-to-right-side)
+#+end_src
+
+
+* shackle
+
+don't pop windows everywhere!
+
+#+begin_src emacs-lisp
+
+(when (fboundp 'mac-auto-operator-composition-mode)
+  (mac-auto-operator-composition-mode))
+
+;; don't pop windows everywhere!
+(use-package shackle
+  :straight t
+  :hook (after-init . shackle-mode)
+  :custom
+  (shackle-default-size 0.5)
+  (shackle-default-alignment 'below)
+  (shackle-rules
+   '((magit-log-mode       :select t :inhibit-window-quit t :same t)
+     ("*quickrun*"         :select t :inhibit-window-quit t :same t)
+     (profiler-report-mode :select t)
+     (apropos-mode         :select t :align t :size 0.3)
+     (help-mode            :select t :align t :size 0.4)
+     (comint-mode          :select t :align t :size 0.4)
+     (grep-mode            :select t :align t)
+     (rg-mode              :select t :align t)
+     ("*Flycheck errors*"         :select t   :align t :size 10)
+     ("*Backtrace*"               :select t   :align t :size 15)
+     ("*ydcv*"                    :select nil :align t :size 0.4)
+     ("*Shell Command Output*"    :select nil :align t :size 0.4)
+     ("*Async Shell Command*"     :select nil :align t :size 0.4)
+     ("*Org-Babel Error Output*"  :select nil :align t :size 0.3)
+     ("*package update results*"  :select nil :align t :size 10)
+     ("*Process List*"            :select t   :align t :size 0.3)
+     ("*Help*"                    :select t   :align t :size 0.3)
+     ("*Occur*"                   :select t   :align right)
+     ("\\*ivy-occur .*\\*"        :select t   :align right :regexp t)
+     ("\\*eldoc\\( for \\)?.*\\*" :select nil :align t :size 15 :regexp t))))
+#+end_src
+
+* pair
+
+#+begin_src emacs-lisp
+
+(use-package paredit
+    :straight t
+    ;; :straight (:type git
+    ;;		   :host github
+    ;;		   :repo "emacsmirror/paredit")
+    :ensure t
+    :defer t
+    :hook ((;; scheme-mode
+	    ;; emacs-lisp-mode lisp-mode ielm-mode
+	    clojure-mode cider-repl-mode
+	    ;; cask-mode
+	    ) . paredit-mode)
+    :commands paredit-mode enable-paredit-mode
+    ;; :config
+    ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+    )
+
+;; electric-pair-mode or smartparens-mode
+
+;; keeps our parentheses balanced and allows for easy manipulation
+(use-package smartparens
+    :straight t
+    :ensure t
+    :diminish smartparens-mode
+    :commands
+    smartparens-strict-mode
+    smartparens-mode
+    sp-restrict-to-pairs-interactive
+    sp-local-pair
+    :hook  (after-init . smartparens-global-mode)
+    :init
+    (setq sp-interactive-dwim t)
+    :custom
+    (sp-base-key-bindings 'sp)
+    ;; (sp-show-pair-from-inside t)
+    ;; (sp-autoskip-closing-pair 'always)
+    ;; (sp-hybrid-kill-entire-symbol nil)
+    ;; (sp-autowrap-region nil)
+    :config
+    (show-smartparens-global-mode t)
+    ;; (smartparens-global-mode t)
+    (require 'smartparens-config)
+    (sp-use-smartparens-bindings)
+    ;; Only use smartparens in web-mode
+    (with-eval-after-load 'smartparens
+      (setq web-mode-enable-auto-pairing nil)
+      (sp-local-pair 'web-mode "<% " " %>")
+      (sp-local-pair 'web-mode "{ " " }")
+      (sp-local-pair 'web-mode "<%= "  " %>")
+      (sp-local-pair 'web-mode "<%# "  " %>")
+      (sp-local-pair 'web-mode "<%$ "  " %>")
+      (sp-local-pair 'web-mode "<%@ "  " %>")
+      (sp-local-pair 'web-mode "<%: "  " %>")
+      (sp-local-pair 'web-mode "{{ "  " }}")
+      (sp-local-pair 'web-mode "{% "  " %}")
+      (sp-local-pair 'web-mode "{%- "  " %}")
+      (sp-local-pair 'web-mode "{# "  " #}"))
+
+    (sp-pair "(" ")" :wrap "C-(") ;; how do people live without this?
+    (sp-pair "[" "]" :wrap "s-[") ;; C-[ sends ESC
+    (sp-pair "{" "}" :wrap "C-{")
+
+
+    ;; WORKAROUND https://github.com/Fuco1/smartparens/issues/543
+    (bind-key "C-<left>" nil smartparens-mode-map)
+    (bind-key "C-<right>" nil smartparens-mode-map)
+
+    (bind-key "s-<delete>" 'sp-kill-sexp smartparens-mode-map)
+    (bind-key "s-<backspace>" 'sp-backward-kill-sexp smartparens-mode-map)
+
+    ;; ;; fix conflict with move frame left/right side
+    ;; (unbind-key "C-M-<left>" smartparens-mode-map)
+    ;; (unbind-key "C-M-<right>" smartparens-mode-map)
+    )
+
+(use-package rainbow-mode
+    :straight t
+    :diminish rainbow-mode
+    :commands rainbow-mode)
+
+(use-package rainbow-delimiters
+    :straight t
+    :ensure t
+    :diminish rainbow-delimiters-mode
+    :commands rainbow-delimiters-mode
+    :init
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+#+end_src

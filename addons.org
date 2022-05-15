@@ -1,4 +1,4 @@
-#+title: Addons
+j#+title: Addons
 
 Configuration for addons, additional features provided by individual packages.
 
@@ -9,7 +9,6 @@ Configuration for addons, additional features provided by individual packages.
 * hydra
 
 #+begin_src emacs-lisp
-
 (use-package hydra
   :straight t
   :ensure t
@@ -100,38 +99,38 @@ _SPC_ cancel  _o_nly this     _d_elete
   ("f" helm-find-files)
   ("F" follow-mode)
   ("a" (lambda ()
-         (interactive)
-         (ace-window 1)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body))
+	 (interactive)
+	 (ace-window 1)
+	 (add-hook 'ace-window-end-once-hook
+		   'hydra-window/body))
    )
   ("v" (lambda ()
-         (interactive)
-         (split-window-right)
-         (windmove-right))
+	 (interactive)
+	 (split-window-right)
+	 (windmove-right))
    )
   ("x" (lambda ()
-         (interactive)
-         (split-window-below)
-         (windmove-down))
+	 (interactive)
+	 (split-window-below)
+	 (windmove-down))
    )
   ("s" (lambda ()
-         (interactive)
-         (ace-window 4)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body)))
+	 (interactive)
+	 (ace-window 4)
+	 (add-hook 'ace-window-end-once-hook
+		   'hydra-window/body)))
   ("S" save-buffer)
   ("d" delete-window)
   ("D" (lambda ()
-         (interactive)
-         (ace-window 16)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body)))
+	 (interactive)
+	 (ace-window 16)
+	 (add-hook 'ace-window-end-once-hook
+		   'hydra-window/body)))
   ("o" delete-other-windows)
   ("i" ace-maximize-window)
   ("z" (progn
-         (winner-undo)
-         (setq this-command 'winner-undo)))
+	 (winner-undo)
+	 (setq this-command 'winner-undo)))
   ("Z" winner-redo)
   ("SPC" nil))
 
@@ -434,11 +433,11 @@ Headline^^            Visit entry^^               Filter^^                    Da
 
 
 (defhydra hydra-smerge (:color pink
-                               :hint nil
-                               :pre (unless smerge-mode (smerge-mode +1))
-                               :post (smerge-auto-leave))
+			       :hint nil
+			       :pre (unless smerge-mode (smerge-mode +1))
+			       :post (smerge-auto-leave))
   "
-                                                         [smerge]
+							 [smerge]
 ^Move^       ^Keep^               ^Diff^                 ^Other^
   ╭─────────────────────────────────────────────────────────╯
 _n_ext       _b_ase               _<_: upper/base        _C_ombine
@@ -471,21 +470,21 @@ _C-j_
   ("r" smerge-resolve)
   ("R" smerge-kill-current)
   ("ZZ" (lambda ()
-          (interactive)
-          (save-buffer)
-          (bury-buffer))
+	  (interactive)
+	  (save-buffer)
+	  (bury-buffer))
    "Save and bury buffer" :color blue)
   ("q" nil "cancel" :color blue))
 
 (defhydra hydra-tab (:color red :hint nil)
   "
-                                                ^tab^
+						^tab^
 -------^^-----------------------------^^--------------------------------^^-----------------------^^-------------------
     ^Switch^                        ^Move^                        ^Create & Kill^              ^Other^
 _h_:       left tab              _<_: tab to left               _n_: new tab                  _rr_: rename
 _l_:       right tab             _>_: tab to right              _N_: new tab with name        _rp_: rename default
 [_1_.._9_]: switch [1st..last]     [_m1_..._9_]: move [1st..last]   _x_: kill                     _U_ : undo
-                                                                                        _R_ : redo
+											_R_ : redo
 "
 
   ;; ("u" winner-undo)
@@ -547,16 +546,16 @@ _l_:       right tab             _>_: tab to right              _N_: new tab wit
 (defun toy/tab-move-right ()
   (interactive)
   (let* ((ix (tab-bar--current-tab-index))
-         (n-tabs (length (funcall tab-bar-tabs-function)))
-         (next-ix (mod (+ ix 1) n-tabs)))
+	 (n-tabs (length (funcall tab-bar-tabs-function)))
+	 (next-ix (mod (+ ix 1) n-tabs)))
     ;; use 1-based index
     (tab-bar-move-tab-to (+ 1 next-ix))))
 
 (defun toy/tab-move-left ()
   (interactive)
   (let* ((ix (tab-bar--current-tab-index))
-         (n-tabs (length (funcall tab-bar-tabs-function)))
-         (next-ix (mod (+ ix n-tabs -1) n-tabs)))
+	 (n-tabs (length (funcall tab-bar-tabs-function)))
+	 (next-ix (mod (+ ix n-tabs -1) n-tabs)))
     ;; use 1-based index
     (tab-bar-move-tab-to (+ 1 next-ix))))
 #+end_src
@@ -741,11 +740,11 @@ To manage the git repository, use builtin package ~vc~.
     :config
     (defun git-gutter+-remote-default-directory (dir file)
       (let* ((vec (tramp-dissect-file-name file))
-             (method (tramp-file-name-method vec))
-             (user (tramp-file-name-user vec))
-             (domain (tramp-file-name-domain vec))
-             (host (tramp-file-name-host vec))
-             (port (tramp-file-name-port vec)))
+	     (method (tramp-file-name-method vec))
+	     (user (tramp-file-name-user vec))
+	     (domain (tramp-file-name-domain vec))
+	     (host (tramp-file-name-host vec))
+	     (port (tramp-file-name-port vec)))
 	(tramp-make-tramp-file-name method user domain host port dir)))
 
     (defun git-gutter+-remote-file-path (dir file)
@@ -824,29 +823,29 @@ To manage the git repository, use builtin package ~vc~.
     :ensure t
     :diminish
     :commands (smerge-mode
-               smerge-auto-leave
-               smerge-next
-               smerge-prev
-               smerge-keep-base
-               smerge-keep-upper
-               smerge-keep-lower
-               smerge-keep-all
-               smerge-keep-current
-               smerge-keep-current
-               smerge-diff-base-upper
-               smerge-diff-upper-lower
-               smerge-diff-base-lower
-               smerge-refine
-               smerge-ediff
-               smerge-combine-with-next
-               smerge-resolve
-               smerge-kill-current)
+	       smerge-auto-leave
+	       smerge-next
+	       smerge-prev
+	       smerge-keep-base
+	       smerge-keep-upper
+	       smerge-keep-lower
+	       smerge-keep-all
+	       smerge-keep-current
+	       smerge-keep-current
+	       smerge-diff-base-upper
+	       smerge-diff-upper-lower
+	       smerge-diff-base-lower
+	       smerge-refine
+	       smerge-ediff
+	       smerge-combine-with-next
+	       smerge-resolve
+	       smerge-kill-current)
     :after (hydra magit)
     :hook ((find-file . (lambda ()
-                          (save-excursion
-                            (goto-char (point-min))
-                            (when (re-search-forward "^<<<<<<< " nil t)
-                              (smerge-mode 1)))))
+			  (save-excursion
+			    (goto-char (point-min))
+			    (when (re-search-forward "^<<<<<<< " nil t)
+			      (smerge-mode 1)))))
 
 	   ( magit-diff-visit-file . (lambda ()
 				       (when smerge-mode
@@ -901,25 +900,25 @@ Enable diff-hl in based on major modes.
 
   (defun +rime-predicate-is-back-quote-or-tilde ()
     (or (equal rime--current-input-key ?`)
-        (equal rime--current-input-key ?~)))
+	(equal rime--current-input-key ?~)))
 
   (use-package rime
     :straight (rime
-               :host github
-               :repo "DogLooksGood/emacs-rime"
-               :files (:defaults "lib.c" "Makefile"))
+	       :host github
+	       :repo "DogLooksGood/emacs-rime"
+	       :files (:defaults "lib.c" "Makefile"))
     :defer t
     :custom
     ;; Disable input method in non-insert state.
     (rime-disable-predicates '(rime-predicate-prog-in-code-p
-                               rime-predicate-after-alphabet-char-p
-                               meow-normal-mode-p
-                               meow-motion-mode-p
-                               meow-keypad-mode-p))
+			       rime-predicate-after-alphabet-char-p
+			       meow-normal-mode-p
+			       meow-motion-mode-p
+			       meow-keypad-mode-p))
     ;; Auto switch to inline ascii state when after a space after a non-ascii character.
     (rime-inline-predicates '(rime-predicate-space-after-cc-p
-                              +rime-predicate-is-back-quote-or-tilde
-                              rime-predicate-current-uppercase-letter-p))
+			      +rime-predicate-is-back-quote-or-tilde
+			      rime-predicate-current-uppercase-letter-p))
     (rime-translate-keybindings '("C-f" "C-b" "C-n" "C-p" "C-g"))
     (default-input-method "rime")
     ;; (rime-cursor "˰")
@@ -931,8 +930,8 @@ Enable diff-hl in based on major modes.
     (rime-show-candidate 'posframe)
     ;; (rime-show-candidate 'minibuffer)
     ;; (rime-posframe-properties (list :background-color "#202325"
-    ;; 				  :foreground-color "#ddddde" ;; "#dedddd"
-    ;; 				  :internal-border-width 6))
+    ;;				  :foreground-color "#ddddde" ;; "#dedddd"
+    ;;				  :internal-border-width 6))
     ;; (rime-code-face
     ;;  '((t (:inherit default :background "#ffffff" :foreground "#000000"))))
     ;; (rime-disable-predicates
@@ -944,10 +943,10 @@ Enable diff-hl in based on major modes.
     (rime-user-data-dir (expand-file-name "rime" poly-local-dir))
     :bind
     (:map rime-active-mode-map
-          ("<tab>" . rime-inline-ascii)
-          :map rime-mode-map
-          ("C-$" . rime-send-keybinding)
-          ("M-j" . rime-force-enable)))
+	  ("<tab>" . rime-inline-ascii)
+	  :map rime-mode-map
+	  ("C-$" . rime-send-keybinding)
+	  ("M-j" . rime-force-enable)))
 #+end_src
 
 * Telegram client with Telega
@@ -970,32 +969,32 @@ Use Telega as Telegram client.
   (telega-root-show-avatars nil)
   ;; (telega-user-show-avatars nil)
   ;; (telega-avatar-factors-alist '((1 . (0.8 . 0.1))
-  ;; 				 (2 . (0.8 . 0.1))))
+  ;;				 (2 . (0.8 . 0.1))))
   (telega-animation-play-inline nil)
   (telega-server-libs-prefix "/usr/local")
   (telega-use-images t)
   ;; (telega-proxies
   ;;  (list
   ;;   '(:server "127.0.0.1" :port 6153 :enable nil
-  ;; 	:type (:@type "proxyTypeSocks5"))))
+  ;;	:type (:@type "proxyTypeSocks5"))))
   (telega-directory (expand-file-name "telega" poly-cache-dir))
   :config
   ;; show previews for photo/video webpages
   (advice-add #'telega-ins--webpage :before-while
 	      (lambda (msg &rest args)
-                (let ((ht (telega--tl-get msg :content :web_page :type)))
-                  (-contains? '("video" "photo") ht))))
+		(let ((ht (telega--tl-get msg :content :web_page :type)))
+		  (-contains? '("video" "photo") ht))))
 
   ;; (add-hook 'telega-chat-mode-hook
-  ;; 	    (lambda ()
-  ;; 	      (set (make-local-variable 'company-backends)
-  ;; 		   (append '(telega-company-emoji
-  ;; 			     telega-company-username
-  ;; 			     telega-company-hashtag)
-  ;; 			   (when (telega-chat-bot-p telega-chatbuf--chat)
-  ;; 			     '(telega-company-botcmd))))
-  ;; 	      ;; (company-mode 1)
-  ;; 	      ))
+  ;;	    (lambda ()
+  ;;	      (set (make-local-variable 'company-backends)
+  ;;		   (append '(telega-company-emoji
+  ;;			     telega-company-username
+  ;;			     telega-company-hashtag)
+  ;;			   (when (telega-chat-bot-p telega-chatbuf--chat)
+  ;;			     '(telega-company-botcmd))))
+  ;;	      ;; (company-mode 1)
+  ;;	      ))
   (unbind-key (kbd "k") telega-msg-button-map)  ;; delete marked or at point (doubled with d)
   (unbind-key (kbd "e") telega-msg-button-map)  ;; msg-edit
   (define-key telega-msg-button-map (kbd "E") 'telega-msg-edit)
@@ -1012,7 +1011,7 @@ Use Telega as Telegram client.
      (t
       (find-file file))))
   (setq telega-open-message-as-file '(photo video)
-        telega-open-file-function '+telega-open-file)
+	telega-open-file-function '+telega-open-file)
   )
 #+end_src
 
@@ -1026,4 +1025,39 @@ Use Telega as Telegram client.
   (define-key toggle-map "e" 'direnv-mode)
 
   (autoload 'direnv-mode "direnv" nil t)
+#+end_src
+
+* embark
+
+#+begin_src emacs-lisp
+(use-package embark
+  :straight t
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :bind (("C-c o" . embark-act)
+	 :map minibuffer-local-map
+	 ("M-o"   . embark-act))
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		 nil
+		 (window-parameters (mode-line-format . none)))))
+
+(use-package embark-consult
+  :straight t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package savehist
+  :straight t
+  :config
+  (savehist-mode 1))
+
+(use-package docker-compose-mode
+  :straight t)
 #+end_src

@@ -41,9 +41,9 @@ If FORCE-TANGLE is non-nil, always tangle before load."
    (expand-file-name "private_template.org" user-emacs-directory)
    (expand-file-name "private.org" user-emacs-directory)))
 
-(setq warning-minimum-level :debug)
-(setq debug-on-error t)
-(setq stack-trace-on-error t)
+;; (setq warning-minimum-level :debug)
+;; (setq debug-on-error t)
+;; (setq stack-trace-on-error t)
 
 ;; core configurations
 (poly-load-org-config "core")

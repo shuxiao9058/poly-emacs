@@ -143,7 +143,7 @@ Configuration for programming and languages support.
 
 
   ;; (define-format-all-formatter nginxfmt
-  ;; 	(:executable "nginxfmt")
+  ;;	(:executable "nginxfmt")
   ;;   (:install (macos "pip install nginxfmt"))
   ;;   ;; (:install
   ;;   ;;  (macos "brew install shfmt")
@@ -155,7 +155,7 @@ Configuration for programming and languages support.
   ;;    (format-all--buffer-easy executable "-i" "4" "-")))
 
   ;; (define-format-all-formatter crossplane
-  ;; 	(:executable "/usr/local/bin/nginx_format.sh")
+  ;;	(:executable "/usr/local/bin/nginx_format.sh")
   ;;   (:install (macos "pip install crossplane"))
   ;;   (:languages "Nginx")
   ;;   (:features)
@@ -218,7 +218,6 @@ Configuration for programming and languages support.
 Use eglot as LSP client.
 
 #+begin_src emacs-lisp
-
 ;; https://github.com/DEbling/dotfiles/blob/9dc0e347267dd68111baf8e7ab7d33c2e39ed404/.emacs.d/elisp/lang-java.el
 ;; (defconst jdt-jar-path "~/.emacs.d/.local/jar/org.eclipse.equinox.launcher.jar")
 ;; (defconst jdt-jar-path "/opt/jdt-language-server/plugins/org.eclipse.equinox.launcher_1.6.0.v20200915-1508.jar")
@@ -252,10 +251,10 @@ If INTERACTIVE, prompt user for details."
 
 (defun dart-lsp-contact (interactive)
   (list (executable-find "dart")
-        (concat (file-name-directory (nix-executable-find nil "dart"))
-                "snapshots/analysis_server.dart.snapshot")
-        "--lsp"
-        "--client-id=emacs.eglot"))
+	(concat (file-name-directory (nix-executable-find nil "dart"))
+		"snapshots/analysis_server.dart.snapshot")
+	"--lsp"
+	"--client-id=emacs.eglot"))
 
 (use-package eglot
   :straight t
@@ -281,7 +280,7 @@ If INTERACTIVE, prompt user for details."
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
   (setq eglot-workspace-configuration
-        '((:gopls .
+	'((:gopls .
 		  (:usePlaceholders t
 				    :completeUnimported  t
 				    :experimentalWorkspaceModule t
@@ -303,46 +302,46 @@ If INTERACTIVE, prompt user for details."
 
   (when (executable-find "ccls")
     (add-to-list 'eglot-server-programs '((c-mode c++-mode) "ccls"
- 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
+					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
   (when (executable-find "gopls")
     (add-to-list 'eglot-server-programs '(go-mode . ("gopls"))))
 
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
 	      (progn
-                (lsp/non-greedy-eglot)
-                (lsp/extra-capf))
+		(lsp/non-greedy-eglot)
+		(lsp/extra-capf))
 	      ;; (make-local-variable 'completion-at-point-functions)
 	      ;; (setq-local completion-at-point-functions
-	      ;; 		  '(tabnine-completion-at-point cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
+	      ;;		  '(tabnine-completion-at-point cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
 	      ))
 
   ;; (add-hook 'eglot-managed-mode-hook
-  ;; 	    (lambda()
-  ;; 	      (make-local-variable 'company-backends)
-  ;; 	      (setq-local company-backends
-  ;; 			  '(company-tabnine-capf company-capf company-tabnine
-  ;; 						 (company-dabbrev company-dabbrev-code)
-  ;; 						 company-keywords company-files))))
+  ;;	    (lambda()
+  ;;	      (make-local-variable 'company-backends)
+  ;;	      (setq-local company-backends
+  ;;			  '(company-tabnine-capf company-capf company-tabnine
+  ;;						 (company-dabbrev company-dabbrev-code)
+  ;;						 company-keywords company-files))))
   ;; (add-hook 'eglot-managed-mode-hook (lambda()
-  ;; 				       (make-local-variable 'company-backends)
-  ;; 				       ;; (setq-local company-backends nil)
-  ;; 				       ;; (setq company-backends
-  ;; 				       ;; 	     '(company-capf
-  ;; 				       ;; 	       ;; company-dabbrev-code
-  ;; 				       ;; 	       (company-files          ; files & directory
-  ;; 				       ;; 		company-keywords       ; keywords
-  ;; 				       ;; 		)
-  ;; 				       ;; 	       (company-abbrev company-dabbrev)))
-  ;; 				       (setq-local company-backends
-  ;; 						   ;; '((company-tabnine :with company-capf :separate)
-  ;; 						   '(company-tabnine
-  ;; 						     company-dabbrev-code
-  ;; 						     (company-files          ; files & directory
-  ;; 						      company-keywords       ; keywords
-  ;; 						      )
-  ;; 						     (company-abbrev company-dabbrev)))
-  ;; 				       ))
+  ;;				       (make-local-variable 'company-backends)
+  ;;				       ;; (setq-local company-backends nil)
+  ;;				       ;; (setq company-backends
+  ;;				       ;;	     '(company-capf
+  ;;				       ;;	       ;; company-dabbrev-code
+  ;;				       ;;	       (company-files          ; files & directory
+  ;;				       ;;		company-keywords       ; keywords
+  ;;				       ;;		)
+  ;;				       ;;	       (company-abbrev company-dabbrev)))
+  ;;				       (setq-local company-backends
+  ;;						   ;; '((company-tabnine :with company-capf :separate)
+  ;;						   '(company-tabnine
+  ;;						     company-dabbrev-code
+  ;;						     (company-files          ; files & directory
+  ;;						      company-keywords       ; keywords
+  ;;						      )
+  ;;						     (company-abbrev company-dabbrev)))
+  ;;				       ))
   ;; )
   :bind (:map eglot-mode-map
 	      ("C-c C-r" . eglot-rename)
@@ -355,10 +354,10 @@ If INTERACTIVE, prompt user for details."
   "Making Eglot capf non-greedy."
   (progn
     (fset 'non-greedy-eglot
-          (cape-capf-buster
-           (cape-capf-properties #'eglot-completion-at-point :exclusive 'no)))
+	  (cape-capf-buster
+	   (cape-capf-properties #'eglot-completion-at-point :exclusive 'no)))
     (setq completion-at-point-functions
-          (list #'non-greedy-eglot))))
+	  (list #'non-greedy-eglot))))
 
 (defun lsp/extra-capf ()
   "Adding extra capf during LSP startup."
@@ -371,6 +370,155 @@ If INTERACTIVE, prompt user for details."
 
 #+begin_src emacs-lisp
   (define-key toggle-map "L" 'eglot)
+#+end_src
+
+
+* Languages
+** Go Language
+#+begin_src emacs-lisp
+(use-package go-mode
+  :straight t
+  :ensure t
+  :commands (godoc gofmt gofmt-before-save)
+  :after (eglot)
+  ;; :init
+  ;; (defun lsp-go-install-save-hooks()
+  ;;   ;; (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  ;;   ;; (add-hook 'before-save-hook #'lsp-organize-imports t t)
+  ;;   (setq-local lsp-enable-on-type-formatting t))
+
+  ;; (defun eglot-go-install-save-hooks()
+  ;;   (add-hook 'before-save-hook #'eglot-format-buffer t t))
+
+  ;; (if poly-use-lsp-mode
+  ;;     (eval-after-load 'lsp
+  ;;	(add-hook 'go-mode-hook #'lsp-go-install-save-hooks))
+  ;;   (eval-after-load 'eglot
+  ;;     (add-hook 'go-mode-hook #'eglot-go-install-save-hooks)))
+  )
+
+(use-package gorepl-mode
+  :straight t
+  :after go-mode
+  :commands gorepl-run-load-current-file)
+
+;; Install: See https://github.com/golangci/golangci-lint#install
+(use-package flycheck-golangci-lint
+  :straight t
+  :after (flycheck go-mode)
+  ;; :hook (go-mode . flycheck-golangci-lint-setup)
+  :hook (go-mode . (lambda ()
+		     "Enable golangci-lint."
+		     (setq flycheck-disabled-checkers '(go-gofmt
+							go-golint
+							go-vet
+							go-build
+							go-test
+							go-staticcheck
+							go-errcheck))
+		     (flycheck-golangci-lint-setup)))
+  :defines flycheck-disabled-checkers
+  :custom
+  ;; (flycheck-golangci-lint-enable-all t)
+  ;; (flycheck-golangci-lint-fast t)
+  (flycheck-golangci-lint-config
+   (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
+  ;; (flycheck-golangci-lint-tests t)
+  :config
+  (eval-after-load 'flycheck
+    '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
+  )
+
+(use-package go-eldoc
+  :straight t
+  :after go-mode
+  :ensure t
+  :disabled
+  :commands go-eldoc-setup
+  :init
+  (add-hook 'go-mode-hook #'go-eldoc-setup))
+
+(use-package go-rename
+  :straight t
+  :after go-mode
+  :disabled
+  :ensure t
+  :commands go-rename)
+
+(use-package go-guru
+  :straight t
+  :after go-mode
+  :disabled
+  :ensure t
+  :commands go-guru-hl-identifier-mode
+  :init
+  (add-hook 'go-mode-hook #'go-guru-hl-identifier-mode))
+
+;; (use-package go-mod-mode
+;;     :straight (:host github :repo "zkry/go-mod-mode")
+;;     :ensure t
+;;     :mode (("go\\.mod\\'" . go-mod-mode)))
+
+(use-package go-tag
+  :straight t
+  :bind (:map go-mode-map
+	      ("C-c t a" . go-tag-add)
+	      ("C-c t r" . go-tag-remove))
+  :init (setq go-tag-args (list "-transform" "camelcase")))
+
+(use-package go-gen-test
+  :straight t
+  :bind (:map go-mode-map
+	      ("C-c t g" . go-gen-test-dwim)))
+
+(use-package gotest
+  :straight t
+  :bind (:map go-mode-map
+	      ("C-c t f" . go-test-current-file)
+	      ("C-c t t" . go-test-current-test)
+	      ("C-c t j" . go-test-current-project)
+	      ("C-c t b" . go-test-current-benchmark)
+	      ("C-c t c" . go-test-current-coverage)
+	      ("C-c t x" . go-run)))
+
+(use-package go-playground
+  :straight t
+  :diminish
+  :commands (go-playground-mode))
+#+end_src
+* lisp
+
+#+begin_src emacs-lisp
+
+(use-package lisp-mode
+  :straight nil
+  :after paredit
+  :ensure nil
+  :defer t
+  :config
+  (defun init-lisp-mode ()
+    (setq lisp-body-indent 2)
+    (show-paren-mode t)
+    (setq show-paren-delay 0)
+    (make-variable-buffer-local 'show-paren-style)
+    (setq show-paren-style 'parenthesis) ; or parenthesis/expression
+    (enable-paredit-mode)
+    (setq abbrev-mode t)
+    (setq lisp-indent-function 'common-lisp-indent-function))
+  :hook
+  (lisp-mode . init-lisp-mode)
+  (emacs-lisp-mode . init-lisp-mode))
+
+
+;; (use-package profiler
+;;   :straight t
+;;   :defer t
+;;   ;; :config
+;;   ;; :general
+;;   ;; (nmap :keymaps '(profiler-report-mode-map)
+;;   ;;   (kbd "<tab>") 'profiler-report-toggle-entry
+;;   ;;   (kbd "<backtab>")  'profiler-report-toggle-entry)
+;;   )
 #+end_src
 
 * Clojure
