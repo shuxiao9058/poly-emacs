@@ -1,0 +1,296 @@
+#+title: keybindings
+
+#+begin_src emacs-lisp
+
+(defconst leader-key "SPC"
+  "The leader prefix key for global commands.")
+
+(defconst leader-key-non-normal "M-m"
+  "The leader prefix key for global commands in emacs and insert states.")
+
+(defconst local-leader-key "SPC m"
+  "The local leader prefix key for major mode specific commands.")
+
+(defconst local-leader-key-non-normal "M-,"
+  "The local leader prefix key for major mode specific commands in emacs and insert states.")
+
+(use-package which-key
+  :straight t
+  :defer 1
+  :custom
+  (which-key-idle-delay 0.5)
+  (which-key-idle-secondary-delay 0.3)
+  (which-key-sort-order #'which-key-prefix-then-key-order)
+  (which-key-sort-uppercase-first nil)
+  (which-key-add-column-padding 1)
+  (which-key-max-display-columns nil)
+  (which-key-min-display-lines 4)
+  (which-key-side-window-slot -10)
+  (which-key-show-early-on-C-h t)
+  (which-key-allow-evil-operators t)
+  :config
+  ;; general improvements to which-key readability
+  ;; (set-face-attribute 'which-key-local-map-description-face nil :weight 'bold)
+  (which-key-setup-side-window-bottom)
+  (which-key-mode +1))
+
+(require 'mouse)
+(xterm-mouse-mode t)
+(defun track-mouse (e))
+
+;; Yank text to clipboard
+(cond
+ ;; OS X
+ ((string-equal system-type "darwin") ; Mac OS X
+  (progn
+    (setq save-to-clipboard-cmd "pbcopy")
+    (setq paste-from-clipboard-cmd "pbpaste")
+    )
+  )
+ ;; Linux
+ ((string-equal system-type "gnu/linux") ; linux
+  (progn
+    (setq save-to-clipboard-cmd "xsel -i -b")
+    (setq paste-from-clipboard-cmd "xsel -o -b")
+    )
+  )
+ )
+
+(defun copy-to-clipboard ()
+  "Copies selection to x-clipboard."
+  (interactive)
+  (if (display-graphic-p)
+      (progn
+        (message "Yanked region to x-clipboard!")
+        (call-interactively 'clipboard-kill-ring-save)
+        )
+    (if (region-active-p)
+        (progn
+          (shell-command-on-region (region-beginning) (region-end) save-to-clipboard-cmd)
+          (message "Yanked region to clipboard!")
+          (deactivate-mark))
+      (message "No region active; can't yank to clipboard!")))
+  )
+
+(defun paste-from-clipboard ()
+  "Pastes from x-clipboard."
+  (interactive)
+  (if (display-graphic-p)
+      (progn
+        (clipboard-yank)
+        (message "graphics active")
+        )
+    (insert (shell-command-to-string paste-from-clipboard-cmd))))
+
+;; comment with new line
+;; Fix M-j behaviour in block comments in js-mode
+(setq-local comment-multi-line t)
+(local-set-key [remap indent-new-comment-line] 'c-indent-new-comment-line)
+
+(bind-key "s-c" #'copy-to-clipboard)
+(bind-key "s-v" #'paste-from-clipboard)
+(bind-key "s-SPC" #'set-mark-command)
+(bind-key "M-RET" #'toggle-frame-fullscreen)
+(unbind-key "C-z")
+
+
+#+end_src
+
+
+* Meow
+
+This configuration sticks with Meow for modal editing.
+
+Key bindings are defined in [[file:private.org::#Modal Editing Key Binding][private]] config.
+
+#+begin_src emacs-lisp
+;; custom indicator
+(when window-system
+  (setq meow-replace-state-name-list
+        '((normal . "🅝")
+          (beacon . "🅑")
+          (insert . "🅘")
+          (motion . "🅜")
+          (keypad . "🅚"))))
+
+(defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-overwrite-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; SPC j/k will run the original command in MOTION state.
+   '("j" . "H-j")
+   '("k" . "H-k")
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+
+(use-package meow
+  :straight t
+  :demand t
+  :ensure t
+  :init
+  (meow-global-mode 1)
+  :custom
+  (meow-expand-hint-remove-delay 3.0)
+  :config
+  (dolist (mode '(inf-iex-mode
+      authinfo-mode
+      Custom-mode
+      cider-test-report-mode
+      comint-mode
+      protobuf-mode
+      cperl-mode
+      perl-mode
+      debuffer-mode
+                  ielm-mode
+                  inferior-python-mode
+                  go-dot-mod-mode
+      go-mod-mode
+                  diff-mode))
+    (add-to-list 'meow-mode-state-list `(,mode . normal)))
+
+  (add-to-list 'meow-mode-state-list '(git-commit-mode . motion))
+  (add-to-list 'meow-mode-state-list '(magit-log-edit-mode . motion))
+  (add-to-list 'meow-grab-fill-commands 'eval-expression)
+
+  (setq meow-cursor-type-keypad 'box)
+  (setq meow-cursor-type-insert '(bar . 2))
+
+  (setq
+   ;; meow-visit-sanitize-completion nil
+   meow-esc-delay 0.001
+   meow-keypad-describe-delay 0.5
+   meow-select-on-change t
+   meow-cursor-type-normal 'box
+   meow-cursor-type-insert '(bar . 4)
+   meow-selection-command-fallback '((meow-replace . meow-page-up)
+             (meow-change . meow-change-char)
+             (meow-save . meow-save-empty)
+             (meow-kill . meow-C-k)
+             (meow-cancel . keyboard-quit)
+             (meow-pop . meow-pop-grab)
+             (meow-delete . meow-C-d)))
+
+  (add-to-list 'meow-char-thing-table '(?\] . line))
+  (add-to-list 'meow-char-thing-table '(?\[ . line))
+
+  (dolist (hook '(git-commit-mode-hook
+      magit-log-edit-mode-hook))
+    (add-hook hook (lambda()(meow--switch-state 'insert))))
+
+  ;; disable <backspace> work as meow-keypad-undo
+  ;; since some useful command may use <backspace> key
+  ;; such as C-x BS
+  (define-key meow-keypad-state-keymap (kbd "<backspace>")
+    'meow-keypad-self-insert)
+
+  (define-key meow-keypad-state-keymap (kbd "DEL")
+    'meow-keypad-self-insert)
+
+  (meow-leader-define-key
+   '(;; "e" . my/selectrum-recentf-open-files)
+     "e" . consult-recent-file)
+   ;; '("e" . my/icomplete-recentf)
+   ;; '("." . find-file)
+   '("." . poly/find-file)
+   '("p" . projectile-command-map)
+   ;; '("b" . switch-to-buffer)
+   '("b" . poly/switch-to-buffer)
+   '("s" . save-buffer)
+   '("j" . sp-join-sexp)
+   '("(" . sp-wrap-round)
+   '("[" . sp-wrap-square)
+   '("{" . sp-wrap-curly)
+   '("o" . ace-window)
+   '("a" . delete-other-windows)
+   '("-" . split-window-below)
+   '("/" . swiper)
+   '("\\" . split-window-right)
+   '("w" . ace-swap-window)
+   '("k" . kill-buffer)
+   )
+  ;; meow-setup is your custom function, see below
+  (meow-setup)
+  ;; If you want relative line number in NORMAL s tate(for display-line-numbers-mode)
+  (meow-setup-line-number)
+  ;; If you need setup indicator, see `meow-indicator' for customizing by hand.
+  (meow-setup-indicator)
+
+  ;; (unbind-key (kbd "<escape>") meow-leader-keymap) ;; disable meow-temp-normal
+  )
+#+end_src

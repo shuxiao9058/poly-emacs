@@ -1,0 +1,389 @@
+#+title: Core
+
+Core configuration of poly emacs, global variable declare.
+
+* Core
+** const declare
+#+begin_src emacs-lisp
+(defconst EMACS27+   (> emacs-major-version 26))
+(defconst IS-MAC     (eq system-type 'darwin))
+(defconst IS-LINUX   (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+(defconst IS-BSD     (or IS-MAC (eq system-type 'berkeley-unix)))
+(defconst IS-GUI (display-graphic-p))
+(defconst IS-CONSOLE (not IS-GUI))
+#+end_src
+
+** Core function
+#+begin_src emacs-lisp
+(defun IS-AARCH64 ()
+  (string-match-p "aarch64-apple-darwin.+" system-configuration))
+
+(defconst IS-AARCH64
+  (if (IS-AARCH64) t nil)
+  "Whether apple arm chip")
+
+;;; Directories/files
+(defconst poly-emacs-dir
+  (eval-when-compile (file-truename user-emacs-directory))
+  "The path to the currently loaded .emacs.d directory. Must end with a slash.")
+
+(defconst poly-core-dir (concat poly-emacs-dir "core/")
+  "The root directory of Poly's core files. Must end with a slash.")
+
+(defconst poly-site-lisp-dir (concat poly-emacs-dir "site-lisp/"))
+
+(defconst poly-local-dir
+  (let ((localdir (getenv "POLYLOCALDIR")))
+    (if localdir
+	(expand-file-name (file-name-as-directory localdir))
+      (expand-file-name ".local/" poly-emacs-dir)))
+  "Root directory for local storage.
+Use this as a storage location for this system's installation of Doom Emacs.
+These files should not be shared across systems. By default, it is used by
+`doom-etc-dir' and `doom-cache-dir'. Must end with a slash.")
+
+(defconst poly-etc-dir (concat poly-local-dir "etc/")
+  "Directory for non-volatile local storage.
+Use this for files that don't change much, like server binaries, external
+dependencies or long-term shared data. Must end with a slash.")
+
+(defconst poly-cache-dir (concat poly-local-dir "cache/")
+  "Directory for volatile local storage.
+Use this for files that change often, like cache files. Must end with a slash.")
+
+(defconst poly-autoload-dir (expand-file-name "autoload/" poly-emacs-dir)
+  "Directory for autoload files.")
+
+(defvar poly-pdump-load-path nil
+  "The load-path backup before dump.
+This variable is non-nil when emacs is started with dump file.")
+
+(defvar poly-pdump-packages '(cl-lib)
+  "A list of package names to dump.")
+
+(defun poly-pdump-packages (&rest pkgs)
+  "Mark pkgs should be dumped."
+  (dolist (pkg pkgs)
+    ;; (push pkg poly-pdump-packages)
+    (cl-pushnew pkg poly-pdump-packages :test #'string=)))
+
+(defvar poly-use-package-always-pdump t
+  "always set :pdump to use-package"
+  )
+
+(defvar poly-use-lsp-mode nil
+  "use lsp-mode for completion"
+  )
+
+(defvar poly-use-company nil
+  "use company for completion"
+  )
+
+(defvar poly-enable-native-comp t
+  "Enable native compilation")
+
+;; (defconst poly/using-native-comp (fboundp 'native-comp-available-p)
+;;   ;; for native comp branch
+;;   )
+(defconst poly/using-native-comp
+  (and poly-enable-native-comp (fboundp 'native-comp-available-p))
+  ;; native compilation
+  )
+
+;; (when (boundp 'comp-deferred-compilation)
+;;   (setq comp-deferred-compilation t))
+
+(setq x-select-enable-clipboard           t
+      x-select-enable-primary             t
+      save-interprogram-paste-before-kill t
+      apropos-do-all                      t
+      mouse-yank-at-point                 t
+      require-final-newline               t
+      ;; silence ad-handle-definition about advised functions getting redefined
+      ad-redefinition-action 'accept)
+#+end_src
+
+
+
+** core lib
+
+
+#+begin_src emacs-lisp
+
+(require 'cl-lib)
+(require 'subr-x)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun load-expand(filename)
+  (load(expand-file-name filename)))
+
+;; attempt to load a feature/library, failing silently
+(defvar missing-packages-list nil
+  "List of packages that `try-require' can't find.")
+
+;; (defmacro watcher:try-load (module)
+;;   "Try to load the given module, logging an error if unable to load"
+;;   `(condition-case ex
+;;        (require ,module)
+;;      ('error
+;;       (message "watcher: Unable to load [%s] module: %s" ,module ex))))
+
+(defun eval-after-load-all (my-features form)
+  "Run FORM after all MY-FEATURES are loaded.
+See `eval-after-load' for the possible formats of FORM."
+  (if (null my-features)
+      (if (functionp form)
+    (funcall form)
+  (eval form))
+    (eval-after-load (car my-features)
+      `(lambda ()
+   (eval-after-load-all
+    (quote ,(cdr my-features))
+    (quote ,form))))))
+
+
+(cl-defmacro after-load (pkgs &body body)
+  "Waits until all packages are loaded before evaluating body.
+Example:
+(after-load (ivy counsel projectile)
+  (do-stuff))
+Expands to:
+(with-eval-after-load \"ivy\"
+  (with-eval-after-load \"counsel\"
+    (with-eval-after-load \"projectile\"
+      ...)))"
+  (declare (indent 1))
+  (if pkgs
+      `(with-eval-after-load ,(symbol-name (car pkgs))
+         (after-load ,(cdr pkgs) ,@body))
+    `(progn ,@body)))
+
+(defun try-require (feature)
+  "Attempt to load a library or module. Return true if the
+library given as argument is successfully loaded. If not, instead
+of an error, just add the package to a list of missing packages."
+  (condition-case err
+      ;; protected form
+      (progn
+        (message "Checking for library `%s'..." feature)
+        (if (stringp feature)
+            (load-library feature)
+          (require feature))
+        (message "Checking for library `%s'... Found" feature))
+    ;; error handler
+    (file-error  ; condition
+     (progn
+       (message "Checking for library `%s'... Missing" feature)
+       (add-to-list 'missing-packages-list feature 'append))
+     nil)))
+
+(defmacro require-soft (feature &optional file)
+  "*Try to require FEATURE, but don't signal an error if 'require' fails."
+  `(require ,feature ,file 'noerror))
+
+;;{Ensure Executables};
+;; Add any executables that must be found
+(defun ensure-executable (exec)
+  (unless (executable-find exec)
+    (message (concat exec " not found in exec-path"))))
+
+(defmacro when-available (func foo)
+  "*Do something if FUNCTION is available."
+  `(when (fboundp ,func) ,foo))
+
+;;; timestamps in *Messages*
+(defun current-time-microseconds ()
+  (let* ((nowtime (current-time))
+         (now-ms (nth 2 nowtime)))
+    (concat (format-time-string "[%Y-%m-%dT%T" nowtime) (format ".%d] " now-ms))))
+
+(defmacro η (fnc)
+  "Return function that ignores its arguments and invokes FNC."
+  `(lambda (&rest _rest)
+     (funcall ,fnc)))
+
+(defadvice message (before test-symbol activate)
+  (if (not (string-equal (ad-get-arg 0) "%s%s"))
+      (let ((deactivate-mark nil)
+            (inhibit-read-only t))
+  (with-current-buffer "*Messages*"
+          (goto-char (point-max))
+          (if (not (bolp))
+              (newline))
+          (insert (current-time-microseconds)))
+        )))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;;; Public library
+
+(defun poly-unquote (exp)
+  "Return EXP unquoted."
+  (declare (pure t) (side-effect-free t))
+  (while (memq (car-safe exp) '(quote function))
+    (setq exp (cadr exp)))
+  exp)
+
+;; (defun poly-region-active-p ()
+;;   "Return non-nil if selection is active.
+;; Detects evil visual mode as well."
+;;   (declare (side-effect-free t))
+;;   (or (use-region-p)
+;;       (and (bound-and-true-p evil-local-mode)
+;;            (evil-visual-state-p))))
+
+
+(defun poly-keyword-name (keyword)
+  "Returns the string name of KEYWORD (`keywordp') minus the leading colon."
+  (declare (pure t) (side-effect-free t))
+  (cl-check-type keyword keyword)
+  (substring (symbol-name keyword) 1))
+
+(defmacro poly-log (format-string &rest args)
+  "Log to *Messages* if `poly-debug-mode' is on.
+Does not interrupt the minibuffer if it is in use, but still logs to *Messages*.
+Accepts the same arguments as `message'."
+  `(when poly-debug-mode
+     (let ((inhibit-message (active-minibuffer-window)))
+       (message
+        ,(concat (propertize "POLY " 'face 'font-lock-comment-face)
+                 ;; (when (bound-and-true-p poly--current-module)
+                 ;;   (propertize
+                 ;;    (format "[%s/%s] "
+                 ;;            (poly-keyword-name (car poly--current-module))
+                 ;;            (cdr poly--current-module))
+                 ;;    'face 'warning))
+                 format-string)
+        ,@args))))
+
+;; ;;
+;; ;; Growl (Mac OS X only)
+;; ;;
+;; (defun growl-notify (message &optional title)
+;;   "Display a Growl MESSAGE. The optional TITLE's default value is \"Emacs\"."
+;;   (interactive "Message: ")
+;;   (let ((g-title (if (and title (not (eq title ""))) title "Emacs")))
+;;     (shell-command
+;;      (concat
+;;       "growlnotify"
+;;       " --image /Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+;;       " --title " (shell-quote-argument g-title)
+;;       " --message " (shell-quote-argument message)))))
+
+(defun terminal-notify (message &optional title)
+  "Display a Notify MESSAGE. The optional TITLE's default value is \"Emacs\"."
+  (interactive "Message: ")
+  (let ((g-title (if (and title (not (eq title ""))) title "Emacs")))
+    (shell-command
+     (concat
+      "terminal-notifier "
+      " -ignoreDnD "
+      ;; " -appIcon /Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+      " -title " (shell-quote-argument g-title)
+      " -sender " (shell-quote-argument "org.gnu.Emacs")
+      " -message " (shell-quote-argument message)))))
+#+end_src
+
+** ui
+#+begin_src emacs-lisp
+;; Hide the mouse while typing:
+(setq make-pointer-invisible t)
+
+(when EMACS27+
+  ;; very long line performence optimizy
+  (global-so-long-mode t))
+
+;;; highlight current line
+(global-hl-line-mode)
+
+;; Removes *scratch* from buffer after the mode has been set.
+(defun remove-scratch-buffer ()
+  (if (get-buffer "*scratch*")
+      (kill-buffer "*scratch*")))
+(add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
+
+;; ;; auto maximized frame
+;; (when (and IS-MAC IS-GUI)
+;;   (add-to-list 'default-frame-alist '(fullscreen . maximized)))
+
+(when IS-MAC
+  (setq frame-resize-pixelwise t
+  mac-command-modifier 'super
+  mac-option-modifier  'meta)
+  (when (featurep 'ns)
+    (setq ns-use-thin-smoothing t
+          ns-use-fullscreen-animation t
+          ns-use-native-fullscreen t
+          ns-use-proxy-icon t
+          ns-use-mwheel-momentum t
+          ns-use-mwheel-acceleration t)
+    ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+    ;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
+    ))
+
+;; Symbol’s value as variable is void: mouse-wheel-down-event
+(when (require 'mwheel nil 'noerror)
+  ;; scroll two lines at a time (less "jumpy" than defaults)
+  (setq mouse-wheel-scroll-amount
+        '(1                                 ; 一次只滚动 1 行
+          ((shift) . 2)                     ; 按住 Shift 滚动 2 行
+          ((control). 3))                   ; 按住 Ctrl 滚动 3 行
+        mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
+        mouse-wheel-follow-mouse 't ;; scroll window under mouse
+        scroll-preserve-screen-position 't ;; 鼠标滚动的时候保持光标在屏幕中的位置不变
+        scroll-step 2) ;; keyboard scroll two lines at a time
+  (mouse-wheel-mode t)
+  ;; Better scrolling with mouse wheel/trackpad.
+  (unless (and (boundp 'mac-mouse-wheel-smooth-scroll) mac-mouse-wheel-smooth-scroll)
+    (global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
+    (global-set-key [wheel-up] (lambda () (interactive) (scroll-down-command 1)))
+    (global-set-key [double-wheel-down] (lambda () (interactive) (scroll-up-command 2)))
+    (global-set-key [double-wheel-up] (lambda () (interactive) (scroll-down-command 2)))
+    (global-set-key [triple-wheel-down] (lambda () (interactive) (scroll-up-command 4)))
+    (global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))))
+
+;; Clear Window clutter and set up the look and feel
+(when (and (fboundp 'menu-bar-mode) (not (eq menu-bar-mode -1)))
+  (menu-bar-mode -1))
+(when (and (fboundp 'tool-bar-mode) (not (eq tool-bar-mode -1)))
+  (tool-bar-mode -1))
+(when (and (fboundp 'scroll-bar-mode) (not (eq scroll-bar-mode -1)))
+  (scroll-bar-mode -1))
+(when (and (fboundp 'horizontal-scroll-bar-mode) (not (eq horizontal-scroll-bar-mode -1)))
+  (scroll-bar-mode -1))
+
+(when (and (fboundp 'use-file-dialog) (not (eq use-file-dialog -1)))
+  (use-file-dialog -1))
+(when (and (fboundp 'use-dialog-box) (not (eq use-dialog-box -1)))
+  (use-dialog-box -1))
+(when (and (fboundp 'blink-cursor-mode) (not (eq blink-cursor-mode -1)))
+  (blink-cursor-mode -1))
+
+;; emacs 28 new feature, CJK word breaking lines
+(when (boundp 'word-wrap-by-category)
+  (setq word-wrap-by-category t))
+
+(setq mode-line-compact t)
+#+end_src
+
+
+** theme
+
+#+begin_src emacs-lisp
+
+;; themes
+(add-to-list 'load-path
+       (expand-file-name "themes" user-emacs-directory))
+
+(defun reload-theme()
+  "reload theme"
+  (interactive)
+  (require 'my-dark-theme)
+  (load-theme 'my-dark t))
+
+(reload-theme)
+#+end_src
+
+

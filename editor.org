@@ -110,37 +110,6 @@ Bind some keys for quick operations.
   (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+end_src
 
-* Meow
-
-This configuration sticks with Meow for modal editing.
-
-Key bindings are defined in [[file:private.org::#Modal Editing Key Binding][private]] config.
-
-#+begin_src emacs-lisp
-  (straight-use-package 'meow)
-
-  (require 'meow)
-
-  ;; custom indicator
-  (when window-system
-    (setq meow-replace-state-name-list
-          '((normal . "🅝")
-            (beacon . "🅑")
-            (insert . "🅘")
-            (motion . "🅜")
-            (keypad . "🅚"))))
-
-  ;; custom variables
-  (setq meow-esc-delay 0.001)
-
-  (meow-setup)
-
-  (meow-setup-indicator)
-
-  (unless (bound-and-true-p meow-global-mode)
-    (meow-global-mode 1))
-#+end_src
-
 * Window management
 
 Switch window by pressing the number showned in the mode line.

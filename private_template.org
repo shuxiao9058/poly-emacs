@@ -161,11 +161,11 @@ Tweaking following table for key bindings in leader keymap.
 #+tblname: fonts
 | key         | font              | description                       |
 |-------------+-------------------+-----------------------------------|
-| default     | Latin Modern Mono | default font for ascii characters |
-| cjk         | LXGW WenKai       | default font for cjk characters   |
-| symbol      | Symbola           | default font for unicode symbols  |
+| default     | Roboto Mono       | default font for ascii characters |
+| cjk         | Sarasa Mono SC    | default font for cjk characters   |
+| symbol      | Sarasa Mono SC    | default font for unicode symbols  |
 | fixed       | Source Code Pro   | for face ~fixed-pitch~              |
-| fixed-serif | Latin Modern Mono | for face ~fixed-pitch-serif~        |
+| fixed-serif | Sarasa Mono SC | for face ~fixed-pitch-serif~        |
 | variable    | Source Serif Pro  | for face ~variable-pitch~           |
 
 #+begin_src emacs-lisp :var fonts=fonts
@@ -185,12 +185,12 @@ Tweaking following table for key bindings in leader keymap.
 
 #+header: :var themes=themes
 #+begin_src emacs-lisp
-  (setq meomacs-themes
-        (thread-last
-          themes
-          (mapcar 'car)
-          (cl-remove-if-not (lambda (s) (string-prefix-p "[X] " s)))
-          (mapcar (lambda (s) (intern (substring s 4))))))
+;;  (setq meomacs-themes
+;;         (thread-last
+;;           themes
+;;           (mapcar 'car)
+;;           (cl-remove-if-not (lambda (s) (string-prefix-p "[X] " s)))
+;;           (mapcar (lambda (s) (intern (substring s 4))))))
 #+end_src
 
 * Network settings

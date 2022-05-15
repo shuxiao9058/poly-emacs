@@ -1,18 +1,18 @@
 ;;; -*- lexical-binding: t -*-
 
 ;; Define helper command for reloading configuration
-(defun meomacs-refresh ()
+(defun poly-refresh ()
   "Refresh and tangle configuration."
   (interactive)
-  (meomacs-load-config "private" t)
-  (meomacs-load-config "laf" t)
-  (meomacs-load-config "editor" t)
-  (meomacs-load-config "writing" t)
-  (meomacs-load-config "programming" t)
-  (meomacs-load-config "addons" t))
+  (poly-load-org-config "private" t)
+  (poly-load-org-config "laf" t)
+  (poly-load-org-config "editor" t)
+  (poly-load-org-config "writing" t)
+  (poly-load-org-config "programming" t)
+  (poly-load-org-config "addons" t))
 
 ;; Define helper command for open configuration file.
-(defun meomacs-open-configuration ()
+(defun poly-open-configuration ()
   "Open meomacs.org under `user-emacs-directory'."
   (interactive)
   (let ((config (completing-read "Open configuration: "
@@ -26,12 +26,12 @@
 				 t)))
     (find-file (expand-file-name (format "%s.org" config) user-emacs-directory))))
 
-(global-set-key (kbd "<f9>") 'meomacs-open-configuration)
-(global-set-key (kbd "<f12>") 'meomacs-refresh)
+(global-set-key (kbd "<f9>") 'poly-open-configuration)
+(global-set-key (kbd "<f12>") 'poly-refresh)
 
 ;; Load main configuration
-(meomacs-load-config "editor")
-(meomacs-load-config "writing")
-(meomacs-load-config "programming")
-(meomacs-load-config "addons" t)
+(poly-load-org-config "editor")
+(poly-load-org-config "writing")
+(poly-load-org-config "programming")
+(poly-load-org-config "addons" t)
 
