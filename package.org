@@ -1,5 +1,9 @@
 #+title: Package
 
+#+begin_src emacs-lisp
+  ;;; -*- lexical-binding: t -*-
+#+end_src
+
 * straight
 
 ** setting default directory
