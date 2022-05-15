@@ -6,7 +6,7 @@ Configuration for editor basics.
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
-* Package management                                               :required:
+* Package management
 
 ** Straight
 
@@ -132,7 +132,7 @@ Don't show *Buffer list* when opening multiple files at the same time.
 ** Which-key
 
 * Minibuffer completion reading
-** COMMENT Vertico & Orderless
+**  Vertico & Orderless
 
 - Vertico provides a better UX for completion reading.
 - Orderless provides a completion style, which allows you to search with orderless segments.
