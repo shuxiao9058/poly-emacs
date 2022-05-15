@@ -127,6 +127,60 @@ Don't show *Buffer list* when opening multiple files at the same time.
     (run-with-idle-timer 2 nil #'linum-update-current))))
 #+end_src
 
+* modeline
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  ;; :straight t
+  :straight (doom-modeline
+	     :type git
+	     :host github
+	     :repo "seagle0128/doom-modeline")
+  :pdump nil
+  :custom
+  ;; (doom-modeline-buffer-file-name-style 'truncate-with-project)
+  ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
+  (doom-modeline-buffer-file-name-style 'relative-to-project)
+  (doom-modeline-modal-icon t)
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-minor-modes nil)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-persp-name t)
+  (doom-modeline-lsp t)
+  ;; Whether display github notifications or not. Requires `ghub+` package.
+  (doom-modeline-github nil)
+  ;; The interval of checking github.
+  (doom-modeline-github-interval (* 30 60))
+  (doom-modeline-height 25)
+  (doom-modeline-bar-width 3)
+  (doom-modeline-vcs-max-length 20)
+  (doom-modeline-checker-simple-format t)
+  (doom-modeline-env-version t)
+  (doom-modeline-env-enable-python t)
+  (doom-modeline-env-enable-ruby t)
+  (doom-modeline-env-enable-perl t)
+  (doom-modeline-env-enable-go t)
+  (doom-modeline-env-enable-elixir t)
+  (doom-modeline-env-enable-rust t)
+  (doom-modeline-env-python-executable "python")
+  (doom-modeline-env-ruby-executable "ruby")
+  (doom-modeline-env-perl-executable "perl")
+  (doom-modeline-env-go-executable "go")
+  (doom-modeline-env-elixir-executable "iex")
+  (doom-modeline-env-rust-executable "rustc")
+  :after (all-the-icons)
+  :hook (after-init . doom-modeline-init)
+  :config
+  ;; Define your custom doom-modeline
+  (doom-modeline-def-modeline 'my-simple-line
+    '(bar input-method matches buffer-info remote-host buffer-position parrot selection-info)
+    '(objed-state misc-info persp-name lsp minor-modes indent-info buffer-encoding major-mode process vcs checker))
+
+  ;; Add to `doom-modeline-mode-hook` or other hooks
+  (add-hook 'doom-modeline-mode-hook
+	    (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
+  (doom-modeline-mode +1))
+#+end_src
 * Completion for key sequence
 
 ** Which-key
@@ -494,6 +548,24 @@ No tab will created if the command is cancelled."
 ** ace
 
 #+begin_src emacs-lisp
+
+;; winum users can use `winum-select-window-by-number' directly.
+(defun my-select-window-by-number (win-id)
+  "Use `ace-window' to select the window by using window index.
+WIN-ID : Window index."
+  (let ((wnd (nth (- win-id 1) (aw-window-list))))
+    (if wnd
+	(aw-switch-to-window wnd)
+      (message "No such window."))))
+
+(defun my-select-window ()
+  (interactive)
+  (let* ((event last-input-event)
+	 (key (make-vector 1 event))
+	 (key-desc (key-description key)))
+    (my-select-window-by-number
+     (string-to-number (car (nreverse (split-string key-desc "-")))))))
+
 (use-package ace-window
   :straight t
   :ensure t

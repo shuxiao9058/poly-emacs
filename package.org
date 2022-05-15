@@ -6,6 +6,48 @@
 
 * straight
 
+** add :pdump tag
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'use-package-core
+  (when (and (boundp 'use-package-keywords)
+	     (listp use-package-keywords))
+    (setq use-package-keywords (remq :pdump use-package-keywords))
+    (add-to-list 'use-package-keywords :pdump t))
+  ;; default :pdump to t when poly-use-package-always-pdump is t and no :pdump attribute
+  (add-to-list 'use-package-defaults
+	       '(:pdump poly-use-package-always-pdump
+			(lambda (name args)
+			  (and poly-use-package-always-pdump
+			       (not (plist-member args :pdump)))))))
+
+(defun use-package-normalize/:pdump (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      ;; (princ (type-of arg))
+      ;; (princ arg)
+      (cond
+       ((and (listp arg) (keywordp (car arg))) arg)
+       ((consp arg) arg)
+       ((symbolp arg) (symbol-name arg))
+       ((stringp arg) (unless (string= "nil" arg) arg))
+       (t
+	(use-package-error
+	 ":pdump wants a bool value"))))))
+
+(defun use-package-handler/:pdump (name _keyword arg rest state)
+  ;; (princ arg)
+  (let* ((enable-pdump (if (and (stringp arg) (string= "nil" arg)) nil t)))
+    (when enable-pdump
+      (poly-pdump-packages `,name))
+    ;; arg may contain extra packages
+    (when (consp arg)
+      (cl-loop for cell in arg
+	       do
+	       (when  (symbolp cell)
+		 (poly-pdump-packages cell))))))
+#+end_src
+
 ** setting default directory
 #+begin_src emacs-lisp
 ;; Emacs wants to load `package.el' before the init file,
@@ -37,8 +79,8 @@
       ;; Tell straight.el about the profiles we are going to be using.
       straight-profiles
       '((nil . "default.el")
-        ;; Packages which are pinned to a specific commit.
-        (pinned . "pinned.el"))
+	;; Packages which are pinned to a specific commit.
+	(pinned . "pinned.el"))
       ;; ;; Set package.el variables just in case to avoid polluting
       ;; ;; the root directory.
       ;; package-enable-at-startup nil
@@ -60,7 +102,7 @@
     ;; catch emacs updates that have native compiled leftovers
     ;; Credits: https://github.com/raxod502/straight.el/643/issues
     (unless (catch 'emacs-version-changed
-        (load bootstrap-file nil 'nomessage))
+	(load bootstrap-file nil 'nomessage))
       ;; remove historian-save-file
       ;; try fix (void-variable _args)
       (when (boundp 'historian-save-file)
@@ -98,12 +140,12 @@
   ;; (setq exec-path-from-shell-arguments '("-l"))
   (setq exec-path-from-shell-variables
 	'("PATH"
-          "PYENV_ROOT"
-          "JAVA_HOME"
-          "GOPATH"
-          "GOINSECURE"
-          "GOINSECURE"
-          "SDKMAN_DIR"
+	  "PYENV_ROOT"
+	  "JAVA_HOME"
+	  "GOPATH"
+	  "GOINSECURE"
+	  "GOINSECURE"
+	  "SDKMAN_DIR"
 	  "EMACS_MODULE_HEADER_ROOT"
 	  "LIBRIME_ROOT"))
 
@@ -115,8 +157,8 @@
     (defvar zsh-executable  "/opt/local/bin/zsh")
     ;; (defvar zsh-executable  "/usr/bin/env zsh")
     (let* ((zshpath (shell-command-to-string
-                     (concat zsh-executable " -lc 'printenv PATH'")))
-           (pathlst (split-string zshpath ":")))
+		     (concat zsh-executable " -lc 'printenv PATH'")))
+	   (pathlst (split-string zshpath ":")))
       (setq exec-path pathlst)
       (setq eshell-path-env zshpath)
       ;; (princ zshpath)
@@ -130,7 +172,7 @@
   ;; (setenv "LIBRARY_PATH" "/opt/local/lib/gcc11/")
   (if (and poly-enable-native-comp
 	   (fboundp 'native-comp-available-p)
-           (native-comp-available-p))
+	   (native-comp-available-p))
       (progn
 	(message "Native comp is available")
 	;; Using Emacs.app/Contents/MacOS/bin since it was compiled with
@@ -161,17 +203,17 @@
 (unless (display-graphic-p)
   (advice-add #'tty-run-terminal-initialization :override #'ignore)
   (add-hook 'window-setup-hook
-            (lambda ()
-              (advice-remove #'tty-run-terminal-initialization #'ignore)
-              (tty-run-terminal-initialization (selected-frame) nil t))))
+	    (lambda ()
+	      (advice-remove #'tty-run-terminal-initialization #'ignore)
+	      (tty-run-terminal-initialization (selected-frame) nil t))))
 
 
 (use-package recentf
   :straight nil
   :commands (recentf-mode
-             recentf-add-file
-             recentf-apply-filename-handlers
-             recentf-open-files)
+	     recentf-add-file
+	     recentf-apply-filename-handlers
+	     recentf-open-files)
   ;; :defines no-littering-etc-directory no-littering-var-directory quelpa-packages-dir
   ;; :after no-littering
   :hook (after-init . recentf-mode)
@@ -188,33 +230,33 @@
   (recentf-auto-save-timer (run-with-idle-timer 600 t 'recentf-save-list))
   ;; exclude ** from recentfiles buffer
   (recentf-exclude `(;; ,@(cl-loop  for f in `(
-                     ;; ,package-user-dir
-                     ;; ,quelpa-packages-dir
-                     ;; ,no-littering-var-directory
-                     ;; ,no-littering-etc-directory)
-                     ;;        collect (abbreviate-file-name f))
-                     "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\)$"
-                     "^/tmp/" "^/ssh:" "\\.?ido\\.last$" "\\.revive$" "/TAGS$"
-                     "^/var/folders\\.*" "\\.git/config" "\\.git/COMMIT_EDITMSG"
-                     "COMMIT_MSG"
-                     "[0-9a-f]\\{32\\}-[0-9a-f]\\{32\\}\\.org"
-                     "github.*txt$"
-                     "COMMIT_EDITMSG\\'"
-                     ".*-autoloads\\.el\\'"
-                     "recentf"
-                     ".*pang$" ".*cache$"
-                     "[/\\]\\.elpa/"
-                     ;; Folders on MacOS start
-                     "^/private/tmp/"
-                     "^/var/folders/"
-                     ;; Folders on MacOS end
-                     "^/tmp/"
-                     "/ssh\\(x\\)?:"
-                     "/su\\(do\\)?:"
-                     "^/usr/include/"
-                     "/TAGS\\'"
-                     ;; "COMMIT_EDITMSG\\'"
-                     ))
+		     ;; ,package-user-dir
+		     ;; ,quelpa-packages-dir
+		     ;; ,no-littering-var-directory
+		     ;; ,no-littering-etc-directory)
+		     ;;        collect (abbreviate-file-name f))
+		     "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\)$"
+		     "^/tmp/" "^/ssh:" "\\.?ido\\.last$" "\\.revive$" "/TAGS$"
+		     "^/var/folders\\.*" "\\.git/config" "\\.git/COMMIT_EDITMSG"
+		     "COMMIT_MSG"
+		     "[0-9a-f]\\{32\\}-[0-9a-f]\\{32\\}\\.org"
+		     "github.*txt$"
+		     "COMMIT_EDITMSG\\'"
+		     ".*-autoloads\\.el\\'"
+		     "recentf"
+		     ".*pang$" ".*cache$"
+		     "[/\\]\\.elpa/"
+		     ;; Folders on MacOS start
+		     "^/private/tmp/"
+		     "^/var/folders/"
+		     ;; Folders on MacOS end
+		     "^/tmp/"
+		     "/ssh\\(x\\)?:"
+		     "/su\\(do\\)?:"
+		     "^/usr/include/"
+		     "/TAGS\\'"
+		     ;; "COMMIT_EDITMSG\\'"
+		     ))
   ;; :config
   ;; (setq recentf-max-saved-items nil
   ;;  recentf-max-menu-items 60
@@ -235,8 +277,8 @@
   :init
   (if IS-WINDOWS
       (progn
-        (setq server-use-tcp t)
-        (setq server-use-socket nil))
+	(setq server-use-tcp t)
+	(setq server-use-socket nil))
     (setq server-use-tcp nil)
     (setq server-use-socket t))
 
@@ -275,9 +317,9 @@
 ;; https://gitlab.com/ideasman42/emacs-undo-fu
 (use-package undo-fu
   :straight (undo-fu
-             :host gitlab
-             :repo "ideasman42/emacs-undo-fu"
-             :files ("undo-fu.el"))
+	     :host gitlab
+	     :repo "ideasman42/emacs-undo-fu"
+	     :files ("undo-fu.el"))
   :ensure t
   :demand t
   :custom
@@ -399,15 +441,15 @@
   :straight t
   :bind
   (:map transient-map
-        ([escape] . transient-quit-one)
-        ("q" . transient-quit-one)))
+	([escape] . transient-quit-one)
+	("q" . transient-quit-one)))
 
 (use-package multiple-cursors
   :straight t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
-         ("C-<" . mc/mark-next-like-this)
-         ("C->" . mc/mark-previous-like-this)
-         ("C-c C-<" . mc/mark-all-like-this)))
+	 ("C-<" . mc/mark-next-like-this)
+	 ("C->" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)))
 
 ;; required by core-hammerspoon
 (use-package dash
@@ -415,20 +457,20 @@
 
 ;;;; disable annoying notifications
 (defcustom message-filter-regexp-list '("^Starting new Ispell process \\[.+\\] \\.\\.\\.$"
-                                        "^Ispell process killed$"
-                                        ".+expected selector or type assertion, found.+"
-                                        ".+expected identifier on left side.+"
-                                        "^LSP ::.+"
-                                        ".+and \d{1,10} more errors.+"
-                                        "Wrote "
-                                        "Liberime: start with shared dir" ;;; liberime
-                                        ".+Starting new Ispell process.+" ;;; ispell
-                                        "Package cl is deprecated"
-                                        "Loading[\s\w\/\.-]+\(module\).+"
-                                        ".+search-failed.+"
-                                        ;; "Loading[\w\/\d\W]+\(module\).+" ;;; module load
-                                        "For information about GNU Emacs and the GNU system.+"
-                                        )
+					"^Ispell process killed$"
+					".+expected selector or type assertion, found.+"
+					".+expected identifier on left side.+"
+					"^LSP ::.+"
+					".+and \d{1,10} more errors.+"
+					"Wrote "
+					"Liberime: start with shared dir" ;;; liberime
+					".+Starting new Ispell process.+" ;;; ispell
+					"Package cl is deprecated"
+					"Loading[\s\w\/\.-]+\(module\).+"
+					".+search-failed.+"
+					;; "Loading[\w\/\d\W]+\(module\).+" ;;; module load
+					"For information about GNU Emacs and the GNU system.+"
+					)
   "filter formatted message string to remove noisy messages"
   :type '(list string)
   :group 'general)
@@ -438,14 +480,14 @@
       ad-do-it
     (let ((formatted-string (apply 'format (ad-get-args 0))))
       (if (and (stringp formatted-string)
-               (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
-          (let ((inhibit-read-only t))
-            (with-current-buffer "*Messages*"
-              (goto-char (point-max))
-              (insert formatted-string "\n")))
-        (progn
-          (ad-set-args 0 `("%s" ,formatted-string))
-          ad-do-it)))))
+	       (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
+	  (let ((inhibit-read-only t))
+	    (with-current-buffer "*Messages*"
+	      (goto-char (point-max))
+	      (insert formatted-string "\n")))
+	(progn
+	  (ad-set-args 0 `("%s" ,formatted-string))
+	  ad-do-it)))))
 
 ;; Michael Hoffman at the comment of
 ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
@@ -460,9 +502,9 @@
   "Suppress any `message' starting with REGEX when executing BODY."
   (declare (indent 1))
   `(cl-letf (((symbol-function 'message)
-              (lambda (format-string &rest args)
-                (unless (string-match-p ,regex format-string)
-                  (apply 'tl/message-orig format-string args)))))
+	      (lambda (format-string &rest args)
+		(unless (string-match-p ,regex format-string)
+		  (apply 'tl/message-orig format-string args)))))
      ,@body))
 
 ;; enable winner-mode
@@ -479,24 +521,24 @@
 
 (defun tl/open-hammerspoon-url (event &rest params)
   (let ((len (length params))
-        (url (concat "hammerspoon://" event)))
+	(url (concat "hammerspoon://" event)))
     (when (> len 0)
       (if (zerop (% len 2))
-          (let ((querys (--reduce (format "%s&%s" acc it)
-                                  (-map (lambda (l)
-                                          (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l)))
-            ;; (format "%s=%s" ( car l) ( cadr l))
-            )
-                                        (-partition-all 2 params)))))
-            (setq url (concat url "?" querys)))
-        (error "illegal hammerspoon params")))
+	  (let ((querys (--reduce (format "%s&%s" acc it)
+				  (-map (lambda (l)
+					  (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l)))
+	    ;; (format "%s=%s" ( car l) ( cadr l))
+	    )
+					(-partition-all 2 params)))))
+	    (setq url (concat url "?" querys)))
+	(error "illegal hammerspoon params")))
     ;; (print url)
     (tl/with-suppress-message "Shell command succeeded with"
       (shell-command (format "open -g \"%s\""
-           ;; (url-encode-url url)
-           url
-           ;; (url-encode-url url)
-           )))))
+	   ;; (url-encode-url url)
+	   url
+	   ;; (url-encode-url url)
+	   )))))
 
 (defun tl/notify-hammerspoon-did-init ()
   (tl/open-hammerspoon-url "emacs_did_init"))
