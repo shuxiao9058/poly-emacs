@@ -1,4 +1,4 @@
-j#+title: Addons
+#+title: Addons
 
 Configuration for addons, additional features provided by individual packages.
 

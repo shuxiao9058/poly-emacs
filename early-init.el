@@ -21,17 +21,17 @@ If FORCE-TANGLE is non-nil, always tangle before load."
   (let* ((source (expand-file-name (format "%s.org" config-name) user-emacs-directory))
 	 (tangle-dir (expand-file-name "tangle" user-emacs-directory))
 	 (target (expand-file-name (format "%s.el" config-name) tangle-dir))
-         (target-mod-time (poly/file-mod-time target))
-         (source-mod-time (poly/file-mod-time source)))
+	 (target-mod-time (poly/file-mod-time target))
+	 (source-mod-time (poly/file-mod-time source)))
     (when (file-exists-p source)
       (make-directory tangle-dir t)
       (when (or force-tangle
-                (not (file-exists-p target))
-                (time-less-p target-mod-time source-mod-time))
+		(not (file-exists-p target))
+		(time-less-p target-mod-time source-mod-time))
 	(require 'org)
 	(require 'ob)
 	(org-babel-tangle-file source target)
-        (message "generate file, source: %s, taget: %s" source target))
+	(message "generate file, source: %s, taget: %s" source target))
       (load-file target))))
 
 ;; Prepare private.org when not exist.
@@ -44,6 +44,9 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 ;; (setq warning-minimum-level :debug)
 ;; (setq debug-on-error t)
 ;; (setq stack-trace-on-error t)
+
+(setq warning-minimum-level :emergency)
+(setq debug-on-error nil)
 
 ;; core configurations
 (poly-load-org-config "core")

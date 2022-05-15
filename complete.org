@@ -43,16 +43,16 @@
   :defer 1
   :custom
   (marginalia-annotators '(marginalia-annotators-heavy
-                           marginalia-annotators-light))
+			   marginalia-annotators-light))
   :init
   (setq marginalia-command-categories
-        '((imenu . imenu)
+	'((imenu . imenu)
 	  (projectile-find-file . project-file)
 	  ;; (projectile-find-file . project)
-          (projectile-find-dir . project-file)
+	  (projectile-find-dir . project-file)
 	  ;; (projectile-find-dir . project)
 	  ;; (projectile-switch-project . project)
-          (projectile-switch-project . file)
+	  (projectile-switch-project . file)
 	  (projectile-switch-open-project . file)
 	  (projectile-recentf . project-file)
 	  (projectile-display-buffer . project-buffer)
@@ -60,8 +60,8 @@
 	  ;; (projectile-commander . project)
 	  ))
   :bind (;; ("M-A" . marginalia-cycle)
-         :map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+	 :map minibuffer-local-map
+	 ("M-A" . marginalia-cycle))
   :config
   (marginalia-mode)
 
@@ -90,9 +90,9 @@
 
   (advice-add 'marginalia-classify-by-prompt :around
 	      (lambda (orig-fun &rest args)
-                (if c/switching-project?
+		(if c/switching-project?
 		    'project
-                  (apply orig-fun args)))))
+		  (apply orig-fun args)))))
 #+end_src
 
 ** all-the-icons-completion
@@ -165,7 +165,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;;      orderless-style-dispatchers nil))
 ;;   :bind
 ;;   (:map minibuffer-local-completion-map
-;; 	("C-l" . my/match-components-literally)))
+;;	("C-l" . my/match-components-literally)))
 
 ;; ;; '=' at the end of a component will make this component match as a literal.
 ;; (defun my/orderless-literal-dispatcher (pattern _index _total)
@@ -209,11 +209,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :hook
   (completion-list-mode . consult-preview-at-point-mode)
   :init (bind-key "TAB"
-                  (lambda ()
-                    (interactive)
-                    (isearch-exit)
-                    (consult-line isearch-string))
-                  isearch-mode-map)
+		  (lambda ()
+		    (interactive)
+		    (isearch-exit)
+		    (consult-line isearch-string))
+		  isearch-mode-map)
   :config
   (require 'consult)
   (require 'consult-imenu)
@@ -230,18 +230,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     ;; Disable consult-buffer project-related capabilities as
     ;; they are very slow in TRAMP.
     (setq consult-buffer-sources
-          (delq 'consult--source-project-buffer
-                (delq 'consult--source-project-file consult-buffer-sources)))
+	  (delq 'consult--source-project-buffer
+		(delq 'consult--source-project-file consult-buffer-sources)))
 
     (setq consult--source-hidden-buffer
-          (plist-put consult--source-hidden-buffer :narrow ?h)))
+	  (plist-put consult--source-hidden-buffer :narrow ?h)))
   :bind (
    ("M-s f" . consult-line)
-         ("M-g g" . consult-line)
-         ("M-g o" . consult-outline)
-         ("M-g i" . consult-imenu)
-         ("M-g r" . consult-ripgrep)
-         ("C-x C-r" . consult-recent-file)
+	 ("M-g g" . consult-line)
+	 ("M-g o" . consult-outline)
+	 ("M-g i" . consult-imenu)
+	 ("M-g r" . consult-ripgrep)
+	 ("C-x C-r" . consult-recent-file)
    ([remap yank-pop] . consult-yank-from-kill-ring)
    ([remap switch-to-buffer] . consult-buffer)
    ([remap goto-line] . consult-goto-line)))
@@ -254,7 +254,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ** vertico
 #+begin_src emacs-lisp
-
 (use-package vertico
   :straight (vertico
 	     :files (:defaults "extensions/*")
@@ -290,9 +289,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :ensure nil
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word)
+	      ("RET" . vertico-directory-enter)
+	      ("DEL" . vertico-directory-delete-char)
+	      ("M-DEL" . vertico-directory-delete-word)
 	      ("<S-backspace>" . vertico-directory-delete-word))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
@@ -309,9 +308,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
   ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+  (setq completion-styles '(orderless) ;; basic
+	completion-category-defaults nil
+	completion-category-overrides '((file (styles partial-completion)))))
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -325,7 +324,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
   ;; Do not allow the cursor in the minibuffer prompt
   (setq minibuffer-prompt-properties
-        '(read-only t cursor-intangible t face minibuffer-prompt))
+	'(read-only t cursor-intangible t face minibuffer-prompt))
   (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
   ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
@@ -347,22 +346,23 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 #+begin_src emacs-lisp
 (use-package corfu
     :straight (
-               :files (:defaults "extensions/*")
-               :includes (corfu-history))
+	       :files (:defaults "extensions/*")
+	       :includes (corfu-history))
     :bind (:map corfu-map
-                ("TAB" . corfu-next)
-                ("C-n" . corfu-next)
-                ("<tab>" . corfu-next)
-                ("S-TAB" . corfu-previous)
-                ("C-p" . corfu-previous)
-                ("<backtab>" . corfu-previous)
-                ("RET"     . corfu-insert)
-                ("<return>"  . corfu-insert)
-                ;; ("<escape>" . corfu-reset)
-                ;; ("ESC"    . corfu-reset)
-                ;; ("SPC" . corfu-move-to-minibuffer)
-                ;; ("<space>" . corfu-move-to-minibuffer)
-                ([remap completion-at-point] . corfu-next))
+		("TAB" . corfu-next)
+		("C-n" . corfu-next)
+		("<tab>" . corfu-next)
+		("S-TAB" . corfu-previous)
+		("C-p" . corfu-previous)
+		("<backtab>" . corfu-previous)
+		("RET"     . corfu-insert)
+		("<return>"  . corfu-insert)
+		;; ("<escape>" . corfu-reset)
+		;; ("ESC"    . corfu-reset)
+		;; ("SPC" . corfu-move-to-minibuffer)
+		;; ("<space>" . corfu-move-to-minibuffer)
+		;; ([remap completion-at-point] . corfu-next)
+		)
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     (corfu-auto t)                 ;; Enable auto completion
@@ -375,24 +375,25 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (corfu-preview-current t)
     (corfu-preselect-first t)
     ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-    (corfu-echo-documentation nil) ;; Disable documentation in the echo area
+    ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
     (corfu-min-width 30)
     ;; hide scroll-bar
     (corfu-bar-width 0)
     (corfu-right-margin-width 0)
     (corfu-scroll-margin 5)        ;; Use scroll margin
-    :hook (after-init-hook . global-corfu-mode))
-
+    ;; :hook (after-init-hook . global-corfu-mode)
+    :init
+    (global-corfu-mode))
 
   ;; (unless (display-graphic-p)
   ;;   (use-package popon
   ;;     :straight (popon
-  ;; 	       :type git
-  ;; 	       :repo "https://codeberg.org/akib/emacs-popon.git"))
+  ;;	       :type git
+  ;;	       :repo "https://codeberg.org/akib/emacs-popon.git"))
   ;;   (use-package corfu-popup
   ;;     :straight (corfu-popup
-  ;; 	       :type git
-  ;; 	       :repo "https://codeberg.org/akib/emacs-corfu-popup.git")
+  ;;	       :type git
+  ;;	       :repo "https://codeberg.org/akib/emacs-corfu-popup.git")
   ;;     :init
   ;;     (corfu-popup-mode +1)))
 
@@ -410,38 +411,38 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     :config
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
     (setq kind-icon-mapping
-          '((array "a" :icon "code-brackets" :face font-lock-type-face)
-            (boolean "b" :icon "circle-half-full" :face font-lock-builtin-face)
-            (class "c" :icon "video-input-component" :face font-lock-type-face) ;
-            (color "#" :icon "palette" :face success) ;
-            (constant "co" :icon "square-circle" :face font-lock-constant-face) ;
-            (constructor "cn" :icon "cube-outline" :face font-lock-function-name-face) ;
-            (enum-member "em" :icon "format-align-right" :face font-lock-builtin-face) ;
-            (enum "e" :icon "server" :face font-lock-builtin-face) ;
-            (event "ev" :icon "zip-box-outline" :face font-lock-warning-face) ;
-            (field "fd" :icon "tag" :face font-lock-variable-name-face) ;
-            (file "f" :icon "file-document-outline" :face font-lock-string-face) ;
-            (folder "d" :icon "folder" :face font-lock-doc-face) ;
-            (interface "if" :icon "share-variant" :face font-lock-type-face) ;
-            (keyword "kw" :icon "image-filter-center-focus" :face font-lock-keyword-face) ;
-            (macro "mc" :icon "lambda" :face font-lock-keyword-face)
-            (method "m" :icon "cube-outline" :face font-lock-function-name-face) ;
-            (function "f" :icon "cube-outline" :face font-lock-function-name-face) ;
-            (module "{" :icon "view-module" :face font-lock-preprocessor-face) ;
-            (numeric "nu" :icon "numeric" :face font-lock-builtin-face)
-            (operator "op" :icon "plus-circle-outline" :face font-lock-comment-delimiter-face) ;
-            (param "pa" :icon "tag" :face default)
-            (property "pr" :icon "wrench" :face font-lock-variable-name-face) ;
-            (reference "rf" :icon "collections-bookmark" :face font-lock-variable-name-face) ;
-            (snippet "S" :icon "format-align-center" :face font-lock-string-face) ;
-            (string "s" :icon "sticker-text-outline" :face font-lock-string-face)
-            (struct "%" :icon "video-input-component" :face font-lock-variable-name-face) ;
-            (text "tx" :icon "format-text" :face shadow)
-            (type-parameter "tp" :icon "format-list-bulleted-type" :face font-lock-type-face)
-            (unit "u" :icon "ruler-square" :face shadow)
-            (value "v" :icon "format-align-right" :face font-lock-builtin-face) ;
-            (variable "va" :icon "tag" :face font-lock-variable-name-face)
-            (t "." :icon "file-find" :face shadow)))
+	  '((array "a" :icon "code-brackets" :face font-lock-type-face)
+	    (boolean "b" :icon "circle-half-full" :face font-lock-builtin-face)
+	    (class "c" :icon "video-input-component" :face font-lock-type-face) ;
+	    (color "#" :icon "palette" :face success) ;
+	    (constant "co" :icon "square-circle" :face font-lock-constant-face) ;
+	    (constructor "cn" :icon "cube-outline" :face font-lock-function-name-face) ;
+	    (enum-member "em" :icon "format-align-right" :face font-lock-builtin-face) ;
+	    (enum "e" :icon "server" :face font-lock-builtin-face) ;
+	    (event "ev" :icon "zip-box-outline" :face font-lock-warning-face) ;
+	    (field "fd" :icon "tag" :face font-lock-variable-name-face) ;
+	    (file "f" :icon "file-document-outline" :face font-lock-string-face) ;
+	    (folder "d" :icon "folder" :face font-lock-doc-face) ;
+	    (interface "if" :icon "share-variant" :face font-lock-type-face) ;
+	    (keyword "kw" :icon "image-filter-center-focus" :face font-lock-keyword-face) ;
+	    (macro "mc" :icon "lambda" :face font-lock-keyword-face)
+	    (method "m" :icon "cube-outline" :face font-lock-function-name-face) ;
+	    (function "f" :icon "cube-outline" :face font-lock-function-name-face) ;
+	    (module "{" :icon "view-module" :face font-lock-preprocessor-face) ;
+	    (numeric "nu" :icon "numeric" :face font-lock-builtin-face)
+	    (operator "op" :icon "plus-circle-outline" :face font-lock-comment-delimiter-face) ;
+	    (param "pa" :icon "tag" :face default)
+	    (property "pr" :icon "wrench" :face font-lock-variable-name-face) ;
+	    (reference "rf" :icon "collections-bookmark" :face font-lock-variable-name-face) ;
+	    (snippet "S" :icon "format-align-center" :face font-lock-string-face) ;
+	    (string "s" :icon "sticker-text-outline" :face font-lock-string-face)
+	    (struct "%" :icon "video-input-component" :face font-lock-variable-name-face) ;
+	    (text "tx" :icon "format-text" :face shadow)
+	    (type-parameter "tp" :icon "format-list-bulleted-type" :face font-lock-type-face)
+	    (unit "u" :icon "ruler-square" :face shadow)
+	    (value "v" :icon "format-align-right" :face font-lock-builtin-face) ;
+	    (variable "va" :icon "tag" :face font-lock-variable-name-face)
+	    (t "." :icon "file-find" :face shadow)))
     )
 
   ;; A few more useful configurations...
@@ -499,8 +500,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (add-to-list 'completion-at-point-functions #'cape-symbol)
     (add-to-list 'completion-at-point-functions #'cape-line)
     :hook ((prog-mode . my/set-basic-capf)
-           (org-mode . my/set-basic-capf)
-           ((lsp-completion-mode eglot-managed-mode) . my/set-lsp-capf))
+	   (org-mode . my/set-basic-capf)
+	   ((lsp-completion-mode eglot-managed-mode) . my/set-lsp-capf))
     :config
     (setq dabbrev-upcase-means-case-search t)
     (setq case-fold-search nil)
@@ -521,7 +522,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (defun corfu-move-to-minibuffer ()
     (interactive)
     (let ((completion-extra-properties corfu--extra)
-          completion-cycle-threshold completion-cycling)
+	  completion-cycle-threshold completion-cycling)
       (apply #'consult-completion-in-region completion-in-region--data)))
   (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
@@ -544,7 +545,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     ;; (tempel-trigger-prefix "<")
 
     :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-           ("M-*" . tempel-insert))
+	   ("M-*" . tempel-insert))
     :init
 
     ;; Setup completion at point
@@ -557,8 +558,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
       ;; `tempel-expand' *before* the main programming mode Capf, such
       ;; that it will be tried first.
       (setq-local completion-at-point-functions
-                  (cons #'tempel-expand
-                        completion-at-point-functions)))
+		  (cons #'tempel-expand
+			completion-at-point-functions)))
 
     (add-hook 'prog-mode-hook 'tempel-setup-capf)
     (add-hook 'text-mode-hook 'tempel-setup-capf)
@@ -582,9 +583,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      #'cape-file
      (cape-capf-buster
       (cape-super-capf
-       ;; #'tempel-expand 
-       #'tabnine-completion-at-point
+       ;; #'tempel-expand
        arg-capf
+       #'tabnine-completion-at-point
        )
       )
      ;; #'cape-dabbrev
