@@ -23,6 +23,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
       make-backup-files nil
       enable-local-eval t
       enable-local-variables :all
+      bookmark-default-file (expand-file-name "bookmarks" poly-cache-dir)
       save-silently t
       find-file-suppress-same-file-warnings t
       vc-follow-symlinks t
@@ -222,6 +223,119 @@ Don't show *Buffer list* when opening multiple files at the same time.
   (add-hook 'doom-modeline-mode-hook
 	    (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
   (doom-modeline-mode +1))
+#+end_src
+* treemacs
+#+begin_src emacs-lisp
+
+(use-package treemacs
+  :straight t
+  ;; :after hl-line-mode
+  :custom
+  (treemacs-collapse-dirs                 (if (executable-find "python") 3 0))
+  (treemacs-deferred-git-apply-delay      0.5)
+  (treemacs-display-in-side-window        t)
+  (treemacs-eldoc-display                 nil)
+  (treemacs-file-event-delay              5000)
+  (treemacs-file-follow-delay             0.2)
+  (treemacs-follow-after-init             t)
+  (treemacs-git-command-pipe              "")
+  (treemacs-git-integration                t)
+  (treemacs-goto-tag-strategy             'refetch-index)
+  (treemacs-indentation                   2)
+  (treemacs-indentation-string            " ")
+  (treemacs-is-never-other-window         t)
+  (treemacs-max-git-entries               5000)
+  (treemacs-no-png-images                 t)
+  (treemacs-no-delete-other-windows       t)
+  (treemacs-project-follow-cleanup        t)
+  (treemacs-persist-file                  (expand-file-name "/treemacs-persist" poly-cache-dir))
+  (treemacs-recenter-distance             0.1)
+  (treemacs-recenter-after-file-follow    nil)
+  (treemacs-recenter-after-tag-follow     nil)
+  (treemacs-recenter-after-project-jump   'always)
+  (treemacs-recenter-after-project-expand 'on-distance)
+  (treemacs--icon-size 12)
+  (treemacs-silent-refresh t)
+  (treemacs-follow-mode t)
+  (treemacs-show-cursor                   t)
+  (treemacs-show-hidden-files             t)
+  (treemacs-silent-filewatch              t)
+  (treemacs-sorting                       'alphabetic-desc)
+  (treemacs-space-between-root-nodes      t)
+  (treemacs-tag-follow-cleanup            t)
+  (treemacs-tag-follow-delay              1.5)
+  (treemacs-width                         28)
+  (doom-treemacs-use-generic-icons nil)
+  :defines winum-keymap
+  :commands (treemacs-follow-mode
+             treemacs-filewatch-mode
+             treemacs-fringe-indicator-mode
+             treemacs-git-mode)
+  :init
+  (with-eval-after-load 'winum
+    (bind-key (kbd "M-9") #'treemacs-select-window winum-keymap))
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-fringe-indicator-mode t)
+  (pcase (cons (not (null (executable-find "git")))
+	       (not (null (executable-find "python3"))))
+    (`(t . t)
+     (treemacs-git-mode 'deferred))
+    (`(t . _)
+     (treemacs-git-mode 'simple)))
+  (if (fboundp 'define-fringe-bitmap)
+      (define-fringe-bitmap 'treemacs--fringe-indicator-bitmap
+        (vector #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111
+                #b00000111111)))
+  :bind (([f8]        . treemacs)
+         ("C-`"       . treemacs-select-window)
+         ("M-0"       . treemacs-select-window)
+         ("C-x 1"     . treemacs-delete-other-windows)
+         ("C-x t 1"   . treemacs-delete-other-windows)
+         ("C-x t t"   . treemacs)
+         ("C-x t b"   . treemacs-bookmark)
+         ("C-x t C-t" . treemacs-find-file)
+         ("C-x t M-t" . treemacs-find-tag)
+	 :map treemacs-mode-map
+         ([mouse-1]   . treemacs-single-click-expand-action))
+  )
+
+(use-package treemacs-projectile
+  :straight t
+  :ensure t
+  :after (treemacs projectile)
+  :config
+  (setq treemacs-header-function #'treemacs-projectile-create-header))
+
+(use-package treemacs-magit
+  :straight t
+  :after (treemacs magit)
+  :ensure t)
 #+end_src
 * Completion for key sequence
 
@@ -815,4 +929,69 @@ don't pop windows everywhere!
     :commands rainbow-delimiters-mode
     :init
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+#+end_src
+
+
+
+* highlight indent & parentheses
+
+#+begin_src emacs-lisp
+(use-package highlight-indent-guides
+  :straight t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :delight highlight-indent-guides-mode
+  :init
+  (setq highlight-indent-guides-method 'character
+	highlight-indent-guides-auto-enabled nil
+        ;; default is \x2502 but it is very slow on Mac
+        highlight-indent-guides-character ?\xFFE8
+        highlight-indent-guides-responsive 'top)
+  ;; :config
+  ;; (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+  ;; (set-face-background 'highlight-indent-guides-even-face "dimgray")
+  ;; (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+  )
+
+(use-package display-fill-column-indicator
+  :if EMACS27+
+  :straight nil
+  :hook ((prog-mode . display-fill-column-indicator-mode)
+         (text-mode . display-fill-column-indicator-mode)))
+
+;; copied from +spacemacs/spacemacs-editing-visual
+(use-package highlight-parentheses
+  :straight t
+  :hook (prog-mode . highlight-parentheses-mode)
+  :init
+  (setq hl-paren-delay 0.2)
+  (setq hl-paren-colors
+	'("SpringGreen3" "IndianRed1" "IndianRed3" "IndianRed4"))
+  ;; :config
+  ;; (set-face-attribute 'hl-paren-face nil :weight 'bold)
+  ;; (custom-set-faces '(show-paren-match ((t (:foreground "SpringGreen1" :underline t)))))
+  )
+#+end_src
+
+* icon
+
+#+begin_src emacs-lisp
+(use-package all-the-icons
+  :straight t
+  :if (or IS-GUI (daemonp))
+  ;; :init
+  ;; (setq all-the-icons-scale-factor 0.8)
+  )
+
+(use-package all-the-icons-dired
+  :straight t
+  :if (or IS-GUI (daemonp))
+  :after (all-the-icons dired)
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package all-the-icons-ibuffer
+  :straight t
+  :if (or IS-GUI (daemonp))
+  :after (all-the-icons ibuffer)
+  :config
+  (all-the-icons-ibuffer-mode t))
 #+end_src

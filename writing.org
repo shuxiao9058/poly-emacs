@@ -1144,6 +1144,7 @@ Prefix arguments are interpreted by `org-refile'."
   ;; org-roam-graph-viewer "google-chrome-stable"
   (org-roam-completion-system 'default)
   (org-roam-completion-everywhere t)
+  (org-roam-db-location (expand-file-name "org-roam.db" poly-cache-dir))
   :config
   (setq org-roam-directory (expand-file-name "Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/" "~"))
   ;; For org-roam to update LAST_MODIFIED field

@@ -218,6 +218,7 @@
   ;; :after no-littering
   :hook (after-init . recentf-mode)
   :custom
+  (recentf-save-file (expand-file-name "recentf" poly-cache-dir))
   (recentf-max-saved-items 300)
   ;; disable recentf-cleanup on Emacs start, because it can cause
   (recentf-auto-cleanup 'never)

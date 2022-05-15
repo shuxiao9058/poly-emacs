@@ -1055,6 +1055,8 @@ Use Telega as Telegram client.
 
 (use-package savehist
   :straight t
+  :custom
+  (savehist-file (expand-file-name "history" poly-cache-dir))
   :config
   (savehist-mode 1))
 
