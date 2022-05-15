@@ -4,12 +4,12 @@
 ;; Ensure we have correct user-emacs-directory
 ;; The folder of meomacs can be placed anywhere, and started with
 ;;   emacs -q -l /path/to/meomacs/init.el
-(setq user-emacs-directory (file-name-directory (or load-file-name buffer-file-name)))
+(setq user-emacs-directory
+      (file-name-directory (or load-file-name buffer-file-name)))
 
 (defun poly/file-mod-time(file)
   (when (file-exists-p file)
-    (nth 5 (file-attributes file)))
-  )
+    (nth 5 (file-attributes file))))
 
 ;; Define configuration loader helper
 (defun poly-load-org-config (config-name &optional force-tangle)
@@ -41,10 +41,9 @@ If FORCE-TANGLE is non-nil, always tangle before load."
    (expand-file-name "private_template.org" user-emacs-directory)
    (expand-file-name "private.org" user-emacs-directory)))
 
-;; (setq warning-minimum-level :debug)
-;; (setq debug-on-error t)
-
-;; (setq stack-trace-on-error t)
+(setq warning-minimum-level :debug)
+(setq debug-on-error t)
+(setq stack-trace-on-error t)
 
 ;; core configurations
 (poly-load-org-config "core")

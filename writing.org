@@ -1045,15 +1045,15 @@ Prefix arguments are interpreted by `org-refile'."
 ;;   ;; for today and which have no time of day defined.
 ;;   (add-hook 'after-init-hook #'secretaria-unknown-time-always-remind-me))
 
-(use-package org-mru-clock
-  :straight t
-  :after (org org-clock)
-  :bind (("C-c C-x C-j" . org-clock-goto)
-         ("C-c C-x C-k" . org-mru-clock-in))
-  :custom
-  (org-mru-clock-how-many 100)
-  (org-mru-clock-keep-formatting t)
-  (org-mru-clock-predicate nil))
+;; (use-package org-mru-clock
+;;   :straight t
+;;   :after (org org-clock)
+;;   :bind (("C-c C-x C-j" . org-clock-goto)
+;;          ("C-c C-x C-k" . org-mru-clock-in))
+;;   :custom
+;;   (org-mru-clock-how-many 100)
+;;   (org-mru-clock-keep-formatting t)
+;;   (org-mru-clock-predicate nil))
 
 (defvar poly/previously-clocking '())
 

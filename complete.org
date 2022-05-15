@@ -94,10 +94,10 @@
 #+end_src
 
 
-* corfu
+** corfu
 
 #+begin_src emacs-lisp
-  (use-package corfu
+(use-package corfu
     :straight (
                :files (:defaults "extensions/*")
                :includes (corfu-history))
@@ -335,9 +335,9 @@
      #'cape-file
      (cape-capf-buster
       (cape-super-capf
-       #'tabnine-completion-at-point
        #'tempel-expand
        arg-capf
+       #'tabnine-completion-at-point
        )
       )
      ;; #'cape-dabbrev

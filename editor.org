@@ -13,241 +13,14 @@ Configuration for editor basics.
 Straight.el is used for package management.
 Bind some keys for quick operations.
 
-#+begin_src emacs-lisp
-  (defvar straight-keymap
-    (let ((keymap (make-keymap)))
-      (define-key keymap "c" 'straight-check-package)
-      (define-key keymap "C" 'straight-check-all)
-      (define-key keymap "p" 'straight-pull-package)
-      (define-key keymap "P" 'straight-pull-all)
-      (define-key keymap "b" 'straight-rebuild-package)
-      (define-key keymap "B" 'straight-rebuild-all)
-      keymap))
-
-  (defalias 'straight-keymap straight-keymap)
-  (global-set-key (kbd "C-c P") 'straight-keymap)
-#+end_src
-
 * Better defaults
 
-#+begin_src emacs-lisp
-  (setq-default
-
-   inhibit-startup-screen t
-   ;; Don't display comp warnings
-   warning-suppress-log-types '((comp))
-   ;; Don't create lockfiles
-   create-lockfiles nil
-
-   ;; prefer UTF8
-   buffer-file-coding-system 'utf-8-unix
-   default-file-name-coding-system 'utf-8-unix
-   default-keyboard-coding-system 'utf-8-unix
-   default-process-coding-system '(utf-8-unix . utf-8-unix)
-   default-sendmail-coding-system 'utf-8-unix
-   default-terminal-coding-system 'utf-8-unix
-
-   ;; Add newline at bottom of file
-   require-final-newline t
-
-   ;; Backup setups
-   ;; We use temporary directory /tmp for backup files
-   ;; More versions should be saved
-   backup-directory-alist `((".*" . ,temporary-file-directory))
-   auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
-   backup-by-copying t
-   delete-old-versions t
-   kept-new-versions 6
-   kept-old-versions 2
-   version-control t
-
-   ;; Skip prompt for xref find definition
-   xref-prompt-for-identifier nil
-
-   ;; Don't wait for keystrokes display
-   echo-keystrokes 0.01
-
-   ;; Disable margin for overline and underline
-   overline-margin 0
-   underline-minimum-offset 0
-
-   ;; Allow resizing frame by pixels
-   frame-resize-pixelwise t
-
-   ;; Better scroll behavior
-   mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
-   mouse-wheel-progressive-speed nil
-
-   ;; Disable copy region blink
-   copy-region-blink-delay 0
-
-   ;; Use short answer when asking yes or no
-   read-answer-short t
-
-   ;; Always follow link
-   vc-follow-symlinks t
-
-   ;; Use custom.el as custom file
-   custom-file (expand-file-name "custom.el" user-emacs-directory)
-
-   ;; Disable ring bell
-   ring-bell-function 'ignore
-
-   ;; Mouse yank at current point
-   mouse-yank-at-point t
-
-   ;; DWIM target for dired
-   ;; Automatically use another dired buffer as target for copy/rename
-   dired-dwim-target t
-
-   ;; Use spaces instead of tab
-   indent-tabs-mode nil
-
-   ;; Don't echo multiline eldoc
-   eldoc-echo-area-use-multiline-p nil)
-
-  (global-hl-line-mode t)
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
-#+end_src
-
-* Window management
-
-Switch window by pressing the number showned in the mode line.
-
-#+begin_src emacs-lisp
-  (straight-use-package '(window-numbering
-                          :repo "DogLooksGood/window-numbering.el"
-                          :host github
-                          :type git))
-
-
-  (require 'window-numbering)
-  (window-numbering-mode 1)
-
-  (defun meomacs-window-numbering-modeline ()
-    (concat " "
-            (let ((n (window-numbering-get-number)))
-              (if window-system
-                  (alist-get
-                   n
-                   '((0 . "⓪")
-                     (1 . "①")
-                     (2 . "②")
-                     (3 . "③")
-                     (4 . "④")
-                     (5 . "⑤")
-                     (6 . "⑥")
-                     (7 . "⑦")
-                     (8 . "⑧")
-                     (9 . "⑨")))
-                (number-to-string n)))))
-
-  (let ((modeline-segment '(:eval (meomacs-window-numbering-modeline))))
-    (unless (member modeline-segment mode-line-format)
-      (setq-default mode-line-format (cons modeline-segment mode-line-format))))
-#+end_src
-
-* Workspace management
-
-** Using frames
-
-Use frames for workspaces.
-
-#+begin_src emacs-lisp
-  (global-set-key (kbd "C-c j") 'select-frame-by-name)
-
-  ;; Better to have title name with project name
-  (setq-default frame-title-format
-                '((:eval
-                   (or (cdr (project-current))
-                       (buffer-name)))))
-#+end_src
-
-** COMMENT Using tab-bar-mode
-
-Use tabs for workspaces.
-
-#+begin_src emacs-lisp
-  (defun meomacs-format-tab (tab i)
-    (let ((current-p (eq (car tab) 'current-tab)))
-      (concat
-       (propertize (concat
-                    " "
-                    (alist-get 'name tab)
-                    " ")
-                   'face
-                   (funcall tab-bar-tab-face-function tab))
-       " ")))
-
-  (setq tab-bar-border nil
-        tab-bar-close-button nil
-        tab-bar-new-button (propertize " 🞤 " 'display '(:height 2.0))
-        tab-bar-back-button nil
-        tab-bar-tab-name-format-function 'meomacs-format-tab
-        tab-bar-tab-name-truncated-max 10)
-
-  (tab-bar-mode 1)
-
-  (global-set-key (kbd "C-c j") 'tab-bar-switch-to-tab)
-#+end_src
-
-Add missing keybindings
-
-#+begin_src emacs-lisp
-  (global-set-key (kbd "C-x t .") 'tab-bar-rename-tab)
-#+end_src
-
-* Auto pairs
-
-** Builtin electric pair
-
-#+begin_src emacs-lisp
-  (add-hook 'prog-mode-hook 'electric-pair-local-mode)
-  (add-hook 'conf-mode-hook 'electric-pair-local-mode)
-#+end_src
-
-** COMMENT Smartparens
-
-Use smartparens for auto pairs, toggle strict mode with =C-c t s=.
-
-#+begin_src emacs-lisp
-  (straight-use-package 'smartparens)
-
-  (require 'smartparens)
-
-  (add-hook 'prog-mode-hook 'smartparens-mode)
-  (add-hook 'conf-mode-hook 'smartparens-mode)
-
-  (setq sp-highlight-pair-overlay nil
-        sp-highlight-wrap-overlay nil)
-
-  (with-eval-after-load "smartparens"
-
-    ;; setup for emacs-lisp
-    (sp-with-modes '(emacs-lisp-mode)
-      (sp-local-pair "'" nil :actions nil))
-
-    ;; Use strict-mode by default
-    (add-hook 'smartparens-mode-hook 'smartparens-strict-mode)
-
-    ;; Keybindings
-    (define-key toggle-map "s" 'smartparens-strict-mode))
-#+end_src
 
 * Line numbers with display-line-numbers-mode
-
-#+begin_src emacs-lisp
-  (define-key toggle-map "l" 'display-line-numbers-mode)
-#+end_src
-
 
 * Completion for key sequence
 
 ** Which-key
-#+begin_src emacs-lisp
-(straight-use-package 'which-key)
-(which-key-mode 1)
-#+end_src
 
 * Minibuffer completion reading
 ** COMMENT Vertico & Orderless
@@ -255,114 +28,16 @@ Use smartparens for auto pairs, toggle strict mode with =C-c t s=.
 - Vertico provides a better UX for completion reading.
 - Orderless provides a completion style, which allows you to search with orderless segments.
 
-#+begin_src emacs-lisp
-  (straight-use-package 'vertico)
-  (straight-use-package 'orderless)
-
-  (require 'vertico)
-  (require 'orderless)
-
-  (vertico-mode 1)
-#+end_src
 
 Enable orderless for minibuffer completion.
 
-#+begin_src emacs-lisp
-  (defun meomacs--vertico-init-minibuffer ()
-    (setq-local completion-styles '(basic orderless)))
-
-  (add-hook 'minibuffer-setup-hook 'meomacs--vertico-init-minibuffer)
-#+end_src
-
-** Selectrum & Precient
-
-#+begin_src emacs-lisp
-  (straight-use-package 'selectrum)
-  (straight-use-package 'selectrum-prescient)
-
-  (selectrum-mode 1)
-  (selectrum-prescient-mode 1)
-  (prescient-persist-mode 1)
-#+end_src
-
-** Fix M-DEL in minibuffer
-
-Do "delete" instead of "kill" when pressing =M-DEL=.
-
-#+begin_src emacs-lisp
-  (defun meomacs-backward-delete-sexp ()
-    "Backward delete sexp.
-
-  Used in minibuffer, replace the the default kill behavior with M-DEL."
-    (interactive)
-    (save-restriction
-      (narrow-to-region (minibuffer-prompt-end) (point-max))
-      (delete-region
-       (save-mark-and-excursion
-         (backward-sexp)
-         (point))
-       (point))))
-
-  (define-key minibuffer-local-map (kbd "M-DEL") #'meomacs-backward-delete-sexp)
-#+end_src
-
 * Completion at point
-
-** Company
-
-#+begin_src emacs-lisp
-  (straight-use-package 'company)
-
-  (add-hook 'prog-mode-hook 'company-mode)
-  (add-hook 'conf-mode-hook 'company-mode)
-  (autoload 'company-mode "company" nil t)
-#+end_src
-
-A setup for vim-like behavior.  Completion will popup automatically, =SPC= and =RET= will do insertion even though the popup is available.
-
-| action                      | key |
-|-----------------------------+-----|
-| trigger completion at point | TAB |
-| previous candidate          | M-p |
-| next candidate              | M-n |
-| next template placeholder   | RET |
-
-#+begin_src emacs-lisp
-  (with-eval-after-load "company"
-    (require 'company-tng)
-
-    (add-hook 'company-mode-hook 'company-tng-mode)
-
-    (define-key company-mode-map (kbd "M-n") 'company-complete-common)
-
-    (define-key company-active-map (kbd "TAB") nil)
-    (define-key company-active-map [tab] nil)
-    (define-key company-active-map (kbd "C-n") nil)
-    (define-key company-active-map (kbd "C-p") nil)
-    (define-key company-active-map (kbd "M-n") 'company-select-next)
-    (define-key company-active-map (kbd "M-p") 'company-select-previous)
-
-    ;; Free SPC and RET, popup will no longer interrupt typing.
-    (define-key company-active-map [escape] nil)
-    (define-key company-active-map [return] nil)
-    (define-key company-active-map (kbd "RET") nil)
-    (define-key company-active-map (kbd "SPC") nil))
-#+end_src
 
 * Templating
 
 ** yasnippet
 
 Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=.
-
-#+begin_src emacs-lisp
-  (straight-use-package 'yasnippet)
-  (straight-use-package 'yasnippet-snippets)
-
-  (require 'yasnippet)
-
-  (yas-global-mode 1)
-#+end_src
 
 * Project management
 
@@ -371,57 +46,207 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
 To find files/buffers and apply commands on project, use builtin package ~project~.
 
 #+begin_src emacs-lisp
-  (when (version<= "28" emacs-version)
-    (setq project-switch-commands '((project-find-file "Find file")
-                                    (project-find-regexp "Find regexp")
-                                    (project-dired "Dired")
-                                    (project-eshell "Eshell")
-                                    (shell "Shell")
-                                    (magit "Magit")))
+(use-package project
+  :straight nil
+  :custom
+  (project-vc-ignores
+   '("vendor/" "*.elc" "*.a"
+     "tmp" "dist" "coverage"
+     ".idea" ".vscode"
+     ".ensime_cache" ".eunit"
+     ".git" ".hg" ".fslckout"
+     "_FOSSIL_" ".bzr" "_darcs"
+     ".tox" ".svn"
+     ".stack-work" ".ccls-cache" ".cache" ".clangd")
+   '(".log" ".vs" "node_modules")))
 
-    (defalias 'project-prefix-map project-prefix-map)
+(use-package ag
+  :straight t
+  :ensure t
+  :commands (ag ag-regexp ag-project)
+  :custom
+  (ag-highlight-search t)
+  (ag-reuse-buffers t)
+  (ag-reuse-window t))
 
-    (define-key mode-specific-map "p" 'project-prefix-map)
+(defcustom find-project-ignore-dir
+  '("/usr")
+  ""
+  :type 'list)
 
-    (with-eval-after-load "project"
-      (define-key project-prefix-map "s" 'shell)
-      (define-key project-prefix-map "m" 'magit)))
+
+(defun my/projectile-ignored-project-function(project-root)
+  (member t (mapcar
+             #'(lambda (dir)
+                 (string-prefix-p dir project-root)
+                 )
+             find-project-ignore-dir
+             )))
+
+
+(defun projectile-selection-at-point ()
+  (when (use-region-p)
+    (buffer-substring-no-properties (region-beginning) (region-end))))
+
+(defun projectile-deadgrep (search-term)
+  (interactive (list (deadgrep--read-search-term)))
+  (let ((deadgrep-project-root-function #'projectile-project-root))
+    (deadgrep search-term)))
+
+(use-package projectile
+  :straight t
+  :commands projectile-global-mode
+  :after rg
+  :delight '(:eval (format " [prj: %s]" (projectile-project-name)))
+  ;; :init
+  ;; (when (executable-find "rg")
+  ;;   (setq-default projectile-generic-command "rg --files --hidden"))
+  ;; :delight
+  :preface
+  :custom
+  (projectile-buffers-filter-function 'projectile-buffers-with-file-or-process)
+  (projectile-indexing-method 'hybrid)
+  (projectile-completion-system 'default)
+  (projectile-ignored-project-function #'my/projectile-ignored-project-function)
+  (projectile-enable-caching t)
+  (projectile-sort-order 'recently-active)
+  ;; (projectile-sort-order 'modification-time)
+  ;; (projectile-search-in-file-rg  (lambda () (projectile-dired) (projectile-commander)))
+  ;; (projectile-switch-project-action  (lambda () (projectile-dired) (projectile-commander)))
+  ;; :preface
+  ;; (defun projectile-rg ()
+  ;;   "Run ripgrep in projectile."
+  ;;   (interactive)
+  ;;   (counsel-rg "" (projectile-project-root))
+  ;;   )
+  :config
+  (defun poly/switch-project-action ()
+    (interactive)
+    (if (magit-git-dir)
+  (magit-status)
+      (projectile-find-file)))
+
+  (defun my/projectile-dynamic-change-index-method()
+    (when (projectile-project-p)
+      (if (eq (projectile-project-vcs) 'none)
+          (setq projectile-indexing-method 'native)
+  (setq projectile-indexing-method 'hybrid))))
+
+  (add-hook 'find-file-hook #'my/projectile-dynamic-change-index-method)
+  (add-hook 'dired-mode-hook #'my/projectile-dynamic-change-index-method)
+
+  (defun reload-dir-locals-for-project ()
+    "For every buffer with the same `projectile-project-root' as the
+current buffer's, reload dir-locals."
+    (interactive)
+    (dolist (buffer (projectile-project-buffer-names))
+      (with-current-buffer buffer
+  (reload-dir-locals-for-curent-buffer))))
+
+
+  ;; `ibuffer-projectile'
+  (add-hook 'ibuffer-hook
+      (lambda ()
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+    (ibuffer-do-sort-by-alphabetic))))
+
+  (my/projectile-ignored-project-function "/usr/bin")
+  (my/projectile-ignored-project-function "vendor")
+
+  ;; (setq projectile-switch-project-action #'poly/switch-project-action)
+
+  (defun my/projectile-custom-switch-action()
+    (my/projectile-dynamic-change-index-method)
+    (projectile-find-file))
+
+  (setq projectile-switch-project-action #'my/projectile-custom-switch-action)
+
+  (setq projectile-cache-file (expand-file-name "projectile.cache" poly-cache-dir)
+  projectile-known-projects-file (concat poly-cache-dir "projectile-bookmarks.eld"))
+  (setq projectile-globally-ignored-directories 
+            '(".idea"
+              ".ensime_cache"
+              ".eunit"
+              ".extension"
+              ".git"
+              ".hg"
+              ".fslckout"
+              "_FOSSIL_"
+              ".bzr"
+              ".vagrant"
+              "_darcs"
+              "archive-contents"
+              "cache"
+              "target"
+              "coverage"
+              ".tox"
+              ".settings"
+              ".svn"
+              ".github"
+              ".metals"
+              ".bloop"
+              ".ccls-cache"
+              ".stack-work"
+              "doc"
+              "docs"
+              "elpa"
+              "log"
+              "logs"
+              "node_modules"
+              "sorbet"
+              "straight"
+              "tmp"
+              "vendor/assets")
+        projectile-globally-ignored-file-suffixes '("*.pyc" "*.class" "*.project" "*.jar")
+  projectile-globally-ignored-files '("TAGS" "*.log"))
+  ;; Use the faster searcher to handle project files: ripgrep `rg'.
+  (when (and (not (executable-find "fd"))
+             (executable-find "rg"))
+    (setq projectile-generic-command
+          (let ((rg-cmd ""))
+            (dolist (dir projectile-globally-ignored-directories)
+        (setq rg-cmd (format "%s --glob '!%s'" rg-cmd dir)))
+            (dolist (extfs projectile-globally-ignored-file-suffixes)
+        (setq rg-cmd (format "%s -g '!%s'" rg-cmd extfs)))
+            (concat "rg -0 --files --color=never --hidden" rg-cmd))))
+  (projectile-global-mode)
+  :bind (
+   :map projectile-command-map
+   ("s s" . projectile-deadgrep)))
+
+(defun poly/find-file()
+  "my find file"
+  (interactive)
+  (if (and (bound-and-true-p projectile-mode) (not (eq (projectile-project-vcs) 'none)))
+      (projectile-find-file)
+    (call-interactively #'find-file)
+    ))
+
+(defun my-filter-buffer(buffers)
+  (cl-remove-if
+   (lambda (b)
+     (let ((buf-name (buffer-file-name b)))
+       (if buf-name
+     (string-match-p (buffer-file-name b) "\\`\\*")
+   t))) buffers))
+
+(defun poly/switch-to-buffer()
+  "my find file"
+  (interactive)
+  (if (and (bound-and-true-p projectile-mode) (not (eq (projectile-project-vcs) 'none)))
+      (let ((projectile-buffers-filter-function #'projectile-buffers-with-file))
+  (projectile-switch-to-buffer))
+    (call-interactively #'switch-to-buffer)
+    ))
 #+end_src
 
 * Enanced completion commands
 
 ** consult
 
-#+begin_src emacs-lisp
-  (straight-use-package 'consult)
-
-  (require 'consult)
-
-  (define-key mode-specific-map "q" 'consult-ripgrep)
-#+end_src
-
 * Text searching
 
 ** COMMENT deadgrep
 
-#+begin_src emacs-lisp
-  (straight-use-package 'deadgrep)
-
-  (require 'deadgrep)
-
-  (define-key project-prefix-map "r" 'deadgrep)
-#+end_src
-
 ** rg.el
-
-#+begin_src emacs-lisp
-  (straight-use-package 'rg)
-
-  (autoload 'rg-project "wgrep" nil t)
-  (autoload 'rg-project "rg" nil t)
-
-  (with-eval-after-load "wgrep"
-    (define-key wgrep-mode-map (kbd "C-c C-c") #'wgrep-finish-edit))
-
-  (define-key project-prefix-map "r" 'rg-project)
-#+end_src
