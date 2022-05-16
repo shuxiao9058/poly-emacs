@@ -269,19 +269,16 @@ If INTERACTIVE, prompt user for details."
   ;; (eglot-events-buffer-size 500000)
   (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
-  (eglot-ignored-server-capabilites
-   '(:documentHighlightProvider
-     :signatureHelpProvider
-     :hoverProvider))
+  ;; (eglot-ignored-server-capabilites
+  ;;  '(:documentHighlightProvider
+  ;;    :signatureHelpProvider
+  ;;    :hoverProvider))
   ;; NOTE We disable eglot-auto-display-help-buffer because :select t in
   ;; its popup rule causes eglot to steal focus too often.
   (eglot-auto-display-help-buffer nil)
-
   :functions eglot--eclipse-jdt-contact
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
-
-  ;; )
   ;; emmylua
   (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
     (add-to-list 'eglot-server-programs
@@ -372,6 +369,9 @@ If INTERACTIVE, prompt user for details."
   ;; )
   :bind (:map eglot-mode-map
 	      ("C-c C-r" . poly/eglot-rename)
+	      ("C-c o" . eglot-code-action-organize-imports)
+	      ("C-c h" . eldoc)
+	      ("<f6>" . xref-find-definitions)
 	      ("C-c C-a" . eglot-code-actions)
 	      ("C-c C-f" . eglot-format-buffer))
   )

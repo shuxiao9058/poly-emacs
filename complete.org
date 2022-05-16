@@ -368,7 +368,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (corfu-auto t)                 ;; Enable auto completion
     (corfu-count 10) ;; Max # of candidates to show
     (corfu-commit-predicate nil)
-    (corfu-auto-delay 0.4)
+    (corfu-auto-delay 0.5)
     (corfu-auto-prefix 2)
     (corfu-quit-at-boundary nil)
     (corfu-separator ?\s)          ;; Orderless field separator
@@ -593,7 +593,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      (cape-capf-buster
       (cape-super-capf
        ;; #'tempel-expand
-       ;; #'tabnine-completion-at-point
+       #'tabnine-completion-at-point
        arg-capf
        )
       )
