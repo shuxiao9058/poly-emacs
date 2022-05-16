@@ -98,7 +98,7 @@ Create a command ~meomacs-next-theme~ at =C-c t t= to switch themes.
 #+begin_src emacs-lisp
 ;;   (require 'subr-x)
 ;;   (require 'cl-lib)
-;; 
+;;
 ;;   (defvar meomacs-themes '()
 ;;     "Themes to use.")
 
@@ -122,19 +122,3 @@ Create a command ~meomacs-next-theme~ at =C-c t t= to switch themes.
 #+end_src
 
 * Modeline
-
-** Use variable font
-
-#+begin_src emacs-lisp
-;;   (custom-set-faces
-;;    '(mode-line ((t :inherit variable-pitch)))
-;;    '(mode-line-inactive ((t :inherit variable-pitch))))
-#+end_src
-
-** COMMENT mood-line
-#+begin_src emacs-lisp
-  (straight-use-package 'mood-line)
-
-  (require 'mood-line)
-  (mood-line-mode 1)
-#+end_src

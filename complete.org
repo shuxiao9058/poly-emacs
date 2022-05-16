@@ -366,17 +366,23 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     (corfu-auto t)                 ;; Enable auto completion
+    (corfu-count 10) ;; Max # of candidates to show
     (corfu-commit-predicate nil)
     (corfu-auto-delay 0.4)
-    (corfu-auto-prefix 1)
+    (corfu-auto-prefix 2)
     (corfu-quit-at-boundary nil)
     (corfu-separator ?\s)          ;; Orderless field separator
     (corfu-quit-no-match t)
-    (corfu-preview-current t)
+    ;; (corfu-preview-current t)
+    (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
+    (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
+    (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
     (corfu-preselect-first t)
     ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
     ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
+    ;; (corfu-echo-documentation '(1.0 . 0.2))
     (corfu-min-width 30)
+    ;; (corfu-min-width 99)
     ;; hide scroll-bar
     (corfu-bar-width 0)
     (corfu-right-margin-width 0)
@@ -580,14 +586,14 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
   (defun my/convert-super-capf (arg-capf)
     (list
-     #'cape-file
+     ;; #'cape-file
      ;; #'cape-dabbrev
-     #'cape-keyword
-     #'cape-symbol
+     ;; #'cape-keyword
+     ;; #'cape-symbol
      (cape-capf-buster
       (cape-super-capf
        ;; #'tempel-expand
-       #'tabnine-completion-at-point
+       ;; #'tabnine-completion-at-point
        arg-capf
        )
       )
