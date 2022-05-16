@@ -580,8 +580,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     :after cape
     :straight (:host github :repo "50ways2sayhard/tabnine-capf" :files ("*.el" "*.sh"))
     :hook (kill-emacs . tabnine-capf-kill-process)
-    :config
-    (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point))
+    ;; :config
+    ;; (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point)
+    )
 
   ;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
   (defun my/convert-super-capf (arg-capf)

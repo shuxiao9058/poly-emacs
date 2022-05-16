@@ -266,8 +266,8 @@ If INTERACTIVE, prompt user for details."
   (eglot-connect-timeout 40)
   (eglot-send-changes-idle-time 0.5)
   (eglot-confirm-server-initiated-edits nil)
-  ;; (eglot-events-buffer-size 500000)
-  (eglot-events-buffer-size 0)
+  (eglot-events-buffer-size 500000)
+  ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
   ;; (eglot-ignored-server-capabilites
   ;;  '(:documentHighlightProvider
@@ -296,8 +296,8 @@ If INTERACTIVE, prompt user for details."
   (when (executable-find "ccls")
     (add-to-list 'eglot-server-programs '((c-mode c++-mode) "ccls"
 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
-  (when (executable-find "gopls")
-    (add-to-list 'eglot-server-programs '(go-mode . ("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log"))))
+  ;; (when (executable-find "gopls")
+  ;;   (add-to-list 'eglot-server-programs '(go-mode . ("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log"))))
 
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
@@ -420,6 +420,45 @@ If INTERACTIVE, prompt user for details."
 #+end_src
 
 
+** yas parameter complete in place required
+
+#+begin_src emacs-lisp
+(use-package yasnippet-snippets
+  :straight t
+  :ensure t
+  :config
+  (add-to-list 'yas-snippet-dirs
+	       (expand-file-name "snippets" poly-cache-dir) t))
+
+(use-package yasnippet
+  :straight t
+  :ensure t
+  :diminish yas-global-mode
+  :commands yas-global-mode
+  :hook (after-init . yas-global-mode)
+  ;; :hook ((typescript-mode . yas-minor-mode)
+  ;;        (sh-mode . yas-minor-mode)
+  ;;        (c-mode . yas-minor-mode)
+  ;;        (c++-mode . yas-minor-mode)
+  ;;        (go-mode . yas-minor-mode)
+  ;;        (json-mode . yas-minor-mode)
+  ;;        (yaml-mode . yas-minor-mode)
+  ;;        (web-mode . yas-minor-mode)
+  ;;        (js2-mode . yas-minor-mode)
+  ;; 	 (lua-mode . yas-minor-mode))
+  :after (yasnippet-snippets)
+  :config
+  ;; (message "config yasnippet")
+  (yas-reload-all))
+
+(use-package java-snippets
+  :straight t
+  :defer t
+  :after yasnippet)
+
+(use-package javadoc-lookup
+  :straight t)
+#+end_src
 * Languages
 ** Go Language
 #+begin_src emacs-lisp
