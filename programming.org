@@ -284,7 +284,7 @@ If INTERACTIVE, prompt user for details."
 		  (:usePlaceholders t
 				    :completeUnimported  t
 				    :experimentalWorkspaceModule t
-				    ;; :experimentalDiagnosticsDelay "800ms"
+				    :experimentalDiagnosticsDelay "800ms"
 				    ))))
   ;; emmylua
   (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
@@ -344,7 +344,7 @@ If INTERACTIVE, prompt user for details."
   ;;				       ))
   ;; )
   :bind (:map eglot-mode-map
-	      ("C-c C-r" . eglot-rename)
+	      ("C-c C-r" . poly/eglot-rename)
 	      ("C-c C-a" . eglot-code-actions)
 	      ("C-c C-f" . eglot-format-buffer))
   )
@@ -364,6 +364,26 @@ If INTERACTIVE, prompt user for details."
   (let ((tmp-symbol (intern (concat "capf/" (symbol-name major-mode)))))
     (unless (null (symbol-function tmp-symbol))
       (funcall (symbol-function tmp-symbol)))))
+#+end_src
+
+*** eglot-rename with symbol  in place
+
+#+begin_src emacs-lisp
+(defun poly/eglot-rename (newname)
+  "Rename the current symbol to NEWNAME."
+  (interactive
+   (list (read-from-minibuffer
+          (format "Rename `%s' to: " (or (thing-at-point 'symbol t)
+                                         "unknown symbol"))
+          (or (thing-at-point 'symbol t) "") nil nil nil
+          (symbol-name (symbol-at-point)))))
+  (unless (eglot--server-capable :renameProvider)
+    (eglot--error "Server can't rename!"))
+  (eglot--apply-workspace-edit
+   (jsonrpc-request (eglot--current-server-or-lose)
+                    :textDocument/rename `(,@(eglot--TextDocumentPositionParams)
+                                           :newName ,newname))
+   current-prefix-arg))
 #+end_src
 
 *** Key Binding

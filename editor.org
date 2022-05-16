@@ -25,6 +25,9 @@ This is consulted on every `require', `load' and various path/io functions.  You
       enable-local-variables :all
       bookmark-default-file (expand-file-name "bookmarks" poly-cache-dir)
       prescient-save-file (expand-file-name "prescient-save.el" poly-cache-dir)
+      ;; auto-save-default nil
+      ;; auto-save-list-file-prefix nil
+      auto-save-list-file-prefix (expand-file-name "auto-save-list/save-" poly-cache-dir)
       save-silently t
       find-file-suppress-same-file-warnings t
       vc-follow-symlinks t
