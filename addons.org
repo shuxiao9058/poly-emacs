@@ -1063,3 +1063,25 @@ Use Telega as Telegram client.
 (use-package docker-compose-mode
   :straight t)
 #+end_src
+
+* activity-watch
+#+begin_src emacs-lisp
+(use-package activity-watch-mode
+    :straight t
+    :demand
+    :config
+    (global-activity-watch-mode))
+#+end_src
+* wakatime
+#+begin_src emacs-lisp
+(use-package wakatime-mode
+    :straight t
+    :init
+    (setq +wakatime-hide-filenames t)
+    (when IS-MAC
+      (setq wakatime-cli-path "/usr/local/bin/wakatime"))
+    :hook ((org-mode . wakatime-mode)
+           (prog-mode . wakatime-mode))
+    :config
+    (global-wakatime-mode +1))
+#+end_src

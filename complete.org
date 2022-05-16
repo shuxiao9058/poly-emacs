@@ -581,7 +581,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (defun my/convert-super-capf (arg-capf)
     (list
      #'cape-file
-     #'cape-dabbrev
+     ;; #'cape-dabbrev
      #'cape-keyword
      #'cape-symbol
      (cape-capf-buster
