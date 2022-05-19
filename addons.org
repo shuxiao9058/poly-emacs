@@ -1022,7 +1022,7 @@ Use Telega as Telegram client.
 
   (setq direnv-always-show-summary nil)
 
-  (define-key toggle-map "e" 'direnv-mode)
+;;  (define-key toggle-map "e" 'direnv-mode)
 
   (autoload 'direnv-mode "direnv" nil t)
 #+end_src

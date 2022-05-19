@@ -130,11 +130,12 @@ You may want to set this to window's border color.")
    ;; Meow
    `(meow-keypad-indicator          ((t (:foreground "black" :background ,red))))
    `(meow-insert-indicator          ((t (:foreground "black" :background ,green))))
+   ;; `(meow-normal-indicator          ((t (:foreground "black" :background ,yellow))))
    `(meow-normal-indicator          ((t (:foreground "black" :background ,yellow))))
    `(meow-motion-indicator          ((t (:foreground "black" :background ,blue))))
    `(meow-beacon-indicator          ((t (:foreground "black" :background ,purple))))
    `(meow-keypad-cursor             ((t ())))
-   `(meow-insert-cursor             ((t ())))
+   `(meow-insert-cursor             ((t (:background ,green))))
    `(meow-normal-cursor             ((t ())))
    `(meow-motion-cursor             ((t ())))
 
@@ -271,10 +272,13 @@ You may want to set this to window's border color.")
    `(font-lock-variable-name-face ((t (:foreground "#50fa7b"))))
    `(highlight-indentation-face ((t (:inherit default :foreground "#878787"))))
    ;; `(hl-line ((t (:background "DodgerBlue4"))))
+
+   `(mode-line ((t (:foreground ,purple :background ,red))))
+   ;; `(mode-line-inactive ((t (:family "Noto Sans" :height 100))))
    )
   )
 
-;; (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
+;; (set-face-attribute 'mode-line nil :inherit 'mode-line)
 ;; (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
 
 (and load-file-name

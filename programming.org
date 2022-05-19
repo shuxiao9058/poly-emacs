@@ -12,7 +12,7 @@ Configuration for programming and languages support.
 
 (use-package format-all
   ;; :straight t
-  :straight (:host github :repo "shuxiao9058/emacs-format-all-the-code")
+  :straight (:host github :repo "lassik/emacs-format-all-the-code")
   :ensure t
   :hook ((
 	  fish-mode
@@ -266,8 +266,8 @@ If INTERACTIVE, prompt user for details."
   (eglot-connect-timeout 40)
   (eglot-send-changes-idle-time 0.5)
   (eglot-confirm-server-initiated-edits nil)
-  (eglot-events-buffer-size 500000)
-  ;; (eglot-events-buffer-size 0)
+  ;; (eglot-events-buffer-size 500000)
+  (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
   ;; (eglot-ignored-server-capabilites
   ;;  '(:documentHighlightProvider
@@ -416,7 +416,7 @@ If INTERACTIVE, prompt user for details."
 *** Key Binding
 
 #+begin_src emacs-lisp
-  (define-key toggle-map "L" 'eglot)
+;;  (define-key toggle-map "L" 'eglot)
 #+end_src
 
 

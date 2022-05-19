@@ -99,7 +99,7 @@
 (when (fboundp 'winner-mode)
   (winner-mode 1))
 
-  (setq mode-line-compact t)
+  (setq mode-line-compact 'long)
 #+end_src
 
 **  since emacs 28
@@ -129,4 +129,82 @@
                               (width . 95)
                               (undecorated . t) ;; remove title bar
                               ))
+#+end_src
+
+** Font
+
+#+begin_src emacs-lisp
+(setq +font-family "Roboto Mono")
+
+(setq +ufont-family "Sarasa Mono SC")
+;; (defvar +ufont-family "PingFang SC") ;; chinese font
+(setq +fixed-pitch-family "Sarasa Mono SC")
+(setq +variable-pitch-family "Sarasa Mono SC")
+
+(defun poly/font-exist-p (fontname)
+  "test if this font is exist or not."
+  (when (and fontname (not (string= fontname "")))
+    (when (x-list-fonts fontname) t)))
+
+(setq english-font-size 12)
+(setq chinese-font-size 14)
+
+(defun +load-font (&optional frame)
+  (interactive)
+  (setq english-fonts `(,+font-family))
+  (setq chinese-fonts `(,+ufont-family))
+  (set-face-attribute 'default nil
+		      ;; (format "%s-%d" (car english-fonts) 12)
+                      :font (format "%s:pixelsize=%d" (car english-fonts) english-font-size) ;; 11 13 17 19 23
+		      )
+  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+    (set-fontset-font  nil ;; (frame-parameter nil 'font)
+		       charset
+		       (font-spec :family +ufont-family
+				  ;; (car chinese-fonts)
+				  :size chinese-font-size))) ;; 14 16 20 22 28
+  (set-face-attribute 'variable-pitch nil :font (format "%s-%d" +ufont-family chinese-font-size))
+  (set-face-attribute 'fixed-pitch nil :font (format "%s-%d" +ufont-family chinese-font-size))
+
+  ;; (setq face-font-rescale-alist `((,+ufont-family . 1.2)))
+  ;; (setq face-font-rescale-alist `((,+ufont-family . 1.24)))
+
+  ;; emoji
+  (when IS-MAC
+    (if (version< "27.0" emacs-version)
+	(set-fontset-font "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
+      (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size 13) nil 'prepend)))
+
+  ;; (let* ((font-spec (format "%s-%d" +font-family +font-size))
+  ;;        (variable-pitch-font-spec (format "%s-%d" +variable-pitch-family +font-size))
+  ;;        (fixed-pitch-font-spec (format "%s-%d" +fixed-pitch-family +font-size)))
+  ;;   (set-fontset-font nil nil (font-spec :family +font-family
+  ;;           :size +font-size
+  ;;           :width 'normal
+  ;;           ) frame)
+  ;;   ;; (set-frame-font font-spec frame)
+  ;;   (set-face-attribute 'variable-pitch nil :font variable-pitch-font-spec)
+  ;;   (set-face-attribute 'fixed-pitch nil :font fixed-pitch-font-spec))
+  ;; (+load-ext-font)
+  )
+
+(when IS-GUI
+  (+load-font nil))
+
+(add-hook 'after-init-hook
+	  (lambda ()
+	    (when IS-GUI
+	      (+load-font nil))))
+
+;; (add-hook 'telega-root-mode-hook '+load-font)
+(add-hook 'after-init-hook
+	  (lambda ()
+	    (when IS-GUI
+	      (+load-font nil))))
+#+end_src
+
+** ligatures
+#+begin_src emacs-lisp
+(when (fboundp 'mac-auto-operator-composition-mode)
+  (mac-auto-operator-composition-mode t))
 #+end_src

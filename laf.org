@@ -96,29 +96,6 @@ Font families are specified in [[file:private.org::Fonts][private]] config.
 Create a command ~meomacs-next-theme~ at =C-c t t= to switch themes.
 
 #+begin_src emacs-lisp
-;;   (require 'subr-x)
-;;   (require 'cl-lib)
-;;
-;;   (defvar meomacs-themes '()
-;;     "Themes to use.")
-
-;;   (defun meomacs-load-theme ()
-;;     (when-let ((theme (car meomacs-themes)))
-;;       (message "Load theme: %s" (car meomacs-themes))
-;;       (mapc 'disable-theme custom-enabled-themes)
-;;       (load-theme theme t)
-;;       ;; (meomacs-load-face-font)
-;;       ))
-
-;;   (defun meomacs-next-theme ()
-;;     (interactive)
-;;     (when meomacs-themes
-;;       (setq meomacs-themes (append (cdr meomacs-themes) (list (car meomacs-themes))))
-;;       (meomacs-load-theme)))
-
-;;   (define-key toggle-map "t" 'meomacs-next-theme)
-
-;;   (add-hook 'desktop-after-read-hook 'meomacs-load-theme)
 #+end_src
 
 * Modeline

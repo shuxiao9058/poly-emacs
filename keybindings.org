@@ -287,14 +287,13 @@ Key bindings are defined in [[file:private.org::#Modal Editing Key Binding][priv
     (meow-setup-indicator)
 
   ;; custom indicator
-(when window-system
+(when IS-GUI
   (setq meow-replace-state-name-list
         '((normal . "🅝")
           (beacon . "🅑")
           (insert . "🅘")
           (motion . "🅜")
           (keypad . "🅚"))))
-
     ;; (unbind-key (kbd "<escape>") meow-leader-keymap) ;; disable meow-temp-normal
     )
 #+end_src

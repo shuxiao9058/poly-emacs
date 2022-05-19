@@ -9,13 +9,13 @@ Private configuration.
 * User custom keymaps                                              :required:
 
 #+begin_src emacs-lisp
-  (defvar toggle-map (make-keymap))
-  (defalias 'toggle-map toggle-map)
+ ;;  (defvar toggle-map (make-keymap))
+ ;; (defalias 'toggle-map toggle-map)
 
   (defvar addon-map (make-keymap))
   (defalias 'addon-map addon-map)
 
-  (define-key mode-specific-map "t" toggle-map)
+ ;;  (define-key mode-specific-map "t" toggle-map)
   (define-key mode-specific-map "a" addon-map)
 #+end_src
 
