@@ -1101,6 +1101,7 @@ Use Telega as Telegram client.
   :custom
   (vterm-max-scrollback 10000)
   (vterm-ignore-blink-cursor nil)
+  (vterm-always-compile-module t)
   :init
   (setq vterm-shell "zsh")
   (defun ds/vterm-send-C-x ()
@@ -1109,6 +1110,9 @@ Use Telega as Telegram client.
   (defun ds/vterm-send-C-z ()
     (interactive)
     (vterm-send "C-z"))
+  (when noninteractive
+    (advice-add #'vterm-module-compile :override #'ignore)
+    (provide 'vterm-module))
   :bind (:map vterm-mode-map
               ("C-c t" . 'vterm-copy-mode)
               ("C-x C-x" . 'ds/vterm-send-C-x)
@@ -1152,6 +1156,8 @@ Use Telega as Telegram client.
   ;;   (vterm-send-key "k" nil nil t))
   (add-hook 'vterm-mode-hook
             (lambda ()
+	      (setq confirm-kill-processes nil)
+	      (setq hscroll-margin 0)
               (set (make-local-variable 'buffer-face-mode-face) 'fixed-pitch)
               (buffer-face-mode t)))
   (defun ds/vterm (&optional name)
@@ -1161,6 +1167,8 @@ Use Telega as Telegram client.
             (switch-to-buffer name)
           (vterm name))
       (vterm)))
+  (setq vterm-kill-buffer-on-exit t)
+  (setq vterm-max-scrollback 6000)
   )
 
 (use-package vterm-toggle

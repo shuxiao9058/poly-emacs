@@ -608,6 +608,28 @@ current buffer's, reload dir-locals."
 ** COMMENT deadgrep
 
 ** rg.el
+
+#+begin_src emacs-lisp
+(use-package rg
+  :straight t
+  ;; :hook (rg-mode . wgrep-ag-setup)
+  :custom
+  (rg-custom-type-aliases
+   '(("clojure" . "*.clj *.cljs *.cljc *.cljx *.edn")))
+  (rg-group-result t)
+  (rg-show-columns t)
+  (rg-ignore-case 'smart)
+  (rg-show-header t)
+  :config
+  (rg-enable-default-bindings)
+  ;; (rg-define-search bl/rg-regexp-project
+  ;;   :query ask
+  ;;   :format regexp
+  ;;   :files current
+  ;;   :dir project
+  ;;   :confirm never)
+  )
+#+end_src
 * tab-bar
 
 Tab bar represents a named persistent window configuration.
