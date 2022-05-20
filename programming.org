@@ -693,29 +693,58 @@ If INTERACTIVE, prompt user for details."
 Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
-#+end_src
+(use-package clojure-mode
+    :straight t
+    :commands (clojurescript-mode)
+    ;; :config
+    ;; (add-hook 'clojure-mode-hook 'paredit-mode)
+    )
 
-** Fix clojure syntax highlighting
+(use-package clojure-mode-extra-font-locking
+    :straight t
+    :ensure t
+    :after clojure-mode)
 
-#+begin_src emacs-lisp
-
+;; (use-package flycheck-clojure
+;;     :straight t
+;;     :ensure t
+;;     :commands clojure-mode
+;;     ;; :config
+;;     ;; (flycheck-clojure-setup)
+;;     )
 #+end_src
 
 ** Cider for REPL connection
 
 #+begin_src emacs-lisp
-
+(use-package cider
+    :straight t
+    :ensure t
+    :commands cider-mode
+    :custom
+    (cider-print-fn 'zprint)
+    :hook (cider-repl-mode . paredit-mode)
+    :config
+    (setq nrepl-popup-stacktraces nil)
+    ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+    ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+    ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)
+    )
 #+end_src
 
 ** Linting with flycheck-clj-kondo
 
 #+begin_src emacs-lisp
+(use-package flycheck-clj-kondo
+    :straight t
+    :ensure t
+    :commands clojure-mode
+    :hook (clojure-mode . flycheck-mode)
+    ;; :config
+    ;; (flycheck-clojure-setup)
+    )
 #+end_src
 
-** Format code with zprint
-
-#+begin_src emacs-lisp
-#+end_src
 
 * Rust
 ** rust-mode
@@ -727,7 +756,152 @@ Use clojure-mode for basic syntax support.
 #+begin_src emacs-lisp
 #+end_src
 
-* HTML
+* WEB
+** vue
+#+begin_src emacs-lisp
+(use-package vue-mode
+  :straight t
+  :commands (vue-mode)
+  :mode "\\.vue"
+  ;; :config
+  ;; (set-face-background 'mmm-default-submode-face nil)
+  )
+#+end_src
+** web-mode
+#+begin_src emacs-lisp
+
+
+;; 设置缩进级别空格数
+(defvar-local my/web-mode-offset 2)
+
+(defun my/current-buffer-suffix()
+  "Return suffix of current buffer."
+  (nth 0 (cdr (split-string (buffer-name) "\\."))))
+
+(use-package web-mode
+  :straight t
+  :hook
+  (web-mode . (lambda()
+		(if (string= (my/current-buffer-suffix) "vue")
+		    (setq web-mode-style-padding 0
+			  web-mode-script-padding 0))
+
+		;; 设置缩进级别
+		(setq web-mode-markup-indent-offset my/web-mode-offset)
+		(setq web-mode-css-indent-offset my/web-mode-offset)
+		(setq web-mode-code-indent-offset my/web-mode-offset)
+		(setq web-mode-attr-indent-offset my/web-mode-offset)))
+  :mode (("\\.js\\'" . web-mode)
+	 ("\\.jsx\\'" . web-mode)
+	 ("\\.vue\\'" . web-mode)
+	 ("\\.jinja\\'" . web-mode)
+	 ("\\.ts\\'" . web-mode)
+	 ("\\.tsx\\'" . web-mode)
+	 ("\\.html$" . web-mode))
+  :custom
+  (web-mode-markup-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-block-padding 2)
+  (web-mode-comment-style 2)
+  (web-mode-enable-css-colorization t)
+  (web-mode-enable-auto-pairing t)
+  (web-mode-enable-comment-keywords t)
+  (web-mode-enable-current-element-highlight t)
+  ;; (js2-basic-offset my/web-mode-offset)
+  ;; (js-indent-level my/web-mode-offset)
+  ;; (company-tooltip-align-annotations t)
+  ;; (sgml-basic-offset my/web-mode-offset)
+  )
+#+end_src
+
+** tidy
+#+begin_src emacs-lisp
+(defun my/setup-tide-mode ()
+  "Setup tide mode used in \\<keymap\\>>."
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  ;; company is an optional dependency. You have to
+  ;; install it separately via package-install
+  ;; `M-x package-install [ret] company`
+  ;; (company-mode +1)
+  )
+
+(use-package tide
+  :straight t
+  :commands tide-setup
+  :hook
+  (before-save . tide-format-before-save)
+  (typescript-mode . setup-tide-mode)
+  :after web-mode
+  :custom
+  (typescript-indent-level 2)
+  (tide-format-options '(:indentSize 2 :tabSize 2)))
+#+end_src
+
+** typescript
+#+begin_src emacs-lisp
+(use-package typescript-mode
+  :straight t
+  :init
+  (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
+  :custom
+  (typescript-indent-level 2)
+  :hook
+  ((typescript-mode . subword-mode)
+   (typescript-mode . lsp)
+   (typescript-mode . (lambda ()
+			(require 'tide)
+			(tide-setup))))
+  :mode
+  ("\\.tsx?\\'" . typescript-tsx-mode))
+#+end_src
+
+** prettier-js
+#+begin_src emacs-lisp
+(use-package prettier-js
+  :straight t
+  :commands (prettier-js-mode prettier)
+  :custom
+  (prettier-target-mode "js-mode")
+  (prettier-js-args
+   '("--trailing-comma" "all" "--single-quote" "--semi" "--arrow-parens" "always"))
+  :hook ((js-mode . prettier-js-mode)
+	 (typescript-mode . prettier-js-mode)
+	 (web-mode . prettier-js-mode)))
+#+end_src
+
+** js-mode
+#+begin_src emacs-lisp
+(use-package js
+  :straight (:type built-in)
+  :mode ("\\.js$" . js-mode)
+  :hook
+  ((js-mode . lsp)
+   (js-mode . (lambda ()
+		(require 'tide)
+		(tide-setup)))))
+#+end_src
+
+** tagedit
+
+#+begin_src emacs-lisp
+(use-package tagedit
+  :straight t
+  :ensure t
+  :commands tagedit-mode
+  :config
+  (tagedit-add-paredit-like-keybindings)
+  ;; (add-hook 'web-mode-hook 'tagedit-mode)
+  :hook
+  (((sgml-mode html-mode) . tagedit-mode)))
+#+end_src
+
+** HTML
 #+begin_src emacs-lisp
 #+end_src
 
