@@ -1,3 +1,5 @@
+
+
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
 
@@ -48,11 +50,9 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 (setq warning-minimum-level :emergency)
 (setq debug-on-error nil)
 
-;; core configurations
-(poly-load-org-config "core")
-
 ;; Native compilation settings
 (when (featurep 'native-compile)
+  (let ((poly-local-dir (expand-file-name ".local" user-emacs-directory)))
   ;; Silence compiler warnings as they can be pretty disruptive
   (setq native-comp-async-report-warnings-errors nil)
 
@@ -64,15 +64,7 @@ If FORCE-TANGLE is non-nil, always tangle before load."
   (when (fboundp 'startup-redirect-eln-cache)
     (if (version< emacs-version "29")
         (add-to-list 'native-comp-eln-load-path (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))
-      (startup-redirect-eln-cache (convert-standard-filename (expand-file-name "var/eln-cache/"poly-local-dir)))))
+      (startup-redirect-eln-cache (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))))
 
   (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" poly-local-dir)))
-
-;; straight package
-(poly-load-org-config "package")
-(poly-load-org-config "ui")
-(poly-load-org-config "keybindings")
-
-;; Load configurations
-(poly-load-org-config "private")
-(poly-load-org-config "laf")
+  )

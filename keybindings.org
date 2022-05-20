@@ -287,7 +287,7 @@ Key bindings are defined in [[file:private.org::#Modal Editing Key Binding][priv
     (meow-setup-indicator)
 
   ;; custom indicator
-(when IS-GUI
+(when (IS-GUI)
   (setq meow-replace-state-name-list
         '((normal . "🅝")
           (beacon . "🅑")

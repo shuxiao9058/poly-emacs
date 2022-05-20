@@ -14,12 +14,16 @@ Core configuration of poly emacs, global variable declare.
 (defconst IS-LINUX   (eq system-type 'gnu/linux))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 (defconst IS-BSD     (or IS-MAC (eq system-type 'berkeley-unix)))
-(defconst IS-GUI (display-graphic-p))
+(defvar IS-GUI (display-graphic-p))
 (defconst IS-CONSOLE (not IS-GUI))
 #+end_src
 
 ** Core function
+
 #+begin_src emacs-lisp
+(defun IS-GUI()
+  (display-graphic-p))
+
     (defun IS-AARCH64 ()
       (string-match-p "aarch64-apple-darwin.+" system-configuration))
 
@@ -371,10 +375,6 @@ Accepts the same arguments as `message'."
 (when (boundp 'word-wrap-by-category)
   (setq word-wrap-by-category t))
 
-(setq mode-line-compact t)
-
-
-
 ;; ;;; Automatic Optimization
 ;; (defvar gc-cons-threshold-original gc-cons-threshold)
 ;; ;; (setq gc-cons-threshold-original gc-cons-threshold)
@@ -429,13 +429,13 @@ Accepts the same arguments as `message'."
 (add-to-list 'load-path
        (expand-file-name "themes" user-emacs-directory))
 
-(defun reload-theme()
+(defun poly/reload-theme()
   "reload theme"
   (interactive)
   (require 'my-dark-theme)
   (load-theme 'my-dark t))
 
-(reload-theme)
+(poly/reload-theme)
 #+end_src
 
 ** gc timer
