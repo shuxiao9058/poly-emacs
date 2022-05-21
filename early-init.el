@@ -53,18 +53,17 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 ;; Native compilation settings
 (when (featurep 'native-compile)
   (let ((poly-local-dir (expand-file-name ".local" user-emacs-directory)))
-  ;; Silence compiler warnings as they can be pretty disruptive
-  (setq native-comp-async-report-warnings-errors nil)
+    ;; Silence compiler warnings as they can be pretty disruptive
+    (setq native-comp-async-report-warnings-errors nil)
 
-  ;; Make native compilation happens asynchronously
-  (setq native-comp-deferred-compilation t)
+    ;; Make native compilation happens asynchronously
+    (setq native-comp-deferred-compilation t)
 
-  ;; Set the right directory to store the native compilation cache
-  ;; NOTE the method for setting the eln-cache directory depends on the emacs version
-  (when (fboundp 'startup-redirect-eln-cache)
-    (if (version< emacs-version "29")
-        (add-to-list 'native-comp-eln-load-path (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))
-      (startup-redirect-eln-cache (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))))
+    ;; Set the right directory to store the native compilation cache
+    ;; NOTE the method for setting the eln-cache directory depends on the emacs version
+    (when (fboundp 'startup-redirect-eln-cache)
+      (if (version< emacs-version "29")
+          (add-to-list 'native-comp-eln-load-path (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))
+	(startup-redirect-eln-cache (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))))
 
-  (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" poly-local-dir)))
-  )
+    (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" poly-local-dir))))

@@ -134,10 +134,12 @@
 ** Font
 
 #+begin_src emacs-lisp
-(setq +font-family "Roboto Mono")
+(setq +font-family "Fira Code")
 
-(setq +ufont-family "Sarasa Mono SC")
-;; (defvar +ufont-family "PingFang SC") ;; chinese font
+;; (poly/font-exist-p +font-family)
+
+;; (setq +ufont-family "Sarasa Mono SC")
+(defvar +ufont-family "PingFang SC") ;; chinese font
 (setq +fixed-pitch-family "Sarasa Mono SC")
 (setq +variable-pitch-family "Sarasa Mono SC")
 
@@ -204,6 +206,9 @@
 #+end_src
 
 ** ligatures
+
+enable ligatures with emacs-mac, must install font first
+
 #+begin_src emacs-lisp
 (when (fboundp 'mac-auto-operator-composition-mode)
   ;; Function available in railwaycat Emacs only:
