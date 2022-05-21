@@ -1199,3 +1199,43 @@ Use Telega as Telegram client.
           (vterm-send-string compile-command t)
           (vterm-send-return))))))
 #+end_src
+
+** Hideshow
+
+ text folding minor mode
+
+#+begin_src emacs-lisp
+(defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
+(defun hideshow-folded-overlay-fn (ov)
+  (when (eq 'code (overlay-get ov 'hs))
+    (let* ((nlines (count-lines (overlay-start ov) (overlay-end ov)))
+           (info (format " ... #%d " nlines)))
+      (overlay-put ov 'display (propertize info 'face hideshow-folded-face)))))
+(setq hs-set-up-overlay 'hideshow-folded-overlay-fn)
+
+ (defvar my-hs-hide nil
+      "Current state of hideshow for toggling all.")
+ (defun my-toggle-hideshow-all ()
+      "Toggle hideshow all."
+      (interactive)
+      (setq my-hs-hide (not my-hs-hide))
+      (if my-hs-hide
+          (hs-hide-all)
+        (hs-show-all)))
+
+  ;; (defadvice! +fold--hideshow-ensure-mode-a (&rest _)
+  ;;   "Ensure `hs-minor-mode' is enabled when we need it, no sooner or later."
+  ;;   :before '(hs-toggle-hiding hs-hide-block hs-hide-level hs-show-all hs-hide-all)
+  ;;   (unless (bound-and-true-p hs-minor-mode)
+  ;;     (hs-minor-mode +1)))
+
+(use-package hideshow
+  :straight (:type built-in)
+  :diminish hs-minor-mode
+  :bind (("C-c s" . hs-toggle-hiding)
+         ("C-c C-s" . my-toggle-hideshow-all))
+  :custom
+  (hs-hide-comments-when-hiding-all nil)
+  ;; Nicer code-folding overlays (with fringe indicators)
+  :hook (prog-mode . hs-minor-mode))
+#+end_src
