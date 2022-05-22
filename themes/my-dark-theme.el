@@ -1,3 +1,4 @@
+;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
 (deftheme my-dark "my dark theme.")
 

@@ -957,12 +957,22 @@ don't pop windows everywhere!
     ;; (unbind-key "C-M-<left>" smartparens-mode-map)
     ;; (unbind-key "C-M-<right>" smartparens-mode-map)
     )
+#+end_src
 
+* rainbow-mode
+
+Visualizing Color Codes with rainbow-mode.
+
+#+begin_src emacs-lisp
 (use-package rainbow-mode
     :straight t
     :diminish rainbow-mode
-    :commands rainbow-mode)
+    :commands rainbow-mode
+    ;; :init
+    ;; (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+    )
 
+;; Colored parentheses
 (use-package rainbow-delimiters
     :straight t
     :ensure t
@@ -971,7 +981,6 @@ don't pop windows everywhere!
     :init
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
-
 
 
 * highlight indent & parentheses

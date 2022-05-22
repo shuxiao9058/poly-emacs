@@ -1232,8 +1232,13 @@ Use Telega as Telegram client.
 (use-package hideshow
   :straight (:type built-in)
   :diminish hs-minor-mode
-  :bind (("C-c s" . hs-toggle-hiding)
-         ("C-c C-s" . my-toggle-hideshow-all))
+  ;; :bind (("C-c s" . hs-toggle-hiding)
+  ;;        ("C-c C-s" . my-toggle-hideshow-all)
+  :bind (("C-`" . hs-toggle-hiding)
+	 ("C-c <left>" . hs-hide-block)
+         ("C-c <right>" . hs-show-block)
+         ("C-c <up>" . hs-hide-all)
+         ("C-c <down>" . hs-show-all)))
   :custom
   (hs-hide-comments-when-hiding-all nil)
   ;; Nicer code-folding overlays (with fringe indicators)

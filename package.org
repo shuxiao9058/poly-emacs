@@ -507,9 +507,6 @@
 		(unless (string-match-p ,regex format-string)
 		  (apply 'tl/message-orig format-string args)))))
      ,@body))
-
-;; enable winner-mode
-(winner-mode 1)
 #+end_src
 
 
