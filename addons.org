@@ -1205,42 +1205,433 @@ Use Telega as Telegram client.
  text folding minor mode
 
 #+begin_src emacs-lisp
-(defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
-(defun hideshow-folded-overlay-fn (ov)
-  (when (eq 'code (overlay-get ov 'hs))
-    (let* ((nlines (count-lines (overlay-start ov) (overlay-end ov)))
-           (info (format " ... #%d " nlines)))
-      (overlay-put ov 'display (propertize info 'face hideshow-folded-face)))))
-(setq hs-set-up-overlay 'hideshow-folded-overlay-fn)
+;; (defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
+;; (defun hideshow-folded-overlay-fn (ov)
+;;   (when (eq 'code (overlay-get ov 'hs))
+;;     (let* ((nlines (count-lines (overlay-start ov) (overlay-end ov)))
+;;            (info (format " ... #%d " nlines)))
+;;       (overlay-put ov 'display (propertize info 'face hideshow-folded-face)))))
+;; (setq hs-set-up-overlay 'hideshow-folded-overlay-fn)
 
- (defvar my-hs-hide nil
-      "Current state of hideshow for toggling all.")
- (defun my-toggle-hideshow-all ()
-      "Toggle hideshow all."
-      (interactive)
-      (setq my-hs-hide (not my-hs-hide))
-      (if my-hs-hide
-          (hs-hide-all)
-        (hs-show-all)))
-
-  ;; (defadvice! +fold--hideshow-ensure-mode-a (&rest _)
-  ;;   "Ensure `hs-minor-mode' is enabled when we need it, no sooner or later."
-  ;;   :before '(hs-toggle-hiding hs-hide-block hs-hide-level hs-show-all hs-hide-all)
-  ;;   (unless (bound-and-true-p hs-minor-mode)
-  ;;     (hs-minor-mode +1)))
+;;  (defvar my-hs-hide nil
+;;       "Current state of hideshow for toggling all.")
+;;  (defun my-toggle-hideshow-all ()
+;;       "Toggle hideshow all."
+;;       (interactive)
+;;       (setq my-hs-hide (not my-hs-hide))
+;;       (if my-hs-hide
+;;           (hs-hide-all)
+;;         (hs-show-all)))
 
 (use-package hideshow
   :straight (:type built-in)
   :diminish hs-minor-mode
-  ;; :bind (("C-c s" . hs-toggle-hiding)
-  ;;        ("C-c C-s" . my-toggle-hideshow-all)
   :bind (("C-`" . hs-toggle-hiding)
 	 ("C-c <left>" . hs-hide-block)
          ("C-c <right>" . hs-show-block)
          ("C-c <up>" . hs-hide-all)
-         ("C-c <down>" . hs-show-all)))
-  :custom
-  (hs-hide-comments-when-hiding-all nil)
+         ("C-c <down>" . hs-show-all))
   ;; Nicer code-folding overlays (with fringe indicators)
-  :hook (prog-mode . hs-minor-mode))
+  :hook (prog-mode . hs-minor-mode)
+  :custom
+  (hs-hide-comments-when-hiding-all nil))
+#+end_src
+
+** gpg
+
+#+begin_src emacs-lisp
+;; enable EasyPG handling
+;; gpg-agent confuses epa when getting passphrase
+(defun my-squash-gpg (&rest ignored-frame)
+  "Kill any GPG_AGENT_INFO in our environment."
+  (setenv "GPG_AGENT_INFO" nil))
+
+(use-package epa-file
+    :straight (:type built-in)
+    :pdump nil
+    :ensure t
+    ;; :if (string-match "socrates" (system-name))
+    :commands epa-file-enable
+    ;; :init (epa-file-enable)
+    ;; :custom
+    :config
+    (setq     epa-file-name-regexp "\\.gpg\\(~\\|\\.~[0-9]+~\\)?\\'\\|\\.asc"
+	      ;; (epa-file-name-regexp "\\.\\(gpg\\|asc\\)$")
+	      epa-file-cache-passphrase-for-symmetric-encryption t
+	      epa-file-select-keys nil
+	      epg-gpg-program "/opt/local/bin/gpg2")
+    (add-hook 'after-make-frame-functions 'my-squash-gpg t)
+    (my-squash-gpg)
+    (epa-file-name-regexp-update)
+    (epa-file-enable))
+
+
+(use-package auth-source-pass
+    :straight (:type built-in)
+    :ensure t
+    ;; :if (file-exists-p "~/.password-store")
+    :config (auth-source-pass-enable))
+
+(use-package pinentry
+    :straight t
+    :config
+    (pinentry-start)
+    (setq epa-pinentry-mode 'loopback))
+#+end_src
+
+* Mail
+
+GNUS
+
+#+begin_src emacs-lisp
+
+(use-package gnus
+  :straight (:type built-in)
+  :ensure t
+  ;; :straight (nnhackernews :type built-in)
+  ;; :straight (nnreddit :type built-in)
+  ;; :bind (("C-c m" . 'gnus))
+  ;; :bind (:map gnus-article-mode-map
+  ;;             ("o" . gnus-mime-copy-part)
+  ;;             :map gnus-topic-mode-map
+  ;;             ("<tab>" . gnus-topic-select-group))
+  :commands gnus
+  :hook
+  (gnus-select-group-hook . gnus-group-set-timestamp)
+  (gnus-summary-exit-hook . gnus-topic-sort-groups-by-alphabet)
+  (gnus-summary-exit-hook . gnus-group-sort-groups-by-rank)
+  (gnus-group-mode . gnus-topic-mode)
+  ((gnus-browse-mode gnus-server-mode gnus-group-mode gnus-summary-mode) . hl-line-mode)
+  (gnus-started-hook . gnus-group-list-all-groups)
+  :custom
+  (gnus-use-cache t)
+  (gnus-use-scoring nil)
+  (gnus-keep-backlog 10)
+  (gnus-suppress-duplicates t)
+  (gnus-novice-user nil)
+  (gnus-expert-user t)
+  (gnus-interactive-exit 'quiet)
+  (gnus-dbus-close-on-sleep t)
+  (gnus-use-cross-reference nil)
+  (gnus-inhibit-startup-message nil)
+  ;; (gnus-select-method '(nnmaildir "" (directory "~/Mail/")))
+  ;; (gnus-home-directory (expand-file-name "gnus/" poly-cache-dir))
+  ;; (gnus-select-method '(nnfolder ""))
+  ;; (gnus-secondary-select-methods
+  ;;  '(
+  ;;    (nnfolder "")
+  ;;    ;; (nnmaildir ""
+  ;;    ;; 		(directory "~/Mail/"))
+  ;;    )
+  ;;  )
+  ;; (gnus-select-method
+  ;;  '(nnmaildir "MyMail"
+  ;;              (directory "~/Mail/")))
+  ;; (gnus-secondary-select-methods nil)
+  ;; (gnus-select-method '(nnnil))
+  ;; (gnus-secondary-select-methods
+  ;;  '((nnmaildir "MyMail"
+  ;;               (directory "~/Mail/"))))
+  ;; (gnus-secondary-select-methods
+  ;;  '((nnmaildir ""
+  ;;               (directory "~/Mail/"))))
+  ;; Render HTML content using gnus-w3m
+  (mm-text-html-renderer 'gnus-w3m)
+  (gnus-inhibit-images nil);; Keep images displayed
+  (gnus-blocked-images nil)
+  :config
+  (auto-image-file-mode t)
+
+  ;; (setq ;; mail-sources
+  ;;  mail-sources '((maildir :path "~/Mail/" :subdirs ("cur" "new")))
+  ;;  ;; '((maildir :path "~/Mail/Inbox/")
+  ;;  ;;   (maildir :path "~/Mail/archive/"))
+  ;;  )
+  (setq gnus-select-method
+	'(nnmaildir "" (directory "~/Mail")))
+  ;; (setq gnus-secondary-select-methods nil)
+
+  (setq mail-sources
+	'((maildir :path "~/Mail/Inbox"  :subdirs ("cur" "new" "tmp"))))
+  ;; (setq mail-sources nil)
+  ;; (setq poly/mail-root-dir (expand-file-name "Mail" "~"))
+  ;; (let ((gmail (expand-file-name "Inbox"  poly/mail-root-dir))
+  ;; 	(work (expand-file-name "work"  poly/mail-root-dir)))
+  ;;   (setq mail-sources nil)
+  ;;   (if (file-directory-p gmail)
+  ;; 	(add-to-list 'mail-sources `(maildir :path ,gmail  :subdirs ("cur" "new" "tmp"))))
+  ;;   ;; (if (file-directory-p work)
+  ;;   ;; 	(add-to-list 'mail-sources `(maildir :path ,work  :subdirs ("cur" "new"))))
+
+  ;;   ;; (setq gnus-secondary-select-methods
+  ;;   ;;   `((nnmaildir "gmail" (directory ,gmail))
+  ;;   ;; 	(nnmaildir "work" (directory ,work))))
+  ;;   ;; (setq gnus-select-method
+  ;;   ;;   '(nnmaildir "Local"
+  ;;   ;;               (directory "~/Maildir")
+  ;;   ;;               (nnir-search-engine notmuch)
+  ;;   ;;   ))
+
+  ;;   ;; (setq gnus-select-method
+  ;;   ;; 	  `(nnmaildir "gmail"
+  ;;   ;; 		      (directory ,gmail)
+  ;;   ;; 		      (expire-age never))
+  ;;   ;; 	  ;; `((nnmaildir "gmail" (directory ,gmail))
+  ;;   ;; 	  ;;   (nnmaildir "work" (directory ,work)))
+  ;;   ;; 	  )
+  ;;     (setq gnus-secondary-select-methods
+  ;; 	    `((nnmaildir  "" (directory ,gmail))))
+
+  ;;   )
+
+  ;; (setq gnus-select-method nil)
+  ;; (setq gnus-select-method '(nnml ""))
+  (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+  (setq gnus-use-trees t)
+  (setq gnus-gcc-mark-as-read t)
+  (setq gnus-asynchronous t)
+  ;; (setq gnus-select-method '(nnnil ""))
+
+  ;; (setq gnus-permanently-visible-groups ".*")
+  ;; (setq gnus-message-archive-group "nnmaildir+gmail:outbox")
+
+  (setq gnu-fetch-old-headers t)
+  (setq  mail-source-delete-incoming nil)
+  (setq gnus-thread-sort-functions
+	'(gnus-thread-sort-by-number
+          gnus-thread-sort-by-most-recent-date))
+
+  ;; (setq gnus-secondary-select-methods nil)
+  (setq gnus-secondary-select-methods
+	'((nnmaildir "Gmail"
+		     (directory "~/Mail/Inbox"))
+	  (nnmaildir "QQMail"
+		     (directory "~/Mail/QQMail"))
+	  (nnmaildir "Work"
+		     (directory "~/Mail/work"))
+	  ))
+
+  ;; (setq mh-mime-save-parts-directory (expand-file-name "Mail/attachments" "~"))
+
+  ;; set default attachement download directory
+  (setq mm-default-directory (expand-file-name "Mail/attachments" "~"))
+
+  ;; prevent ask "Gnus auto-save file exists"
+  (setq gnus-always-read-dribble-file t)
+
+  ;; (setq gnus-select-method
+  ;; 	'(nnmaildir ""
+  ;; 		    (directory "~/Mail/Inbox")
+  ;; 		    (get-new-mail nil)))
+
+  ;; ;; Sent mail
+  ;; (setq gnus-message-archive-method gnus-select-method)
+  ;; (setq gnus-message-archive-oroup "Sent")
+
+  ;; (setq gnus-secondary-select-methods
+  ;; 	'((nnml ""))
+  ;; 	mail-user-agent 'gnus-user-agent
+  ;; 	read-mail-command 'gnus)
+
+  ;; (setq gnus-secondary-select-methods nil)
+
+  ;; (setq group-name-map '(
+  ;; 			 ;; 	 ("nnmaildir+OldEmail:INBOX" . "Gmail-Inbox")
+  ;; 			 ;; ("nnmaildir+Work:INBOX" . "Work-Inbox")
+  ;; 			 ;; ("nnmaildir+Work:Archive" . "Work-Archive")
+  ;; 			 ;; ("nnmaildir+Work:Backlog" . "Work-Backlog")
+  ;; 			 ;; ("nnmaildir+Work:Sent Mail" . "Work-Sent")
+  ;; 			 ;; ("nnmaildir+Work:org-archive" . "Work-Org-Archive")
+  ;; 			 ;; ("nnmaildir+Gmail:INBOX" . "Gmail: Inbox")
+  ;; 			 ("Inbox" . "Gmail: Inbox")
+  ;; 			 ("QQMail" . "Gmail: QQMail")
+  ;; 			 ))
+
+  (setq group-name-map '(
+			 ;; 	 ("nnmaildir+OldEmail:INBOX" . "Gmail-Inbox")
+			 ;; ("nnmaildir+Work:INBOX" . "Work-Inbox")
+			 ;; ("nnmaildir+Work:Archive" . "Work-Archive")
+			 ;; ("nnmaildir+Work:Backlog" . "Work-Backlog")
+			 ;; ("nnmaildir+Work:Sent Mail" . "Work-Sent")
+			 ;; ("nnmaildir+Work:org-archive" . "Work-Org-Archive")
+			 ;; ("nnmaildir+Gmail:INBOX" . "Gmail: Inbox")
+			 ("Inbox" . "nnmaildir+Gmail:Inbox")
+			 ("QQMail" . "Gmail: QQMail")
+			 ))
+  (setq gnus-group-line-format "%ue%uM %S%p[%5t][%L]\t%P%5y:%B%(%uG%)%O\n")
+
+
+  ;; You need to replace this key ID with your own key ID!
+  (setq mml2015-signers '("FC6BDB92CD5BEB22")
+	mml2015-encrypt-to-self t)
+  (add-hook 'message-send-hook 'mml-secure-message-sign-pgpmime)
+
+  (setq mm-inline-text-html-with-images t)
+
+  (require 'browse-url)
+  ;; (require 'gnus-dired)
+  ;; (require 'gnus-topic)
+
+  (setq nnmail-expiry-wait 30)
+  (setq mm-encrypt-option 'guided)
+  (setq mml-secure-openpgp-encrypt-to-self t)
+  (setq mml-secure-openpgp-sign-with-sender t)
+  (setq mml-secure-smime-encrypt-to-self t)
+  (setq mml-secure-smime-sign-with-sender t)
+
+  ;; gnus article
+  (setq gnus-article-browse-delete-temp 'ask)
+  (setq gnus-article-over-scroll nil)
+  (setq gnus-article-show-cursor t)
+  (setq gnus-article-sort-functions
+        '((not gnus-article-sort-by-number)
+          (not gnus-article-sort-by-date)))
+  (setq gnus-article-truncate-lines nil)
+  (setq gnus-html-frame-width 80)
+  (setq gnus-html-image-automatic-caching t)
+  (setq gnus-inhibit-images t)
+  (setq gnus-max-image-proportion 0.3)
+  (setq gnus-treat-display-smileys nil)
+  (setq gnus-article-mode-line-format "%G %S %m")
+  ;; (setq gnus-visible-headers
+  ;;       '("^From:" "^To:" "^Cc:" "^Newsgroups:" "^Subject:" "^Date:"
+  ;;         "Followup-To:" "Reply-To:" "^Organization:" "^X-Newsreader:"
+  ;;         "^X-Mailer:"))
+  ;; (setq gnus-sorted-header-list gnus-visible-headers)
+
+  ;; Gnus group
+  (setq gnus-level-subscribed 6)
+  (setq gnus-level-unsubscribed 7)
+  (setq gnus-level-zombie 8)
+  (setq gnus-list-groups-with-ticked-articles nil)
+  )
+
+(use-package gnus-group
+  :straight (:type built-in)
+  ;; :straight nil
+  :after gnus
+  :ensure t
+  :custom
+  (gnus-group-sort-function 'gnus-group-sort-by-server)
+  (gnus-level-subscribed 6)
+  (gnus-level-unsubscribed 7)
+  (gnus-level-zombie 8)
+  (gnus-activate-level 2)
+  (gnus-list-groups-with-ticked-articles nil)
+  (gnus-group-line-format "%M%p%P%5y:%B%(%g%)\n")
+  (gnus-group-mode-line-format "%%b")
+  :config
+  ;; (setq gnus-group-sort-function
+  ;;       '((gnus-group-sort-by-unread)
+  ;;         (gnus-group-sort-by-alphabet)
+  ;;         (gnus-group-sort-by-rank)))
+  (defun my-gnus-group-list-subscribed-groups ()
+    "List all subscribed groups with or without un-read messages"
+    (interactive)
+    (gnus-group-list-all-groups 5))
+
+  (define-key gnus-group-mode-map
+    ;; list all the subscribed groups even they contain zero un-read messages
+    (kbd "o") 'my-gnus-group-list-subscribed-groups)
+  :hook ((gnus-group-mode-hook . hl-line-mode)
+         (gnus-select-group-hook . gnus-group-set-timestamp))
+  :bind (:map gnus-group-mode-map
+	      ("M-n" . gnus-topic-goto-next-topic)
+	      ("M-p" . gnus-topic-goto-previous-topic)))
+
+(use-package gnus-topic
+  :straight (:type built-in)
+  :after (gnus gnus-group)
+  :ensure nil
+  :config
+  (setq gnus-topic-display-empty-topics t)
+  (add-hook 'gnus-group-mode-hook #'gnus-topic-mode)
+  )
+
+(use-package gnus-async
+  :straight (:type built-in)
+  :after gnus
+  :ensure nil
+  :defer t
+  :config
+  (setq gnus-asynchronous t)
+  (setq gnus-use-article-prefetch 15))
+
+(use-package gnus-sum
+  :straight (:type built-in)
+  :after gnus
+  :defer t
+  :ensure nil
+  :config
+  (setq gnus-auto-select-first nil)
+  (setq gnus-summary-ignore-duplicates t)
+  (setq gnus-suppress-duplicates t)
+  (setq gnus-save-duplicate-list t)
+  (setq gnus-summary-goto-unread nil)
+  (setq gnus-summary-make-false-root 'adopt)
+  (setq gnus-summary-thread-gathering-function
+        'gnus-gather-threads-by-subject)
+  (setq gnus-summary-gather-subject-limit 'fuzzy)
+  (setq gnus-thread-sort-functions
+        '((not gnus-thread-sort-by-date)
+          (not gnus-thread-sort-by-number)))
+  (setq gnus-subthread-sort-functions
+        'gnus-thread-sort-by-date)
+  (setq gnus-thread-hide-subtree nil)
+  (setq gnus-thread-ignore-subject nil)
+  (setq gnus-user-date-format-alist
+        '(((gnus-seconds-today) . "Today at %R")
+          ((+ (* 60 60 24) (gnus-seconds-today)) . "Yesterday, %R")
+          (t . "%Y-%m-%d %R")))
+  (setq gnus-face-1 'gnus-header-content)
+  (setq gnus-face-2 'gnus-header-from)
+  (setq gnus-face-3 'gnus-header-subject)
+  (setq gnus-summary-line-format "%U%R  %1{%-16,16&user-date;%}  %2{%-25,25f%}  %3{%B%S%}\n")
+  (setq gnus-summary-mode-line-format "%p")
+  ;; (setq gnus-sum-thread-tree-false-root ""
+  ;;       gnus-sum-thread-tree-indent " "
+  ;;       gnus-sum-thread-tree-leaf-with-other "├► "
+  ;;       gnus-sum-thread-tree-root ""
+  ;;       gnus-sum-thread-tree-single-leaf "╰► "
+  ;;       gnus-sum-thread-tree-vertical "│")
+  (setq gnus-sum-thread-tree-false-root "─┬> ")
+  (setq gnus-sum-thread-tree-indent " ")
+  (setq gnus-sum-thread-tree-single-indent "")
+  (setq gnus-sum-thread-tree-leaf-with-other "├─> ")
+  (setq gnus-sum-thread-tree-root "")
+  (setq gnus-sum-thread-tree-single-leaf "└─> ")
+  (setq gnus-sum-thread-tree-vertical "│")
+  )
+
+(use-package gnus-dired
+  :straight (:type built-in)
+  :after gnus
+  :hook (dired-mode . gnus-dired-mode)
+  )
+
+(use-package gnus-art
+  :straight (:type built-in)
+  :after gnus
+  :config
+  (setq
+   gnus-article-browse-delete-temp 'ask
+   gnus-article-over-scroll nil
+   gnus-article-show-cursor t
+   gnus-article-sort-functions
+   '((not gnus-article-sort-by-number)
+     (not gnus-article-sort-by-date))
+   gnus-article-truncate-lines nil
+   gnus-html-frame-width 80
+   gnus-html-image-automatic-caching t
+   gnus-inhibit-images t
+   gnus-max-image-proportion 0.7
+   gnus-treat-display-smileys nil
+   gnus-article-mode-line-format "%G %S %m"
+   gnus-visible-headers
+   '("^From:" "^Subject:" "^To:" "^Cc:" "^Newsgroups:" "^Date:"
+     "Followup-To:" "Reply-To:" "^Organization:" "^X-Newsreader:"
+     "^X-Mailer:")
+   gnus-sorted-header-list gnus-visible-headers
+   )
+  :hook (gnus-article-mode-hook . (lambda () (setq-local fill-column 80))))
 #+end_src

@@ -860,7 +860,7 @@ Use clojure-mode for basic syntax support.
   (typescript-indent-level 2)
   :hook
   ((typescript-mode . subword-mode)
-   (typescript-mode . lsp)
+   ;; (typescript-mode . lsp)
    (typescript-mode . (lambda ()
 			(require 'tide)
 			(tide-setup))))
@@ -888,7 +888,7 @@ Use clojure-mode for basic syntax support.
   :straight (:type built-in)
   :mode ("\\.js$" . js-mode)
   :hook
-  ((js-mode . lsp)
+  (;; (js-mode . lsp)
    (js-mode . (lambda ()
 		(require 'tide)
 		(tide-setup)))))

@@ -55,13 +55,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(eglot-ignored-server-capabilities
-   '(:documentHighlightProvider :signatureHelpProvider :hoverProvider) nil nil "Customized with use-package eglot")
- '(git-messenger:use-magit-popup t)
- '(safe-local-variable-values '((eval setq-local my-disable-lsp-completion t))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+ (custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+  )
