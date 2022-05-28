@@ -72,6 +72,10 @@
 (when (and (fboundp 'horizontal-scroll-bar-mode) (not (eq horizontal-scroll-bar-mode -1)))
   (scroll-bar-mode -1))
 
+;; Display column number in Mode line
+(when (and (fboundp 'column-number-mode) (not (eq column-number-mode t)))
+  (column-number-mode t))
+
 (when (and (fboundp 'use-file-dialog) (not (eq use-file-dialog -1)))
   (use-file-dialog -1))
 (when (and (fboundp 'use-dialog-box) (not (eq use-dialog-box -1)))
