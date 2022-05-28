@@ -9,7 +9,6 @@ Configuration for programming and languages support.
 * Format
 
 #+begin_src emacs-lisp
-
 (use-package format-all
   ;; :straight t
   :straight (:host github :repo "lassik/emacs-format-all-the-code")
@@ -211,6 +210,13 @@ Configuration for programming and languages support.
 #+begin_src emacs-lisp
 #+end_src
 
+* flymake
+
+#+begin_src emacs-lisp
+(use-package flymake
+  :straight (:type built-in))
+#+end_src
+
 * LSP
 
 ** eglot
@@ -247,7 +253,6 @@ If INTERACTIVE, prompt user for details."
 	 (args (cddr contact)))
     (append (list jdt-class "/usr/bin/java")
 	    jdt-extra-jvm-args args)))
-;; (setq aaabb (my-eclipse-jdt-contact))
 
 (defun dart-lsp-contact (interactive)
   (list (executable-find "dart")
@@ -260,7 +265,7 @@ If INTERACTIVE, prompt user for details."
   :straight t
   :hook ((go-mode lua-mode beancount-mode python-mode c-mode c++-mode python-mode java-mode) . eglot-ensure)
   :custom
-  (eglot-stay-out-of '(flymake imenu eldoc))  ;; eglot reinits backends
+  (eglot-stay-out-of '(imenu flymake eldoc))  ;; eglot reinits backends
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
   (eglot-connect-timeout 40)
@@ -269,10 +274,10 @@ If INTERACTIVE, prompt user for details."
   ;; (eglot-events-buffer-size 500000)
   (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
-  ;; (eglot-ignored-server-capabilites
-  ;;  '(:documentHighlightProvider
-  ;;    :signatureHelpProvider
-  ;;    :hoverProvider))
+  (eglot-ignored-server-capabilites
+   '(:documentHighlightProvider
+     :signatureHelpProvider
+     :hoverProvider))
   ;; NOTE We disable eglot-auto-display-help-buffer because :select t in
   ;; its popup rule causes eglot to steal focus too often.
   (eglot-auto-display-help-buffer nil)
@@ -393,7 +398,7 @@ If INTERACTIVE, prompt user for details."
       (funcall (symbol-function tmp-symbol)))))
 #+end_src
 
-*** eglot-rename with symbol  in place
+*** eglot-rename with symbol in place
 
 #+begin_src emacs-lisp
 (defun poly/eglot-rename (newname)
@@ -412,13 +417,6 @@ If INTERACTIVE, prompt user for details."
                                            :newName ,newname))
    current-prefix-arg))
 #+end_src
-
-*** Key Binding
-
-#+begin_src emacs-lisp
-;;  (define-key toggle-map "L" 'eglot)
-#+end_src
-
 
 ** yas parameter complete in place required
 
@@ -582,7 +580,6 @@ If INTERACTIVE, prompt user for details."
 * lisp
 
 #+begin_src emacs-lisp
-
 (use-package lisp-mode
   :straight nil
   :after paredit
@@ -601,17 +598,6 @@ If INTERACTIVE, prompt user for details."
   :hook
   (lisp-mode . init-lisp-mode)
   (emacs-lisp-mode . init-lisp-mode))
-
-
-;; (use-package profiler
-;;   :straight t
-;;   :defer t
-;;   ;; :config
-;;   ;; :general
-;;   ;; (nmap :keymaps '(profiler-report-mode-map)
-;;   ;;   (kbd "<tab>") 'profiler-report-toggle-entry
-;;   ;;   (kbd "<backtab>")  'profiler-report-toggle-entry)
-;;   )
 #+end_src
 
 * Lua
@@ -701,16 +687,16 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package clojure-mode
-    :straight t
-    :commands (clojurescript-mode)
-    ;; :config
-    ;; (add-hook 'clojure-mode-hook 'paredit-mode)
-    )
+  :straight t
+  :commands (clojurescript-mode)
+  ;; :config
+  ;; (add-hook 'clojure-mode-hook 'paredit-mode)
+  )
 
 (use-package clojure-mode-extra-font-locking
-    :straight t
-    :ensure t
-    :after clojure-mode)
+  :straight t
+  :ensure t
+  :after clojure-mode)
 
 ;; (use-package flycheck-clojure
 ;;     :straight t
@@ -743,25 +729,15 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package flycheck-clj-kondo
-    :straight t
-    :ensure t
-    :commands clojure-mode
-    :hook (clojure-mode . flycheck-mode)
-    ;; :config
-    ;; (flycheck-clojure-setup)
-    )
+  :straight t
+  :ensure t
+  :commands clojure-mode
+  :hook (clojure-mode . flycheck-mode)
+  ;; :config
+  ;; (flycheck-clojure-setup)
+  )
 #+end_src
 
-
-* Rust
-** rust-mode
-#+begin_src emacs-lisp
-#+end_src
-
-** Use LSP
-
-#+begin_src emacs-lisp
-#+end_src
 
 * WEB
 ** vue
@@ -776,8 +752,6 @@ Use clojure-mode for basic syntax support.
 #+end_src
 ** web-mode
 #+begin_src emacs-lisp
-
-
 ;; 设置缩进级别空格数
 (defvar-local my/web-mode-offset 2)
 

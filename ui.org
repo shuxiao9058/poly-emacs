@@ -6,8 +6,6 @@
 
 ** Core UI configuration
 #+begin_src emacs-lisp
-
-
 ;; Hide the mouse while typing:
 (setq make-pointer-invisible t)
 

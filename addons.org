@@ -348,9 +348,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package corfu
-  :straight (
-	     :files (:defaults "extensions/*")
-	     :includes (corfu-history))
+  :straight (:files (:defaults "extensions/*")
+		    :includes (corfu-history))
   :bind (:map corfu-map
 	      ("TAB" . corfu-next)
 	      ("C-n" . corfu-next)
@@ -498,19 +497,19 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;;        ("C-c p r" . cape-rfc1345))
   :init
   ;; Add `completion-at-point-functions', used by `completion-at-point'.
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-tex)
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  ;; (add-to-list 'completion-at-point-functions #'cape-file)
+  ;; (add-to-list 'completion-at-point-functions #'cape-tex)
+  ;; (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   ;; (add-to-list 'completion-at-point-functions #'cape-keyword)
   ;; (add-to-list 'completion-at-point-functions #'cape-sgml)
   ;; (add-to-list 'completion-at-point-functions #'cape-rfc1345)
-  (add-to-list 'completion-at-point-functions #'cape-ispell)
+  ;; (add-to-list 'completion-at-point-functions #'cape-ispell)
   ;; (add-to-list 'completion-at-point-functions #'cape-dict)
-  (add-to-list 'completion-at-point-functions #'cape-symbol)
-  (add-to-list 'completion-at-point-functions #'cape-line)
-  :hook ((prog-mode . my/set-basic-capf)
-	 (org-mode . my/set-basic-capf)
-	 ((lsp-completion-mode eglot-managed-mode) . my/set-lsp-capf))
+  ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
+  ;; (add-to-list 'completion-at-point-functions #'cape-line)
+  :hook ((prog-mode . poly/set-basic-capf)
+	 ;; (org-mode . poly/set-basic-capf)
+	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
   :config
   (setq dabbrev-upcase-means-case-search t)
   (setq case-fold-search nil)
@@ -552,11 +551,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; Require trigger prefix before template name when completing.
   ;; :custom
   ;; (tempel-trigger-prefix "<")
-
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
 	 ("M-*" . tempel-insert))
   :init
-
   ;; Setup completion at point
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
@@ -572,7 +569,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf)
-
   ;; Optionally make the Tempel templates available to Abbrev,
   ;; either locally or globally. `expand-abbrev' is bound to C-x '.
   ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
@@ -583,11 +579,12 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :after cape
   :straight (:host github :repo "50ways2sayhard/tabnine-capf" :files ("*.el" "*.sh"))
   :hook (kill-emacs . tabnine-capf-kill-process)
-  :config
-  (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point))
+  ;; :config
+  ;; (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point)
+  )
 
 ;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
-(defun my/convert-super-capf (arg-capf)
+(defun poly/convert-super-capf (arg-capf)
   (list
    ;; #'cape-file
    ;; #'cape-dabbrev
@@ -603,18 +600,20 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    ;; #'cape-dabbrev
    ))
 
-(defun my/set-basic-capf ()
+(defun poly/set-basic-capf ()
+  (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-	      (my/convert-super-capf
+	      (poly/convert-super-capf
 	       (car completion-at-point-functions))))
 
-(defun my/set-lsp-capf ()
+(defun poly/set-lsp-capf ()
+  (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-	      (my/convert-super-capf (if poly-use-lsp-mode
-					 #'lsp-completion-at-point
-				       #'eglot-completion-at-point))))
+	      (poly/convert-super-capf (if poly-use-lsp-mode
+					   #'lsp-completion-at-point
+					 #'eglot-completion-at-point))))
 #+end_src
 
 * hydra
@@ -2451,4 +2450,37 @@ org-download-paste for clipboard images
   ;; ; notmuch-mua-reply called by try reply, defined by macro for 'r'
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t")
   (setq org-msg-convert-citation t))
+#+end_src
+
+* hammerspoon
+
+send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammerspoon, required by org-clock & pomo
+
+ https://github.com/deftsp/.emacs.d/blob/fe38ec59ae630c5b88df9d10f40e33a2159113fb/lisp/50hammerspoon.el
+
+#+begin_src emacs-lisp
+(defun tl/open-hammerspoon-url (event &rest params)
+  (let ((len (length params))
+	(url (concat "hammerspoon://" event)))
+    (when (> len 0)
+      (if (zerop (% len 2))
+	  (let ((querys (--reduce (format "%s&%s" acc it)
+				  (-map (lambda (l)
+					  (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l))))
+					(-partition-all 2 params)))))
+	    (setq url (concat url "?" querys)))
+	(error "illegal hammerspoon params")))
+    (tl/with-suppress-message "Shell command succeeded with"
+      (shell-command (format "open -g \"%s\""
+			     url)))))
+
+(defun tl/notify-hammerspoon-did-init ()
+  (tl/open-hammerspoon-url "emacs_did_init"))
+
+(add-hook 'after-init-hook #'tl/notify-hammerspoon-did-init t)
+
+(defun tl/notify-hammerspoon-did-kill ()
+  (tl/open-hammerspoon-url "emacs_did_kill"))
+
+(add-hook 'kill-emacs-hook #'tl/notify-hammerspoon-did-kill t)
 #+end_src
