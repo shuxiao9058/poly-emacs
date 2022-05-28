@@ -78,6 +78,8 @@ Configuration for writing with Emacs, specifically for Markdown and Org mode.
   ;; (add-to-list 'org-modules 'org-journal)
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-element)
+
+
   ;; (add-to-list 'org-modules 'org-bars)
   ;; (add-to-list 'org-modules 'org-pdfview)
   ;; (add-to-list 'org-modules 'org-download)
@@ -656,7 +658,7 @@ do not already have one."
   ;; (org-agenda-to-appt)
   )
 #+end_src
-**  Write codes in org-mode
+** Write codes in org-mode
 #+begin_src emacs-lisp
   (use-package org-src
   :straight nil
@@ -702,6 +704,20 @@ do not already have one."
 ;;   (setq org-babel-clojure-backend 'cider))
 
 #+end_src
+
+** org-tempo
+
+#+begin_src emacs-lisp
+    (use-package org-tempo
+      :straight nil
+      :hook (org-mode . (lambda()
+			  (require 'org-tempo)))
+      )
+
+  ;; (with-eval-after-load "org"
+  ;;   (require 'org-tempo))
+#+end_src
+
 ** org-habbit
 #+begin_src emacs-lisp
        (use-package org-habit
@@ -858,7 +874,6 @@ Prefix arguments are interpreted by `org-refile'."
 
 (bind-key [remap org-insert-last-stored-link]  #'my-org-insert-last-stored-link 'org-mode-map)
 #+end_src
-
 
 ** org-present
 

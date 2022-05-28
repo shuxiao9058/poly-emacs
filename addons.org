@@ -510,8 +510,8 @@ _l_:       right tab             _>_: tab to right              _N_: new tab wit
   ("n" #'tab-bar-new-tab)
   ;; new tab and set name
   ("N" (lambda () (interactive)
-   (tab-bar-new-tab)
-   (call-interactively 'tab-bar-rename-tab)))
+	 (tab-bar-new-tab)
+	 (call-interactively 'tab-bar-rename-tab)))
   ("x" #'tab-bar-close-tab)
 
   ;; select tab
@@ -1027,16 +1027,35 @@ Use Telega as Telegram client.
   (autoload 'direnv-mode "direnv" nil t)
 #+end_src
 
+* savehist
+
+save minibuffer history
+
+#+begin_src emacs-lisp
+(use-package savehist
+  :straight (:type built-in)
+  :custom
+  (savehist-file (expand-file-name "history" poly-cache-dir))
+  :config
+  (savehist-mode 1)
+  (setq savehist-additional-variables
+	'(kill-ring
+	  log-edit-comment-ring
+	  search-ring regexp-search-ring shell-command-history)))
+#+end_src
+
 * embark
 
 #+begin_src emacs-lisp
 (use-package embark
   :straight t
+  :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
-  :bind (("C-c o" . embark-act)
-	 :map minibuffer-local-map
-	 ("M-o"   . embark-act))
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
   :config
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
@@ -1052,13 +1071,6 @@ Use Telega as Telegram client.
   ;; auto-updating embark collect buffer
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
-
-(use-package savehist
-  :straight t
-  :custom
-  (savehist-file (expand-file-name "history" poly-cache-dir))
-  :config
-  (savehist-mode 1))
 
 (use-package docker-compose-mode
   :straight t)
@@ -1284,7 +1296,6 @@ Use Telega as Telegram client.
 GNUS
 
 #+begin_src emacs-lisp
-
 (use-package gnus
   :straight (:type built-in)
   :ensure t
@@ -1337,8 +1348,10 @@ GNUS
   ;;               (directory "~/Mail/"))))
   ;; Render HTML content using gnus-w3m
   (mm-text-html-renderer 'gnus-w3m)
+  (browse-url-browser-function #'w3m-browse-url)
   (gnus-inhibit-images nil);; Keep images displayed
   (gnus-blocked-images nil)
+  (mm-inline-text-html-with-images t)
   :config
   (auto-image-file-mode t)
 
@@ -1387,9 +1400,11 @@ GNUS
   ;; (setq gnus-select-method nil)
   ;; (setq gnus-select-method '(nnml ""))
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-  (setq gnus-use-trees t)
+  (setq gnus-use-trees nil)
   (setq gnus-gcc-mark-as-read t)
   (setq gnus-asynchronous t)
+  (setq browse-url-browser-function 'browse-url-default-macosx-browser)
+  (setq gnus-check-new-newsgroups nil)
   ;; (setq gnus-select-method '(nnnil ""))
 
   ;; (setq gnus-permanently-visible-groups ".*")
@@ -1415,6 +1430,8 @@ GNUS
 
   ;; set default attachement download directory
   (setq mm-default-directory (expand-file-name "Mail/attachments" "~"))
+
+  (setq message-forward-as-mime nil)
 
   ;; prevent ask "Gnus auto-save file exists"
   (setq gnus-always-read-dribble-file t)
@@ -1573,8 +1590,10 @@ GNUS
         'gnus-gather-threads-by-subject)
   (setq gnus-summary-gather-subject-limit 'fuzzy)
   (setq gnus-thread-sort-functions
-        '((not gnus-thread-sort-by-date)
-          (not gnus-thread-sort-by-number)))
+        '( ;; gnus-thread-sort-by-date
+          (not gnus-thread-sort-by-number)
+	  (not gnus-thread-sort-by-most-recent-date)
+	  ))
   (setq gnus-subthread-sort-functions
         'gnus-thread-sort-by-date)
   (setq gnus-thread-hide-subtree nil)
@@ -1634,4 +1653,165 @@ GNUS
    gnus-sorted-header-list gnus-visible-headers
    )
   :hook (gnus-article-mode-hook . (lambda () (setq-local fill-column 80))))
+#+end_src
+
+** Marking Articles
+ https://github.com/cofi/dotfiles/blob/master/gnus.el
+ https://github.com/fniessen/gnus-leuven
+
+#+begin_src emacs-lisp
+  ;; Unread Articles
+  (when (char-displayable-p ?\u2691)
+    (setq gnus-ticked-mark ?⚑))
+
+  (when (char-displayable-p ?\u2690)
+    (setq gnus-dormant-mark ?⚐))
+
+  (when (char-displayable-p ?\u2709)
+    (setq gnus-unread-mark ?✉))
+
+  ;; Read Articles
+  (when (char-displayable-p ?\u2717)
+    (setq gnus-del-mark ?✗))
+
+  (when (char-displayable-p ?\u2713)
+    (setq gnus-read-mark ?✓))
+
+  (setq gnus-ancient-mark ? )
+
+  (when (char-displayable-p ?\u2620)
+    (setq gnus-killed-mark ?☠))
+
+  (when (char-displayable-p ?\u2197)
+    (setq gnus-canceled-mark ?↗))
+
+  (when (char-displayable-p ?\u267B)
+    (setq gnus-expirable-mark ?♻))
+  ;; Other marks
+
+  (when (char-displayable-p ?\u21BA)
+    (setq gnus-replied-mark ?↺))
+
+  (when (char-displayable-p ?\u21AA)
+    (setq gnus-forwarded-mark ?↪))
+
+  (when (char-displayable-p ?\u260D)
+    (setq gnus-cached-mark ?☍))
+
+  (when (char-displayable-p ?\u2729)
+    (setq gnus-unseen-mark ?✩))
+
+  (when (char-displayable-p ?\u2699)
+    (setq gnus-process-mark ?⚙))
+
+  (when (char-displayable-p ?\u2605)
+    (setq gnus-recent-mark ?★))
+
+  ;; score variables
+  (when (char-displayable-p ?\u2191)
+    (setq gnus-score-over-mark ?↑))
+
+  (when (char-displayable-p ?\u2193)
+    (setq gnus-score-below-mark ?↓))
+#+end_src
+
+
+*** outline
+
+#+begin_src emacs-lisp
+(use-package outline
+  :straight (:type built-in)
+  :diminish outline-minor-mode
+  :commands outline-minor-mode
+  :init
+  (add-hook 'prog-mode-hook 'outline-minor-mode)
+  (add-hook 'TeX-mode-hook 'outline-minor-mode)
+  (add-hook 'message-mode-hook 'outline-minor-mode)
+  ;; (defvar outline-minor-mode-prefix "\M-O")
+  :config
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'prog-mode 'tex-mode 'message-mode)
+        (outline-minor-mode))))
+  ;; (smartrep-define-key outline-minor-mode-map "M-s"
+  ;;   '(("p" . outline-previous-visible-heading)
+  ;;     ("n" . outline-next-visible-heading)
+  ;;     ("u" . outline-up-heading)
+  ;;     ("b" . outline-backward-same-level)
+  ;;     ("f" . outline-forward-same-level)))
+  (define-key outline-minor-mode-map (kbd "<M-S-return>") 'outline-insert-heading)
+  (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+  (define-key outline-minor-mode-map (kbd "C-M-i") nil)
+  (add-hook 'outline-insert-heading-hook (lambda ()
+                                           (if (string-equal "" head)
+                                               (progn (call-interactively 'comment-dwim)
+                                                      (insert "* "))
+                                             (when (memq major-mode '(c++-mode
+                                                                      c-mode
+                                                                      arduino-mode))
+                                               (save-excursion (insert " */"))))))
+  (add-hook 'TeX-mode-hook
+            (lambda ()
+              (define-key outline-minor-mode-map (kbd "\C-i") '(menu-item "maybe-latex/hide-show" nil :filter
+                                                                          (lambda (&rest _)
+                                                                            (when (latex//header-at-point)
+                                                                              #'outline-cycle))))))
+  ;; Copied from latex-extra.
+  (defcustom latex/section-hierarchy
+    '("\\\\headerbox\\_>"
+      "\\\\subparagraph\\*?\\_>"
+      "\\\\paragraph\\*?\\_>"
+      "\\\\subsubsection\\*?\\_>"
+      "\\\\subsection\\*?\\_>"
+      "\\\\section\\*?\\_>"
+      "\\\\chapter\\*?\\_>"
+      "\\\\part\\*?\\_>"
+      ;; "\\\\maketitle\\_>"
+      "\\\\appendix\\_>\\|\\\\\\(begin\\|end\\){document}"
+      "\\\\documentclass\\_>")
+    "List of regexps which define what a section can be.Ordered from deepest to highest level."
+    :group 'outlines
+    :type '(repeat (choice regexp function)))
+  (defun latex/section-regexp ()
+    "Return a regexp matching anything in `latex/section-hierarchy'."
+    (format "^\\(%s\\)" (mapconcat 'identity latex/section-hierarchy "\\|")))
+  (defun latex//header-at-point ()
+    "Return header under point or nil, as per `latex/section-hierarchy'."
+    (save-match-data
+      (save-excursion
+        (goto-char (line-beginning-position))
+        (when (looking-at (latex/section-regexp))
+          (match-string-no-properties 0))))))
+#+end_src
+
+*** outshine
+
+#+begin_src emacs-lisp
+(use-package outshine
+  :straight t
+  :diminish outshine-mode
+  :commands (outshine-mode
+             outshine-cycle-buffer
+             outshine-calc-outline-regexp)
+  :init
+  (add-hook 'outline-minor-mode-hook
+            (lambda () ;; 在latex-mode和org-mode中不开启outshine。
+              (unless (derived-mode-p 'latex-mode 'org-mode)
+                (outshine-mode))))
+  :config
+  ;; Heading格式随mode不同，通常是M-;加*加空格
+  (setq outshine-use-speed-commands t)
+  (setq outshine-imenu-show-headlines-p nil)
+  (define-key outshine-mode-map (kbd "M-TAB") nil))
+#+end_src
+
+*** outorg
+
+#+begin_src emacs-lisp
+(use-package outorg
+  :straight t
+  ;; M-O # current heading.
+  ;; C-u M-O # current buffer.
+  ;; M-# outorg-copy-edits-and-exit.
+  :after outshine)
 #+end_src
