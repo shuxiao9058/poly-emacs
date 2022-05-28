@@ -208,6 +208,18 @@ Configuration for programming and languages support.
 * Flycheck
 
 #+begin_src emacs-lisp
+(use-package flycheck
+  :straight t
+  :ensure t
+  :init (global-flycheck-mode)
+  :custom
+  (flycheck-check-syntax-automatically
+   '(save idle-change mode-enabled))
+  (flycheck-checker-error-threshold nil))
+
+(use-package flycheck-color-mode-line
+  :straight t
+  :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 #+end_src
 
 * flymake
@@ -265,7 +277,6 @@ If INTERACTIVE, prompt user for details."
   :straight t
   :hook ((go-mode lua-mode beancount-mode python-mode c-mode c++-mode python-mode java-mode) . eglot-ensure)
   :custom
-  (eglot-stay-out-of '(imenu flymake eldoc))  ;; eglot reinits backends
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
   (eglot-connect-timeout 40)
@@ -283,6 +294,7 @@ If INTERACTIVE, prompt user for details."
   (eglot-auto-display-help-buffer nil)
   :functions eglot--eclipse-jdt-contact
   :config
+  (setq eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
   (setq eldoc-echo-area-use-multiline-p nil)
   ;; emmylua
   (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
@@ -307,6 +319,7 @@ If INTERACTIVE, prompt user for details."
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
 	      (progn
+		(flymake-mode -1)
 		(lsp/non-greedy-eglot)
 		(lsp/extra-capf))
 	      ;; (make-local-variable 'completion-at-point-functions)
@@ -316,22 +329,22 @@ If INTERACTIVE, prompt user for details."
 
   (with-eval-after-load 'eglot
     (setq eglot-workspace-configuration
-					'((:gopls . ((staticcheck . nil)
-						     (matcher . "CaseSensitive")
-		     (gofumpt . t)
-		     (usePlaceholders . t)
-		     (completeUnimported . t)
-		     ;; (experimentalWorkspaceModule . t)
-		     (completionBudget . "150ms")
-		     (diagnosticsDelay  .  "800ms")
-		     ;; (directoryFilters . ["-vendor"])
-		     (analyses . ((unusedparams . t) (unusedwrite . t)))
-           (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
-           (codelenses . ((vendor . t)))
-           ;; (buildFlags . ["-mod=vendor"])
-           (allowImplicitNetworkAccess . t)
-           (allowModfileModifications . t)
-           ))))
+	  '((:gopls . ((staticcheck . nil)
+		       (matcher . "CaseSensitive")
+		       (gofumpt . t)
+		       (usePlaceholders . t)
+		       (completeUnimported . t)
+		       ;; (experimentalWorkspaceModule . t)
+		       (completionBudget . "150ms")
+		       (diagnosticsDelay  .  "800ms")
+		       ;; (directoryFilters . ["-vendor"])
+		       (analyses . ((unusedparams . t) (unusedwrite . t)))
+		       (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
+		       (codelenses . ((vendor . t)))
+		       ;; (buildFlags . ["-mod=vendor"])
+		       (allowImplicitNetworkAccess . t)
+		       (allowModfileModifications . t)
+		       ))))
 
     ;; (setq eglot-workspace-configuration
     ;; 	'((:gopls . ((staticcheck . t)
@@ -494,31 +507,31 @@ If INTERACTIVE, prompt user for details."
   :commands gorepl-run-load-current-file)
 
 ;; Install: See https://github.com/golangci/golangci-lint#install
-(use-package flycheck-golangci-lint
-  :straight t
-  :after (flycheck go-mode)
-  ;; :hook (go-mode . flycheck-golangci-lint-setup)
-  :hook (go-mode . (lambda ()
-		     "Enable golangci-lint."
-		     (setq flycheck-disabled-checkers '(go-gofmt
-							go-golint
-							go-vet
-							go-build
-							go-test
-							go-staticcheck
-							go-errcheck))
-		     (flycheck-golangci-lint-setup)))
-  :defines flycheck-disabled-checkers
-  :custom
-  ;; (flycheck-golangci-lint-enable-all t)
-  ;; (flycheck-golangci-lint-fast t)
-  (flycheck-golangci-lint-config
-   (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
-  ;; (flycheck-golangci-lint-tests t)
-  :config
-  (eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
-  )
+;; (use-package flycheck-golangci-lint
+;;   :straight t
+;;   :after (flycheck go-mode)
+;;   ;; :hook (go-mode . flycheck-golangci-lint-setup)
+;;   :hook (go-mode . (lambda ()
+;; 		     "Enable golangci-lint."
+;; 		     (setq flycheck-disabled-checkers '(go-gofmt
+;; 							go-golint
+;; 							go-vet
+;; 							go-build
+;; 							go-test
+;; 							go-staticcheck
+;; 							go-errcheck))
+;; 		     (flycheck-golangci-lint-setup)))
+;;   :defines flycheck-disabled-checkers
+;;   :custom
+;;   ;; (flycheck-golangci-lint-enable-all t)
+;;   ;; (flycheck-golangci-lint-fast t)
+;;   (flycheck-golangci-lint-config
+;;    (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
+;;   ;; (flycheck-golangci-lint-tests t)
+;;   :config
+;;   (eval-after-load 'flycheck
+;;     '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
+;;   )
 
 (use-package go-eldoc
   :straight t

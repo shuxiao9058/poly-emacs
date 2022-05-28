@@ -1,5 +1,3 @@
-
-
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
 
@@ -43,12 +41,12 @@ If FORCE-TANGLE is non-nil, always tangle before load."
    (expand-file-name "private_template.org" user-emacs-directory)
    (expand-file-name "private.org" user-emacs-directory)))
 
-(setq warning-minimum-level :debug)
-(setq debug-on-error t)
-(setq stack-trace-on-error t)
+;; (setq warning-minimum-level :debug)
+;; (setq debug-on-error t)
+;; (setq stack-trace-on-error t)
 
-;; (setq warning-minimum-level :emergency)
-;; (setq debug-on-error nil)
+(setq warning-minimum-level :emergency)
+(setq debug-on-error nil)
 
 ;; Native compilation settings
 (when (featurep 'native-compile)

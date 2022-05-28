@@ -645,6 +645,7 @@ Quick action with hydra
   "
 _a_genda
 _e_in
+_f_lycheck
 _o_utline & outshine
 _s_traight
 _t_ab
@@ -652,12 +653,12 @@ _w_indow
 "
   ("a" hydra-agenda-view/body :exit t)
   ("d" dumb-jump-hydra/body :exit t)
+  ("f" hydra-flycheck/body :exit t)
   ("w" hydra-window/body :exit t)
   ("o" hydra-outline/body :exit t)
   ("s" hydra-straight/body :exit t)
   ("t" hydra-tab/body :exit t)
-  ("e" hydra-ein/body :exit t)
-  )
+  ("e" hydra-ein/body :exit t))
 
 (defhydra hydra-straight (:hint nil)
   "
@@ -953,6 +954,22 @@ Headline^^            Visit entry^^               Filter^^                    Da
   ("i" dumb-jump-go-prompt "Prompt")
   ("l" dumb-jump-quick-look "Quick look")
   ("b" dumb-jump-back "Back"))
+
+(defhydra hydra-flycheck (:hint nil)
+  "
+  _a_: list errors   _p_: prev error   _<_ : first error _w_: copy message
+  _c_: check buffer  _n_: next error   _>_ : last error  _C_: clear errors    "
+  ("a" flycheck-list-errors)
+  ("n" flycheck-next-error)
+  ("p" flycheck-previous-error)
+  ("<" flycheck-first-error)
+  (">" (lambda ()
+	 (interactive)
+	 (goto-char (point-max)) (flycheck-previous-error)))
+  ("c" flycheck-buffer)
+  ("C" flycheck-clear)
+  ("w" flycheck-copy-errors-as-kill)
+  ("q" nil "quit" :color "deep sky blue"))
 
 ;; (defhydra hydra-clock (:color blue)
 ;;     "
