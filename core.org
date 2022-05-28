@@ -319,8 +319,8 @@ Accepts the same arguments as `message'."
 
 (when IS-MAC
   (setq frame-resize-pixelwise t
-  mac-command-modifier 'super
-  mac-option-modifier  'meta)
+	mac-command-modifier 'super
+	mac-option-modifier  'meta)
   (when (featurep 'ns)
     (setq ns-use-thin-smoothing t
           ns-use-fullscreen-animation t
@@ -450,7 +450,7 @@ Accepts the same arguments as `message'."
 ;; When idle for 30s run the GC no matter what.
 (defvar my/gc-timer
   (run-with-idle-timer 30 t
-                       (lambda ()
+		       (lambda ()
                          (let ((inhibit-read-only t)
                                (gc-msg (format "Garbage Collector has run for %.06fsec"
                                                (my/timer (garbage-collect)))))

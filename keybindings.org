@@ -32,14 +32,14 @@
 ;; Yank text to clipboard
 (cond
  ;; OS X
- ((string-equal system-type "darwin") ; Mac OS X
+ (IS-MAC ; Mac OS X
   (progn
     (setq save-to-clipboard-cmd "pbcopy")
     (setq paste-from-clipboard-cmd "pbpaste")
     )
   )
  ;; Linux
- ((string-equal system-type "gnu/linux") ; linux
+ (IS-LINUX ; linux
   (progn
     (setq save-to-clipboard-cmd "xsel -i -b")
     (setq paste-from-clipboard-cmd "xsel -o -b")
@@ -50,7 +50,7 @@
 (defun copy-to-clipboard ()
   "Copies selection to x-clipboard."
   (interactive)
-  (if (display-graphic-p)
+  (if IS-GUI
       (progn
         (message "Yanked region to x-clipboard!")
         (call-interactively 'clipboard-kill-ring-save)
@@ -66,7 +66,7 @@
 (defun paste-from-clipboard ()
   "Pastes from x-clipboard."
   (interactive)
-  (if (display-graphic-p)
+  (if IS-GUI
       (progn
         (clipboard-yank)
         (message "graphics active")
@@ -83,16 +83,12 @@
 (bind-key "s-SPC" #'set-mark-command)
 (bind-key "M-RET" #'toggle-frame-fullscreen)
 (unbind-key "C-z")
-
-
 #+end_src
 
 
 * Meow
 
 This configuration sticks with Meow for modal editing.
-
-Key bindings are defined in [[file:private.org::#Modal Editing Key Binding][private]] config.
 
 #+begin_src emacs-lisp
 (defun meow-setup ()
