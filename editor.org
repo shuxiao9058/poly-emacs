@@ -525,6 +525,13 @@ WIN-ID : Window index."
   (aw-background t)
   :bind
   (("C-x o" . ace-window)))
+
+;;;###autoload
+(defun ace-maximize-window ()
+  "Ace maximize window."
+  (interactive)
+  (select-window (aw-select " Ace - Maximize Window"))
+  (delete-other-windows))
 #+end_src
 
 ** windswap

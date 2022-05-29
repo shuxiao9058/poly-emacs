@@ -788,16 +788,16 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   ("e" straight-prune-build)
   ("q" nil))
 
-(defhydra hydra-window ()
+(defhydra hydra-window (:exit nil)
   "
 Movement^^        ^Split^         ^Switch^    ^Resize^
 ----------------------------------------------------------------
-_h_ ←         _v_ertical      _b_uffer    _q_ ←→ shrink
-_j_ ↓         _x_ horizontal  _f_ind files  _w_ ←→ grow
-_k_ ↑         _z_ undo        _a_ce 1   _e_ ↑↓ shrink
-_l_ →         _Z_ reset       _s_wap    _r_ ↑↓ grow
-_F_ollow       _D_lt Other     _S_ave    max_i_mize
-_SPC_ cancel  _o_nly this     _d_elete
+_h_ ←          _v_ertical      _b_uffer      _q_ ←→ shrink
+_j_ ↓          _x_ horizontal  _f_ind files  _w_ ←→ grow
+_k_ ↑          _z_ undo        _a_ce 1       _e_ ↑↓ shrink
+_l_ →          _Z_ reset       _s_wap        _r_ ↑↓ grow
+_F_ollow       _D_lt Other     _S_ave        _m_aximize
+_SPC_ cancel   _o_nly this     _d_elete
 "
   ("h" windmove-left )
   ("j" windmove-down )
@@ -839,7 +839,7 @@ _SPC_ cancel  _o_nly this     _d_elete
 	 (add-hook 'ace-window-end-once-hook
 		   'hydra-window/body)))
   ("o" delete-other-windows)
-  ("i" ace-maximize-window)
+  ("m" ace-maximize-window)
   ("z" (progn
 	 (winner-undo)
 	 (setq this-command 'winner-undo)))
@@ -1219,7 +1219,6 @@ _l_:       right tab             _>_: tab to right              _N_: new tab wit
   ;; ;; ("C-r" winner-redo)
 
   ;; ;; tab-bar-mode (Emacs 27)
-  ;; ;; `awesome-tab`: https://github.com/manateelazycat/awesome-tab
   ("h"  #'tab-bar-switch-to-prev-tab)
   ("l"  #'tab-bar-switch-to-next-tab)
   ("<"  #'toy/tab-move-left)
