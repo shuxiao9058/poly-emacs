@@ -784,7 +784,8 @@ Visualizing Color Codes with rainbow-mode.
 #+begin_src emacs-lisp
 (use-package all-the-icons
   :straight t
-  :if (or (IS-GUI) (daemonp))
+  :if IS-GUI
+  ;; :if (or IS-GUI (daemonp))
   ;; :init
   ;; (setq all-the-icons-scale-factor 0.8)
   )
