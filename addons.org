@@ -6,6 +6,90 @@ Configuration for addons, additional features provided by individual packages.
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+* Line numbers with display-line-numbers-mode
+
+#+begin_src emacs-lisp
+
+(defun should-use-minimum-resource ()
+  (and buffer-file-name
+       (string-match-p "\.\\(mock\\|min\\)\.js" buffer-file-name)))
+
+;; http://stackoverflow.com/questions/3875213/turning-on-linum-mode-when-in-python-c-mode
+(setq linum-mode-inhibit-modes-list
+      '(eshell-mode
+	shell-mode
+	profiler-report-mode
+	ffip-diff-mode
+	dictionary-mode
+	erc-mode
+	dired-mode
+	help-mode
+	text-mode
+	fundamental-mode
+	jabber-roster-mode
+	jabber-chat-mode
+	inferior-js-mode
+	inferior-python-mode
+	ivy-occur-grep-mode ; better performance
+	ivy-occur-mode ; better performance
+	twittering-mode
+	compilation-mode
+	weibo-timeline-mode
+	woman-mode
+	Info-mode
+	calc-mode
+	calc-trail-mode
+	comint-mode
+	gnus-group-mode
+	gud-mode
+	org-mode
+	vc-git-log-edit-mode
+	log-edit-mode
+	vterm-mode
+	term-mode
+	w3m-mode
+	speedbar-mode
+	gnus-summary-mode
+	gnus-article-mode
+	company-mode
+	magit-status-mode
+	messages-buffer-mode
+	calendar-mode
+	treemacs-mode
+	telega-chat-mode
+	telega-root-mode))
+
+(cond
+ ;; ((fbounp 'linum-mode))
+ (nil;; (fboundp 'global-display-line-numbers-mode)
+  (defun display-line-numbers-mode-hook-setup ()
+    (setq display-line-numbers (if (or (memq major-mode linum-mode-inhibit-modes-list)
+				       ;; don't show line number for certain file extensions
+				       (should-use-minimum-resource))
+				   nil
+				 t)))
+  (add-hook 'display-line-numbers-mode-hook 'display-line-numbers-mode-hook-setup)
+  (global-display-line-numbers-mode t))
+ (t
+  (global-linum-mode t)
+
+  (defadvice linum-on (around linum-on-inhibit-for-modes)
+    "Stop the load of linum-mode for some major modes."
+    (unless (member major-mode linum-mode-inhibit-modes-list)
+      ad-do-it))
+  (ad-activate 'linum-on)
+
+  ;; update line number every second so `linum-mode' won't slow down Emacs
+  ;; @see https://lists.gnu.org/archive/html/bug-gnu-emacs/2013-04/msg00577.html
+  ;; package like `nlinum-mode' has better performance but `git-gutter' is dependent
+  ;; on `linum-mode'.
+  ;; So we have to use `linum-mode'.
+  (setq linum-delay t)
+  (defadvice linum-schedule (around my-linum-schedule () activate)
+    (run-with-idle-timer 2 nil #'linum-update-current))))
+#+end_src
+
+
 * completion
 
 ** selectrum
@@ -393,18 +477,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :init
   (global-corfu-mode))
 
-;; (unless (display-graphic-p)
-;;   (use-package popon
-;;     :straight (popon
-;;	       :type git
-;;	       :repo "https://codeberg.org/akib/emacs-popon.git"))
-;;   (use-package corfu-popup
-;;     :straight (corfu-popup
-;;	       :type git
-;;	       :repo "https://codeberg.org/akib/emacs-corfu-popup.git")
-;;     :init
-;;     (corfu-popup-mode +1)))
-
 ;; Icon support
 (use-package kind-icon
   :ensure t
@@ -614,6 +686,33 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	      (poly/convert-super-capf (if poly-use-lsp-mode
 					   #'lsp-completion-at-point
 					 #'eglot-completion-at-point))))
+#+end_src
+
+*** corfu-terminal & popon
+
+#+begin_src emacs-lisp
+(unless IS-GUI
+  (use-package popon
+    :straight (popon :package "popon"
+		     :type git
+		     :host nil
+		     :repo "https://codeberg.org/akib/emacs-popon.git"))
+  (use-package corfu-terminal
+    :straight (corfu-terminal
+	       :type git
+	       :host nil
+               :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+    :after popon
+    :config
+    (unless IS-GUI
+      (corfu-popup-mode +1)))
+  ;; (use-package corfu-popup
+  ;; :straight (corfu-popup
+  ;; 	       :type git
+  ;; 	       :repo "https://codeberg.org/akib/emacs-corfu-popup.git")
+  ;; :init
+  ;; (corfu-popup-mode +1))
+  )
 #+end_src
 
 * hydra
@@ -1813,10 +1912,10 @@ save minibuffer history
 (use-package vterm-toggle
   :straight t
   :when (memq window-system '(mac ns x))
-  :bind (([f8] . vterm-toggle)
-         ([f9] . vterm-compile)
+  :bind (([f2] . vterm-toggle)
+         ;; ([f9] . vterm-compile)
          :map vterm-mode-map
-         ([f8] . vterm-toggle)
+         ([f2] . vterm-toggle)
          ([(control return)] . vterm-toggle-insert-cd))
   :config
   (setq vterm-toggle-cd-auto-create-buffer nil)
@@ -2466,37 +2565,4 @@ org-download-paste for clipboard images
   ;; ; notmuch-mua-reply called by try reply, defined by macro for 'r'
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t")
   (setq org-msg-convert-citation t))
-#+end_src
-
-* hammerspoon
-
-send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammerspoon, required by org-clock & pomo
-
- https://github.com/deftsp/.emacs.d/blob/fe38ec59ae630c5b88df9d10f40e33a2159113fb/lisp/50hammerspoon.el
-
-#+begin_src emacs-lisp
-(defun tl/open-hammerspoon-url (event &rest params)
-  (let ((len (length params))
-	(url (concat "hammerspoon://" event)))
-    (when (> len 0)
-      (if (zerop (% len 2))
-	  (let ((querys (--reduce (format "%s&%s" acc it)
-				  (-map (lambda (l)
-					  (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l))))
-					(-partition-all 2 params)))))
-	    (setq url (concat url "?" querys)))
-	(error "illegal hammerspoon params")))
-    (tl/with-suppress-message "Shell command succeeded with"
-      (shell-command (format "open -g \"%s\""
-			     url)))))
-
-(defun tl/notify-hammerspoon-did-init ()
-  (tl/open-hammerspoon-url "emacs_did_init"))
-
-(add-hook 'after-init-hook #'tl/notify-hammerspoon-did-init t)
-
-(defun tl/notify-hammerspoon-did-kill ()
-  (tl/open-hammerspoon-url "emacs_did_kill"))
-
-(add-hook 'kill-emacs-hook #'tl/notify-hammerspoon-did-kill t)
 #+end_src

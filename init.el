@@ -48,4 +48,3 @@
 (poly-load-org-config "writing")
 (poly-load-org-config "programming")
 (poly-load-org-config "addons" t)
-

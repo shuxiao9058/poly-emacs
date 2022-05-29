@@ -7,6 +7,40 @@ Configuration for writing with Emacs, specifically for Markdown and Org mode.
 #+end_src
 
 * Org
+
+** hammerspoon
+
+send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammerspoon, required by org-clock & pomo
+
+ https://github.com/deftsp/.emacs.d/blob/fe38ec59ae630c5b88df9d10f40e33a2159113fb/lisp/50hammerspoon.el
+
+#+begin_src emacs-lisp
+(defun tl/open-hammerspoon-url (event &rest params)
+  (let ((len (length params))
+	(url (concat "hammerspoon://" event)))
+    (when (> len 0)
+      (if (zerop (% len 2))
+	  (let ((querys (--reduce (format "%s&%s" acc it)
+				  (-map (lambda (l)
+					  (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l))))
+					(-partition-all 2 params)))))
+	    (setq url (concat url "?" querys)))
+	(error "illegal hammerspoon params")))
+    (tl/with-suppress-message "Shell command succeeded with"
+      (shell-command (format "open -g \"%s\""
+			     url)))))
+
+(defun tl/notify-hammerspoon-did-init ()
+  (tl/open-hammerspoon-url "emacs_did_init"))
+
+(add-hook 'after-init-hook #'tl/notify-hammerspoon-did-init t)
+
+(defun tl/notify-hammerspoon-did-kill ()
+  (tl/open-hammerspoon-url "emacs_did_kill"))
+
+(add-hook 'kill-emacs-hook #'tl/notify-hammerspoon-did-kill t)
+#+end_src
+
 ** Org-mode config
 #+begin_src emacs-lisp
 (use-package org
@@ -1363,7 +1397,7 @@ Prefix arguments are interpreted by `org-refile'."
             (lambda () (terminal-notify "A long break done, ready a new pomodoro !!!" "Pomo")))
 
   ;; init emacs startup
-  (add-hook 'emacs-startup-hook (lambda() (tl/open-hammerspoon-url "Clocking" "status" "No Task")))
+  (add-hook 'after-init-hook (lambda() (tl/open-hammerspoon-url "Clocking" "status" "No Task")))
 
   (add-hook 'kill-emacs-hook (lambda() (tl/open-hammerspoon-url "Clocking" "status" "Emacs Stopped")))
 
@@ -1416,35 +1450,35 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+begin_src emacs-lisp
 (use-package markdown-mode
-    :straight t
-    :mode (("README\\.md\\'" . gfm-mode)
-           ("\\.md\\'" . markdown-mode)
-           ("\\.markdown\\'" . markdown-mode))
-    :custom
-    (markdown-command "multimarkdown")
-    (markdown-enable-math t)
-    (markdown-enable-wiki-links t)
-    (markdown-asymmetric-header t)
-    (markdown-italic-underscore t)
-    (markdown-fontify-code-blocks-natively t)
-    (markdown-fontify-code-block-default-mode t)
-    (markdown-make-gfm-checkboxes-buttons t)
-    (markdown-gfm-uppercase-checkbox t)
-    )
+  :straight t
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :custom
+  (markdown-command "multimarkdown")
+  (markdown-enable-math t)
+  (markdown-enable-wiki-links t)
+  (markdown-asymmetric-header t)
+  (markdown-italic-underscore t)
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-fontify-code-block-default-mode t)
+  (markdown-make-gfm-checkboxes-buttons t)
+  (markdown-gfm-uppercase-checkbox t)
+  )
 
 (use-package markdown-toc
-    :straight t
-    :commands markdown-toc-generate-toc)
+  :straight t
+  :commands markdown-toc-generate-toc)
 
 (use-package edit-indirect
-    :straight t)
+  :straight t)
 
 (use-package grip-mode
-    :straight t
-    :bind (:map markdown-mode-command-map
-                ("g" . grip-mode)))
+  :straight t
+  :bind (:map markdown-mode-command-map
+              ("g" . grip-mode)))
 
 (use-package mmm-mode
-    :straight t
-    :hook (markdown-mode . mmm-mode))
+  :straight t
+  :hook (markdown-mode . mmm-mode))
 #+end_src
