@@ -437,22 +437,6 @@ If INTERACTIVE, prompt user for details."
 
 *** eglot-rename with symbol in place
 
-*** patch xref
-
-fix xref issue =(wrong-type-argument listp 0)=
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'xref
-  ;; try fix Debugger entered--Lisp error: (wrong-type-argument listp 0)
-  (defun xref--push-backward (m)
-    "Push marker M onto the backward history stack."
-    (when (numberp (car xref--history)) ;; wrong marker, the car of xref-history is a number
-      ;; reset xref--history to (cons nil nil)
-      (setq xref--history (cons nil nil)))
-    (unless (equal m (caar xref--history))
-      (push m (car xref--history)))))
-#+end_src
-
 #+begin_src emacs-lisp
 (defun poly/eglot-rename (newname)
   "Rename the current symbol to NEWNAME."
@@ -469,6 +453,22 @@ fix xref issue =(wrong-type-argument listp 0)=
                     :textDocument/rename `(,@(eglot--TextDocumentPositionParams)
                                            :newName ,newname))
    current-prefix-arg))
+#+end_src
+
+*** patch xref
+
+fix xref issue =(wrong-type-argument listp 0)=
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'xref
+  ;; try fix Debugger entered--Lisp error: (wrong-type-argument listp 0)
+  (defun xref--push-backward (m)
+    "Push marker M onto the backward history stack."
+    (when (numberp (car xref--history)) ;; wrong marker, the car of xref-history is a number
+      ;; reset xref--history to (cons nil nil)
+      (setq xref--history (cons nil nil)))
+    (unless (equal m (caar xref--history))
+      (push m (car xref--history)))))
 #+end_src
 
 ** yas parameter complete in place required
