@@ -1758,10 +1758,9 @@ Save cursor position
 #+begin_src emacs-lisp
 (use-package saveplace
   :straight (:type built-in)
-  :init
-  (progn
-    (setq save-place-file (expand-file-name "saveplace" poly-cache-dir))
-    (setq-default save-place t))
+  :custom
+  (save-place-file (expand-file-name "saveplace" poly-cache-dir))
+  (save-place t)
   :config
   (save-place-mode 1))
 #+end_src
