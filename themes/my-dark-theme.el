@@ -126,6 +126,10 @@ You may want to set this to window's border color.")
    `(company-scrollbar-fg           ((t (:background ,bg+4 :height 0.3))))
    `(company-template-field         ((t (:inherit yas-field-highlight-face))))
 
+   `(corfu-default                ((t (:background "#151321"))))
+   `(corfu-current                ((t (:background ,region))))
+   `(corfu-border                ((t (:background ,bg+1))))
+
    ;; Yasnippet
    `(yas-field-highlight-face       ((t (:background ,region2))))
 
@@ -202,7 +206,8 @@ You may want to set this to window's border color.")
    `(popup-tip-face                 ((t (:background ,bg+4 :foreground ,fg))))
    `(popup-isearch-match            ((t (:background "#CFA300" :foreground "black"))))
 
-   `(tooltip ((t (:foreground ,black :background ,yellow))))
+   `(tooltip                 ((t (:background ,bg+4 :foreground ,fg))))
+   ;; `(tooltip ((t (:foreground ,black :background ,yellow))))
    `(dired-directory                ((t (:foreground ,light-purple))))
    `(web-mode-html-attr-name-face   ((t ())))
    `(web-mode-html-tag-face         ((t ())))
@@ -259,12 +264,12 @@ You may want to set this to window's border color.")
 
    `(tab-bar                        ((t (:background ,bg+2))))
    `(tab-bar-tab-group-current      ((t ())))
-   `(tab-bar-tab                    ((t (:inverse-video t :bold t))))
+   `(tab-bar-tab                    ((t (:inverse-video t :bold t :background ,blue :foreground ,fg))))
    `(tab-bar-tab-group-inactive     ((t ())))
    `(tab-bar-tab-inactive           ((t (:inherit shadow))))
    `(icomplete-first-match ((t (:inherit mode-line-emphasis))))
    `(mode-line-buffer-id ((t (:foreground "Light Blue"))))
-   ;; (font-lock-variable-name-face ((t (:foreground "#50fa7b"))))
+   `(font-lock-variable-name-face ((t (:foreground "#50fa7b"))))
    ;; (highlight-indentation-face ((t (:inherit default :foreground "#878787"))))
    `(hl-line ((t (:background "DodgerBlue4"))))
    `(orderless-match-face-0 ((t (:inherit font-lock-type-face :weight bold))))
@@ -279,6 +284,10 @@ You may want to set this to window's border color.")
    ;; `(mode-line-inactive ((t (:family "Noto Sans" :height 100))))
    )
   )
+
+;; Adjust default font height when running in HiDPI screen.
+(when (> (frame-pixel-width) 3000)
+  (custom-set-faces '(corfu-default ((t (:height 1.3))))))
 
 ;; (set-face-attribute 'mode-line nil :inherit 'mode-line)
 ;; (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)

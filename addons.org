@@ -464,14 +464,14 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
   (corfu-preselect-first t)
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
-  ;; (corfu-echo-documentation '(1.0 . 0.2))
+  (corfu-echo-documentation '(1.0 . 0.2))
   (corfu-min-width 30)
   ;; (corfu-min-width 99)
   ;; hide scroll-bar
   (corfu-bar-width 0)
-  (corfu-right-margin-width 0)
+  ;; (corfu-right-margin-width 0)
   (corfu-scroll-margin 5)        ;; Use scroll margin
   ;; :hook (after-init-hook . global-corfu-mode)
   :init
@@ -522,6 +522,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	  (unit "u" :icon "ruler-square" :face shadow)
 	  (value "v" :icon "format-align-right" :face font-lock-builtin-face) ;
 	  (variable "va" :icon "tag" :face font-lock-variable-name-face)
+	  (tabnine "tn" :icon "billiards-rack" :face font-lock-string-face) ;; tabnine
 	  (t "." :icon "file-find" :face shadow)))
   )
 
@@ -580,7 +581,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
   ;; (add-to-list 'completion-at-point-functions #'cape-line)
   :hook ((prog-mode . poly/set-basic-capf)
-	 ;; (org-mode . poly/set-basic-capf)
+	 (org-mode . poly/set-basic-capf)
 	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
   :config
   (setq dabbrev-upcase-means-case-search t)
@@ -625,48 +626,47 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (tempel-trigger-prefix "<")
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
 	 ("M-*" . tempel-insert))
-  :init
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-		(cons #'tempel-expand
-		      completion-at-point-functions)))
+  ;; :init
+  ;; ;; Setup completion at point
+  ;; (defun tempel-setup-capf ()
+  ;;   ;; Add the Tempel Capf to `completion-at-point-functions'.
+  ;;   ;; `tempel-expand' only triggers on exact matches. Alternatively use
+  ;;   ;; `tempel-complete' if you want to see all matches, but then you
+  ;;   ;; should also configure `tempel-trigger-prefix', such that Tempel
+  ;;   ;; does not trigger too often when you don't expect it. NOTE: We add
+  ;;   ;; `tempel-expand' *before* the main programming mode Capf, such
+  ;;   ;; that it will be tried first.
+  ;;   (setq-local completion-at-point-functions
+  ;; 		(cons #'tempel-expand
+  ;; 		      completion-at-point-functions)))
 
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
+  ;; (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  ;; (add-hook 'text-mode-hook 'tempel-setup-capf)
+  ;; ;; Optionally make the Tempel templates available to Abbrev,
+  ;; ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; ;; (global-tempel-abbrev-mode)
   )
 
 (use-package tabnine-capf
   :after cape
   :straight (:host github :repo "50ways2sayhard/tabnine-capf" :files ("*.el" "*.sh"))
   :hook (kill-emacs . tabnine-capf-kill-process)
-  ;; :config
-  ;; (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point)
-  )
+  :config
+  (add-to-list 'completion-at-point-functions #'tabnine-completion-at-point))
 
 ;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
 (defun poly/convert-super-capf (arg-capf)
   (list
-   ;; #'cape-file
+   #'cape-file
    ;; #'cape-dabbrev
    ;; #'cape-keyword
    ;; #'cape-symbol
    (cape-capf-buster
     (cape-super-capf
-     ;; #'tempel-expand
      #'tabnine-completion-at-point
      arg-capf
+     #'tempel-expand
      )
     )
    ;; #'cape-dabbrev
