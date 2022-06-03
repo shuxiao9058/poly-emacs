@@ -49,7 +49,12 @@ Configuration for addons, additional features provided by individual packages.
 	term-mode
 	w3m-mode
 	speedbar-mode
+	mu4e-main-mode
+	mu4e-headers-mode
+	mu4e-view-mode
+	mu4e-compose-mode
 	gnus-summary-mode
+	mu4e-article-mode
 	gnus-article-mode
 	company-mode
 	magit-status-mode
@@ -1674,6 +1679,31 @@ Enable diff-hl in based on major modes.
 	("M-j" . rime-force-enable)))
 #+end_src
 
+** isearch-mb
+
+deal with rime search in minibuffer
+
+#+begin_src emacs-lisp
+(use-package isearch-mb
+  :straight t
+  :custom
+  ;; Match count next to the minibuffer prompt
+  (isearch-lazy-count t)
+  ;; Don't be stingy with history; default is to keep just 16 entries
+  (search-ring-max 200)
+  (regexp-search-ring-max 200)
+  (isearch-regexp-lax-whitespace t)
+  ;; Swiper style: space matches any sequence of characters in a line.
+  (search-whitespace-regexp ".*?")
+  ;; ;; Alternative: space matches whitespace, newlines and punctuation.
+  ;; (search-whitespace-regexp "\\W+")
+  ;; :bind
+  ;; (("C-s" . isearch-forward-regexp)
+  ;;  ("C-r" . isearch-backward-regexp))
+  :config
+  (isearch-mb-mode +1))
+#+end_src
+
 * Telegram client with Telega
 
 ~telegram-libtd~ is required for this feature.
@@ -2143,9 +2173,273 @@ session
 
 * Mail
 
-GNUS
+** mu4e
 
 #+begin_src emacs-lisp
+(defconst my-interesting-mail
+  (concat " \(maildir:/fastmail/Inbox"
+          " OR maildir:/gmail/Inbox"
+          " OR maildir:/gmail/[Gmail]/.All\ Mail"
+          " OR maildir:/gmail/[Gmail]/.Important"
+          " OR maildir:/riseup/Inbox\)")
+  "Interesting mail suffix.")
+
+(defun no-auto-fill ()
+  "Turn off 'auto-fill-mode'."
+  (auto-fill-mode -1))
+
+(use-package mu4e
+  :straight (mu4e :host github
+		  :files ("mu4e/*")
+		  :repo "djcb/mu"
+		  :branch "release/1.6")
+  :commands mu4e
+  :defer nil
+  :custom
+  (mu4e-mu-binary "/opt/local/bin/mu")
+  (mu4e-update-interval (* 60 10))
+  (mu4e-get-mail-command "/usr/local/bin/fdm -k fetch")
+  (mu4e-view-show-addresses t)
+  (mu4e-compose-dont-reply-to-self t)
+  (mu4e-context-policy 'pick-first)
+  (mu4e-maildir "~/Mail")
+  (mu4e-attachment-dir "~/Downloads")
+  (mu4e-headers-skip-duplicates t)
+  (mu4e-headers-visible-lines 20)
+  (mu4e-view-show-addresses 'long)
+  (mu4e-compose-in-new-frame t)
+  (mu4e-compose-complete-only-personal t)
+  (mu4e-change-filenames-when-moving t)
+  (message-kill-buffer-on-exit t)
+  (mu4e-hide-index-messages t)
+  (mu4e-view-show-images t)
+  (mu4e-view-image-max-width 800)
+  (mu4e-confirm-quit nil)
+  (mu4e-completing-read-function 'completing-read)
+  (mu4e-compose-format-flowed t)
+
+  ;; (message-send-mail-function 'message-send-mail-with-sendmail)
+  ;; (mu4e-bookmarks
+  ;;  `((,(concat "flag:unread date:today..now" my-interesting-mail)
+  ;;     "Today's unread messages" ?u)
+  ;;    (,(concat "date:today..now" my-interesting-mail)
+  ;;     "Today's messages" ?t)
+  ;;    (,(concat "date:7d..now" my-interesting-mail)
+  ;;     "This week's messages" ?w)
+  ;;    (,my-interesting-mail
+  ;;     "All messages" ?a)))
+  :config
+  (add-hook 'mu4e-compose-mode-hook 'epa-mail-mode)
+  (add-hook 'mu4e-compose-mode-hook 'visual-line-mode)
+  (add-hook 'mu4e-view-mode-hook 'epa-mail-mode)
+  (add-hook 'mu4e-view-mode-hook 'visual-line-mode)
+  (add-hook 'mu4e-compose-mode-hook #'no-auto-fill)
+  (add-to-list 'mu4e-view-actions
+               '("View In Browser" . mu4e-action-view-in-browser) t)
+  (require 'mu4e)
+  (require 'mu4e-contrib)
+
+  (require 'mu4e-icalendar)
+  (with-eval-after-load 'org-agenda
+    ;; (require 'consult-org)
+    )
+  (mu4e-icalendar-setup)
+
+  (setq mail-user-agent 'mu4e-user-agent)
+
+  (setq-default mu4e-html2text-command 'mu4e-shr2text)
+
+  )
+
+  ;;;###autoload
+(define-mail-user-agent 'mu4e-user-agent
+  'mu4e~compose-mail
+  'message-send-and-exit
+  'message-kill-buffer
+  'message-send-hook)
+;; Without this `mail-user-agent' cannot be set to `mu4e-user-agent'
+;; through customize, as the custom type expects a function.  Not
+;; sure whether this function is actually ever used; if it is then
+;; returning the symbol is probably the correct thing to do, as other
+;; such functions suggest.
+(defun mu4e-user-agent ()
+  "Return the `mu4e-user-agent' symbol."
+  'mu4e-user-agent)
+
+(use-package mu4e-maildirs-extension
+  :straight t
+  :custom
+  (mu4e-maildirs-extension-fake-maildir-separator "\\.")
+  :config
+  (unless (fboundp 'mu4e--main-action-str)
+    (defalias 'mu4e--main-action-str 'mu4e~main-action-str))
+  (mu4e-maildirs-extension))
+
+(use-package mu4e-alert
+  :straight t
+  :hook (after-init . mu4e-alert-enable-notifications)
+  :config
+  (setq mu4e-alert-set-default-style (if (eq system-type 'darwin)
+                                         'notifier '(notifications))))
+
+(require 'epg-config)
+
+(setq-default mml2015-use 'epg
+	      mml2015-encrypt-to-self t
+	      mml2015-sign-with-sender t)
+
+(use-package mu4e-marker-icons
+  :straight t
+  :init (mu4e-marker-icons-mode 1)
+  (defcustom v/message-attachment-intent-re
+    (regexp-opt '("I attach"
+		  "I have included"
+		  "I've included"
+                  "attached"
+                  "attachment"
+                  "pdf"))
+    "A regex which - if found in the message, and if there is no
+attachment - should launch the no-attachment warning.")
+
+  (defcustom v/message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message
+containing `v/message-attachment-intent-re' without an
+actual attachment.")
+
+  (defun v/message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though
+there are no attachments."
+    (when (and (save-excursion
+	         (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (re-search-forward v/message-attachment-intent-re nil t)))
+	       (not (v/message-attachment-present-p)))
+      (unless (y-or-n-p v/message-attachment-reminder)
+        (keyboard-quit))))(defcustom v/message-attachment-intent-re
+    (regexp-opt '("I attach"
+		  "I have included"
+		  "I've included"
+                  "attached"
+                  "attachment"
+                  "pdf"))
+    "A regex which - if found in the message, and if there is no
+attachment - should launch the no-attachment warning.")
+
+  (defcustom v/message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message
+containing `v/message-attachment-intent-re' without an
+actual attachment.")
+
+  (defun v/message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though
+there are no attachments."
+    (when (and (save-excursion
+	         (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (re-search-forward v/message-attachment-intent-re nil t)))
+	       (not (v/message-attachment-present-p)))
+      (unless (y-or-n-p v/message-attachment-reminder)
+        (keyboard-quit))))  (setq mu4e-headers-flagged-mark   '("F" . "🚩 "))
+  (setq mu4e-headers-unread-mark    '("u" . "✉️ "))
+  (setq mu4e-headers-draft-mark     '("D" . "🚧 "))
+  (setq mu4e-headers-new-mark       '("N" . "✨ "))
+  (setq mu4e-headers-passed-mark    '("P" . "↪ "))
+  (setq mu4e-headers-replied-mark   '("R" . "↩ "))
+  (setq mu4e-headers-seen-mark      '("S" . " "))
+  (setq mu4e-headers-trashed-mark   '("T" . "🗑️"))
+  (setq mu4e-headers-attach-mark    '("a" . "📎 "))
+  (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
+  (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
+
+;; (use-package validate
+;;   :straight t)
+
+(use-package message
+  :straight (:type built-in)
+  :hook ((message-send . v/message-warn-if-no-attachments)
+         (message-mode . turn-on-orgtbl))
+  :after mu4e
+  :config
+  ;; (setq message-send-mail-function 'smtpmail-send-it)
+  (require 'validate)
+  ;; (validate-setq mail-user-agent 'mu4e-user-agent)
+  ;; (validate-setq read-mail-command 'mu4e)
+  ;; From http://mbork.pl/2016-02-06_An_attachment_reminder_in_mu4e
+  (defun v/message-attachment-present-p ()
+    "Return t if an attachment is found in the current message."
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (when (search-forward "<#part" nil t) t))))
+
+  (defcustom v/message-attachment-intent-re
+    (regexp-opt '("I attach"
+		  "I have included"
+		  "I've included"
+                  "attached"
+                  "attachment"
+                  "pdf"))
+    "A regex which - if found in the message, and if there is no
+attachment - should launch the no-attachment warning.")
+
+  (defcustom v/message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message
+containing `v/message-attachment-intent-re' without an
+actual attachment.")
+
+  (defun v/message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though
+there are no attachments."
+    (when (and (save-excursion
+	         (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (re-search-forward v/message-attachment-intent-re nil t)))
+	       (not (v/message-attachment-present-p)))
+      (unless (y-or-n-p v/message-attachment-reminder)
+        (keyboard-quit))))
+  )
+
+(require 'mu4e-vars)
+
+(add-to-list 'mu4e-header-info-custom
+             '(:mail-directory . (:name "Mail Directory"
+					:shortname "Dir"
+					:help "Mail Storage Directory"
+					:function
+					(lambda (msg)
+					  (or
+					   (mu4e-message-field msg :maildir) "")))))
+(setq mu4e-headers-fields '(;; (:mail-directory . 20)
+			    (:human-date    .   12)
+			    (:flags         .    6)
+			    (:mailing-list  .   10)
+			    (:from          .   22)
+			    (:subject       .   nil)))
+#+end_src
+
+*** mm
+
+#+begin_src emacs-lisp
+;; You need to replace this key ID with your own key ID!
+(setq mml2015-signers '("FC6BDB92CD5BEB22")
+      mml2015-encrypt-to-self t)
+(add-hook 'message-send-hook 'mml-secure-message-sign-pgpmime)
+(setq mm-inline-text-html-with-images t)
+#+end_src
+
+#+RESULTS:
+: t
+
+** GNUS
+
+#+begin_src emacs-lisp :tangle no
 (use-package gnus
   :straight (:type built-in)
   :ensure t
@@ -2508,7 +2802,7 @@ GNUS
  https://github.com/cofi/dotfiles/blob/master/gnus.el
  https://github.com/fniessen/gnus-leuven
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   ;; Unread Articles
   (when (char-displayable-p ?\u2691)
     (setq gnus-ticked-mark ?⚑))
@@ -2665,7 +2959,7 @@ GNUS
   :after outshine)
 #+end_src
 
-**  org-download
+** org-download
 
 org-download-paste for clipboard images
 
@@ -2676,17 +2970,344 @@ org-download-paste for clipboard images
 #+end_src
 
 ** org-msg send mail
-
 #+begin_src emacs-lisp
 (use-package org-msg
-  :straight t
-  :ensure t
+  :after (mu4e)
   :config
-  ;; (setq mail-user-agent 'message-user-agent) ; default
-  ;; (setq mail-user-agent 'notmuch-user-agent) ; doesn't work. sends =-=-= blank message
-  ;; (setq mail-user-agent 'mu4e-user-agent) ; 20220501
-  ;; ; (org-msg-mode-notmuch) adds advice to notmuch-mua-{reply,mail}
-  ;; ; notmuch-mua-reply called by try reply, defined by macro for 'r'
-  (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t")
-  (setq org-msg-convert-citation t))
+  (setq
+   org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+   org-msg-startup "hidestars indent inlineimages"
+   org-msg-greeting-fmt "\nHi%s,\n\n"
+   org-msg-greeting-name-limit 3
+   org-export-global-macros  '(("color" . "@@html:<span style=\"color: $1\">$2</span>@@@@latex:\textcolor{$1}{$2}@@@@odt:<text:span text:style-name=\"$1\">$2</text:span>@@"))
+   org-msg-convert-citation t)
+
+  (setq org-msg-enforce-css
+	(let* ((font-family '(font-family . "\"PingFang SC Regular\",\"PingFang SC\",\"Microsoft YaHei Regular\",\"Microsoft YaHei\",\"Arial\",\"Helvetica\", \"sans-serif\""))
+	       (font-size '(font-size . "10pt"))
+	       (font `(,font-family ,font-size))
+	       (line-height '(line-height . "10pt"))
+	       (bold '(font-weight . "bold"))
+	       (theme-color "#0071c5")
+	       (color `(color . ,theme-color)))
+	  `((del nil
+		 (,@font
+		  (color . "grey")
+		  (border-left . "none")
+		  (text-decoration . "line-through")
+		  (margin-bottom . "0px")
+		  (margin-top . "10px")
+		  (line-height . "11pt")))
+	    (a nil
+               (,color))
+	    (a reply-header
+               ((color . "black")
+		(text-decoration . "none")))
+	    (div reply-header
+		 ((padding . "3.0pt 0in 0in 0in")
+		  (border-top . "solid #e1e1e1 1.0pt")
+		  (margin-bottom . "20px")))
+	    (span underline
+		  ((text-decoration . "underline")))
+	    (li nil
+		(,@font
+		 (margin-bottom . "0px")
+		 (margin-top . "2px")))
+	    (nil org-ul
+		 ((list-style-type . "square")))
+	    (nil org-ol
+		 (,@font
+		  (margin-bottom . "0px")
+		  (margin-top . "0px")
+		  (margin-left . "30px")
+		  (padding-top . "0px")
+		  (padding-left . "5px")))
+	    (nil signature
+		 (,@font
+		  (line-height . "25pt")
+		  (margin-bottom . "20px")))
+	    (blockquote quote0
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (border-left . "3px solid #ccc")))
+	    (blockquote quote1
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#324e72")
+			 (border-left . "3px solid #557fb4")))
+	    (blockquote quote2
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#6a3a4c")
+			 (border-left . "3px solid #a8617c")))
+	    (blockquote quote3
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#7a4900")
+			 (border-left . "3px solid #e08600")))
+	    (blockquote quote4
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#ff34ff")
+			 (border-left . "3px solid #ff9afe")))
+	    (blockquote quote5
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#ff4a46")
+			 (border-left . "3px solid #ffadab")))
+	    (blockquote quote6
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#008941")
+			 (border-left . "3px solid #00ef71")))
+	    (blockquote quote7
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#006fa6")
+			 (border-left . "3px solid #0daefe")))
+	    (blockquote quote8
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#a30059")
+			 (border-left . "3px solid #ff098f")))
+	    (blockquote quote9
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#ffdbe5")
+			 (border-left . "3px solid #ffffff")))
+	    (blockquote quote10
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#000000")
+			 (border-left . "3px solid #333333")))
+	    (blockquote quote11
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#0000a6")
+			 (border-left . "3px solid #0d0dfe")))
+	    (blockquote quote12
+			((padding-left . "5px")
+			 (margin-left . "10px")
+			 (margin-top . "10px")
+			 (margin-bottom . "0")
+			 (font-style . "italic")
+			 (background . "#f9f9f9")
+			 (color . "#63ffac")
+			 (border-left . "3px solid #c8ffe2")))
+	    (code nil
+		  ((font-size . "10pt")
+		   (font-family . "monospace")
+		   (background . "#f9f9f9")))
+	    (code src\ src-asl
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-c
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-c++
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-conf
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-cpp
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-csv
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-diff
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-ditaa
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-emacs-lisp
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-fundamental
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-ini
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-json
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-makefile
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-man
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-org
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-plantuml
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-python
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-sh
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (code src\ src-xml
+		  ((color . "#ffffff")
+		   (background-color . "#000000")))
+	    (nil linenr
+		 ((padding-right . "1em")
+		  (color . "black")
+		  (background-color . "#aaaaaa")))
+	    (pre nil
+		 ((line-height . "12pt")
+		  (color . "#ffffff")
+		  (background-color . "#000000")
+		  (margin . "0px")
+		  (font-size . "9pt")
+		  (font-family . "monospace")))
+	    (div org-src-container
+		 ((margin-top . "10px")))
+	    (nil figure-number
+		 (,@font
+		  (color . "#0071c5")
+		  (font-weight . "bold")
+		  (text-align . "left")))
+	    (nil table-number)
+	    (caption nil
+		     ((text-align . "left")
+		      (background . "#0071c5")
+		      (color . "white")
+		      (font-weight . "bold")))
+	    (nil t-above
+		 ((caption-side . "top")))
+	    (nil t-bottom
+		 ((caption-side . "bottom")))
+	    (nil listing-number
+		 (,@font
+		  (color . "#0071c5")
+		  (font-weight . "bold")
+		  (text-align . "left")))
+	    (nil figure
+		 (,@font
+		  ,color
+		  (font-weight . "bold")
+		  (text-align . "left")))
+	    (nil org-src-name
+		 (,@font
+		  ,color
+		  (font-weight . "bold")
+		  (text-align . "left")))
+	    (table nil
+		   (,@font
+		    (margin-top . "0px")
+		    (line-height . "10pt")
+		    (border-collapse . "collapse")))
+	    (th nil
+		((border . "1px solid white")
+		 (background-color . "#0071c5")
+		 (color . "white")
+		 (padding-left . "10px")
+		 (padding-right . "10px")))
+	    (td nil
+		(,@font
+		 (margin-top . "0px")
+		 (padding-left . "0px")
+		 (padding-right . "20px")
+		 (border . "1px solid white")))
+	    (td org-left
+		((text-align . "left")))
+	    (td org-right
+		((text-align . "right")))
+	    (td org-center
+		((text-align . "center")))
+	    (div outline-text-4
+		 ((margin-left . "15px")))
+	    (div outline-4
+		 ((margin-left . "10px")))
+	    (h4 nil
+		((margin-bottom . "0px")
+		 (font-size . "11pt")
+		 ,font-family))
+	    (h3 nil
+		((margin-bottom . "0px")
+		 (text-decoration . "underline")
+		 (font-size . "12pt")
+		 ,font-family
+		 ,color))
+	    (h2 nil
+		((margin-top . "20px")
+		 (margin-bottom . "20px")
+		 (font-style . "italic")
+		 ,color
+		 (font-size . "13pt")
+		 ,font-family))
+	    (h1 nil
+		((margin-top . "20px")
+		 (margin-bottom . "0px")
+		 (font-size . "14pt")
+		 ,font-family
+		 ,color))
+	    (p nil
+               ((text-decoration . "none")
+		(margin-bottom . "0px")
+		(margin-top . "10px")
+		(line-height . "18pt")
+		(font-size . "10pt")
+		,font-family))
+	    (div nil
+		 (,@font
+		  (line-height . "18pt"))))))
+  (org-msg-mode))
+
+(use-package org-mime
+  :commands (org-mime-htmlize org-mime-edit-mail-in-org-mode))
 #+end_src

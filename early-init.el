@@ -38,10 +38,10 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 
 ;; Prepare private.org when not exist.
 
-(unless (file-exists-p (expand-file-name "private.org" user-emacs-directory))
-  (copy-file
-   (expand-file-name "private_template.org" user-emacs-directory)
-   (expand-file-name "private.org" user-emacs-directory)))
+;; (unless (file-exists-p (expand-file-name "private.org" user-emacs-directory))
+;;   (copy-file
+;;    (expand-file-name "private_template.org" user-emacs-directory)
+;;    (expand-file-name "private.org" user-emacs-directory)))
 
 ;; (setq warning-minimum-level :debug)
 ;; (setq debug-on-error t)
