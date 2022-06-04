@@ -346,8 +346,6 @@ Accepts the same arguments as `message'."
 ** theme
 
 #+begin_src emacs-lisp
-
-;; themes
 (add-to-list 'load-path
        (expand-file-name "themes" user-emacs-directory))
 

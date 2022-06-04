@@ -198,6 +198,7 @@ This configuration sticks with Meow for modal editing.
                   inferior-python-mode
                   go-dot-mod-mode
 		  go-mod-mode
+		  mu4e-view-mode
                   diff-mode))
     (add-to-list 'meow-mode-state-list `(,mode . normal)))
 

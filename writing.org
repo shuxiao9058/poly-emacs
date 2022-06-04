@@ -152,6 +152,7 @@ do not already have one."
   (setq org-directory "~/Dropbox/org")
 
   (setq org-beorg-directory (expand-file-name "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/"))
+  (setq +org-mu4e-icalendar-org-capture-file (expand-file-name "mu4e.org" org-beorg-directory))
   (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
   (setq +org-capture-notes-file (expand-file-name  "personal-note.org" org-beorg-directory))
   (setq +org-capture-work-gtd-file (expand-file-name "work-gtd.org" org-beorg-directory))
@@ -165,7 +166,8 @@ do not already have one."
 			  +org-capture-work-gtd-file
 			  +org-capture-work-team-gtd-file
 			  +org-capture-work-talk-file
-			  +org-capture-work-meeting-file))
+			  +org-capture-work-meeting-file
+			  +org-mu4e-icalendar-org-capture-file))
 
   ;; archived location
   (setq org-archive-location (concat org-directory "archive/%s_archive::"))

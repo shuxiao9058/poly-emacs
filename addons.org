@@ -2176,14 +2176,6 @@ session
 ** mu4e
 
 #+begin_src emacs-lisp
-(defconst my-interesting-mail
-  (concat " \(maildir:/fastmail/Inbox"
-          " OR maildir:/gmail/Inbox"
-          " OR maildir:/gmail/[Gmail]/.All\ Mail"
-          " OR maildir:/gmail/[Gmail]/.Important"
-          " OR maildir:/riseup/Inbox\)")
-  "Interesting mail suffix.")
-
 (defun no-auto-fill ()
   "Turn off 'auto-fill-mode'."
   (auto-fill-mode -1))
@@ -2198,9 +2190,8 @@ session
   :custom
   (mu4e-mu-binary "/opt/local/bin/mu")
   (mu4e-update-interval (* 60 10))
-  (mu4e-get-mail-command "/usr/local/bin/fdm -k fetch")
+  (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
   (mu4e-view-show-addresses t)
-  (mu4e-compose-dont-reply-to-self t)
   (mu4e-context-policy 'pick-first)
   (mu4e-maildir "~/Mail")
   (mu4e-attachment-dir "~/Downloads")
@@ -2208,8 +2199,11 @@ session
   (mu4e-headers-visible-lines 20)
   (mu4e-view-show-addresses 'long)
   (mu4e-compose-in-new-frame t)
+  (mu4e-index-cleanup t)
   (mu4e-compose-complete-only-personal t)
+  (mu4e-compose-dont-reply-to-self t)
   (mu4e-change-filenames-when-moving t)
+  (mu4e-index-lazy-check nil)
   (message-kill-buffer-on-exit t)
   (mu4e-hide-index-messages t)
   (mu4e-view-show-images t)
@@ -2217,38 +2211,96 @@ session
   (mu4e-confirm-quit nil)
   (mu4e-completing-read-function 'completing-read)
   (mu4e-compose-format-flowed t)
-
+  (mu4e-view-use-gnus t)
+  (mu4e-headers-results-limit 2048)
+  (mu4e-headers-advance-after-mark t)
+  (mu4e-headers-auto-update t)
+  (mu4e-split-view nil)
+  (mu4e-headers-date-format "%Y-%m-%d %H:%M")
+  ;; (mu4e-headers-date-format "%y-%m-%d")
+  ;; (mu4e-headers-time-format " %R")
   ;; (message-send-mail-function 'message-send-mail-with-sendmail)
-  ;; (mu4e-bookmarks
-  ;;  `((,(concat "flag:unread date:today..now" my-interesting-mail)
-  ;;     "Today's unread messages" ?u)
-  ;;    (,(concat "date:today..now" my-interesting-mail)
-  ;;     "Today's messages" ?t)
-  ;;    (,(concat "date:7d..now" my-interesting-mail)
-  ;;     "This week's messages" ?w)
-  ;;    (,my-interesting-mail
-  ;;     "All messages" ?a)))
+  :hook ((mu4e-view-mode . visual-line-mode)
+	 (mu4e-compose-mode . (lambda ()
+				(visual-line-mode)
+				(use-hard-newlines -1)
+				(flyspell-mode)))
+	 (mu4e-view-mode . (lambda() ;; try to emulate some of the eww key-bindings
+			     (local-set-key (kbd "<tab>") 'shr-next-link)
+			     (local-set-key (kbd "<backtab>") 'shr-previous-link)))
+	 (mu4e-headers-mode . (lambda ()
+				(interactive)
+				(setq mu4e-headers-fields
+                                      `((:human-date . 25) ;; alternatively, use :date
+					(:flags . 6)
+					(:from . 22)
+					(:thread-subject . ,(- (window-body-width) 70)) ;; alternatively, use :subject
+					(:size . 7))))))
   :config
+  ;; (require 'mu4e)
+  (require 'mu4e-vars)
+  (require 'mu4e-contrib)
+  (require 'mu4e-icalendar)
+  (require 'mu4e-view)
+  (require 'mu4e-org)
+  (setq mu4e-org-link-query-in-headers-mode nil)
+  (setq mh-mime-save-parts-directory (expand-file-name "Mail/attachments/" "~"))
+  (setq mm-default-directory mh-mime-save-parts-directory)
+
   (add-hook 'mu4e-compose-mode-hook 'epa-mail-mode)
   (add-hook 'mu4e-compose-mode-hook 'visual-line-mode)
   (add-hook 'mu4e-view-mode-hook 'epa-mail-mode)
   (add-hook 'mu4e-view-mode-hook 'visual-line-mode)
+  (add-hook 'mu4e-view-mode-hook 'variable-pitch-mode)
+  ;; (add-hook 'mu4e-view-mode-hook 'olivetti-mode)
   (add-hook 'mu4e-compose-mode-hook #'no-auto-fill)
   (add-to-list 'mu4e-view-actions
                '("View In Browser" . mu4e-action-view-in-browser) t)
-  (require 'mu4e)
-  (require 'mu4e-contrib)
 
-  (require 'mu4e-icalendar)
-  (with-eval-after-load 'org-agenda
-    ;; (require 'consult-org)
-    )
+  (with-eval-after-load 'org
+    (setq gnus-icalendar-org-capture-file +org-mu4e-icalendar-org-capture-file
+          gnus-icalendar-org-capture-headline '("Meetings")
+          mu4e-icalendar-diary-file +org-mu4e-icalendar-org-capture-file
+          mu4e-icalendar-trash-after-reply t))
+  (setq gnus-icalendar-org-enabled-p t)
+
+  (defun poly/mu4e-icalendar-setup ()
+    "Perform the necessary initialization to use mu4e-icalendar."
+    (gnus-icalendar-setup)
+    (cl-defmethod gnus-icalendar-event:inline-reply-buttons :around
+      ((event gnus-icalendar-event) handle)
+      (if (and (boundp 'mu4e~view-rendering)
+               (gnus-icalendar-event:rsvp event))
+          (let ((method (gnus-icalendar-event:method event)))
+            (when (or (string= method "REQUEST") (string= method "PUBLISH") (string= method "CANCEL"))
+              `(("Accept" mu4e-icalendar-reply (,handle accepted ,event))
+		("Tentative" mu4e-icalendar-reply (,handle tentative ,event))
+		("Decline" mu4e-icalendar-reply (,handle declined ,event)))))
+	(cl-call-next-method event handle))))
   (mu4e-icalendar-setup)
+
+  (poly/mu4e-icalendar-setup)
+  (gnus-icalendar-org-setup)
 
   (setq mail-user-agent 'mu4e-user-agent)
 
   (setq-default mu4e-html2text-command 'mu4e-shr2text)
 
+  (unless (fboundp 'mu4e--main-action-str)
+    (defalias 'mu4e--main-action-str 'mu4e~main-action-str))
+
+  (add-to-list 'mu4e-header-info-custom
+               '(:mail-directory . (:name "Mail Directory"
+					  :shortname "Dir"
+					  :help "Mail Storage Directory"
+					  :function (lambda (msg)
+						      (or (mu4e-message-field msg :maildir) "")))))
+  ;; (setq mu4e-headers-fields '(;; (:mail-directory . 20)
+  ;; 			      (:human-date    .   12)
+  ;; 			      (:flags         .    6)
+  ;; 			      (:mailing-list  .   10)
+  ;; 			      (:from          .   22)
+  ;; 			      (:subject       .   nil)))
   )
 
   ;;;###autoload
@@ -2268,19 +2320,37 @@ session
 
 (use-package mu4e-maildirs-extension
   :straight t
+  :after mu4e
   :custom
   (mu4e-maildirs-extension-fake-maildir-separator "\\.")
   :config
-  (unless (fboundp 'mu4e--main-action-str)
-    (defalias 'mu4e--main-action-str 'mu4e~main-action-str))
   (mu4e-maildirs-extension))
 
 (use-package mu4e-alert
   :straight t
+  :after mu4e
   :hook (after-init . mu4e-alert-enable-notifications)
+  :custom
+  (mu4e-alert-notify-repeated-mails nil)
   :config
-  (setq mu4e-alert-set-default-style (if (eq system-type 'darwin)
-                                         'notifier '(notifications))))
+  (mu4e-alert-enable-notifications)
+  ;; (setq mu4e-enable-notifications t)
+  (setq mu4e-alert-set-default-style 'notifier)
+  ;; (setq mu4e-alert-set-default-style (if (eq system-type 'darwin)
+  ;;                                        'notifier '(notifications)))
+  (mu4e-alert-enable-mode-line-display)
+  (defun gjstein-refresh-mu4e-alert-mode-line ()
+    (interactive)
+    (mu4e~proc-kill)
+    (mu4e-alert-enable-mode-line-display))
+  (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
+  (setq mu4e-alert-interesting-mail-query
+	(concat "(maildir:/Work/Inbox ) AND flag:unread "
+		;; "OR "
+		)))
+
+(use-package olivetti
+  :straight t)
 
 (require 'epg-config)
 
@@ -2290,6 +2360,7 @@ session
 
 (use-package mu4e-marker-icons
   :straight t
+  :after mu4e
   :init (mu4e-marker-icons-mode 1)
   (defcustom v/message-attachment-intent-re
     (regexp-opt '("I attach"
@@ -2365,7 +2436,7 @@ there are no attachments."
   :after mu4e
   :config
   ;; (setq message-send-mail-function 'smtpmail-send-it)
-  (require 'validate)
+  ;; (require 'validate)
   ;; (validate-setq mail-user-agent 'mu4e-user-agent)
   ;; (validate-setq read-mail-command 'mu4e)
   ;; From http://mbork.pl/2016-02-06_An_attachment_reminder_in_mu4e
@@ -2405,24 +2476,10 @@ there are no attachments."
       (unless (y-or-n-p v/message-attachment-reminder)
         (keyboard-quit))))
   )
-
-(require 'mu4e-vars)
-
-(add-to-list 'mu4e-header-info-custom
-             '(:mail-directory . (:name "Mail Directory"
-					:shortname "Dir"
-					:help "Mail Storage Directory"
-					:function
-					(lambda (msg)
-					  (or
-					   (mu4e-message-field msg :maildir) "")))))
-(setq mu4e-headers-fields '(;; (:mail-directory . 20)
-			    (:human-date    .   12)
-			    (:flags         .    6)
-			    (:mailing-list  .   10)
-			    (:from          .   22)
-			    (:subject       .   nil)))
 #+end_src
+
+#+RESULTS:
+| turn-on-orgtbl | outline-minor-mode | doom-modeline-set-message-modeline |
 
 *** mm
 
@@ -2972,6 +3029,7 @@ org-download-paste for clipboard images
 ** org-msg send mail
 #+begin_src emacs-lisp
 (use-package org-msg
+  :straight t
   :after (mu4e)
   :config
   (setq
@@ -3309,5 +3367,8 @@ org-download-paste for clipboard images
   (org-msg-mode))
 
 (use-package org-mime
+  :defer t
+  :straight (:type built-in)
+  :after org
   :commands (org-mime-htmlize org-mime-edit-mail-in-org-mode))
 #+end_src

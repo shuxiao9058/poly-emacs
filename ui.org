@@ -239,7 +239,6 @@ enable ligatures with emacs-mac, must install font first
 * modeline
 #+begin_src emacs-lisp
 (use-package doom-modeline
-  ;; :straight t
   :straight (doom-modeline
 	     :type git
 	     :host github
@@ -257,6 +256,7 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-persp-name t)
   (doom-modeline-persp-icon t)
   (doom-modeline-lsp t)
+  (doom-modeline-mu4e t)
   ;; Whether display github notifications or not. Requires `ghub+` package.
   (doom-modeline-github nil)
   ;; The interval of checking github.
@@ -281,10 +281,9 @@ enable ligatures with emacs-mac, must install font first
   :after (all-the-icons)
   :hook (after-init . doom-modeline-init)
   :config
-  ;; Define your custom doom-modeline
   (doom-modeline-def-modeline 'my-simple-line
     '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
-    '(objed-state misc-info persp-name lsp minor-modes indent-info buffer-encoding major-mode process vcs checker))
+    '(objed-state misc-info persp-name mu4e lsp minor-modes indent-info buffer-encoding major-mode process vcs checker))
 
   ;; Add to `doom-modeline-mode-hook` or other hooks
   (add-hook 'doom-modeline-mode-hook
