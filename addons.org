@@ -435,7 +435,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (define-key vertico-map (kbd "M-TAB") #'minibuffer-complete)
 #+end_src
 
-
 ** corfu
 
 #+begin_src emacs-lisp
@@ -2522,8 +2521,7 @@ there are no attachments."
   :commands notmuch
   :bind (("C-c m" . notmuch)
          :map notmuch-show-mode-map (("D" . apm-notmuch-toggle-deleted)
-                                     ("J" . apm-notmuch-toggle-spam)
-				     )
+                                     ("J" . apm-notmuch-toggle-spam))
          :map notmuch-search-mode-map (("D" . apm-notmuch-toggle-deleted)
                                        ("J" . apm-notmuch-toggle-spam))
          :map notmuch-tree-mode-map (("D" . apm-notmuch-toggle-deleted)
@@ -2537,8 +2535,8 @@ there are no attachments."
   ;; (notmuch-wash-wrap-lines-length 80)
   (notmuch-tree-show-out t)
   (notmuch-hello-thousands-separator ",")
-  ;; (notmuch-address-command "notmuch-addrlookup")
-  (notmuch-address-command nil)
+  (notmuch-address-command "notmuch-addrlookup")
+  ;; (notmuch-address-command nil)
   (notmuch-address-use-company nil)
   (notmuch-address-internal-completion '(received nil))
   (notmuch-mua-hidden-headers nil)
@@ -2552,7 +2550,8 @@ there are no attachments."
   (notmuch-always-prompt-for-sender t)
   (notmuch-mua-cite-function 'message-cite-original-without-signature)
   (notmuch-mua-reply-insert-header-p-function 'notmuch-show-reply-insert-header-p-never)
-  (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-full)
+  ;; (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-full)
+  (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-notmuch)
   (notmuch-maildir-use-notmuch-insert t)
   (notmuch-crypto-process-mime t)
   (notmuch-crypto-get-keys-asynchronously t)
@@ -2569,7 +2568,8 @@ there are no attachments."
   (notmuch-show-text/html-blocked-images nil)  ; enable images
   ;; (notmuch-show-text/html-blocked-images ".") ; block everything
   (notmuch-unthreaded-show-out nil)
-  (notmuch-message-headers '("To" "Cc" "Subject" "Date"))
+  (notmuch-message-headers '("Subject" "To" "Cc" "Bcc" "Date" "Reply-To" "User-Agent"))
+  ;; (notmuch-message-headers '("To" "Cc" "Subject" "Date"))
   (notmuch-message-headers-visible t)
   (notmuch-hello-sections '(notmuch-hello-insert-header
                             notmuch-hello-insert-saved-searches
@@ -2578,7 +2578,6 @@ there are no attachments."
                             notmuch-hello-insert-alltags
                             notmuch-hello-insert-footer))
   (notmuch-show-all-tags-list t)
-
   ;;   '(notmuch-draft-folder "top/Drafts")
   ;; '(notmuch-fcc-dirs "top/Sent")
   :config
@@ -2707,7 +2706,7 @@ The variables `browse-url-browser-function',
 determine which browser function to use."
     (interactive)
     (let* ((filename (notmuch-show-get-filename))
-	   (gnus-article-buffer "*Article*")
+	   (gnus-article-buffer "*nomuch-article*")
 	   (max-specpdl-size 4096)
            (mm-decrypt-option 'known)
 	   (ct (mail-fetch-field "Content-Type"))
@@ -2756,12 +2755,6 @@ determine which browser function to use."
       (mm-destroy-parts gnus-article-mime-handles)
       (kill-buffer gnus-article-buffer)))
   )
-
-;; (defun nico-notmuch-view-part-in-webkit ()
-;;   "View the MIME part containing point from within an xwidget webkit buffer."
-;;   (interactive)
-;;   (notmuch-show-apply-to-current-part-handle #'nico-view-part-in-webkit))
-;; (define-key notmuch-show-part-map "w" #'nico-notmuch-view-part-in-webkit)
 
 (use-package notmuch-capf
   :straight (notmuch-capf
@@ -2840,28 +2833,6 @@ except for `notmuch-show-mode' buffers."
             (notmuch-refresh-this-buffer))))))
   (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
   (bind-key "u" #'notmuch-update notmuch-common-keymap))
-
-;; (use-package notmuch-update
-;;   :straight (notmuch-update :local-repo "/Users/jiya/.emacs.d/site-lisp/notmuch-update/" :type nil)
-;;   :after (notmuch notmuch-notify)
-;;   :custom
-;;   (notmuch-update-command "/usr/local/bin/fdm fetch && notmuch new")
-;;   (notmuch-update-interval (* 5 60))
-;;   :init
-;;   (defun splinter-notmuch-refresh-non-show-buffers ()
-;;     "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
-;; except for `notmuch-show-mode' buffers."
-;;     (interactive)
-;;     (dolist (buffer (buffer-list))
-;;       (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
-;;         (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
-;;           (with-current-buffer buffer
-;;             (notmuch-refresh-this-buffer))))))
-;;   :hook
-;;   (notmuch-hello-mode . notmuch-update-start)
-;;   ;; (notmuch-update-post . notmuch-notify)
-;;   ;; (notmuch-update-post . splinter-notmuch-refresh-non-show-buffers)
-;;   :bind (:map notmuch-common-keymap (("u" . notmuch-update))))
 #+end_src
 
 
@@ -3258,6 +3229,8 @@ except for `notmuch-show-mode' buffers."
 (setq-default mml2015-use 'epg
               mml2015-encrypt-to-self t
               mml2015-sign-with-sender t)
+
+(setq mm-inlined-types (remove "application/zip" mm-inlined-types))
 #+end_src
 
 *** w3m
