@@ -3827,3 +3827,22 @@ org-download-paste for clipboard images
   :after org
   :commands (org-mime-htmlize org-mime-edit-mail-in-org-mode))
 #+end_src
+
+* macOS package
+
+** osx-trash
+
+#+begin_src emacs-lisp
+(use-package osx-trash
+  :straight t
+  :commands osx-trash-move-file-to-trash
+  :init
+  ;; Delete files to trash on macOS, as an extra layer of precaution against
+  ;; accidentally deleting wanted files.
+  (setq delete-by-moving-to-trash t)
+
+  ;; Lazy load `osx-trash'
+  (and IS-MAC
+       (not (fboundp 'system-move-file-to-trash))
+       (defalias #'system-move-file-to-trash #'osx-trash-move-file-to-trash)))
+#+end_src
