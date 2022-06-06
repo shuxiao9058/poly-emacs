@@ -56,6 +56,9 @@ Configuration for addons, additional features provided by individual packages.
 	gnus-summary-mode
 	mu4e-article-mode
 	gnus-article-mode
+	notmuch-show-mode
+	notmuch-hello-mode
+	notmuch-search-mode
 	company-mode
 	magit-status-mode
 	messages-buffer-mode
@@ -670,6 +673,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    (cape-capf-buster
     (cape-super-capf
      #'tabnine-completion-at-point
+     ;; #'ebdb-complete-mail
      arg-capf
      #'tempel-expand
      )
@@ -683,6 +687,22 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (setq-local completion-at-point-functions
 	      (poly/convert-super-capf
 	       (car completion-at-point-functions))))
+
+(defun poly/set-mail-capf ()
+  (interactive)
+  (setq completion-category-defaults nil)
+  (setq-local completion-at-point-functions
+	      (list
+	       #'cape-file
+	       (cape-capf-buster
+		(cape-super-capf
+		 #'notmuch-capf
+		 #'ebdb-mail-dwim-completion-at-point-function
+		 ;; #'ebdb-complete-mail
+		 #'tabnine-completion-at-point
+		 ;; arg-capf
+		 #'tempel-expand)
+		))))
 
 (defun poly/set-lsp-capf ()
   (interactive)
@@ -2175,7 +2195,7 @@ session
 
 ** mu4e
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun no-auto-fill ()
   "Turn off 'auto-fill-mode'."
   (auto-fill-mode -1))
@@ -2215,6 +2235,8 @@ session
   (mu4e-headers-results-limit 2048)
   (mu4e-headers-advance-after-mark t)
   (mu4e-headers-auto-update t)
+  (mu4e-headers-include-related nil)
+  (mu4e-headers-show-threads nil)
   (mu4e-split-view nil)
   (mu4e-headers-date-format "%Y-%m-%d %H:%M")
   ;; (mu4e-headers-date-format "%y-%m-%d")
@@ -2264,6 +2286,10 @@ session
           mu4e-icalendar-trash-after-reply t))
   (setq gnus-icalendar-org-enabled-p t)
 
+  ;; use imagemagick, if available
+  (when (fboundp 'imagemagick-register-types)
+    (imagemagick-register-types))
+
   (defun poly/mu4e-icalendar-setup ()
     "Perform the necessary initialization to use mu4e-icalendar."
     (gnus-icalendar-setup)
@@ -2281,6 +2307,17 @@ session
 
   (poly/mu4e-icalendar-setup)
   (gnus-icalendar-org-setup)
+
+  ;; from https://github.com/fgallina/dotemacs/blob/master/init.el
+  (defun my:mu4e-toggle-headers-include-related ()
+    "Toggle `mu4e-headers-include-related' and refresh."
+    (interactive)
+    (setq mu4e-headers-include-related
+          (not mu4e-headers-include-related))
+    (mu4e-headers-rerun-search))
+
+  (define-key 'mu4e-headers-mode-map "o"
+    'my:mu4e-toggle-headers-include-related)
 
   (setq mail-user-agent 'mu4e-user-agent)
 
@@ -2345,7 +2382,7 @@ session
     (mu4e-alert-enable-mode-line-display))
   (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
   (setq mu4e-alert-interesting-mail-query
-	(concat "(maildir:/Work/Inbox ) AND flag:unread "
+	(concat "(maildir:/Work ) AND flag:unread "
 		;; "OR "
 		)))
 
@@ -2478,21 +2515,355 @@ there are no attachments."
   )
 #+end_src
 
-#+RESULTS:
-| turn-on-orgtbl | outline-minor-mode | doom-modeline-set-message-modeline |
-
-*** mm
-
+** notmuch
 #+begin_src emacs-lisp
-;; You need to replace this key ID with your own key ID!
-(setq mml2015-signers '("FC6BDB92CD5BEB22")
-      mml2015-encrypt-to-self t)
-(add-hook 'message-send-hook 'mml-secure-message-sign-pgpmime)
-(setq mm-inline-text-html-with-images t)
+(use-package notmuch
+  :straight t
+  :commands notmuch
+  :bind (("C-c m" . notmuch)
+         :map notmuch-show-mode-map (("D" . apm-notmuch-toggle-deleted)
+                                     ("J" . apm-notmuch-toggle-spam)
+				     )
+         :map notmuch-search-mode-map (("D" . apm-notmuch-toggle-deleted)
+                                       ("J" . apm-notmuch-toggle-spam))
+         :map notmuch-tree-mode-map (("D" . apm-notmuch-toggle-deleted)
+                                     ("J" . apm-notmuch-toggle-spam))
+	 :map notmuch-show-part-map (("V" . notmuch-view-html)))
+  :custom
+  (notmuch-show-logo nil)
+  ;; (notmuch-wash-wrap-lines-length 150)
+  (notmuch-search-oldest-first nil)
+  (mail-user-agent 'message-user-agent)
+  ;; (notmuch-wash-wrap-lines-length 80)
+  (notmuch-tree-show-out t)
+  (notmuch-hello-thousands-separator ",")
+  ;; (notmuch-address-command "notmuch-addrlookup")
+  (notmuch-address-command nil)
+  (notmuch-address-use-company nil)
+  (notmuch-address-internal-completion '(received nil))
+  (notmuch-mua-hidden-headers nil)
+  (notmuch-column-control t)
+  ;;; Email composition
+  (notmuch-mua-compose-in 'current-window)
+  (notmuch-mua-hidden-headers nil) ; TODO 2021-05-12: Review hidden headers
+  ;; (notmuch-address-command nil)    ; FIXME 2021-05-13: Make it work with EBDB
+  (notmuch-address-use-company nil)
+  (notmuch-address-internal-completion '(received nil))
+  (notmuch-always-prompt-for-sender t)
+  (notmuch-mua-cite-function 'message-cite-original-without-signature)
+  (notmuch-mua-reply-insert-header-p-function 'notmuch-show-reply-insert-header-p-never)
+  (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-full)
+  (notmuch-maildir-use-notmuch-insert t)
+  (notmuch-crypto-process-mime t)
+  (notmuch-crypto-get-keys-asynchronously t)
+;;; Reading messages
+  (notmuch-show-relative-dates t)
+  (notmuch-show-all-multipart/alternative-parts t)
+  (notmuch-show-indent-messages-width 2)
+  (notmuch-show-indent-multipart nil)
+  (notmuch-show-part-button-default-action 'notmuch-show-save-part)
+  (notmuch-wash-citation-lines-prefix 6)
+  (notmuch-wash-citation-lines-suffix 6)
+  (notmuch-wash-wrap-lines-length 100)
+  (shr-use-colors nil)
+  (notmuch-show-text/html-blocked-images nil)  ; enable images
+  ;; (notmuch-show-text/html-blocked-images ".") ; block everything
+  (notmuch-unthreaded-show-out nil)
+  (notmuch-message-headers '("To" "Cc" "Subject" "Date"))
+  (notmuch-message-headers-visible t)
+  (notmuch-hello-sections '(notmuch-hello-insert-header
+                            notmuch-hello-insert-saved-searches
+                            notmuch-hello-insert-search
+                            notmuch-hello-insert-recent-searches
+                            notmuch-hello-insert-alltags
+                            notmuch-hello-insert-footer))
+  (notmuch-show-all-tags-list t)
+
+  ;;   '(notmuch-draft-folder "top/Drafts")
+  ;; '(notmuch-fcc-dirs "top/Sent")
+  :config
+  ;; (unless (string= (system-name) "spicy")
+  ;;   (setq notmuch-command "remote-notmuch.sh"))
+  ;;; remote-notmuch should look like:
+
+  (define-key notmuch-show-mode-map "d"
+    (lambda ()
+      "toggle deleted tag for message"
+      (interactive)
+      (if (member "deleted" (notmuch-show-get-tags))
+          (notmuch-show-tag (list "-deleted"))
+        (notmuch-show-tag (list "+deleted")))))
+
+  ;; (eval-after-load 'notmuch-show
+  ;;   '(define-key notmuch-show-mode-map "`" 'notmuch-show-apply-tag-macro))
+  ;; (setq notmuch-show-tag-macro-alist
+  ;; 	(list
+  ;; 	 '("m" "+notmuch::patch" "+notmuch::moreinfo" "-notmuch::needs-review")))
+
+  (setq notmuch-search-result-format
+        '(("date" . "%12s  ")
+          ("count" . "%-7s  ")
+          ("authors" . "%-20s  ")
+          ("subject" . "%-80s  ")
+          ("tags" . "(%s)")))
+
+  (setq notmuch-tree-result-format
+        '(("date" . "%12s  ")
+          ("authors" . "%-20s  ")
+          ((("tree" . "%s")
+            ("subject" . "%s"))
+           . " %-80s  ")
+          ("tags" . "(%s)")))
+
+  (setq notmuch-search-line-faces
+        '(("unread" . notmuch-search-unread-face)
+          ("flag" . notmuch-search-flagged-face)))
+  (setq notmuch-show-empty-saved-searches t)
+
+  (setq notmuch-draft-tags '("+draft")
+	notmuch-show-mark-read-tags '("-unread")
+	notmuch-message-forwarded-tags '("+forwarded")
+	notmuch-message-replied-tags '("+replied")
+	notmuch-archive-tags '("-inbox" "+archived"))
+
+  (add-to-list 'corfu-excluded-modes 'notmuch-message-mode)
+  (add-to-list 'corfu-excluded-modes 'org-msg-edit-mode)
+
+  (defun notmuch-show-apply-tag-macro (key)
+    (interactive "k")
+    (let ((macro (assoc key notmuch-show-tag-macro-alist)))
+      (apply 'notmuch-show-tag-message (cdr macro))))
+
+  (define-key notmuch-show-mode-map "r" 'notmuch-show-reply)
+  (define-key notmuch-show-mode-map "R" 'notmuch-show-reply-sender)
+
+  (define-key notmuch-search-mode-map "r" 'notmuch-search-reply-to-thread)
+  (define-key notmuch-search-mode-map "R" 'notmuch-search-reply-to-thread-sender)
+
+
+  (defun apm-notmuch-toggle-tag (tag)
+    "Toggle TAG for the current message returning t if we set it."
+    (let ((gettagsfun nil)
+          (tagfun nil))
+      (pcase major-mode
+        ('notmuch-search-mode
+         (setq gettagsfun #'notmuch-search-get-tags)
+         (setq tagfun #'notmuch-search-tag))
+        ('notmuch-show-mode
+         (setq gettagsfun #'notmuch-show-get-tags)
+         (setq tagfun #'notmuch-show-tag))
+        ('notmuch-tree-mode
+         (setq gettagsfun #'notmuch-tree-get-tags)
+         (setq tagfun #'notmuch-tree-tag))
+        (_
+         (user-error "Must be called from notmuch mode")))
+      (if (member tag (funcall gettagsfun))
+          (funcall tagfun (list (concat "-" tag)))
+        (funcall tagfun (list (concat "+" tag))))
+      ;; return whether it is now set or not
+      (member tag (funcall gettagsfun))))
+  (defun apm-notmuch-toggle-deleted ()
+    "Toggle the deleted tag for the current message."
+    (interactive)
+    (apm-notmuch-toggle-tag "deleted"))
+  (defun apm-notmuch-toggle-spam ()
+    "Toggle the spam tag for the current message."
+    (interactive)
+    (if (apm-notmuch-toggle-tag "spam")
+        (when-let ((url (notmuch-show-get-header :X-MailControl-ReportSpam)))
+          (and (y-or-n-p "Do you also want to report this message as spam to mailcontrol? ")
+               (eww-browse-url url)))))
+
+  (setq mail-user-agent 'notmuch-user-agent)
+  ;; (define-key notmuch-tree-mode-map "r" (notmuch-tree-close-message-pane-and #'notmuch-show-reply))
+  ;; (define-key notmuch-tree-mode-map "R" (notmuch-tree-close-message-pane-and #'notmuch-show-reply-sender))
+  ;;;
+  ;;; #!/usr/bin/env bash
+  ;;; printf -v ARGS "%q " "$@"
+  ;;; exec ssh notmuch notmuch ${ARGS}
+
+  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  (setq read-extended-command-predicate #'command-completion-default-include-p)
+
+  ;; In non-programming-buffers, we don't want `pcomplete-completions-at-point'
+  ;; or 't' which seems to complete everything.
+  (defun ash/fix-completion-for-nonprog-buffers ()
+    (setq completion-at-point-functions
+          (-remove-item t (append (-remove-item #'pcomplete-completions-at-point completion-at-point-functions)
+                                  '(cape-file cape-abbrev cape-rfc1345)))))
+  (add-hook 'org-mode-hook #'ash/fix-completion-for-nonprog-buffers)
+  (add-hook 'notmuch-message-mode-hook #'ash/fix-completion-for-nonprog-buffers)
+
+  ;;; Hooks and key bindings
+  (add-hook 'notmuch-mua-send-hook #'notmuch-mua-attachment-check)
+  (remove-hook 'notmuch-show-hook #'notmuch-show-turn-on-visual-line-mode)
+  (add-hook 'notmuch-show-hook (lambda () (setq-local header-line-format nil)))
+
+  (require 'gnus-art)
+  (defun notmuch-view-html ()
+    "Show current MSG in browser if it includes an HTML-part.
+The variables `browse-url-browser-function',
+`browse-url-handlers', and `browse-url-default-handlers'
+determine which browser function to use."
+    (interactive)
+    (let* ((filename (notmuch-show-get-filename))
+	   (gnus-article-buffer "*Article*")
+	   (max-specpdl-size 4096)
+           (mm-decrypt-option 'known)
+	   (ct (mail-fetch-field "Content-Type"))
+           (ct (and ct (mail-header-parse-content-type ct)))
+           (charset (mail-content-type-get ct 'charset))
+           (charset (and charset (intern charset)))
+           (mu4e~view-rendering t); Needed if e.g. an ics file is buttonized
+           (gnus-article-emulate-mime t)
+           (gnus-unbuttonized-mime-types '(".*/.*"))
+           (gnus-buttonized-mime-types
+            (append (list "multipart/signed" "multipart/encrypted")
+                    gnus-buttonized-mime-types))
+           (gnus-newsgroup-charset
+            (if (and charset (coding-system-p charset)) charset
+              (detect-coding-region (point-min) (point-max) t))))
+
+      ;; if article buffer exist, kill it then create a new one
+      (when (bufferp gnus-article-buffer)
+	(kill-buffer gnus-article-buffer))
+
+      (with-current-buffer (get-buffer-create gnus-article-buffer)
+	(let ((inhibit-read-only t))
+	  (erase-buffer)
+	  (insert-file-contents-literally
+	   filename nil nil nil t))
+	(mm-enable-multibyte)
+	(run-hooks 'gnus-article-decode-hook)
+	(gnus-article-prepare-display)
+	(with-temp-buffer
+	  (insert-file-contents-literally
+	   filename nil nil nil t)
+	  (run-hooks 'gnus-article-decode-hook)
+	  (let ((header (cl-loop for field in '("from" "to" "cc" "date" "subject")
+				 when (message-fetch-field field)
+				 concat (format "%s: %s\n" (capitalize field) it)))
+		(parts (mm-dissect-buffer t t)))
+	    ;; If singlepart, enforce a list.
+	    (when (and (bufferp (car parts))
+                       (stringp (car (mm-handle-type parts))))
+              (setq parts (list parts)))
+	    ;; Process the list
+	    (unless (gnus-article-browse-html-parts parts header)
+              (message "Message does not contain a \"text/html\" part"))
+	    (mm-destroy-parts parts))))
+      ;; kill temp article buffer
+      (mm-destroy-parts gnus-article-mime-handles)
+      (kill-buffer gnus-article-buffer)))
+  )
+
+;; (defun nico-notmuch-view-part-in-webkit ()
+;;   "View the MIME part containing point from within an xwidget webkit buffer."
+;;   (interactive)
+;;   (notmuch-show-apply-to-current-part-handle #'nico-view-part-in-webkit))
+;; (define-key notmuch-show-part-map "w" #'nico-notmuch-view-part-in-webkit)
+
+(use-package notmuch-capf
+  :straight (notmuch-capf
+             :host github
+             :repo "tpeacock19/notmuch-capf"))
+
+(use-package notmuch-labeler
+  :straight t
+  :defer t
+  :after notmuch)
+
+(use-package notmuch-bookmarks
+  :straight t
+  :after notmuch
+  :config
+  (notmuch-bookmarks-mode))
+
+(use-package notmuch-alert
+  :straight (notmuch-alert
+             :host github
+             :repo "publicimageltd/notmuch-alerts")
+  :after notmuch-bookmarks
+  :config
+  (notmuch-alert-mode)
+  (defun notmuch-alert-unread-attachment ()
+    "Create a new alert object for unread mails with attachment."
+    (make-notmuch-alert :filter "date:today"
+			:description "Check for mails from today"
+			:format-string "%d mails from today"))
+  (defun notmuch-alert-unread-attachment ()
+    "Create a new alert object for unread mails with attachment."
+    (make-notmuch-alert :filter "date:today"
+			:description "Check for mails from today"
+			:format-string "%d mails from today"))
+  :bind*
+  (:map global-map
+	("<f3>" . notmuch-alert-visit))
+  )
+
+
+(use-package notmuch-notify
+  :ensure t
+  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify")
+  ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
+  :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
+  :custom
+  (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
+  (notmuch-notify-refresh-interval 60)
+  ;; (notmuch-notify-alert-profiles
+  ;;  `((:name "inbox"
+  ;; 	    :search-term "tag:inbox"
+  ;; 	    :severity urgent
+  ;; 	    :title "Notmuch inbox:"
+  ;; 	    :icon ,(expand-file-name "img/inbox.jpg" user-emacs-directory)
+  ;; 	    :audio ,(expand-file-name "audio/inbox.mp3" user-emacs-directory))
+  ;;    (:name "default")))
+  :config
+  ;; (Recommended) activate system-wise notification timer
+  (notmuch-notify-set-refresh-timer))
+
+
+;; (straight-use-package
+;;  '(notmuch-update :local-repo "/Users/jiya/.emacs.d/site-lisp/notmuch-update/" :type nil))
+
+(with-eval-after-load 'notmuch-update
+  (setq notmuch-update-command "/usr/local/bin/fdm fetch && notmuch new")
+  (setq notmuch-update-interval (* 5 60))
+  (defun splinter-notmuch-refresh-non-show-buffers ()
+    "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
+except for `notmuch-show-mode' buffers."
+    (interactive)
+    (dolist (buffer (buffer-list))
+      (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
+        (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
+          (with-current-buffer buffer
+            (notmuch-refresh-this-buffer))))))
+  (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
+  (bind-key "u" #'notmuch-update notmuch-common-keymap))
+
+;; (use-package notmuch-update
+;;   :straight (notmuch-update :local-repo "/Users/jiya/.emacs.d/site-lisp/notmuch-update/" :type nil)
+;;   :after (notmuch notmuch-notify)
+;;   :custom
+;;   (notmuch-update-command "/usr/local/bin/fdm fetch && notmuch new")
+;;   (notmuch-update-interval (* 5 60))
+;;   :init
+;;   (defun splinter-notmuch-refresh-non-show-buffers ()
+;;     "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
+;; except for `notmuch-show-mode' buffers."
+;;     (interactive)
+;;     (dolist (buffer (buffer-list))
+;;       (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
+;;         (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
+;;           (with-current-buffer buffer
+;;             (notmuch-refresh-this-buffer))))))
+;;   :hook
+;;   (notmuch-hello-mode . notmuch-update-start)
+;;   ;; (notmuch-update-post . notmuch-notify)
+;;   ;; (notmuch-update-post . splinter-notmuch-refresh-non-show-buffers)
+;;   :bind (:map notmuch-common-keymap (("u" . notmuch-update))))
 #+end_src
 
-#+RESULTS:
-: t
 
 ** GNUS
 
@@ -2604,7 +2975,7 @@ there are no attachments."
   (setq gnus-use-trees nil)
   (setq gnus-gcc-mark-as-read t)
   (setq gnus-asynchronous t)
-  (setq browse-url-browser-function 'browse-url-default-macosx-browser)
+
   (setq gnus-check-new-newsgroups nil)
   ;; (setq gnus-select-method '(nnnil ""))
 
@@ -2855,6 +3226,118 @@ there are no attachments."
   :hook (gnus-article-mode-hook . (lambda () (setq-local fill-column 80))))
 #+end_src
 
+
+** Others
+
+*** mm
+
+#+begin_src emacs-lisp
+;; You need to replace this key ID with your own key ID!
+(setq mml2015-signers '("FC6BDB92CD5BEB22")
+      mml2015-encrypt-to-self t)
+(add-hook 'message-send-hook 'mml-secure-message-sign-pgpmime)
+(setq mm-inline-text-html-with-images t)
+
+(setq mm-text-html-renderer 'w3m)
+;; (setq browse-url-browser-function #'w3m-browse-url)
+;; (setq browse-url-browser-function 'xwidget-webkit-browse-url)
+(setq browse-url-browser-function 'browse-url-default-macosx-browser)
+(setq gnus-inhibit-images nil);; Keep images displayed
+(setq gnus-blocked-images nil)
+(setq mm-inline-text-html-with-images t)
+
+(setq mm-coding-system-priorities '(iso-8859-1 gbk gb18030 utf-8))
+(setq mm-use-ultra-safe-encoding t)
+
+  ;; use imagemagick, if available
+  (when (fboundp 'imagemagick-register-types)
+    (imagemagick-register-types))
+
+(require 'epg-config)
+
+(setq-default mml2015-use 'epg
+              mml2015-encrypt-to-self t
+              mml2015-sign-with-sender t)
+#+end_src
+
+*** w3m
+
+#+begin_src emacs-lisp
+(use-package w3m
+  :straight t
+  :config
+  (with-eval-after-load 'notmuch
+    (notmuch-show-setup-w3m)))
+#+end_src
+
+*** ebdb
+
+#+begin_src emacs-lisp :tangle no
+(use-package ebdb
+  :straight t
+  :config
+  (require 'ebdb-message)
+  (require 'ebdb-notmuch) ; FIXME 2021-05-13: does not activate the corfu-mode UI
+  ;; (setq ebdb-sources (locate-user-emacs-file "ebdb"))
+  (setq ebdb-sources (expand-file-name "ebdb/ebdb" poly-cache-dir))
+  (setq ebdb-permanent-ignores-file (expand-file-name "ebdb/ebdb-permanent-ignores" poly-cache-dir))
+
+  (setq ebdb-mua-pop-up nil)
+  (setq ebdb-default-window-size 0.25)
+  (setq ebdb-mua-default-formatter ebdb-default-multiline-formatter)
+
+  ;; (setq ebdb-mua-auto-update-p 'existing)
+  ;; (setq ebdb-mua-reader-update-p 'existing)
+  ;; (setq ebdb-mua-sender-update-p 'create)
+  ;; (setq ebdb-message-auto-update-p 'create)
+
+  ;; (setq ebdb-mua-auto-update-p nil)
+  ;; (setq ebdb-mua-reader-update-p nil)
+  ;; (setq ebdb-mua-sender-update-p nil)
+  ;; (setq ebdb-message-auto-update-p nil)
+
+  (setq ebdb-message-try-all-headers t)
+  (setq ebdb-message-headers
+        '((sender "From" "Resent-From" "Reply-To" "Sender")
+          (recipients "Resent-To" "Resent-Cc" "Resent-CC" "To" "Cc" "CC" "Bcc" "BCC")))
+  (setq ebdb-message-all-addresses t)
+
+  (setq ebdb-complete-mail 'capf)
+  (setq ebdb-mail-avoid-redundancy t)
+  (setq ebdb-completion-display-record nil)
+  (setq ebdb-complete-mail-allow-cycling nil)
+
+  ;; (setq ebdb-record-self "ace719a4-61f8-4bee-a1ca-2f07e2292305")
+  (setq ebdb-user-name-address-re 'self) ; match the above
+  (setq ebdb-save-on-exit t)
+
+  ;; (add-hook 'message-setup-hook #'prot-mail-ebdb-message-setup)
+  ;; (with-eval-after-load 'prot-mail ; check my `prot-mail.el'
+  ;;   (add-hook 'message-setup-hook #'prot-mail-ebdb-message-setup))
+  (let ((map ebdb-mode-map))
+    (define-key map (kbd "D") #'ebdb-delete-field-or-record)
+    (define-key map (kbd "M") #'ebdb-mail) ; disables `ebdb-mail-each'
+    (define-key map (kbd "m") #'ebdb-toggle-record-mark)
+    (define-key map (kbd "t") #'ebdb-toggle-all-record-marks)
+    (define-key map (kbd "T") #'ebdb-toggle-records-format) ; disables `ebdb-toggle-all-records-format'
+    (define-key map (kbd "U") #'ebdb-unmark-all-records))
+
+  (remove-hook 'message-send-hook 'ebdb-message-auto-update)
+  (remove-hook 'mail-send-hook 'ebdb-message-auto-update)
+
+  (defun poly/org-msg-post ()
+    ;; (message "enable ebdb-insinuate-message")
+    (ebdb-insinuate-message)
+    (poly/set-mail-capf))
+
+  (add-hook 'gnus-message-setup-hook #'poly/org-msg-post)
+  ;; (advice-add 'org-msg-post-setup :around 'poly/org-msg-post)
+  ;; (advice-add 'org-msg-post-setup--if-not-reply :around 'poly/org-msg-post)
+  ;; (add-hook 'notmuch-mua-reply #'poly/org-msg-post)
+  ;; (add-hook 'notmuch-mua-mail #'poly/org-msg-post)
+  )
+#+end_src
+
 ** Marking Articles
  https://github.com/cofi/dotfiles/blob/master/gnus.el
  https://github.com/fniessen/gnus-leuven
@@ -3030,15 +3513,14 @@ org-download-paste for clipboard images
 #+begin_src emacs-lisp
 (use-package org-msg
   :straight t
-  :after (mu4e)
   :config
-  (setq
-   org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
-   org-msg-startup "hidestars indent inlineimages"
-   org-msg-greeting-fmt "\nHi%s,\n\n"
-   org-msg-greeting-name-limit 3
-   org-export-global-macros  '(("color" . "@@html:<span style=\"color: $1\">$2</span>@@@@latex:\textcolor{$1}{$2}@@@@odt:<text:span text:style-name=\"$1\">$2</text:span>@@"))
-   org-msg-convert-citation t)
+  (org-msg-mode-notmuch)
+  (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+	org-msg-startup "hidestars indent inlineimages"
+	org-msg-greeting-fmt "\nHi%s,\n\n"
+	org-msg-greeting-name-limit 3
+	org-export-global-macros  '(("color" . "@@html:<span style=\"color: $1\">$2</span>@@@@latex:\textcolor{$1}{$2}@@@@odt:<text:span text:style-name=\"$1\">$2</text:span>@@"))
+	org-msg-convert-citation t)
 
   (setq org-msg-enforce-css
 	(let* ((font-family '(font-family . "\"PingFang SC Regular\",\"PingFang SC\",\"Microsoft YaHei Regular\",\"Microsoft YaHei\",\"Arial\",\"Helvetica\", \"sans-serif\""))

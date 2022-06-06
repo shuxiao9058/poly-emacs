@@ -48,6 +48,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 ;; Suppress warning when opening large files
 (setq large-file-warning-threshold nil)
 
+ (setq ring-bell-function 'ignore)
+
 ; From Mastering Emacs
 ;; https://masteringemacs.org/article/working-coding-systems-unicode-emacs
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
