@@ -2775,33 +2775,33 @@ determine which browser function to use."
   :defer t
   :after notmuch)
 
-(use-package notmuch-bookmarks
-  :straight t
-  :after notmuch
-  :config
-  (notmuch-bookmarks-mode))
+;; (use-package notmuch-bookmarks
+;;   :straight t
+;;   :after notmuch
+;;   :config
+;;   (notmuch-bookmarks-mode))
 
-(use-package notmuch-alert
-  :straight (notmuch-alert
-             :host github
-             :repo "publicimageltd/notmuch-alerts")
-  :after notmuch-bookmarks
-  :config
-  (notmuch-alert-mode)
-  (defun notmuch-alert-unread-attachment ()
-    "Create a new alert object for unread mails with attachment."
-    (make-notmuch-alert :filter "date:today"
-			:description "Check for mails from today"
-			:format-string "%d mails from today"))
-  (defun notmuch-alert-unread-attachment ()
-    "Create a new alert object for unread mails with attachment."
-    (make-notmuch-alert :filter "date:today"
-			:description "Check for mails from today"
-			:format-string "%d mails from today"))
-  :bind*
-  (:map global-map
-	("<f3>" . notmuch-alert-visit))
-  )
+;; (use-package notmuch-alert
+;;   :straight (notmuch-alert
+;;              :host github
+;;              :repo "publicimageltd/notmuch-alerts")
+;;   :after notmuch-bookmarks
+;;   :config
+;;   (notmuch-alert-mode)
+;;   (defun notmuch-alert-unread-attachment ()
+;;     "Create a new alert object for unread mails with attachment."
+;;     (make-notmuch-alert :filter "date:today"
+;; 			:description "Check for mails from today"
+;; 			:format-string "%d mails from today"))
+;;   (defun notmuch-alert-unread-attachment ()
+;;     "Create a new alert object for unread mails with attachment."
+;;     (make-notmuch-alert :filter "date:today"
+;; 			:description "Check for mails from today"
+;; 			:format-string "%d mails from today"))
+;;   :bind*
+;;   (:map global-map
+;; 	("<f3>" . notmuch-alert-visit))
+;;   )
 
 
 (use-package notmuch-notify
@@ -2819,7 +2819,7 @@ determine which browser function to use."
 	    :search-term "tag:inbox"
 	    :severity urgent
 	    :title "Notmuch inbox:"
-	    ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
+	    :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
 	    :audio ,(expand-file-name "straightbuild/notmuch-notify/emailreceived.wav" straight-base-dir))
      (:name "default")))
   :config
