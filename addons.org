@@ -1651,6 +1651,17 @@ Enable diff-hl in based on major modes.
   (or (equal rime--current-input-key ?`)
       (equal rime--current-input-key ?~)))
 
+(defun +rime-inline-predicate()
+  (and (not (eq major-mode 'minibuffer-mode))
+       (or (rime-predicate-space-after-cc-p)
+	   (+rime-predicate-is-back-quote-or-tilde)
+	   (rime-predicate-current-uppercase-letter-p))))
+
+(defun +rime-disable-predicate()
+  (and (not (eq major-mode 'minibuffer-mode))
+       (or (rime-predicate-prog-in-code-p) (rime-predicate-after-alphabet-char-p)
+	   (meow-normal-mode-p) (meow-motion-mode-p) (meow-keypad-mode-p))))
+
 (use-package rime
   :straight (rime
 	     :host github
@@ -1659,15 +1670,9 @@ Enable diff-hl in based on major modes.
   :defer t
   :custom
   ;; Disable input method in non-insert state.
-  (rime-disable-predicates '(rime-predicate-prog-in-code-p
-			     rime-predicate-after-alphabet-char-p
-			     meow-normal-mode-p
-			     meow-motion-mode-p
-			     meow-keypad-mode-p))
+  (rime-disable-predicates '(+rime-disable-predicate))
   ;; Auto switch to inline ascii state when after a space after a non-ascii character.
-  (rime-inline-predicates '(rime-predicate-space-after-cc-p
-			    +rime-predicate-is-back-quote-or-tilde
-			    rime-predicate-current-uppercase-letter-p))
+  (rime-inline-predicates '(+rime-inline-predicate))
   (rime-translate-keybindings '("C-f" "C-b" "C-n" "C-p" "C-g"))
   (default-input-method "rime")
   ;; (rime-cursor "˰")
