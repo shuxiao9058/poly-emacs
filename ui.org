@@ -146,7 +146,7 @@
 
 ;; Disable most GUI widgets early on
 (setq default-frame-alist '((horizontal-scroll-bars . nil)
-                            (alpha . (0.90 0.90))
+                            ;; (alpha . (0.90 0.90))
                             (ns-appearance . dark)
                             (ns-transparent-titlebar . t)
                             (drag-internal-border . 1)
@@ -154,15 +154,32 @@
                             (internal-border-width . 0)
                             ;; (internal-border-width . 5)
                             (vertical-scroll-bars . nil)
-                            (menu-bar-lines . 0)
+                            ;; (menu-bar-lines . 0)
                             (tool-bar-lines . 0)
                             (fullscreen . maximized)
                             (height . 50)
                             (width . 95)
                             (undecorated . t) ;; remove title bar
                             ))
-#+end_src
 
+;; reference | http://d.hatena.ne.jp/IMAKADO/20090215/1234699972
+(defun my-toggle-transparency ()
+  "Toggle transparency."
+  (interactive)
+  (let ((frame  (selected-frame)))
+    (when (display-graphic-p frame)
+      (let* ((current-alpha (or (car (cdr (assoc 'alpha (frame-parameters frame)))) 1.0))
+             (new-alpha (or (cl-case current-alpha ((0.85) 1.0)
+				 ;; ((100) 93)
+				 ;; ((93) 91)
+				 ;; ((91) 78) ((78) 66) ((66) 50)
+				 ;; (t 100)
+				     ) 0.85)))
+	;; (princ current-alpha)
+	(when new-alpha (set-frame-parameter frame 'alpha `(,new-alpha ,new-alpha)))))))
+
+;; (my-toggle-transparency)
+#+end_src
 
 ** fix macOS switch desktop lose focus
 

@@ -769,6 +769,7 @@ Quick action with hydra
 _a_genda
 _e_in
 _f_lycheck
+_n_otdeft
 _o_utline & outshine
 _s_traight
 _t_ab
@@ -777,6 +778,7 @@ _w_indow
   ("a" hydra-agenda-view/body :exit t)
   ("d" dumb-jump-hydra/body :exit t)
   ("f" hydra-flycheck/body :exit t)
+  ("n" notdeft-global-hydra/body :exit t)
   ("w" hydra-window/body :exit t)
   ("o" hydra-outline/body :exit t)
   ("s" hydra-straight/body :exit t)
@@ -1652,13 +1654,13 @@ Enable diff-hl in based on major modes.
       (equal rime--current-input-key ?~)))
 
 (defun +rime-inline-predicate()
-  (and (not (eq major-mode 'minibuffer-mode))
+  (and (not (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
        (or (rime-predicate-space-after-cc-p)
 	   (+rime-predicate-is-back-quote-or-tilde)
 	   (rime-predicate-current-uppercase-letter-p))))
 
 (defun +rime-disable-predicate()
-  (and (not (eq major-mode 'minibuffer-mode))
+  (and (not (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
        (or (rime-predicate-prog-in-code-p) (rime-predicate-after-alphabet-char-p)
 	   (meow-normal-mode-p) (meow-motion-mode-p) (meow-keypad-mode-p))))
 
@@ -2532,6 +2534,8 @@ there are no attachments."
          :map notmuch-tree-mode-map (("D" . apm-notmuch-toggle-deleted)
                                      ("J" . apm-notmuch-toggle-spam))
 	 :map notmuch-show-part-map (("V" . notmuch-view-html)))
+  :init
+  (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notmuch-show-logo nil)
   ;; (notmuch-wash-wrap-lines-length 150)
@@ -2540,8 +2544,8 @@ there are no attachments."
   ;; (notmuch-wash-wrap-lines-length 80)
   (notmuch-tree-show-out t)
   (notmuch-hello-thousands-separator ",")
-  (notmuch-address-command "notmuch-addrlookup")
-  ;; (notmuch-address-command nil)
+  ;; (notmuch-address-command "notmuch-addrlookup")
+  (notmuch-address-command nil)
   (notmuch-address-use-company nil)
   (notmuch-address-internal-completion '(received nil))
   (notmuch-mua-hidden-headers nil)
@@ -2630,8 +2634,8 @@ there are no attachments."
 	notmuch-message-replied-tags '("+replied")
 	notmuch-archive-tags '("-inbox" "+archived"))
 
-  (add-to-list 'corfu-excluded-modes 'notmuch-message-mode)
-  (add-to-list 'corfu-excluded-modes 'org-msg-edit-mode)
+  ;; (add-to-list 'corfu-excluded-modes 'notmuch-message-mode)
+  ;; (add-to-list 'corfu-excluded-modes 'org-msg-edit-mode)
 
   (defun notmuch-show-apply-tag-macro (key)
     (interactive "k")
@@ -2802,27 +2806,25 @@ determine which browser function to use."
 
 (use-package notmuch-notify
   :ensure t
-  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify")
+  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
+			    :files (:defaults "*.png" "*.wav"))
   ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
   :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
   :custom
-  (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
-  (notmuch-notify-refresh-interval 60)
-  ;; (notmuch-notify-alert-profiles
-  ;;  `((:name "inbox"
-  ;; 	    :search-term "tag:inbox"
-  ;; 	    :severity urgent
-  ;; 	    :title "Notmuch inbox:"
-  ;; 	    :icon ,(expand-file-name "img/inbox.jpg" user-emacs-directory)
-  ;; 	    :audio ,(expand-file-name "audio/inbox.mp3" user-emacs-directory))
-  ;;    (:name "default")))
+  ;; (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
+  (notmuch-notify-refresh-interval 300)
+  (alert-default-style 'notifier)
+  (notmuch-notify-alert-profiles
+   `((:name "inbox"
+	    :search-term "tag:inbox"
+	    :severity urgent
+	    :title "Notmuch inbox:"
+	    ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
+	    :audio ,(expand-file-name "straightbuild/notmuch-notify/emailreceived.wav" straight-base-dir))
+     (:name "default")))
   :config
   ;; (Recommended) activate system-wise notification timer
   (notmuch-notify-set-refresh-timer))
-
-
-;; (straight-use-package
-;;  '(notmuch-update :local-repo "/Users/jiya/.emacs.d/site-lisp/notmuch-update/" :type nil))
 
 (with-eval-after-load 'notmuch-update
   (setq notmuch-update-command "/usr/local/bin/fdm fetch && notmuch new")

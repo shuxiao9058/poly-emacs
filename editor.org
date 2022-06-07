@@ -805,3 +805,12 @@ Visualizing Color Codes with rainbow-mode.
   :config
   (all-the-icons-ibuffer-mode t))
 #+end_src
+
+
+* toggle map
+
+#+begin_src emacs-lisp
+(define-prefix-command 'toggle-map)
+(global-set-key (kbd "\C-c t") 'toggle-map)
+(bind-key "t" #'my-toggle-transparency 'toggle-map)
+#+end_src

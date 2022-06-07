@@ -1484,3 +1484,19 @@ Prefix arguments are interpreted by `org-refile'."
   :straight t
   :hook (markdown-mode . mmm-mode))
 #+end_src
+
+* notdeft
+
+#+begin_src emacs-lisp
+(use-package notdeft
+  :init  (setenv "XAPIAN_CJK_NGRAM" "1")
+  :custom
+  (notdeft-allow-org-property-drawers t)
+  :straight (:host github :repo "hasu/notdeft" :files ("*.el" "extras/*.el" "xapian"))
+  :config
+  (setq notdeft-directories `(,org-beorg-directory)
+	notdeft-extension "org")
+  (add-hook 'org-mode-hook 'notdeft-note-mode)
+  (require 'notdeft-global)
+  (require 'notdeft-global-hydra))
+#+end_src
