@@ -696,7 +696,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	       (cape-capf-buster
 		(cape-super-capf
 		 #'notmuch-capf
-		 #'ebdb-mail-dwim-completion-at-point-function
+		 ;; #'ebdb-mail-dwim-completion-at-point-function
 		 ;; #'ebdb-complete-mail
 		 #'tabnine-completion-at-point
 		 ;; arg-capf
@@ -2770,10 +2770,12 @@ determine which browser function to use."
              :host github
              :repo "tpeacock19/notmuch-capf"))
 
-(use-package notmuch-labeler
-  :straight t
-  :defer t
-  :after notmuch)
+;; (use-package notmuch-labeler
+;;   :straight t
+;;   :commands notmuch-labeler-rename
+;;   :defer t
+;;   :after notmuch
+;;   )
 
 ;; (use-package notmuch-bookmarks
 ;;   :straight t
@@ -3305,13 +3307,11 @@ except for `notmuch-show-mode' buffers."
   (remove-hook 'message-send-hook 'ebdb-message-auto-update)
   (remove-hook 'mail-send-hook 'ebdb-message-auto-update)
 
-  (defun poly/org-msg-post ()
-    ;; (message "enable ebdb-insinuate-message")
-    (ebdb-insinuate-message)
-    (poly/set-mail-capf))
+  ;; (add-hook 'gnus-message-setup-hook #'poly/org-msg-post)
+  ;; (advice-add 'org-msg-post-setup :after 'poly/org-msg-post)
+  ;; (advice-add 'org-msg-post-setup--if-not-reply :after 'poly/org-msg-post)
 
-  (add-hook 'gnus-message-setup-hook #'poly/org-msg-post)
-  ;; (advice-add 'org-msg-post-setup :around 'poly/org-msg-post)
+  ;;   (advice-add 'org-msg-post-setup :around 'poly/org-msg-post)
   ;; (advice-add 'org-msg-post-setup--if-not-reply :around 'poly/org-msg-post)
   ;; (add-hook 'notmuch-mua-reply #'poly/org-msg-post)
   ;; (add-hook 'notmuch-mua-mail #'poly/org-msg-post)
@@ -3493,6 +3493,12 @@ org-download-paste for clipboard images
 #+begin_src emacs-lisp
 (use-package org-msg
   :straight t
+  :hook (org-msg-edit-mode . (lambda ()
+			       (poly/set-mail-capf)
+			       (set-fill-column 100)
+			       (turn-on-auto-fill)
+			       (electric-indent-local-mode -1)
+			       (turn-on-flyspell)))
   :config
   (org-msg-mode-notmuch)
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"

@@ -84,8 +84,8 @@ You may want to set this to window's border color.")
    `(secondary-selection            ((t (:background ,region2 :extend t))))
 
    ;; ISearch
-   `(isearch                        ((t (:background ,green :foreground "black"))))
-   `(isearch-fail                   ((t (:backgronud ,red :foreground "black"))))
+   `(isearch                        ((t (:background ,green :foreground ,black))))
+   `(isearch-fail                   ((t (:backgronud ,red :foreground ,orange))))
 
    ;; Font Locks
    `(font-lock-comment-face         ((t (:foreground ,comment :italic ,italic))))
