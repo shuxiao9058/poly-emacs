@@ -13,6 +13,9 @@
   "The main color used for some places.
 You may want to set this to window's border color.")
 
+(defface tabnine-face '((t (:inherit font-lock-string-face)))
+  "tabnine face")
+
 (let ((fg "#F8F8F2")
       (fg+1 "#CCCCCC")
       (fg-1 "#909090")
@@ -129,6 +132,7 @@ You may want to set this to window's border color.")
    `(corfu-default                ((t (:background "#151321"))))
    `(corfu-current                ((t (:background ,region))))
    `(corfu-border                ((t (:background ,bg+1))))
+   `(tabnine-face                ((t (:forground ,white))))
 
    ;; Yasnippet
    `(yas-field-highlight-face       ((t (:background ,region2))))

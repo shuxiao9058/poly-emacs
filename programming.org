@@ -299,7 +299,7 @@ If INTERACTIVE, prompt user for details."
 
 (use-package eglot
   :straight t
-  :hook ((go-mode lua-mode beancount-mode python-mode c-mode c++-mode python-mode java-mode) . eglot-ensure)
+  :hook ((go-mode lua-mode beancount-mode python-mode clojure-mode clojurescript-mode c-mode c++-mode python-mode java-mode) . eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
@@ -344,8 +344,10 @@ If INTERACTIVE, prompt user for details."
 	    (lambda()
 	      (progn
 		(flymake-mode -1)
-		(lsp/non-greedy-eglot)
-		(lsp/extra-capf))
+		;; (lsp/non-greedy-eglot)
+		;; (lsp/extra-capf)
+		(poly/set-lsp-capf)
+		)
 	      ;; (make-local-variable 'completion-at-point-functions)
 	      ;; (setq-local completion-at-point-functions
 	      ;;		  '(tabnine-completion-at-point cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))

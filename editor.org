@@ -598,7 +598,6 @@ WIN-ID : Window index."
 (bind-key "C-M-s-<right>" #'move-frame-to-right-side)
 #+end_src
 
-
 * shackle
 
 don't pop windows everywhere!

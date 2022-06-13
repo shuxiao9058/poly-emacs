@@ -499,9 +499,10 @@ do not already have one."
   ;;	  (remove '("AUTO" "inputenc" t) org-latex-default-packages-alist))
 
   (setq
-   ;; org-latex-caption-above nil ;; 表格等标题置于下方
-   ;; org-export-latex-listings t
-   ;; org-export-latex-tables-column-borders t ;; 表格边框
+   org-export-preserve-breaks t
+   org-latex-caption-above nil ;; 表格等标题置于下方
+   org-export-latex-listings t
+   org-export-latex-tables-column-borders t ;; 表格边框
    org-latex-image-default-width "0.5\\textwidth"
    org-latex-toc-command "\\tableofcontents\n\\clearpage\n" ;; 目录自动分页
    ;; org-latex-pdf-process  '("xelatex -shell-escape -interaction nonstopmode -output-directory %o %f")
