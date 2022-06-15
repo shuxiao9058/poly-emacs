@@ -564,17 +564,19 @@ WIN-ID : Window index."
 
 (defun move-frame-left-or-right-side (left)
   (when (display-graphic-p)
-    (let* ((monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
+    (let* ((frame (selected-frame))
+	   (fullscreen (frame-parameter frame 'fullscreen))
+	   (monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
 	   (monitor-width (car monitor-width-height-in-pixel))
 	   (monitor-height (nth 1 monitor-width-height-in-pixel)))
-
-      (set-frame-width (selected-frame) (- (/ monitor-width 2) 31) nil t)
-      (set-frame-height (selected-frame) (- monitor-height  55) nil t)
+      (when (eq fullscreen 'maximized)
+	(toggle-frame-maximized))
+      (set-frame-width frame (- (/ monitor-width 2) 31) nil t)
+      (set-frame-height frame (- monitor-height  55) nil t)
       (if left
-	  (set-frame-position (selected-frame) 0 0)
+	  (set-frame-position frame 0 0)
 	;; (set-frame-position (selected-frame) (/ (display-pixel-width) 2) 0)
-	(let* ((frame (selected-frame))
-	       (frame-width-pixel (frame-native-width frame))
+	(let ((frame-width-pixel (frame-native-width frame))
 	       (screen-width-pixel (display-pixel-width)))
 	  (set-frame-position frame (- monitor-width frame-width-pixel 30) 0))))))
 
