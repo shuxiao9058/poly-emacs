@@ -577,8 +577,26 @@ WIN-ID : Window index."
 	  (set-frame-position frame 0 0)
 	;; (set-frame-position (selected-frame) (/ (display-pixel-width) 2) 0)
 	(let ((frame-width-pixel (frame-native-width frame))
-	       (screen-width-pixel (display-pixel-width)))
+	      (screen-width-pixel (display-pixel-width)))
 	  (set-frame-position frame (- monitor-width frame-width-pixel 30) 0))))))
+
+(defun move-frame-top-or-bottom-side (top)
+  (when (display-graphic-p)
+    (let* ((frame (selected-frame))
+	   (fullscreen (frame-parameter frame 'fullscreen))
+	   (monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
+	   (monitor-width (car monitor-width-height-in-pixel))
+	   (monitor-height (nth 1 monitor-width-height-in-pixel)))
+      (when (eq fullscreen 'maximized)
+	(toggle-frame-maximized))
+      (set-frame-height frame (- (/ monitor-height 2) 31) nil t)
+      (set-frame-width frame (- monitor-width 50) nil t)
+      (if top
+	  (set-frame-position frame 0 0)
+	(let ((frame-width-pixel (frame-native-width frame))
+	      (frame-height-pixel (frame-native-height frame))
+	      (screen-width-pixel (display-pixel-width)))
+	  (set-frame-position frame 0 (- monitor-height frame-height-pixel 30)))))))
 
 (defun move-frame-to-left-side ()
   "Move frame to left side."
@@ -592,12 +610,26 @@ WIN-ID : Window index."
   (if (display-graphic-p)
       (move-frame-left-or-right-side nil)))
 
+(defun move-frame-to-top-side ()
+  "Move frame to top side."
+  (interactive)
+  (if (display-graphic-p)
+      (move-frame-top-or-bottom-side t)))
+
+(defun move-frame-to-bottom-side ()
+  "Move frame to bottom side."
+  (interactive)
+  (if (display-graphic-p)
+      (move-frame-top-or-bottom-side nil)))
+
 ;; preserve smartparens's shortcut
 ;; (bind-key "C-M-<left>" #'move-frame-to-left-side)
 ;; (bind-key "C-M-<right>" #'move-frame-to-right-side)
 
 (bind-key "C-M-s-<left>" #'move-frame-to-left-side)
 (bind-key "C-M-s-<right>" #'move-frame-to-right-side)
+(bind-key "C-M-s-<up>" #'move-frame-to-top-side)
+(bind-key "C-M-s-<down>" #'move-frame-to-bottom-side)
 #+end_src
 
 * shackle
@@ -741,7 +773,6 @@ Visualizing Color Codes with rainbow-mode.
     :init
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
-
 
 * highlight indent & parentheses
 
