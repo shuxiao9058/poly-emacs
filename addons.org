@@ -298,9 +298,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :demand t
   :after selectrum
   :defer 1
-  ;; :custom
-  ;; (consult-preview-key nil)
-  ;; (consult-project-root-function #'projectile-project-root)
+  :custom
+  (consult-preview-key nil)
+  (consult-project-root-function #'projectile-project-root)
   :hook
   (completion-list-mode . consult-preview-at-point-mode)
   :init (bind-key "TAB"
@@ -321,7 +321,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      consult-ripgrep consult-grep
      consult-buffer consult-recent-file
      :preview-key (kbd "M-."))
-
     ;; Disable consult-buffer project-related capabilities as
     ;; they are very slow in TRAMP.
     (setq consult-buffer-sources
@@ -330,6 +329,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
     (setq consult--source-hidden-buffer
 	  (plist-put consult--source-hidden-buffer :narrow ?h)))
+
+  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
+  (advice-add #'multi-occur :override #'consult-multi-occur)
+  (setq consult-narrow-key "<"
+	consult-line-numbers-widen t)
   :bind (
 	 ("M-s f" . consult-line)
 	 ("M-g g" . consult-line)
@@ -337,7 +341,17 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("M-g i" . consult-imenu)
 	 ("M-g r" . consult-ripgrep)
 	 ("C-x C-r" . consult-recent-file)
-	 ([remap yank-pop] . consult-yank-from-kill-ring)
+	 ([remap apropos]  . consult-apropos)
+	 ([remap bookmark-jump] . consult-bookmark)
+	 ([remap goto-line]  . consult-goto-line)
+	 ([remap imenu]         . consult-imenu)
+	 ([remap recentf-open-files] . consult-recent-file)
+	 ([remap yank-pop] . consult-yank-pop)
+	 ([remap switch-to-buffer]          . consult-buffer)
+	 ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+	 ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
+	 ([remap man]      . consult-man)
+	 ;; ([remap yank-pop] . consult-yank-from-kill-ring)
 	 ([remap switch-to-buffer] . consult-buffer)
 	 ([remap goto-line] . consult-goto-line)))
 
@@ -1659,6 +1673,15 @@ Enable diff-hl in based on major modes.
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
   (add-hook 'prog-mode-hook 'diff-hl-mode)
   (add-hook 'conf-mode-hook 'diff-hl-mode)
+#+end_src
+
+
+Magit with cz
+
+#+begin_src emacs-lisp
+(use-package magit-cz
+  :straight (magit-cz :host github :repo "yqrashawn/magit-cz")
+  :after magit)
 #+end_src
 
 * Input method with emacs-rime
