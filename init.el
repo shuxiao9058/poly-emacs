@@ -7,7 +7,6 @@
   (poly-load-org-config "private" t)
   (poly-load-org-config "laf" t)
   (poly-load-org-config "editor" t)
-  (poly-load-org-config "writing" t)
   (poly-load-org-config "programming" t)
   (poly-load-org-config "addons" t))
 
@@ -45,6 +44,5 @@
 
 ;; (poly-load-org-config "project")
 (poly-load-org-config "editor")
-(poly-load-org-config "writing")
 (poly-load-org-config "programming")
 (poly-load-org-config "addons" t)

@@ -144,13 +144,13 @@ Core configuration of poly emacs, global variable declare.
 See `eval-after-load' for the possible formats of FORM."
   (if (null my-features)
       (if (functionp form)
-    (funcall form)
-  (eval form))
+	  (funcall form)
+	(eval form))
     (eval-after-load (car my-features)
       `(lambda ()
-   (eval-after-load-all
-    (quote ,(cdr my-features))
-    (quote ,form))))))
+	 (eval-after-load-all
+	  (quote ,(cdr my-features))
+	  (quote ,form))))))
 
 
 (cl-defmacro after-load (pkgs &body body)
@@ -217,7 +217,7 @@ of an error, just add the package to a list of missing packages."
   (if (not (string-equal (ad-get-arg 0) "%s%s"))
       (let ((deactivate-mark nil)
             (inhibit-read-only t))
-  (with-current-buffer "*Messages*"
+	(with-current-buffer "*Messages*"
           (goto-char (point-max))
           (if (not (bolp))
               (newline))
@@ -284,15 +284,18 @@ Accepts the same arguments as `message'."
 (defun terminal-notify (message &optional title)
   "Display a Notify MESSAGE. The optional TITLE's default value is \"Emacs\"."
   (interactive "Message: ")
-  (let ((g-title (if (and title (not (eq title ""))) title "Emacs")))
-    (shell-command
-     (concat
-      "terminal-notifier "
-      " -ignoreDnD "
-      ;; " -appIcon /Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
-      " -title " (shell-quote-argument g-title)
-      " -sender " (shell-quote-argument "org.gnu.Emacs")
-      " -message " (shell-quote-argument message)))))
+  (let* ((g-title (if (and title (not (eq title ""))) title "Emacs"))
+	 (notify-command (string-join `("terminal-notifier"
+					"-ignoreDnD"
+					;; "-appIcon"
+					;; "file://Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+					"-title" ,(shell-quote-argument g-title)
+					"-sender" ,(shell-quote-argument "org.gnu.Emacs")
+					"-message" ,(shell-quote-argument message))
+				      " ")))
+    (shell-command notify-command)))
+
+;; (terminal-notify "aabb" "ddddd")
 #+end_src
 
 ** ui

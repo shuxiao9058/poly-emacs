@@ -160,7 +160,9 @@
                             (height . 50)
                             (width . 95)
                             (undecorated . t) ;; remove title bar
-                            ))
+			    ;; (font . "JetBrains Mono-14")
+			    ;; (line-spacing . 0.2)
+			    ))
 
 ;; reference | http://d.hatena.ne.jp/IMAKADO/20090215/1234699972
 (defun my-toggle-transparency ()
@@ -283,7 +285,6 @@ enable ligatures with emacs-mac, must install font first
   ;; supports such a composition.
   (mac-auto-operator-composition-mode t))
 #+end_src
-
 
 * modeline
 #+begin_src emacs-lisp

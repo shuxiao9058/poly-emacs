@@ -27,7 +27,7 @@ Configuration for programming and languages support.
 	  clang-mode
 	  elisp-mode
 	  emacs-lisp-mode
-	  markdown-mode
+	  ;; markdown-mode
 	  yaml-mode
 	  nix-mode
 	  protobuf-mode
