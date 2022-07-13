@@ -120,6 +120,18 @@
 (setq straight-vc-git-default-clone-depth 1)
 #+end_src
 
+** deal with org issue
+
+#+begin_src emacs-lisp
+(let ((straight-current-profile 'pinned))
+  (straight-use-package 'org)
+  (straight-use-package 'org-contrib)
+  ;; Pin org-mode version.
+  (add-to-list 'straight-x-pinned-packages
+	       ;; e0b05b07528dea684f3439c017370436b8d37b50 means v9.5.4
+               '("org" . "e0b05b07528dea684f3439c017370436b8d37b50")))
+#+end_src
+
 ** env
 
 #+begin_src emacs-lisp

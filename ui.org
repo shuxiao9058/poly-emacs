@@ -329,7 +329,7 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-env-elixir-executable "iex")
   (doom-modeline-env-rust-executable "rustc")
   :after (all-the-icons)
-  :hook (after-init . doom-modeline-init)
+  ;; :hook (after-init . doom-modeline-init)
   :config
   (doom-modeline-def-modeline 'my-simple-line
     '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)

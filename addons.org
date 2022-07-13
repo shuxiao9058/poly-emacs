@@ -208,13 +208,24 @@ Configuration for addons, additional features provided by individual packages.
 This is a completion style, it's a back-end for completion and is used by a  front-end that provides a completion UI.
 
 #+begin_src emacs-lisp
-;; ordering of narrowed candidates
 (use-package orderless
   :straight t
   :after selectrum
   :config
   (setq completion-styles '(orderless))
-  (setq orderless-skip-highlighting (lambda () selectrum-is-active)))
+  (setq orderless-skip-highlighting (lambda () selectrum-is-active))
+  (defun my/match-components-literally ()
+    "Components match literally for the rest of the session."
+    (interactive)
+    (setq-local
+     orderless-matching-styles '(orderless-literal)
+     completion-styles '(orderless)
+     ;; orderless-matching-styles '(orderless-strict-initialism)
+     orderless-style-dispatchers nil))
+  :bind
+  (:map minibuffer-local-completion-map
+	("C-l" . my/match-components-literally))
+  )
 
 ;; (use-package orderless
 ;;   :straight t
@@ -569,6 +580,55 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :after corfu
   :init (corfu-history-mode))
 
+
+;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
+(defun poly/convert-super-capf (arg-capf)
+  (list
+   #'cape-file
+   ;; #'cape-dabbrev
+   ;; #'cape-keyword
+   ;; #'cape-symbol
+   (cape-capf-buster
+    (cape-super-capf
+     arg-capf
+     #'tabnine-completion-at-point
+     ;; #'ebdb-complete-mail
+     #'tempel-expand)
+    'equal)
+   ;; #'cape-dabbrev
+   ))
+
+(defun poly/set-basic-capf ()
+  (interactive)
+  (setq completion-category-defaults nil)
+  (setq-local completion-at-point-functions
+        (poly/convert-super-capf
+         (car completion-at-point-functions))))
+
+(defun poly/set-mail-capf ()
+  (interactive)
+  (setq completion-category-defaults nil)
+  (setq-local completion-at-point-functions
+        (list
+         #'cape-file
+         (cape-capf-buster
+    (cape-super-capf
+     #'notmuch-capf
+     ;; #'ebdb-mail-dwim-completion-at-point-function
+     ;; #'ebdb-complete-mail
+     #'tabnine-completion-at-point
+     ;; arg-capf
+     #'tempel-expand)
+    ))))
+
+(defun poly/set-lsp-capf ()
+  (interactive)
+  (setq completion-category-defaults nil)
+  (setq-local completion-at-point-functions
+        (poly/convert-super-capf (if poly-use-lsp-mode
+             #'lsp-completion-at-point
+           #'eglot-completion-at-point))))
+
 ;; Completion At Point Extensions made for `corfu'
 (use-package cape
   :straight t
@@ -679,54 +739,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :straight (:host github :repo "theFool32/tabnine-capf" :files ("*.el" "*.sh" "*.py"))
   :hook ((on-first-input . (lambda () (run-with-timer 2 nil #'tabnine-capf-start-process)))
          (kill-emacs . tabnine-capf-kill-process)))
-
-;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
-(defun poly/convert-super-capf (arg-capf)
-  (list
-   #'cape-file
-   ;; #'cape-dabbrev
-   ;; #'cape-keyword
-   ;; #'cape-symbol
-   (cape-capf-buster
-    (cape-super-capf
-     arg-capf
-     #'tabnine-completion-at-point
-     ;; #'ebdb-complete-mail
-     #'tempel-expand)
-    'equal)
-   ;; #'cape-dabbrev
-   ))
-
-(defun poly/set-basic-capf ()
-  (interactive)
-  (setq completion-category-defaults nil)
-  (setq-local completion-at-point-functions
-	      (poly/convert-super-capf
-	       (car completion-at-point-functions))))
-
-(defun poly/set-mail-capf ()
-  (interactive)
-  (setq completion-category-defaults nil)
-  (setq-local completion-at-point-functions
-	      (list
-	       #'cape-file
-	       (cape-capf-buster
-		(cape-super-capf
-		 #'notmuch-capf
-		 ;; #'ebdb-mail-dwim-completion-at-point-function
-		 ;; #'ebdb-complete-mail
-		 #'tabnine-completion-at-point
-		 ;; arg-capf
-		 #'tempel-expand)
-		))))
-
-(defun poly/set-lsp-capf ()
-  (interactive)
-  (setq completion-category-defaults nil)
-  (setq-local completion-at-point-functions
-	      (poly/convert-super-capf (if poly-use-lsp-mode
-					   #'lsp-completion-at-point
-					 #'eglot-completion-at-point))))
 #+end_src
 
 *** corfu-quick
@@ -1655,14 +1667,27 @@ To manage the git repository, use builtin package ~vc~.
 (use-package code-review
     :straight t
     :bind (:map forge-topic-mode-map
-		("C-c r" . code-review-forge-pr-at-point))
+		("C-c r" . code-review-forge-pr-at-point)
+		:map code-review-feedback-section-map
+		("k" . code-review-section-delete-comment)
+		:map code-review-local-comment-section-map
+		("k" . code-review-section-delete-comment)
+		:map code-review-reply-comment-section-map
+		("k" . code-review-section-delete-comment)
+		:map code-review-mode-map
+		("C-c C-n" . code-review-comment-jump-next)
+		("C-c C-p" . code-review-comment-jump-previous))
     :custom
     (code-review-db-database-file (expand-file-name "code-review-db.sqlite" poly-cache-dir))
     (code-review-log-file (expand-file-name "code-review-error.log" poly-cache-dir))
     :config
+    (setq code-review-auth-login-marker 'forge)
     (setq code-review-gitlab-host "git.17usoft.com/api")
-    (setq code-review-gitlab-baseurl "git.17usoft.com")
-    (setq code-review-gitlab-graphql-host "git.17usoft.com/api"))
+    ;; (setq code-review-gitlab-baseurl "git.17usoft.com")
+    (setq code-review-gitlab-base-url "gitlab.com") ;;; default value
+    (setq code-review-gitlab-graphql-host nil)
+    ;; (setq code-review-gitlab-graphql-host "git.17usoft.com/api")
+    )
 #+end_src
 
 Enable diff-hl in based on major modes.
@@ -2328,6 +2353,38 @@ session
   (add-hook 'mu4e-compose-mode-hook #'no-auto-fill)
   (add-to-list 'mu4e-view-actions
                '("View In Browser" . mu4e-action-view-in-browser) t)
+
+  (defun timu-func-mu4e-action-save-to-pdf (msg)
+    "Save mu4e MSG as a pdf.
+The `wkhtmltopdf' cli command is a dependency.
+Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
+    ;; (let* ((date (mu4e-message-field msg :date))
+    ;;        (infile (mu4e~write-body-to-html msg))
+    ;;        (outfile (format-time-string "%Y-%m-%d%H%M%S.pdf" date)))
+    ;; (with-temp-buffer
+    ;;   (shell-command
+    ;;    (format "wkhtmltopdf %s ~/Desktop/%s" infile outfile) t)))
+    (let* ((html-part
+	    (seq-find (lambda (handle)
+			(equal (mm-handle-media-type (cdr handle)) "text/html"))
+		      gnus-article-mime-handle-alist))
+	   (date (mu4e-message-field msg :date))
+	   (outfile (format-time-string "%Y-%m-%d%H%M%S.pdf" date))
+	   )
+      (if html-part
+	  ;; (gnus-article-inline-part (car html-part))
+	  (message "save file to %s html-part: %s" outfile (car html-part))
+
+	  (with-temp-buffer
+	    (shell-command
+	     (format "wkhtmltopdf %s ~/Desktop/%s" (car html-part) outfile) t)))
+      ;; (mu4e-warn "No html part in this message")
+      )
+    )
+
+
+  (add-to-list 'mu4e-view-actions
+               '("Pdf" . timu-func-mu4e-action-save-to-pdf) t)
 
   (with-eval-after-load 'org
     (setq gnus-icalendar-org-capture-file +org-mu4e-icalendar-org-capture-file
@@ -3957,67 +4014,78 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 
 ** org-mode config
 #+begin_src emacs-lisp
-(use-package org
-  ;; :straight t
-  ;; :straight (org-contrib)
-  :straight (:type built-in)
-  ;; :ensure org-plus-contrib
-  :custom
-  (org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "WAITING(w)" ;; "HOLD(h!)" "NEXT(n!)" "WAIT(w!)"
-				 "DELAYED(y)" "|" "DONE(d!)" "DEFERRED(F)" "CANCELLED(c@/!)")
-		       (sequence "MEETING(m)" "DOING(i)" "WAITING(w)" "|" "DONE(d!)" "CANCELLED(c@/!)")
-		       (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f!)")))
-  (org-todo-keyword-faces
-   '(("TODO"       :foreground "#7c7c75" :weight bold)
-     ("DOING"      :foreground "goldenrod" :weight bold)
-     ("DELAYED"    :foreground "white" :background "#f44242" :weight bold)
-     ("MEETING"    :foreground "#7c7c75" :weight bold)
-     ;; ("HOLD"       :foreground "#feb24c" :weight bold)
-     ;; ("NEXT"       :foreground "#0098dd" :weight bold)
-     ;; ("WAIT"       :foreground "#9f7efe" :weight bold)
-     ("WAITING"    :foreground "#9f7efe" :weight bold)
-     ("DONE"       :foreground "#50a14f" :weight bold)
-     ("DEFERRED"   :foreground "#ff6480" :weight bold)
-     ("CANCELLED"  :foreground "#ff6480" :weight bold)
-     ("REPORT"     :foreground "magenta" :weight bold)
-     ("BUG"        :foreground "red"     :weight bold)
-     ("KNOWNCAUSE" :foreground "yellow"  :weight bold)
-     ("FIXED"      :foreground "green"   :weight bold)))
-  (org-use-fast-todo-selection 'expert)
+
+(with-eval-after-load "org"
+  ;; NOTE org-fold-core-style needs to be set before org is loaded
+  (setq org-fold-core-style 'overlays)
+
+  (setq org-directory "~/Dropbox/org")
+  (setq org-beorg-directory (expand-file-name "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/"))
+  (setq +org-mu4e-icalendar-org-capture-file (expand-file-name "mu4e.org" org-beorg-directory))
+  (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
+  (setq +org-capture-notes-file (expand-file-name  "personal-note.org" org-beorg-directory))
+  (setq +org-capture-work-gtd-file (expand-file-name "work-gtd.org" org-beorg-directory))
+  (setq +org-capture-work-team-gtd-file (expand-file-name "work-team-gtd.org" org-beorg-directory))
+  (setq +org-capture-work-notes-file (expand-file-name "work-note.org" org-beorg-directory))
+  (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
+  (setq +org-capture-work-meeting-file (expand-file-name "work-meeting.org" org-beorg-directory))
+  (setq +org-capture-work-weekly-file (expand-file-name "work-weekly.org" org-beorg-directory))
+
+  (setq org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "WAITING(w)" ;; "HOLD(h!)" "NEXT(n!)" "WAIT(w!)"
+				      "DELAYED(y)" "|" "DONE(d!)" "DEFERRED(F)" "CANCELLED(c@/!)")
+			    (sequence "MEETING(m)" "DOING(i)" "WAITING(w)" "|" "DONE(d!)" "CANCELLED(c@/!)")
+			    (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f!)")))
+  (setq org-todo-keyword-faces
+	'(("TODO"       :foreground "#7c7c75" :weight bold)
+	  ("DOING"      :foreground "goldenrod" :weight bold)
+	  ("DELAYED"    :foreground "white" :background "#f44242" :weight bold)
+	  ("MEETING"    :foreground "#7c7c75" :weight bold)
+	  ;; ("HOLD"       :foreground "#feb24c" :weight bold)
+	  ;; ("NEXT"       :foreground "#0098dd" :weight bold)
+	  ;; ("WAIT"       :foreground "#9f7efe" :weight bold)
+	  ("WAITING"    :foreground "#9f7efe" :weight bold)
+	  ("DONE"       :foreground "#50a14f" :weight bold)
+	  ("DEFERRED"   :foreground "#ff6480" :weight bold)
+	  ("CANCELLED"  :foreground "#ff6480" :weight bold)
+	  ("REPORT"     :foreground "magenta" :weight bold)
+	  ("BUG"        :foreground "red"     :weight bold)
+	  ("KNOWNCAUSE" :foreground "yellow"  :weight bold)
+	  ("FIXED"      :foreground "green"   :weight bold)))
+  (setq org-use-fast-todo-selection 'expert)
   ;; (org-use-fast-todo-selection 'auto)
-  (org-enforce-todo-dependencies t)
-  (org-enforce-todo-checkbox-dependencies t)
-  (org-priority-faces '((?A :foreground "red")
-			(?B :foreground "orange")
-			(?C :foreground "yellow")))
-  (org-global-properties '(("EFFORT_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00")
-			   ("STYLE_ALL" . "habit")))
+  (setq org-enforce-todo-dependencies t)
+  (setq org-enforce-todo-checkbox-dependencies t)
+  (setq org-priority-faces '((?A :foreground "red")
+			     (?B :foreground "orange")
+			     (?C :foreground "yellow")))
+  (setq org-global-properties '(("EFFORT_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00")
+				("STYLE_ALL" . "habit")))
   ;; (org-columns-default-format "%25ITEM %TODO %SCHEDULED %DEADLINE %3PRIORITY %TAGS %CLOCKSUM %EFFORT{:}")
-  (org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
+  (setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
   ;; Remove CLOSED: [timestamp] after switching to non-DONE states
-  (org-closed-keep-when-no-todo t)
+  (setq org-closed-keep-when-no-todo t)
 
   ;; log
-  (org-log-done 'time)
-  (org-log-repeat 'time)
-  (org-log-redeadline 'note)
-  (org-log-reschedule nil)
-  (org-log-into-drawer t)
-  (org-log-state-notes-insert-after-drawers nil)
+  (setq org-log-done 'time
+	org-log-repeat 'time
+	org-log-redeadline 'note
+	org-log-reschedule nil
+	org-log-into-drawer t
+	org-log-state-notes-insert-after-drawers nil)
   ;; (org-log-states-order-reversed t)
 
   ;; tags
-  (org-tags-column 0)
-  (org-fast-tag-selection-single-key t)
-  (org-track-ordered-property-with-tag t)
+  (setq org-tags-column 0
+	org-fast-tag-selection-single-key t
+	org-track-ordered-property-with-tag t)
 
   ;; calendar
-  (org-time-stamp-custom-formats '("<%A, %e. %B %Y>" . "<%A, %e. %B %Y %H:%M>"))
-  (org-agenda-start-on-weekday 1)
-  (calendar-week-start-day 1)
-  (org-display-custom-times t)
-  (org-confirm-babel-evaluate nil)
-  :config
+  (setq org-time-stamp-custom-formats '("<%A, %e. %B %Y>" . "<%A, %e. %B %Y %H:%M>")
+	org-agenda-start-on-weekday 1
+	calendar-week-start-day 1
+	org-display-custom-times t
+	org-confirm-babel-evaluate nil)
+
   (add-to-list 'org-modules 'org-capture)
   (add-to-list 'org-modules 'org-habit)
   (add-to-list 'org-modules 'org-timer)
@@ -4027,6 +4095,7 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-element)
 
+  (require 'ox-confluence)
 
   ;; (add-to-list 'org-modules 'org-bars)
   ;; (add-to-list 'org-modules 'org-pdfview)
@@ -4063,18 +4132,7 @@ do not already have one."
   ;;             (push '("[-]" . "❍") prettify-symbols-alist)
   ;;             (prettify-symbols-mode)))
 
-  (setq org-directory "~/Dropbox/org")
 
-  (setq org-beorg-directory (expand-file-name "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/"))
-  (setq +org-mu4e-icalendar-org-capture-file (expand-file-name "mu4e.org" org-beorg-directory))
-  (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
-  (setq +org-capture-notes-file (expand-file-name  "personal-note.org" org-beorg-directory))
-  (setq +org-capture-work-gtd-file (expand-file-name "work-gtd.org" org-beorg-directory))
-  (setq +org-capture-work-team-gtd-file (expand-file-name "work-team-gtd.org" org-beorg-directory))
-  (setq +org-capture-work-notes-file (expand-file-name "work-note.org" org-beorg-directory))
-  (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
-  (setq +org-capture-work-meeting-file (expand-file-name "work-meeting.org" org-beorg-directory))
-  (setq +org-capture-work-weekly-file (expand-file-name "work-weekly.org" org-beorg-directory))
   (setq org-agenda-files (list
 			  +org-capture-gtd-file
 			  +org-capture-work-gtd-file
@@ -4193,8 +4251,7 @@ do not already have one."
   ;; plantuml
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '(
-     (ditaa . t)
+   '((ditaa . t)
      (dot . t)
      (emacs-lisp . t)
      (gnuplot . t)
@@ -4351,7 +4408,7 @@ do not already have one."
   ;; (add-to-list 'org-latex-packages-alist '("" "geometry"))
   (add-to-list 'org-latex-packages-alist '("" "tabularx"))
   (add-to-list 'org-latex-packages-alist '("" "tabu"))
-  (setq    org-latex-default-table-environment "tabu")
+  (setq org-latex-default-table-environment "tabu")
   ;; (add-to-list 'org-latex-packages-alist '("" "fancyhdr"))
   ;; (add-to-list 'org-latex-packages-alist '("" "natbib"))
   ;; (add-to-list 'org-latex-packages-alist '("" "titlesec"))
@@ -4455,8 +4512,7 @@ do not already have one."
    ;;                         "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
    ;;                         "rm -fr %b.out %b.log %b.tex auto"
    ;;                         )
-   org-latex-default-class "article"
-   )
+   org-latex-default-class "article")
   ;; ;; auto save all org files after doing a common action
   ;; (advice-add 'org-agenda-quit      :before #'org-save-all-org-buffers)
   ;; ;; (advice-add 'org-agenda-schedule  :after #'org-save-all-org-buffers)
@@ -4512,11 +4568,11 @@ do not already have one."
 		     org-pomodoro))
     (advice-add command :after (η #'org-save-all-org-buffers))
     ;; (advice-add command :after  #'org-save-all-org-buffers)
-    )
-  :bind
-  ("C-c l" . org-store-link)
-  ("C-c c" . org-capture)
-  ("C-c a" . org-agenda))
+    ))
+
+(bind-key "C-c l" #'org-store-link)
+(bind-key "C-c c" #'org-capture)
+(bind-key "C-c a" #'org-agenda)
 #+end_src
 
 ** org-download
@@ -5426,6 +5482,7 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-hide-urls t)
   (markdown-hide-markup nil)
   (markdown-header-scaling t)
+  ;; (markdown-nested-imenu-heading-index nil)
   (markdown-command "multimarkdown")
   (markdown-coding-system 'utf-8)
   (markdown-enable-math t)
@@ -5436,10 +5493,15 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-fontify-code-block-default-mode t)
   (markdown-make-gfm-checkboxes-buttons t)
   (markdown-gfm-uppercase-checkbox t)
-  (markdown-gfm-additional-languages "Mermaid")
+  (markdown-gfm-additional-languages '("Mermaid" "sh" "Go"))
   (markdown-content-type "application/xhtml+xml")
   (markdown-xhtml-header-content "\n<meta name=\"viewport\" content=\"width=device-width\">")
   :config
+  ;; HACK Due to jrblevin/markdown-mode#578, invoking `imenu' throws a
+  ;;      'wrong-type-argument consp nil' error if you use native-comp.
+  (setq markdown-nested-imenu-heading-index (not (ignore-errors (native-comp-available-p))))
+  ;; A sensible and simple default preamble for markdown exports that
+  ;; takes after the github asthetic (plus highlightjs syntax coloring).
   (setq markdown-css-paths '("https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css"
                              "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/github.min.css"))
   (setq markdown-xhtml-header-content "
@@ -5517,7 +5579,21 @@ mermaid.initialize({
 
 (use-package markdown-toc
   :straight t
-  :commands markdown-toc-generate-toc)
+  :commands (markdown-toc-generate-toc markdown-toc-generate-or-refresh-toc)
+  :hook ((markdown-mode . markdown-toc-mode))
+  :custom
+  (markdown-toc-header-toc-start "<!-- markdown-toc start -->")
+  (markdown-toc-indentation-space 2)
+  (markdown-toc-header-toc-title "\n**Table of Contents**")
+  :config
+  ;; ISSUE https://github.com/ardumont/markdown-toc/issues/47
+  (defun markdown-toc-refresh-before-save ()
+    "Refresh markdown TOC before save."
+    (when (and (derived-mode-p 'markdown-mode)
+               (require 'markdown-toc)
+               (markdown-toc--toc-already-present-p))
+      (markdown-toc-generate-toc t)))
+  (add-hook 'before-save-hook #'markdown-toc-refresh-before-save))
 
 (use-package edit-indirect
   :straight t)
@@ -5572,3 +5648,14 @@ valign for org-mode & markdown table
 (add-hook 'org-mode-hook 'valign-mode)
   )
 #+end_src
+
+**  tributary
+
+ edit Atlassian Confluence wiki pages.
+
+ #+begin_src emacs-lisp
+(use-package tributary
+  :straight (:host github :repo "mrkrd/tributary" :files ("*.el" "confluence.rnc"))
+  :custom
+  (tributary-api-url "http://wiki.17usoft.com/rest/api/content/"))
+ #+end_src
