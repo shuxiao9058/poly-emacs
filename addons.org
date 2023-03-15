@@ -126,6 +126,13 @@ Configuration for addons, additional features provided by individual packages.
 	 ("<up>" .  selectrum-previous-candidate)
 	 ("C-k"  .  selectrum-previous-candidate)
 	 ("<backtab>" . selectrum-previous-candidate)))
+
+(defun my/selectrum-recentf-open-files ()
+     "Open `recent-list' item in a new buffer.
+    The user's $HOME directory is abbreviated as a tilde."
+    (interactive)
+    (let ((files (mapcar 'abbreviate-file-name recentf-list)))
+       (find-file (completing-read "Find recent file: " files nil t))))
 #+end_src
 
 ** marginalia
@@ -305,6 +312,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package consult
+  :disabled t
   :straight t
   :ensure t
   :demand t
@@ -591,7 +599,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    (cape-capf-buster
     (cape-super-capf
      arg-capf
-     #'tabnine-completion-at-point
+     ;; #'tabnine-completion-at-point
+     #'tabnine-capf
      ;; #'ebdb-complete-mail
      #'tempel-expand)
     'equal)
@@ -616,7 +625,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      #'notmuch-capf
      ;; #'ebdb-mail-dwim-completion-at-point-function
      ;; #'ebdb-complete-mail
-     #'tabnine-completion-at-point
+     ;; #'tabnine-completion-at-point
+     #'tabnine-capf
      ;; arg-capf
      #'tempel-expand)
     ))))
@@ -695,6 +705,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (use-package corfu-doc
   :ensure t
   :straight t
+  :disabled t
   :config
   ;;hook
   (add-hook 'corfu-mode-hook #'corfu-doc-mode)
@@ -735,9 +746,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 (use-package tabnine-capf
   :after (on cape)
-  :commands (tabnine-completion-at-point tabnine-capf-start-process)
+  :commands (tabnine-capf tabnine-capf-start-process)
   :straight (:host github :repo "theFool32/tabnine-capf" :files ("*.el" "*.sh" "*.py"))
-  :hook ((on-first-input . (lambda () (run-with-timer 2 nil #'tabnine-capf-start-process)))
+  :hook ((on-first-input . tabnine-capf-start-process)
+	 ;; (on-first-input . (lambda () (run-with-timer 2 nil #'tabnine-capf-start-process)))
          (kill-emacs . tabnine-capf-kill-process)))
 #+end_src
 
@@ -2909,7 +2921,6 @@ determine which browser function to use."
 ;; 	("<f3>" . notmuch-alert-visit))
 ;;   )
 
-
 (use-package notmuch-notify
   :ensure t
   :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
@@ -2927,7 +2938,7 @@ determine which browser function to use."
 	    :title "Notmuch inbox:"
 	    :icon "/Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
 	    ;; :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
-	    :audio ,(expand-file-name "straightbuild/notmuch-notify/emailreceived.wav" straight-base-dir))
+	    :audio ,(expand-file-name "straight/build/notmuch-notify/emailreceived.wav" straight-base-dir))
      (:name "default")))
   :config
   ;; (Recommended) activate system-wise notification timer
@@ -4267,7 +4278,12 @@ do not already have one."
      ;; (sqlite . t)
      ;; (R . t)
      ))
-  (setq org-plantuml-jar-path (expand-file-name "bin/plantuml.1.2021.5.jar" poly-local-dir))
+  (setq org-plantuml-jar-path "/opt/local/share/java/plantuml.jar")
+
+  (add-hook 'org-babel-after-execute-hook
+          (lambda ()
+            (when org-inline-image-overlays
+              (org-redisplay-inline-images))))
 
   ;; (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
   ;; (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
@@ -4495,7 +4511,10 @@ do not already have one."
    ;; (setq org-latex-pdf-process '("/Library/TeX/texbin/latexmk -e '$pdflatex=q/xelatex %S/' -e '$bibtex=q/upbibtex %B/' -e '$biber=q/biber --bblencoding=utf8 -u -U --output_safechars %B/' -e '$makeindex=q/upmendex -o %D %S/' -norc -gg -pdf %f"))
    org-file-apps
    ;; '(("pdf" . "/usr/bin/open -a PDFGuru\\ Pro.app %s"))
-   '(("pdf" . "/usr/bin/open -a /Applications/Skim.app %s"))
+   '(("pdf" . "/usr/bin/open -a Preview.app %s")
+     ;; ("pdf" . "/usr/bin/open -a PDF\\ Reader\\ X\\ Pro.app %s")
+     ;; ("pdf" . "/usr/bin/open -a /Applications/Skim.app %s")
+     )
    ;; org-latex-toc-command "\\tableofcontents\\newpage"
    ;; org-latex-pdf-process
    ;;    '("xelatex -shell-escape -interaction nonstopmode %f"

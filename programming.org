@@ -10,8 +10,8 @@ Configuration for programming and languages support.
 
 #+begin_src emacs-lisp
 (use-package format-all
-  ;; :straight t
-  :straight (:host github :repo "lassik/emacs-format-all-the-code")
+  :straight t
+  ;; :straight (:host github :repo "lassik/emacs-format-all-the-code")
   :ensure t
   :hook ((
 	  fish-mode
@@ -41,7 +41,6 @@ Configuration for programming and languages support.
 	  ) . format-all-mode)
   :commands (format-all-mode
 	     format-all-buffer)
-  ;; :custom
   :init
   (defconst format-all--system-type
     (cl-case system-type
@@ -140,29 +139,36 @@ Configuration for programming and languages support.
 					(mksh "mksh")
 					(t "posix")))))))
 
+  (define-format-all-formatter my-beautysh
+    (:executable "beautysh")
+    (:install
+     (macos "pip install beautysh"))
+    (:languages "Shell")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
 
-  ;; (define-format-all-formatter nginxfmt
-  ;;	(:executable "nginxfmt")
-  ;;   (:install (macos "pip install nginxfmt"))
-  ;;   ;; (:install
-  ;;   ;;  (macos "brew install shfmt")
-  ;;   ;;  (windows "scoop install shfmt"))
-  ;;   (:languages "_Nginx")
-  ;;   ;; (:modes nginx-mode)
-  ;;   (:features)
-  ;;   (:format
-  ;;    (format-all--buffer-easy executable "-i" "4" "-")))
 
-  ;; (define-format-all-formatter crossplane
-  ;;	(:executable "/usr/local/bin/nginx_format.sh")
-  ;;   (:install (macos "pip install crossplane"))
-  ;;   (:languages "Nginx")
-  ;;   (:features)
-  ;;   ;; (:modes nginx-mode)
-  ;;   (:format (format-all--buffer-easy executable)))
+  (define-format-all-formatter nginxfmt
+	(:executable "nginxfmt")
+    (:install (macos "pip install nginxfmt"))
+    ;; (:install
+    ;;  (macos "brew install shfmt")
+    ;;  (windows "scoop install shfmt"))
+    (:languages "_Nginx")
+    ;; (:modes nginx-mode)
+    (:features)
+    (:format
+     (format-all--buffer-easy executable "-i" "4" "-")))
+
+  (define-format-all-formatter crossplane
+	(:executable "/usr/local/bin/nginx_format.sh")
+    (:install (macos "pip install crossplane"))
+    (:languages "Nginx")
+    (:features)
+    ;; (:modes nginx-mode)
+    (:format (format-all--buffer-easy executable)))
 
   ;; lsp-format-buffer
-
   (eval-after-load 'format-all
     (dolist (hook '(lua-mode-hook
 		    ;; go-mode-hook
@@ -196,12 +202,13 @@ Configuration for programming and languages support.
 		  ;; ("CSS" prettier)
 		  ;; ("HTML" prettier)
 		  ;; ("Dockerfile" dockfmt)
-		  ("Shell" my-shfmt)
+		  ;; ("Shell" my-shfmt)
+		  ("Shell" my-beautysh)
 		  ;; ("Markdown" prettier)
-		  ("Nix" nixpkgs-fmt)
+		  ;; ("Nix" nixpkgs-fmt)
 		  ;; ("Emacs Lisp" emacs-lisp)
 		  ;; ("YAML" prettier)
-		  ;; ("Nginx" nginx-fmt)
+		  ("Nginx" nginx-fmt)
 		  )))
 #+end_src
 
@@ -260,6 +267,12 @@ Configuration for programming and languages support.
 Use eglot as LSP client.
 
 #+begin_src emacs-lisp
+(defun project-name (project)
+  "A human-readable name for the project.
+	Nominally unique, but not enforced."
+  (file-name-nondirectory (directory-file-name (project-root project))))
+
+
 ;; https://github.com/DEbling/dotfiles/blob/9dc0e347267dd68111baf8e7ab7d33c2e39ed404/.emacs.d/elisp/lang-java.el
 ;; (defconst jdt-jar-path "~/.emacs.d/.local/jar/org.eclipse.equinox.launcher.jar")
 ;; (defconst jdt-jar-path "/opt/jdt-language-server/plugins/org.eclipse.equinox.launcher_1.6.0.v20200915-1508.jar")
@@ -299,7 +312,15 @@ If INTERACTIVE, prompt user for details."
 
 (use-package eglot
   :straight t
-  :hook ((go-mode lua-mode beancount-mode python-mode clojure-mode clojurescript-mode c-mode c++-mode python-mode java-mode) . eglot-ensure)
+  :hook ((go-mode
+	  lua-mode
+	  beancount-mode
+	  python-mode
+	  clojure-mode
+	  clojurescript-mode
+	  js-mode typescript-mode
+	  c-mode c++-mode objc-mode swift-mode
+	  java-mode ) . eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
@@ -325,6 +346,12 @@ If INTERACTIVE, prompt user for details."
     (add-to-list 'eglot-server-programs
 		 `(lua-mode  . ("/usr/bin/java" "-cp" ,emmylua-jar-path "com.tang.vscode.MainKt"))))
 
+  ;; (let* ((lua-language-server-dir "/opt/local/lib/lua-language-server")
+  ;; 	 (lua-language-server-main (expand-file-name "bin/main.lua" lua-language-server-dir))
+  ;; 	 (lua-language-server-exec (expand-file-name "bin/lua-language-server" lua-language-server-dir)))
+  ;;   (add-to-list 'eglot-server-programs
+  ;; 		 `(lua-mode  . (,lua-language-server-exec "-E" "-e" "LANG=en" ,lua-language-server-main))))
+
   (add-to-list 'eglot-server-programs
 	       '(java-mode .  my-eclipse-jdt-contact))
 
@@ -335,8 +362,16 @@ If INTERACTIVE, prompt user for details."
 	       '(dart-mode . dart-lsp-contact))
 
   (when (executable-find "ccls")
-    (add-to-list 'eglot-server-programs '((c-mode c++-mode) "ccls"
+    (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode) "ccls"
 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
+
+  (when (executable-find "pyright-langserver")
+    (add-to-list 'eglot-server-programs '((python-mode) "pyright-langserver"
+					  "--node-ipc")))
+
+  (add-to-list 'eglot-server-programs
+	       `((swift-mode) ,(string-trim (shell-command-to-string "xcrun --find sourcekit-lsp"))))
+
   ;; (when (executable-find "gopls")
   ;;   (add-to-list 'eglot-server-programs '(go-mode . ("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log"))))
 
@@ -513,6 +548,89 @@ fix xref issue =(wrong-type-argument listp 0)=
   :straight t)
 #+end_src
 * Languages
+** cc-mode
+#+begin_src emacs-lisp
+(use-package cc-mode
+  :straight t
+  :ensure t
+  :mode (
+	 ("\\.c\\'" . c-mode)
+         ("\\.h\\'" . c-mode)
+	 ("\\.cxx\\'" . c++-mode)
+         ("\\.cpp\\'" . c++-mode)
+         ("\\.hpp\\'" . c++-mode)
+	 ("\\.x\\'" . objc-mode)
+	 ("\\.xm\\'" . objc-mode)
+	 ("\\.m\\'" . objc-mode)
+	 ("\\.mm\\'" . objc-mode)
+
+	 ;; ("\\.c" . c-mode)
+         ;; ("\\.h" . c-mode)
+         ;; ("\\.cpp" . c++-mode)
+         ;; ("\\.hpp" . c++-mode)
+	 ;; ("\\.h\\(h\\|xx\\|pp\\)\\'" . c++-mode)
+         ;; ("\\.tpp\\'" . c++-mode)
+	 )
+  :custom
+  (c-offsets-alist '((inline-open           . 0)
+                     (brace-list-open       . 0)
+                     (inextern-lang         . 0)
+                     (statement-case-open   . 4)
+                     (access-label          . -)
+                     (case-label            . 0)
+                     (member-init-intro     . +)
+                     (topmost-intro         . 0)
+                     (inlambda              . 0) ;; better indentation for lambda
+                     (innamespace           . 0) ;; no indentation after namespace
+                     (arglist-cont-nonempty . +)))
+  ;; :config
+  ;; (with-eval-after-load 'lsp-mode
+  ;;   (setq lsp-clients-clangd-args
+  ;;         '("-j=2"
+  ;;           "--background-index"
+  ;;           "--clang-tidy"
+  ;;           "--completion-style=bundled"
+  ;;           "--pch-storage=memory"
+  ;;           "--suggest-missing-includes")))
+  )
+
+(use-package modern-cpp-font-lock
+  :straight t
+  :ensure t
+  :hook (c++-mode . modern-c++-font-lock-mode))
+
+
+(use-package cmake-mode
+  :straight t
+  :ensure t
+  ;; :defines (company-backends)
+  :mode (("CMakeLists\\.txt\\'" . cmake-mode)
+         ("\\.cmake\\'" . cmake-mode))
+  ;; :config
+  ;; (with-eval-after-load 'company-mode
+  ;;   (add-to-list 'company-backends 'company-cmake))
+  )
+
+;; (use-package clang-format
+;;   :straight t
+;;   :defer t
+;;   ;; :load-path "site-lisp"
+;;   :commands (clang-format-buffer)
+;;   ;; :config
+;;   ;; (setq clang-format-style-option "file")
+;;   ;; ;; (bind-key "C-c <down>" 'clang-format-buffer c-mode-base-map)
+;;   ;; :bind (:map c-mode-base-map
+;;   ;;             ("C-c <down>" . clang-format-buffer)
+;;   ;;             )
+;;   )
+
+(use-package cpp-auto-include
+  :straight   (cpp-auto-include
+               :host github
+               :repo "emacsorphanage/cpp-auto-include")
+  :commands (cpp-auto-include)
+  )
+#+end_src
 ** Go Language
 #+begin_src emacs-lisp
 (use-package go-mode
@@ -867,12 +985,33 @@ Use clojure-mode for basic syntax support.
   ;; (company-mode +1)
   )
 
+(defun poly/tide-before-save ()
+  "Auto format for tide."
+  (interactive)
+  (unless (string-suffix-p ".tsx" (buffer-file-name))
+    ;; (when (bound-and-true-p eglot-mode)
+    ;;   (print "eglot-mode format")
+    ;;   (eglot-format-buffer))
+    (tide-format-before-save)
+    )
+  ;; (if (bound-and-true-p eglot-mode)
+  ;;     (eglot-format-buffer))
+  )
+
+;; (defun poly/tide-after-save ()
+;;   "Auto format for tide."
+;;   (interactive)
+;;   ;; (if (string-suffix-p ".tsx" (buffer-file-name))
+;;   ;;     (me/pretty-quick))
+;;   )
+
 (use-package tide
   :straight t
   :commands tide-setup
   :hook
-  (before-save . tide-format-before-save)
-  (typescript-mode . setup-tide-mode)
+  (before-save . poly/tide-before-save)
+  (typescript-mode . tide-hl-identifier-mode)
+  (typescript-mode . my/setup-tide-mode)
   :after web-mode
   :custom
   (typescript-indent-level 2)
@@ -898,7 +1037,7 @@ Use clojure-mode for basic syntax support.
 #+end_src
 
 ** prettier-js
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package prettier-js
   :straight t
   :commands (prettier-js-mode prettier)
@@ -943,4 +1082,17 @@ Use clojure-mode for basic syntax support.
 
 ** Emmet
 #+begin_src emacs-lisp
+#+end_src
+
+** protobuf
+
+#+begin_src emacs-lisp
+(use-package protobuf-mode
+  :straight t
+  :defer 1
+  :config
+  (defconst my-protobuf-style
+    '((c-basic-offset . 2)
+      (indent-tabs-mode . nil)))
+  (add-hook 'protobuf-mode-hook (lambda () (c-add-style "my-style" my-protobuf-style t))))
 #+end_src
