@@ -120,6 +120,20 @@ Configuration for programming and languages support.
     (:features)
     (:format (format-all--buffer-easy executable)))
 
+  (define-format-all-formatter py-autopep8
+    (:executable "autopep8")
+    (:install (macos ""))
+    (:languages "Python")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
+
+  (define-format-all-formatter py-black
+    (:executable "black")
+    (:install (macos ""))
+    (:languages "Python")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
+
   (define-format-all-formatter my-shfmt
     (:executable "shfmt")
     (:install
@@ -203,6 +217,8 @@ Configuration for programming and languages support.
 		  ;; ("HTML" prettier)
 		  ;; ("Dockerfile" dockfmt)
 		  ;; ("Shell" my-shfmt)
+		  ;; ("Python" py-autopep8)
+		  ("Python" py-black)
 		  ("Shell" my-beautysh)
 		  ;; ("Markdown" prettier)
 		  ;; ("Nix" nixpkgs-fmt)
@@ -367,7 +383,7 @@ If INTERACTIVE, prompt user for details."
 
   (when (executable-find "pyright-langserver")
     (add-to-list 'eglot-server-programs '((python-mode) "pyright-langserver"
-					  "--node-ipc")))
+					  "--stdio" "--watch")))
 
   (add-to-list 'eglot-server-programs
 	       `((swift-mode) ,(string-trim (shell-command-to-string "xcrun --find sourcekit-lsp"))))
@@ -737,6 +753,8 @@ fix xref issue =(wrong-type-argument listp 0)=
 
 (use-package gotest
   :straight t
+  :custom
+  (go-test-verbose t)
   :bind (:map go-mode-map
 	      ("C-c t f" . go-test-current-file)
 	      ("C-c t t" . go-test-current-test)

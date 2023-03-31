@@ -1760,7 +1760,7 @@ Magit with cz
   (default-input-method "rime")
   ;; (rime-cursor "˰")
   ;; (rime-librime-root (concat user-emacs-directory "librime/dist"))
-  (rime-librime-root "/opt/local")
+  (rime-librime-root "/opt/librime")
   (rime-emacs-module-header-root "/opt/local/include/emacs-mac")
   ;; (rime-show-candidate 'minibuffer)
   (rime-show-preedit t)
