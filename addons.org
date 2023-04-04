@@ -42,7 +42,7 @@ Configuration for addons, additional features provided by individual packages.
 	comint-mode
 	gnus-group-mode
 	gud-mode
-	org-mode
+	;; org-mode
 	markdown-mode
 	vc-git-log-edit-mode
 	log-edit-mode
@@ -70,7 +70,8 @@ Configuration for addons, additional features provided by individual packages.
 
 (cond
  ;; ((fbounp 'linum-mode))
- (nil;; (fboundp 'global-display-line-numbers-mode)
+ (;; nil
+  (fboundp 'global-display-line-numbers-mode)
   (defun display-line-numbers-mode-hook-setup ()
     (setq display-line-numbers (if (or (memq major-mode linum-mode-inhibit-modes-list)
 				       ;; don't show line number for certain file extensions
@@ -80,7 +81,7 @@ Configuration for addons, additional features provided by individual packages.
   (add-hook 'display-line-numbers-mode-hook 'display-line-numbers-mode-hook-setup)
   (global-display-line-numbers-mode t))
  (t
-  (global-linum-mode t)
+  ;; (global-linum-mode t)
 
   (defadvice linum-on (around linum-on-inhibit-for-modes)
     "Stop the load of linum-mode for some major modes."
@@ -2635,8 +2636,9 @@ there are no attachments."
 #+end_src
 
 ** notmuch
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package notmuch
+  :disabled t
   :straight t
   :commands notmuch
   :bind (("C-c m" . notmuch)
@@ -3326,7 +3328,7 @@ except for `notmuch-show-mode' buffers."
 
 *** mm
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; You need to replace this key ID with your own key ID!
 (setq mml2015-signers '("FC6BDB92CD5BEB22")
       mml2015-encrypt-to-self t)
@@ -3359,7 +3361,7 @@ except for `notmuch-show-mode' buffers."
 
 *** w3m
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package w3m
   :straight t
   :config
@@ -4955,13 +4957,13 @@ Prefix arguments are interpreted by `org-refile'."
             (lambda ()
 	      (org-present-big)
 	      (org-display-inline-images)
-	      (global-linum-mode -1)
+	      ;; (global-linum-mode -1)
 	      (global-hl-line-mode -1)))
   (add-hook 'org-present-mode-quit-hook
             (lambda ()
 	      (org-present-small)
 	      (org-remove-inline-images)
-	      (global-linum-mode)
+	      ;; (global-linum-mode)
 	      (global-hl-line-mode 1))))
 #+end_src
 
@@ -5020,9 +5022,52 @@ Prefix arguments are interpreted by `org-refile'."
 
    ))
 
+
+;; pdf-tools - Emacs support library for PDF files.
+;; https://github.com/politza/pdf-tools
+;; http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
+(use-package pdf-tools
+  :defer t
+  :straight t
+  :config
+  ;; initialize
+  (setenv "PKG_CONFIG_PATH" "/opt/local/lib/pkgconfig:/opt/X11/lib/pkgconfig")
+
+  (pdf-tools-install)
+
+  ;; open pdfs scaled to fit page
+  (setq-default pdf-view-display-size 'fit-page)
+
+  ;; automatically annotate highlights
+  (setq pdf-annot-activate-created-annotations t)
+
+  ;; enable imenu outline
+  (pdf-outline-imenu-enable)
+
+  ;; use normal isearch
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+  )
+
+(use-package pdf-continuous-scroll-mode
+  :defer t
+  :straight (:host github :repo "dalanicolai/pdf-continuous-scroll-mode.el")
+  :after pdf-tools
+  :config
+  (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode))
+
+;; remember pdf position
+;; https://github.com/politza/pdf-tools/issues/18
+;; Save place in pdf-view buffers for Emacs
+;; https://github.com/nicolaisingh/saveplace-pdf-view
+(use-package saveplace-pdf-view
+  :after pdf-tools
+  :defer t
+  :config
+  (save-place-mode 1))
+
 ;; org-noter
 (use-package org-noter
-  :after org
+  :after (org pdf-tools)
   :straight t
   :config
   (setq

@@ -46,6 +46,7 @@ You may want to set this to window's border color.")
       (match-fg "#000000")
       (magenta "#ff05fa")
       (main my-dark-theme-main-color))
+
   (custom-theme-set-faces
    `my-dark
    ;; We don't specify default foreground/background in TTY.
@@ -78,7 +79,7 @@ You may want to set this to window's border color.")
 							  face minibuffer-prompt));; ()
 					)))
    ;; `(lazy-highlight                 ((t (:background ,bg+3))))
-   `(lazy-highlight                 ((t (:background nil))))
+   ;; `(lazy-highlight                 ((t (:background nil))))
    `(compilation-info               ((t (:inherit font-lock-function-name-face))))
    `(compilation-warning            ((t (:inherit font-lock-warning-face))))
    `(warning                        ((t (:inherit font-lock-warning-face))))
@@ -310,10 +311,13 @@ You may want to set this to window's border color.")
    `(scroll-bar                     ((t (:foreground ,fg-1))))
 
    `(tab-bar                        ((t (:background ,bg+2))))
-   `(tab-bar-tab-group-current      ((t ())))
-   `(tab-bar-tab                    ((t (:inverse-video t :bold t :background ,blue :foreground ,fg))))
-   `(tab-bar-tab-group-inactive     ((t ())))
+   `(tab-bar-tab                    ((t (:inverse-video t :bold t :background ,blue ;; :foreground ,fg
+							:foreground ,bg+2
+							))))
    `(tab-bar-tab-inactive           ((t (:inherit shadow))))
+   ;; `(tab-bar-tab-ungrouped ((t (:inherit ,bg+2))))
+   `(tab-bar-tab-group-current      ((t ())))
+   `(tab-bar-tab-group-inactive     ((t ())))
    `(icomplete-first-match ((t (:inherit mode-line-emphasis))))
    `(mode-line-buffer-id ((t (:foreground "Light Blue"))))
    `(font-lock-variable-name-face ((t (:foreground "#50fa7b"))))

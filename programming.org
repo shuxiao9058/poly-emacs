@@ -1114,3 +1114,10 @@ Use clojure-mode for basic syntax support.
       (indent-tabs-mode . nil)))
   (add-hook 'protobuf-mode-hook (lambda () (c-add-style "my-style" my-protobuf-style t))))
 #+end_src
+
+** python
+
+#+begin_src emacs-lisp
+(setq python-python-command "/opt/local/bin/python")
+(setq py-force-py-shell-name-p t)
+#+end_src

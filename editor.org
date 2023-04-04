@@ -846,3 +846,55 @@ Visualizing Color Codes with rainbow-mode.
 (global-set-key (kbd "\C-c t") 'toggle-map)
 (bind-key "t" #'my-toggle-transparency 'toggle-map)
 #+end_src
+
+* python
+
+#+begin_src emacs-lisp
+(use-package jupyter
+  :straight (emacs-jupyter :type git :host github :repo "nnicandro/emacs-jupyter")
+  :custom
+  (jupyter-repl-echo-eval-p t)
+  (org-babel-default-header-args:jupyter-python '((:async . "yes")
+                                                  (:session . "py")
+                                                  (:kernel . "python3")))
+  (org-babel-default-header-args:jupyter-julia '((:async . "yes")
+                                                 (:session . "jl")
+                                                 (:kernel . "julia-1.8")))
+  (ob-async-no-async-languages-alist '("python" "jupyter-python" "julia" "jupyter-julia"))
+  :bind (("C-c C-x r" . jupyter-repl-restart-kernel)
+         ("C-c C-x h" . jupyter-org-restart-and-execute-to-point))
+  :config
+  (setq jupyter--debug t))
+
+(use-package ob-jupyter
+  :defer t
+  :straight nil
+  :commands (org-babel-execute:jupyter-python)
+  :bind
+  (:map jupyter-repl-mode-map
+        ("C-l" . jupyter-repl-clear-cells)
+        ("C-<up>" . jupyter-repl-history-previous)
+        ("C-<down>" . jupyter-repl-history-next)))
+
+(use-package zmq
+  :custom
+  (module-file-suffix ".a")
+  :straight(zmq :type git :host github
+                :repo "dzop/emacs-zmq"
+                :files (:defaults "Makefile" "src" "*.so")))
+
+(use-package simple-httpd
+  :straight t)
+
+(setenv "PYDEVD_DISABLE_FILE_VALIDATION" "1")
+
+(use-package ansi-color
+  :straight t
+  :ensure t
+  :init
+  (defun colorize-compilation-buffer ()
+    (read-only-mode)
+    (ansi-color-apply-on-region compilation-filter-start (point))
+    (read-only-mode))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+#+end_src
