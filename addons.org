@@ -478,12 +478,12 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :straight (:files (:defaults "extensions/*")
 		    :includes (corfu-history))
   :bind (:map corfu-map
-	      ("TAB" . corfu-next)
-	      ("C-n" . corfu-next)
-	      ("<tab>" . corfu-next)
-	      ("S-TAB" . corfu-previous)
-	      ("C-p" . corfu-previous)
-	      ("<backtab>" . corfu-previous)
+	      ;; ("TAB" . corfu-next)
+	      ;; ("C-n" . corfu-next)
+	      ;; ("<tab>" . corfu-next)
+	      ;; ("S-TAB" . corfu-previous)
+	      ;; ("C-p" . corfu-previous)
+	      ;; ("<backtab>" . corfu-previous)
 	      ("RET"     . corfu-insert)
 	      ("<return>"  . corfu-insert)
 	      ("<escape>" . corfu-quit)
@@ -517,7 +517,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-scroll-margin 5)        ;; Use scroll margin
   ;; :hook (after-init-hook . global-corfu-mode)
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  :config
+  (unbind-key (kbd "TAB") corfu-map)
+  (unbind-key (kbd "<tab>") corfu-map))
 
 ;; Icon support
 (use-package kind-icon
@@ -600,8 +603,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    (cape-capf-buster
     (cape-super-capf
      arg-capf
-     ;; #'tabnine-completion-at-point
-     #'tabnine-capf
      ;; #'ebdb-complete-mail
      #'tempel-expand)
     'equal)
@@ -612,33 +613,33 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-        (poly/convert-super-capf
-         (car completion-at-point-functions))))
+              (poly/convert-super-capf
+               (car completion-at-point-functions))))
 
 (defun poly/set-mail-capf ()
   (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-        (list
-         #'cape-file
-         (cape-capf-buster
-    (cape-super-capf
-     #'notmuch-capf
-     ;; #'ebdb-mail-dwim-completion-at-point-function
-     ;; #'ebdb-complete-mail
-     ;; #'tabnine-completion-at-point
-     #'tabnine-capf
-     ;; arg-capf
-     #'tempel-expand)
-    ))))
+              (list
+               #'cape-file
+               (cape-capf-buster
+		(cape-super-capf
+		 ;; #'notmuch-capf
+		 ;; #'ebdb-mail-dwim-completion-at-point-function
+		 ;; #'ebdb-complete-mail
+		 ;; #'tabnine-completion-at-point
+		 ;; #'tabnine-capf
+		 ;; arg-capf
+		 #'tempel-expand)
+		))))
 
 (defun poly/set-lsp-capf ()
   (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-        (poly/convert-super-capf (if poly-use-lsp-mode
-             #'lsp-completion-at-point
-           #'eglot-completion-at-point))))
+              (poly/convert-super-capf (if poly-use-lsp-mode
+					   #'lsp-completion-at-point
+					 #'eglot-completion-at-point))))
 
 ;; Completion At Point Extensions made for `corfu'
 (use-package cape
@@ -745,13 +746,37 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; ;; (global-tempel-abbrev-mode)
   )
 
-(use-package tabnine-capf
+(use-package editorconfig
+  :straight t)
+
+(use-package tabnine
   :after (on cape)
-  :commands (tabnine-capf tabnine-capf-start-process)
-  :straight (:host github :repo "theFool32/tabnine-capf" :files ("*.el" "*.sh" "*.py"))
-  :hook ((on-first-input . tabnine-capf-start-process)
+  :commands (tabnine-start-process)
+  :hook (prog-mode . tabnine-mode)
+  :straight (tabnine :package "tabnine"
+		     :type git
+		     :host nil
+		     :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git"
+		     ;; :host github :repo "shuxiao9058/tabnine"
+		     :files ("*.el" "*.sh"))
+  :custom
+  (tabnine-wait 1)
+  :init
+  (setq tabnine-executable-args (list "--log-level" "Trace" "--no-lsp" "false"))
+  (setq tabnine-log-file-path "/tmp/tabnine-emacs.log")
+  :hook ((on-first-input . tabnine-start-process)
 	 ;; (on-first-input . (lambda () (run-with-timer 2 nil #'tabnine-capf-start-process)))
-         (kill-emacs . tabnine-capf-kill-process)))
+         (kill-emacs . tabnine-kill-process))
+  :bind
+  (:map tabnine-mode-map
+	("C-TAB" . tabnine-accept-completion-by-word)
+	("C-<tab>" . tabnine-accept-completion-by-word)
+	("TAB" . tabnine-accept-completion)
+	("<tab>" . tabnine-accept-completion))
+  (:map  tabnine-completion-map
+	 ("C-g" . tabnine-clear-overlay)
+	 ("C-n" . tabnine-next-completion)
+	 ("C-p" . tabnine-previous-completion)))
 #+end_src
 
 *** corfu-quick
@@ -1762,7 +1787,7 @@ Magit with cz
   ;; (rime-cursor "˰")
   ;; (rime-librime-root (concat user-emacs-directory "librime/dist"))
   (rime-librime-root "/opt/librime")
-  (rime-emacs-module-header-root "/opt/local/include/emacs-mac")
+  (rime-emacs-module-header-root "/opt/local/include/emacs")
   ;; (rime-show-candidate 'minibuffer)
   (rime-show-preedit t)
   (rime-show-candidate 'posframe)
