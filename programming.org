@@ -18,8 +18,10 @@ Configuration for programming and languages support.
 	  sh-mode
 	  ;; prog-mode
 	  lua-mode
+	  lua-ts-mode
 	  ;; go-mode
 	  python-mode
+	  python-ts-mode
 	  java-mode
 	  cc-mode
 	  c-mode
@@ -65,128 +67,129 @@ Configuration for programming and languages support.
 	     (cl-return (cadr choice))))))
   :config
   (define-format-all-formatter cpp-lua-format
-    (:executable "lua-format")
-    (:install (macos ""))
-    (:languages "Lua")
-    (:features)
-    (:format (format-all--buffer-easy executable "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
+			       (:executable "lua-format")
+			       (:install (macos ""))
+			       (:languages "Lua")
+			       (:features)
+			       (:format (format-all--buffer-easy executable "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
 
   (define-format-all-formatter my-clang-format
-    (:executable "clang-format")
-    (:install
-     (macos "brew install clang-format")
-     (windows "scoop install llvm"))
-    (:languages "C" "C++" "Java" "Objective-C" "Protocol Buffer")
-    (:features)
-    (:format
-     (format-all--buffer-easy
-      executable
-      (concat "-assume-filename="
-	      (or (buffer-file-name)
-		  (cdr (assoc language
-			      '(("C"               . ".c")
-				("C++"             . ".cpp")
-				("Java"            . ".java")
-				("Objective-C"     . ".m")
-				("Objective-C" . ".x")
-				("Objective-C" . ".xm")
-				("Objective-C" . ".m")
-				("Objective-C" . ".mm")
-				("Protocol Buffer" . ".proto")))))))))
+			       (:executable "clang-format")
+			       (:install
+				(macos "brew install clang-format")
+				(windows "scoop install llvm"))
+			       (:languages "C" "C++" "Java" "Objective-C" "Protocol Buffer")
+			       (:features)
+			       (:format
+				(format-all--buffer-easy
+				 executable
+				 (concat "-assume-filename="
+					 (or (buffer-file-name)
+					     (cdr (assoc language
+							 '(("C"               . ".c")
+							   ("C++"             . ".cpp")
+							   ("Java"            . ".java")
+							   ("Objective-C"     . ".m")
+							   ("Objective-C" . ".x")
+							   ("Objective-C" . ".xm")
+							   ("Objective-C" . ".m")
+							   ("Objective-C" . ".mm")
+							   ("Protocol Buffer" . ".proto")))))))))
 
   (define-format-all-formatter goimports-gofmt
-    (:executable "/bin/sh")
-    (:install
-     (macos "brew install go")
-     (windows "scoop install go")
-     "go get golang.org/x/tools/cmd/goimports")
-    (:languages "Go")
-    (:features)
-    (:format (format-all--buffer-easy executable "-c" "goimports | gofmt -s")))
+			       (:executable "/bin/sh")
+			       (:install
+				(macos "brew install go")
+				(windows "scoop install go")
+				"go get golang.org/x/tools/cmd/goimports")
+			       (:languages "Go")
+			       (:features)
+			       (:format (format-all--buffer-easy executable "-c" "goimports | gofmt -s")))
 
 
   (define-format-all-formatter goimports
-    (:executable "goimports")
-    (:install (macos ""))
-    (:languages "Go")
-    (:features)
-    (:format (format-all--buffer-easy executable)))
+			       (:executable "goimports")
+			       (:install (macos ""))
+			       (:languages "Go")
+			       (:features)
+			       (:format (format-all--buffer-easy executable)))
 
   (define-format-all-formatter gofumpt
-    (:executable "gofumpt")
-    ;; (:executable "/bin/sh")
-    (:install (macos ""))
-    (:languages "Go")
-    (:features)
-    (:format (format-all--buffer-easy executable)))
+			       (:executable "gofumpt")
+			       ;; (:executable "/bin/sh")
+			       (:install (macos ""))
+			       (:languages "Go")
+			       (:features)
+			       (:format (format-all--buffer-easy executable)))
 
   (define-format-all-formatter py-autopep8
-    (:executable "autopep8")
-    (:install (macos ""))
-    (:languages "Python")
-    (:features)
-    (:format (format-all--buffer-easy executable "-")))
+			       (:executable "autopep8")
+			       (:install (macos ""))
+			       (:languages "Python")
+			       (:features)
+			       (:format (format-all--buffer-easy executable "-")))
 
   (define-format-all-formatter py-black
-    (:executable "black")
-    (:install (macos ""))
-    (:languages "Python")
-    (:features)
-    (:format (format-all--buffer-easy executable "-")))
+			       (:executable "black")
+			       (:install (macos ""))
+			       (:languages "Python")
+			       (:features)
+			       (:format (format-all--buffer-easy executable "-")))
 
   (define-format-all-formatter my-shfmt
-    (:executable "shfmt")
-    (:install
-     (macos "brew install shfmt")
-     (windows "scoop install shfmt"))
-    (:languages "Shell")
-    (:features)
-    (:format
-     (format-all--buffer-easy executable "-i" "4" "-ci"
-			      (if (buffer-file-name)
-				  (list "-filename" (buffer-file-name))
-				(list "-ln"
-				      (cl-case (and (eql major-mode 'sh-mode)
-						    (boundp 'sh-shell)
-						    (symbol-value 'sh-shell))
-					(bash "bash")
-					(mksh "mksh")
-					(t "posix")))))))
+			       (:executable "shfmt")
+			       (:install
+				(macos "brew install shfmt")
+				(windows "scoop install shfmt"))
+			       (:languages "Shell")
+			       (:features)
+			       (:format
+				(format-all--buffer-easy executable "-i" "4" "-ci"
+							 (if (buffer-file-name)
+							     (list "-filename" (buffer-file-name))
+							   (list "-ln"
+								 (cl-case (and (eql major-mode 'sh-mode)
+									       (boundp 'sh-shell)
+									       (symbol-value 'sh-shell))
+								   (bash "bash")
+								   (mksh "mksh")
+								   (t "posix")))))))
 
   (define-format-all-formatter my-beautysh
-    (:executable "beautysh")
-    (:install
-     (macos "pip install beautysh"))
-    (:languages "Shell")
-    (:features)
-    (:format (format-all--buffer-easy executable "-")))
+			       (:executable "beautysh")
+			       (:install
+				(macos "pip install beautysh"))
+			       (:languages "Shell")
+			       (:features)
+			       (:format (format-all--buffer-easy executable "-")))
 
 
   (define-format-all-formatter nginxfmt
-	(:executable "nginxfmt")
-    (:install (macos "pip install nginxfmt"))
-    ;; (:install
-    ;;  (macos "brew install shfmt")
-    ;;  (windows "scoop install shfmt"))
-    (:languages "_Nginx")
-    ;; (:modes nginx-mode)
-    (:features)
-    (:format
-     (format-all--buffer-easy executable "-i" "4" "-")))
+			       (:executable "nginxfmt")
+			       (:install (macos "pip install nginxfmt"))
+			       ;; (:install
+			       ;;  (macos "brew install shfmt")
+			       ;;  (windows "scoop install shfmt"))
+			       (:languages "_Nginx")
+			       ;; (:modes nginx-mode)
+			       (:features)
+			       (:format
+				(format-all--buffer-easy executable "-i" "4" "-")))
 
   (define-format-all-formatter crossplane
-	(:executable "/usr/local/bin/nginx_format.sh")
-    (:install (macos "pip install crossplane"))
-    (:languages "Nginx")
-    (:features)
-    ;; (:modes nginx-mode)
-    (:format (format-all--buffer-easy executable)))
+			       (:executable "/usr/local/bin/nginx_format.sh")
+			       (:install (macos "pip install crossplane"))
+			       (:languages "Nginx")
+			       (:features)
+			       ;; (:modes nginx-mode)
+			       (:format (format-all--buffer-easy executable)))
 
   ;; lsp-format-buffer
   (eval-after-load 'format-all
     (dolist (hook '(lua-mode-hook
 		    ;; go-mode-hook
 		    python-mode-hook
+		    python-ts-mode-hook
 		    java-mode-hook
 		    markdown-mode-hook
 		    ;; cc-mode-hook
@@ -327,11 +330,14 @@ If INTERACTIVE, prompt user for details."
 	"--client-id=emacs.eglot"))
 
 (use-package eglot
-  :straight t
+  :straight (:type built-in)
   :hook ((go-mode
+	  go-ts-mode
 	  lua-mode
+	  lua-ts-mode
 	  beancount-mode
 	  python-mode
+	  python-ts-mode
 	  clojure-mode
 	  clojurescript-mode
 	  js-mode typescript-mode
@@ -360,7 +366,8 @@ If INTERACTIVE, prompt user for details."
   ;; emmylua
   (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
     (add-to-list 'eglot-server-programs
-		 `(lua-mode  . ("/usr/bin/java" "-cp" ,emmylua-jar-path "com.tang.vscode.MainKt"))))
+		 `((lua-mode lua-ts-mode)  . ("/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java" "-cp" ,emmylua-jar-path
+				"com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))))
 
   ;; (let* ((lua-language-server-dir "/opt/local/lib/lua-language-server")
   ;; 	 (lua-language-server-main (expand-file-name "bin/main.lua" lua-language-server-dir))
@@ -382,14 +389,14 @@ If INTERACTIVE, prompt user for details."
 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
 
   (when (executable-find "pyright-langserver")
-    (add-to-list 'eglot-server-programs '((python-mode) "pyright-langserver"
+    (add-to-list 'eglot-server-programs '((python-ts-mode) "pyright-langserver"
 					  "--stdio" "--watch")))
 
   (add-to-list 'eglot-server-programs
 	       `((swift-mode) ,(string-trim (shell-command-to-string "xcrun --find sourcekit-lsp"))))
 
-  ;; (when (executable-find "gopls")
-  ;;   (add-to-list 'eglot-server-programs '(go-mode . ("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log"))))
+  (when (executable-find "gopls")
+    (add-to-list 'eglot-server-programs '((go-mode go-ts-mode) . ("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log"))))
 
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
@@ -401,7 +408,7 @@ If INTERACTIVE, prompt user for details."
 		)
 	      ;; (make-local-variable 'completion-at-point-functions)
 	      ;; (setq-local completion-at-point-functions
-	      ;;		  '(tabnine-completion-at-point cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
+	      ;;		  '(cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
 	      ))
 
   (with-eval-after-load 'eglot
@@ -563,6 +570,148 @@ fix xref issue =(wrong-type-argument listp 0)=
 (use-package javadoc-lookup
   :straight t)
 #+end_src
+
+* treesitter
+
+#+begin_src emacs-lisp
+(when (and (fboundp 'treesit-available-p) (treesit-available-p))
+  (require 'treesit))
+
+(use-package treesit
+  :straight (:type built-in)
+  :commands treesit-font-lock-rules treesit-font-lock-recompute-features
+  :init
+  (setq treesit-language-source-alist
+        '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
+          (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
+          (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+          (java . ("https://github.com/tree-sitter/tree-sitter-java"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+          (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+          (make . ("https://github.com/alemuller/tree-sitter-make"))
+          (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+          (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+          (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+          (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+          (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+          (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+          (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+          (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+  (setq major-mode-remap-alist
+	'((c-mode . c-ts-mode)
+	  (c++-mode . c++-ts-mode)
+	  (c-or-c++-mode . c-or-c++-ts-mode)
+	  (python-mode . python-ts-mode)
+	  (csharp-mode . csharp-ts-mode)
+	  (cmake-mode . cmake-ts-mode)
+	  (dockerfile-mode . dockerfile-ts-mode)
+	  (go-mode . go-ts-mode)
+	  ;; (lua-mode . lua-ts-mode)
+	  (json-mode . json-ts-mode)
+	  (java-mode . java-ts-mode)
+	  (rust-mode . rust-ts-mode)
+	  (ruby-mode . ruby-ts-mode)
+	  (typescript-mode . typescript-ts-mode)
+	  (conf-toml-mode . toml-ts-mode)
+	  (yaml-mode . yaml-ts-mode)))
+  :config
+  (add-to-list 'treesit-extra-load-path (expand-file-name "tree-sitter" user-emacs-directory))
+  (defun poly/treesit-install-all-languages ()
+    "Install all languages specified in `treesit-language-source-alist'."
+    (interactive)
+    (let ((languages (mapcar 'car treesit-language-source-alist)))
+      (dolist (lang languages)
+        (treesit-install-language-grammar lang)
+        (message "`%s' parser was installed." lang)
+        (sit-for 0.75))))
+  (advice-add
+   'treesit--install-language-grammar-1
+   :around
+   (lambda (old-function out-dir &rest arguments)
+     (apply old-function (car treesit-extra-load-path) arguments)))
+  :hook
+  (c-ts-mode .
+	     (lambda()
+	       (setq-local treesit-font-lock-level 4)
+	       (setq-local
+		treesit-font-lock-settings
+		(append
+		 treesit-font-lock-settings
+		 (treesit-font-lock-rules
+		  :language 'c
+		  :feature 'func
+		  '((call_expression
+		     function:
+		     (identifier) @font-lock-property-face
+		     arguments: (_))))))))
+  (java-ts-mode .
+		(lambda()
+		  (setq-local
+		   treesit-font-lock-settings
+		   (append
+		    treesit-font-lock-settings
+		    (treesit-font-lock-rules
+		     :language 'java
+		     :feature 'expression
+		     :override t
+		     '((method_invocation
+			name: (identifier) @font-lock-property-face)))))))
+  (go-ts-mode
+   .
+   (lambda()
+     (setq-local treesit-font-lock-level 4)
+     (treesit-font-lock-recompute-features '(property bracket delimiter operator variable function attribute import import func))))
+  (python-ts-mode
+   .
+   (lambda()
+     (setq-local treesit-font-lock-level 4)
+     (treesit-font-lock-recompute-features '(property bracket delimiter operator variable function attribute import))))
+  ;; :custom
+  ;; (treesit--font-lock-verbose t)
+  )
+
+
+(add-hook 'prog-mode-hook #'general-ts-mode-setup)
+(add-hook 'c-ts-mode-hook #'c-ts-setup)
+(add-hook 'css-ts-mode-hook 'ts-css-setup)
+
+(defun eglot-format-buffer-on-save ()
+  (add-hook 'before-save-hook #'eglot-format-buffer -10 t))
+(add-hook 'go-ts-mode-hook #'eglot-format-buffer-on-save)
+
+(defun general-ts-mode-setup ()
+  (treesit-font-lock-recompute-features
+   nil
+   '(property bracket delimiter operator variable function)))
+
+(defun c-ts-setup ()
+  (setq-local electric-quote-comment nil)
+  (setq-local electric-quote-string nil)
+  (indent-tabs-mode)
+  (bug-reference-prog-mode)
+  (setq-local fill-paragraph-function #'ts-c-fill-paragraph)
+  (treesit-font-lock-recompute-features '(emacs-devel)))
+
+(defun ts-c-fill-paragraph (&optional arg)
+  (interactive)
+  (let ((node (treesit-node-at (point))))
+    (when (equal (treesit-node-type node) "comment")
+      (fill-region
+       (treesit-node-start node) (treesit-node-end node)))
+    t))
+
+(defun ts-css-setup ()
+  (treesit-font-lock-recompute-features nil '(variable function)))
+#+end_src
+
 * Languages
 ** cc-mode
 #+begin_src emacs-lisp
@@ -650,6 +799,7 @@ fix xref issue =(wrong-type-argument listp 0)=
 ** Go Language
 #+begin_src emacs-lisp
 (use-package go-mode
+  :disabled t
   :straight t
   :ensure t
   :commands (godoc gofmt gofmt-before-save)
@@ -798,7 +948,6 @@ fix xref issue =(wrong-type-argument listp 0)=
   :straight t
   :ensure t
   :defer t
-  ;; :after (company company-tabnine)
   :custom
   (lua-indent-level tab-width)
   (lua-indent-string-contents t)
@@ -808,16 +957,7 @@ fix xref issue =(wrong-type-argument listp 0)=
 		)
   :mode (("\\.lua$" . lua-mode) ("\\.nse$" . lua-mode))
   :config
-  (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-  ;; (defun lsp-lua-install-save-hooks ()
-  ;;   (add-hook 'before-save-hook #'lsp-format-buffer t t))
-  ;; (with-eval-after-load 'lsp
-  ;;   (add-hook 'lua-mode-hook #'lsp-lua-install-save-hooks))
-  ;; :general
-  ;; (nvmap :keymaps 'lua-mode-map
-  ;;   "TAB" #'lua-goto-forward
-  ;;   "C-o" #'lua-goto-backward)
-  )
+  (autoload 'lua-mode "lua-mode" "Lua editing mode." t))
 #+end_src
 
 * Tramp

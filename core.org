@@ -54,7 +54,7 @@ Core configuration of poly emacs, global variable declare.
  dependencies or long-term shared data. Must end with a slash.")
 
 
-(defconst poly-cache-dir (concat poly-local-dir "cache/")
+(defconst poly-cache-dir (concat poly-local-dir (if IS-LINUX "cache-linux/" "cache/"))
   "Directory for volatile local storage.
  Use this for files that change often, like cache files. Must end with a slash.")
 

@@ -103,6 +103,7 @@ You may want to set this to window's border color.")
    `(font-lock-type-face            ((t ())))
    `(font-lock-variable-name-face   ((t ())))
    `(font-lock-keyword-face         ((t (:foreground ,red))))
+   `(font-lock-number-face         ((t (:foreground ,purple))))
    `(font-lock-constant-face        ((t (:foreground ,purple))))
    `(font-lock-function-name-face   ((t (:foreground "#8AFF80" ;; :bold t
 						     ))))

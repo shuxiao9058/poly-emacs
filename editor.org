@@ -849,7 +849,7 @@ Visualizing Color Codes with rainbow-mode.
 
 * python
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package jupyter
   :straight (emacs-jupyter :type git :host github :repo "nnicandro/emacs-jupyter")
   :custom

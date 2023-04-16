@@ -87,33 +87,36 @@
       ;; straight-check-for-modifications '(find-when-checking check-on-save)
       use-package-always-demand t)
 
+(when IS-LINUX
+  (setq straight-build-dir "build-linux"))
+
 (eval-when-compile
   (defvar bootstrap-version)
   (let ((bootstrap-file
-   (expand-file-name "straight/repos/straight.el/bootstrap.el" poly-local-dir))
-  (bootstrap-version 5))
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" poly-local-dir))
+	(bootstrap-version 5))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
-    (url-retrieve-synchronously
-     "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-     'silent 'inhibit-cookies)
-  (goto-char (point-max))
-  (eval-print-last-sexp)))
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
     ;; catch emacs updates that have native compiled leftovers
     ;; Credits: https://github.com/raxod502/straight.el/643/issues
     (unless (catch 'emacs-version-changed
-	(load bootstrap-file nil 'nomessage))
+	      (load bootstrap-file nil 'nomessage))
       ;; remove historian-save-file
       ;; try fix (void-variable _args)
       (when (boundp 'historian-save-file)
-  (delete-directory (file-truename (expand-file-name (car historian-save-file))) t)
-  )
+	(delete-directory (file-truename (expand-file-name (car historian-save-file))) t)
+	)
       (when (boundp 'comp-eln-load-path)
-  ;; remove leftoversear
-  (when (y-or-n-p (format "Delete '%s'? " (car comp-eln-load-path)))
-    (delete-directory (file-truename (expand-file-name (car comp-eln-load-path))) t))
-  ;; try loading again
-  (load bootstrap-file nil 'nomessage))))
+	;; remove leftoversear
+	(when (y-or-n-p (format "Delete '%s'? " (car comp-eln-load-path)))
+	  (delete-directory (file-truename (expand-file-name (car comp-eln-load-path))) t))
+	;; try loading again
+	(load bootstrap-file nil 'nomessage))))
   (straight-use-package 'use-package))
 
 ;; Straight configs
