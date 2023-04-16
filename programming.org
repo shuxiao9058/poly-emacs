@@ -367,7 +367,7 @@ If INTERACTIVE, prompt user for details."
   (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
     (add-to-list 'eglot-server-programs
 		 `((lua-mode lua-ts-mode)  . ("/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java" "-cp" ,emmylua-jar-path
-				"com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))))
+					      "com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))))
 
   ;; (let* ((lua-language-server-dir "/opt/local/lib/lua-language-server")
   ;; 	 (lua-language-server-main (expand-file-name "bin/main.lua" lua-language-server-dir))
@@ -477,6 +477,38 @@ If INTERACTIVE, prompt user for details."
 	      ("C-c C-a" . eglot-code-actions)
 	      ("C-c C-f" . eglot-format-buffer))
   )
+
+
+(defun poly/go-workspace-organize-imports()
+  "Run organize-imports action in workspace with changed go files."
+  (interactive)
+  (save-excursion
+  (when-let ((filename (buffer-file-name))
+	     (directory-name (file-name-directory filename))
+	     (files (magit-changed-files "HEAD")))
+    (dolist (go-file files)
+      (when (s-suffix? ".go" go-file)
+	(let* ((full-filename (expand-file-name go-file directory-name))
+	       (buffer (find-file-noselect full-filename))
+	       (results))
+	  (when buffer
+	    (with-current-buffer buffer
+	      (when (fboundp 'eglot-code-action-organize-imports)
+		(setq results (call-interactively 'eglot-code-action-organize-imports (point-min)))
+		(when results
+		  (let ((el (seq-elt results 0))
+			(edit)
+			(idx 0))
+		    (when (< idx (length results))
+		      (setq edit (plist-get el :edit))
+		      (if edit
+			  (eglot--apply-workspace-edit edit)
+			(message (format "nothing need to import: %s" go-file)))
+		      (setq el (seq-elt results idx))
+		      (setq idx (1+ idx))))))
+	      (message (format "organize imports & save buffer: %s" go-file))
+	      (save-buffer))
+	    )))))))
 
 
 (defun lsp/non-greedy-eglot ()
