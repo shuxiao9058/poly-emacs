@@ -355,10 +355,11 @@ Accepts the same arguments as `message'."
 (defun poly/reload-theme()
   "reload theme"
   (interactive)
-  (require 'my-dark-theme)
-  (load-theme 'my-dark t))
+  (require 'poly-dark-theme)
+  (load-theme 'poly-dark t))
 
 (poly/reload-theme)
+(global-hl-line-mode 1)
 #+end_src
 
 ** gc timer

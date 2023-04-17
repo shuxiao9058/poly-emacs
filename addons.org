@@ -106,6 +106,7 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
 (use-package selectrum
+  :disabled t
   :straight t
   :hook (after-init . selectrum-mode)
   :custom
@@ -128,18 +129,22 @@ Configuration for addons, additional features provided by individual packages.
 	 ("C-k"  .  selectrum-previous-candidate)
 	 ("<backtab>" . selectrum-previous-candidate)))
 
-(defun my/selectrum-recentf-open-files ()
-     "Open `recent-list' item in a new buffer.
+
+(defun poly/recentf-open-files ()
+  "Open `recent-list' item in a new buffer.
     The user's $HOME directory is abbreviated as a tilde."
-    (interactive)
-    (let ((files (mapcar 'abbreviate-file-name recentf-list)))
-       (find-file (completing-read "Find recent file: " files nil t))))
+  (interactive)
+  (let* ((files (mapcar 'abbreviate-file-name recentf-list))
+	 (filter-files (cl-remove-if-not #'file-exists-p files)))
+    ;; (princ files)
+    (find-file (completing-read "Find recent file: " files nil t))))
 #+end_src
 
 ** marginalia
 
 #+begin_src emacs-lisp
 (use-package marginalia
+  :disabled t
   :straight t
   :after selectrum
   :ensure t
@@ -398,19 +403,26 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; :straight t
   :init
   (vertico-mode)
-  :config
+  :custom
   ;; Different scroll margin
-  ;; (setq vertico-scroll-margin 0)
+  (vertico-scroll-margin 0)
 
   ;; Show more candidates
-  ;; (setq vertico-count 20)
+  (vertico-count 12)
 
   ;; Grow and shrink the Vertico minibuffer
-  ;; (setq vertico-resize t)
-
+  (vertico-resize t)
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-  (setq vertico-cycle t)
-  )
+  (vertico-cycle t)
+  :bind
+  (:map vertico-map
+	;; ("DEL" . selectrum-backward-kill-sexp)
+	;; ("<S-backspace>" . vertico-backward-kill-sexp)
+	("<down>" . vertico-next)
+	("C-j"  .  vertico-next)
+	("<up>" .  vertico-previous)
+	("C-k"  .  vertico-previous)
+	("<backtab>" . vertico-previous)))
 
 ;; Configure directory extension.
 (use-package vertico-directory
@@ -1691,17 +1703,6 @@ To manage the git repository, use builtin package ~vc~.
 
 (use-package vdiff
     :straight t)
-
-;; (use-package magit-delta
-;;   :straight t
-;;   :delight
-;;   :if (executable-find "delta")
-;;   :hook ((magit-mode . magit-delta-mode))
-;;   :custom
-;;   ( magit-delta-delta-args
-;;     '("--max-line-distance" "0.6" "--24-bit-color" "always" "--color-only" "--dark" ;; "--diff-so-fancy"
-;;       ;; "--no-gitconfig"
-;;       )))
 
 (use-package code-review
     :straight t

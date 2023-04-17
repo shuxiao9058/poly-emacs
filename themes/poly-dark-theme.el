@@ -190,13 +190,11 @@ You may want to set this to window's border color.")
                ;; Selectrum
                ;; (selectrum-current-candidate    :foreground ,bg :inverse-video t)
                (selectrum-current-candidate    :foreground ,orange :inverse-video t)
-
-               ;; ;; Magit
+               (vertico-current                :foreground ,orange :inverse-video t)
 
                ;; SMerge
                (smerge-refined-added           :background "#253325")
                (smerge-lower                   :background "#173017")
-
 
                ;; Popup
                (popup-tip-face                 :background ,bg+4 :foreground ,fg)
@@ -271,37 +269,37 @@ You may want to set this to window's border color.")
 	       ;; ;; `(mu4e-moved-face                           ())))
 	       (mu4e-view-body-face                          :inherit default)
 
-	      ;; Treemacs
-	      (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
+	       ;; Treemacs
+	       (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
 
-	      (fill-column-indicator          :foreground ,bg+2)
+	       (fill-column-indicator          :foreground ,bg+2)
 
-	      (scroll-bar                     :foreground ,fg-1)
+	       (scroll-bar                     :foreground ,fg-1)
 
 
-	      (icomplete-first-match :inherit mode-line-emphasis)
-	      (mode-line-buffer-id :foreground "Light Blue")
-	      (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
-	      (orderless-match-face-1 :inherit error :weight bold)
-	      (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
-	      (orderless-match-face-3 :inherit font-lock-keyword-face :weight bold)
+	       (icomplete-first-match :inherit mode-line-emphasis)
+	       (mode-line-buffer-id :foreground "Light Blue")
+	       (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
+	       (orderless-match-face-1 :inherit error :weight bold)
+	       (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
+	       (orderless-match-face-3 :inherit font-lock-keyword-face :weight bold)
 
-	      (hl-line :background "DodgerBlue4")
+	       (hl-line :background "DodgerBlue4")
 
-	      ;; auto-highlight-symbol
-	      (ahs-definition-face :foreground ,magenta :background unspecified :slant normal)
-	      (ahs-definition-face-unfocused :foreground ,magenta :background unspecified :slant normal)
-	      (ahs-edit-mode-face :foreground ,bg+1 :background ,magenta)
-	      (ahs-face :foreground ,magenta :background unspecified)
-	      (ahs-face-unfocused :foreground ,magenta :background unspecified)
-	      (ahs-plugin-bod-face :foreground ,magenta :background unspecified)
-	      (ahs-plugin-default-face :foreground ,magenta :background unspecified)
-	      (ahs-plugin-default-face-unfocused :foreground ,magenta :background unspecified)
-	      (ahs-plugin-whole-buffer-face :foreground ,magenta  :background unspecified)
-	      (ahs-warning-face :foreground ,red :weight bold)
+	       ;; auto-highlight-symbol
+	       (ahs-definition-face :foreground ,magenta :background unspecified :slant normal)
+	       (ahs-definition-face-unfocused :foreground ,magenta :background unspecified :slant normal)
+	       (ahs-edit-mode-face :foreground ,bg+1 :background ,magenta)
+	       (ahs-face :foreground ,magenta :background unspecified)
+	       (ahs-face-unfocused :foreground ,magenta :background unspecified)
+	       (ahs-plugin-bod-face :foreground ,magenta :background unspecified)
+	       (ahs-plugin-default-face :foreground ,magenta :background unspecified)
+	       (ahs-plugin-default-face-unfocused :foreground ,magenta :background unspecified)
+	       (ahs-plugin-whole-buffer-face :foreground ,magenta  :background unspecified)
+	       (ahs-warning-face :foreground ,red :weight bold)
 
-	      (cursor :background ,fg3)
-	      (completions-first-difference :foreground ,pink :weight bold)
+	       (cursor :background ,fg3)
+	       (completions-first-difference :foreground ,pink :weight bold)
 	       (default :background ,bg :foreground ,fg)
 	       (default-italic :slant italic)
 	       (ffap :foreground ,fg4)

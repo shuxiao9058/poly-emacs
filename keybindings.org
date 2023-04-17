@@ -270,7 +270,7 @@ This configuration sticks with Meow for modal editing.
       'meow-keypad-self-insert)
 
     (meow-leader-define-key
-     '( "e" . my/selectrum-recentf-open-files)
+     '( "e" . poly/recentf-open-files)
        ;; "e" . consult-recent-file)
      ;; '("e" . my/icomplete-recentf)
      ;; '("." . find-file)
