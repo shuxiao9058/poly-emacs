@@ -17,23 +17,51 @@
 The theme has to be reloaded after changing anything in this group."
   :group 'faces)
 
-(defvar poly-dark-theme-use-italic t
+(defvar poly-dark-use-italic t
   "Non-nil means use italic for comment and docstring.")
 
-(defvar poly-dark-theme-header-scales
+
+(defcustom poly-dark-enlarge-headings t
+  "Use different font sizes for some headings and titles."
+  :type 'boolean
+  :group 'poly-dark)
+
+(defvar poly-dark-header-scales
   '(1.6 1.4 1.2 1.2 1.2 1.1 1.0)
   "Scales for headers.")
+
+
+
+(defcustom poly-dark-height-title-1 1.3
+  "Font size 100%."
+  :type 'number
+  :group 'poly-dark)
+
+(defcustom poly-dark-height-title-2 1.1
+  "Font size 110%."
+  :type 'number
+  :group 'poly-dark)
+
+(defcustom poly-dark-height-title-3 1.0
+  "Font size 130%."
+  :type 'number
+  :group 'poly-dark)
 
 (defcustom poly-dark-height-doc-title 1.44
   "Font size 144%."
   :type 'number
   :group 'poly-dark)
 
-(defvar poly-dark-theme-main-color "#00AAAA"
+					; (defcustom poly-dark-height-doc-title 1.44
+					;   "Font size 144%."
+					;   :type 'number
+					;   :group 'poly-dark)
+
+(defvar poly-dark-main-color "#00AAAA"
   "The main color used for some places.
 You may want to set this to window's border color.")
 
-(defcustom poly-dark-alternate-mode-line-and-minibuffer t
+(defcustom poly-dark-alternate-mode-line-and-minibuffer nil
   "Use less bold and pink in the minibuffer."
   :type 'boolean
   :group 'poly-dark)
@@ -88,87 +116,30 @@ You may want to set this to window's border color.")
 		(magenta "#ff05fa" "#F986BF" "magenta")))
 
       (faces '( ;; default
-               (default :background ,bg :foreground ,fg)
-               (default-italic :slant italic)
-               (cursor                        :background ,white)
-               (region                         :background ,region)
-               (fringe                        :foreground ,fg4 :background ,bg)
-               (show-paren-match               :underline ,green)
-               (highlight                      :background ,bg+2)
-               ;; `(highlight                      ((t (:background ,hilight-bg :foreground ,hilight-fg))))
                (button                         :foreground ,blue :underline t)
-               (vertical-border               :foreground ,bg2)
                (window-divider                 :background ,bg+3)
                (window-divider-first-pixel     :foreground ,bg+1)
                (window-divider-last-pixel      :foreground ,bg+1)
-               (line-number                    :foreground ,bg+3 :inherit default)
                (line-number-current-line       :foreground ,yellow)
 
                (parenthesis                    :foreground ,fg-1)
-               ;; (completions-common-part        )
-               ;; (minibuffer-prompt              ((t (quote (read-only nil cursor-intangible t face minibuffer-prompt));; ()
-               ;;  				   )))
-               (minibuffer-prompt
-                ,@(if poly-dark-alternate-mode-line-and-minibuffer
-                      (list :weight 'normal :foreground fg)
-                    (list :weight 'bold :foreground pink)))
-               ;; `(lazy-highlight                 ((t (:background ,bg+3))))
-               ;; `(lazy-highlight                 ((t (:background nil))))
-               ;; `(match                          ((t (:background ,bg+2))))
-               (match :background ,yellow :foreground ,bg)
+               ;; ;; (completions-common-part        )
                (xref-match                     :inherit match)
-
                (secondary-selection           :background ,region2 :extend t)
 
                ;; ISearch
                (isearch                        :background ,green :foreground ,black)
                (isearch-fail                   :backgronud ,red :foreground ,orange)
 
-               ;; Font Locks
-               (font-lock-comment-face         :foreground ,comment :italic ,poly-dark-theme-use-italic)
-               (font-lock-comment-delimiter-face        :foreground ,comment :italic ,poly-dark-theme-use-italic)
-               (font-lock-string-face          :foreground ,yellow)
-               (font-lock-doc-face             :foreground ,blue :italic ,poly-dark-theme-use-italic)
-               (font-lock-builtin-face         :foreground ,purple)
-               (font-lock-type-face            :forground ,green)
-               (font-lock-variable-name-face   :foreground ,white)
-               (font-lock-operator-face   :foreground ,red)
-               (font-lock-keyword-face         :foreground ,red)
-               (font-lock-number-face         :foreground ,purple)
-               (font-lock-delimiter-face         :foreground ,white)
-               (font-lock-bracket-face         :foreground ,red)
-               (font-lock-escape-face         :foreground ,red)
-               (font-lock-property-face         :foreground ,red)
-               (font-lock-constant-face        :foreground ,purple)
-               (font-lock-function-name-face   :foreground ,green2)
-               (font-lock-warning-face         :foreground ,orange)
-               (font-lock-preprocessor-face    :inherit font-lock-constant-face)
-
                (compilation-info               :inherit font-lock-function-name-face)
                (compilation-warning            :inherit font-lock-warning-face)
-               (warning                        :inherit font-lock-warning-face)
 
-               ;; IMenu
-               ;; (imenu-list-entry-face-0          ((t ())))
+               ;; ;; IMenu
                (imenu-list-entry-subalist-face-0  :bold t)
-
-               ;; Mode Line
-               (mode-line                      :background ,bg-1)
-               (mode-line-inactive             :background ,bg+1)
 
                ;; Yascroll
                (yascroll:thumb-fringe          :background ,fg :foreground ,fg)
                (yascroll:thumb-text-area       :background ,fg :foreground ,fg)
-
-               ;; Company
-               (company-tooltip-common         :bold t)
-               (company-tooltip-common-selection :bold t)
-               (company-tooltip                :background ,bg+2)
-               (company-tooltip-selection      :background ,bg+3)
-               (company-tooltip-annotation     :foreground ,blue)
-               (company-scrollbar-bg           :background ,bg+2 :height 0.3)
-               (company-scrollbar-fg           :background ,bg+4 :height 0.3)
-               (company-template-field         :inherit yas-field-highlight-face)
 
                (corfu-default                :background "#151321")
                (corfu-current                :background ,region)
@@ -181,36 +152,32 @@ You may want to set this to window's border color.")
                ;; Meow
                (meow-keypad-indicator          :foreground "black" :background ,red)
                (meow-insert-indicator          :foreground "black" :background ,green)
-               ;; `(meow-normal-indicator          ((t (:foreground "black" :background ,yellow))))
+               ;; (meow-normal-indicator          ((t (:foreground "black" :background ,yellow))))
                (meow-normal-indicator          :foreground "black" :background ,yellow)
                (meow-motion-indicator          :foreground "black" :background ,blue)
                (meow-beacon-indicator          :foreground "black" :background ,purple)
                ;; (meow-keypad-cursor             ((t ())))
                (meow-insert-cursor             :background ,green)
-               ;; (meow-normal-cursor             ((t ())))
-               ;; (meow-motion-cursor             ((t ())))
 
                ;; Cider
-               ;;
                (cider-result-overlay-face      :background "black")
                (cider-repl-stderr-face         :foreground ,blue)
                (cider-repl-stdout-face         :foreground ,fg-1)
 
                ;; Clojure
-               ;;
                (clojure-character-face         :foreground ,purple)
 
-               ;; Ivy
-               ;; (ivy-highlight-face             ((t ())))
+               ;; ;; Ivy
+               ;; ;; (ivy-highlight-face             ((t ())))
                (ivy-yanked-word                :background "yellow" :foreground "black")
-               ;; (ivy-remote                     ((t ())))
+               ;; ;; (ivy-remote                     ((t ())))
                (ivy-current-match              :foreground ,bg :background ,bg)
-               ;; (ivy-minibuffer-match-highlight ((t ())))
-               ;; (ivy-minibuffer-match-face-1    ((t ())))
-               ;; `(ivy-minibuffer-match-face-2    ((t ())))
-               ;; `(ivy-minibuffer-match-face-3    ((t ())))
-               ;; `(ivy-minibuffer-match-face-4    ((t ())))
-               ;; (counsel-outline-default        ((t ())))
+               ;; ;; (ivy-minibuffer-match-highlight ((t ())))
+               ;; ;; (ivy-minibuffer-match-face-1    ((t ())))
+               ;; ;; `(ivy-minibuffer-match-face-2    ((t ())))
+               ;; ;; `(ivy-minibuffer-match-face-3    ((t ())))
+               ;; ;; `(ivy-minibuffer-match-face-4    ((t ())))
+               ;; ;; (counsel-outline-default        ((t ())))
                (swiper-background-match-face-1  :inherit hl-line)
                (swiper-background-match-face-2  :inherit hl-line)
                (swiper-background-match-face-3 :inherit hl-line)
@@ -221,41 +188,22 @@ You may want to set this to window's border color.")
                (swiper-match-face-4            :foreground "white")
 
                ;; Selectrum
-               (selectrum-current-candidate    :foreground ,bg :inverse-video t)
+               ;; (selectrum-current-candidate    :foreground ,bg :inverse-video t)
+               (selectrum-current-candidate    :foreground ,orange :inverse-video t)
 
-               ;; Magit
-               (magit-diff-file-heading-highlight :background ,bg+1)
-               (magit-section-highlight           :background ,bg+1)
-               (magit-diff-removed             :inherit font-lock-string-face)
-               (magit-diff-added               :inherit font-lock-comment-face)
-               (magit-diff-removed-highlight   :inherit font-lock-string-face :background ,bg+2)
-               (magit-diff-added-highlight     :inherit font-lock-comment-face :background ,bg+2)
-               (magit-diff-highlight           :background ,bg+1)
-               (magit-diff-context-highlight   :background ,bg+1)
+               ;; ;; Magit
 
                ;; SMerge
                (smerge-refined-added           :background "#253325")
                (smerge-lower                   :background "#173017")
 
-               ;; Diff-hl
-               (diff-hl-insert                 :foreground ,green :background ,green)
-               (diff-hl-change                 :foreground ,blue :background ,blue)
-               (diff-hl-delete                 :foreground ,red :background ,red)
-
-               ;; Term
-               (term-color-blue                :foreground ,blue :background ,blue)
-               (term-color-green               :foreground ,green :background ,green)
-               (term-color-red                 :foreground ,red :background ,red)
 
                ;; Popup
                (popup-tip-face                 :background ,bg+4 :foreground ,fg)
                (popup-isearch-match            :background ,brown :foreground "black")
 
                (tooltip                :background ,bg+4 :foreground ,fg)
-               ;; `(tooltip ((t (:foreground ,black :background ,yellow))))
-               (dired-directory                :foreground ,light-purple)
-               ;; (web-mode-html-attr-name-face   ((t ())))
-               ;; (web-mode-html-tag-face         ((t ())))
+               ;; ;; `(tooltip ((t (:foreground ,black :background ,yellow))))
 
                ;; Emacs Rime
                (rime-preedit-face              :underline ,blue :background ,bg+2)
@@ -263,128 +211,647 @@ You may want to set this to window's border color.")
                (rime-indicator-face            :foreground ,purple)
                (rime-indicator-dim-face        :foreground ,bg+4)
 
-               ;; Web Mode
-               ;; (web-mode-function-call-face    ((t ())))
-               ;; (web-mode-function-name-face    ((t ())))
+               ;; ;; Web Mode
+               ;; ;; (web-mode-function-call-face    ((t ())))
+               ;; ;; (web-mode-function-name-face    ((t ())))
                (web-mode-html-tag-bracket-face :inherit parenthesis)
                (web-mode-symbol-face           :foreground ,purple)
                (css-selector                   :foreground ,purple)
 
-               ;; ;; Markdown
-               ;; (markdown-header-face-1         :bold t :height ,(nth 0 my-dark-theme-header-scales))
-               ;; (markdown-header-face-2         :bold t :height ,(nth 1 my-dark-theme-header-scales))
-               ;; (markdown-header-face-3         :bold t :height ,(nth 2 my-dark-theme-header-scales))
-               ;; (markdown-header-face-4         :bold t :height ,(nth 3 my-dark-theme-header-scales))
-               ;; (markdown-header-face-5         :bold t :height ,(nth 4 my-dark-theme-header-scales))
-               ;; (markdown-header-face-6         :bold t :height ,(nth 5 my-dark-theme-header-scales))
-               ;; (markdown-header-face-7         :bold t :height ,(nth 6 my-dark-theme-header-scales))
+               ;; ;; ;; Markdown
+               ;; ;; (markdown-header-face-1         :bold t :height ,(nth 0 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-2         :bold t :height ,(nth 1 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-3         :bold t :height ,(nth 2 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-4         :bold t :height ,(nth 3 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-5         :bold t :height ,(nth 4 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-6         :bold t :height ,(nth 5 poly-dark-header-scales))
+               ;; ;; (markdown-header-face-7         :bold t :height ,(nth 6 poly-dark-header-scales))
 
                ;; Telega
                (telega-entity-type-code        :inherit font-lock-string-face)
                (telega-msg-heading             :inherit hl-line)
                (telega-unmuted-count           :inherit font-lock-function-name-face)
 
-               ;; Org-mode
-               (org-todo                      :foreground ,yellow)
-               (org-done                      :foreground ,blue)
+               ;; ;; Org-mode
                (org-headline-todo             :foreground ,fg+1)
-               (org-headline-done             :foreground ,fg-1 :strike-through t)
-               (org-table                      :foreground ,fg+1)
-               ;; (org-level-1                    :bold t :height ,(nth 0 my-dark-theme-header-scales))
-               ;; (org-level-2                    :bold t :height ,(nth 1 my-dark-theme-header-scales))
-               ;; (org-level-3                    :bold t :height ,(nth 2 my-dark-theme-header-scales))
-               ;; (org-level-4                    :bold t :height ,(nth 3 my-dark-theme-header-scales))
-               ;; (org-level-5                    :bold t :height ,(nth 4 my-dark-theme-header-scales))
-               ;; (org-level-6                    :bold t :height ,(nth 5 my-dark-theme-header-scales))
-               ;; (org-level-7                    :bold t :height ,(nth 6 my-dark-theme-header-scales))
-               (org-document-title             inherit font-lock-string-face)
-               (org-code                       inherit font-lock-constant-face)
+               ;; ;; (org-level-1                    :bold t :height ,(nth 0 poly-dark-header-scales))
+               ;; ;; (org-level-2                    :bold t :height ,(nth 1 poly-dark-header-scales))
+               ;; ;; (org-level-3                    :bold t :height ,(nth 2 poly-dark-header-scales))
+               ;; ;; (org-level-4                    :bold t :height ,(nth 3 poly-dark-header-scales))
+               ;; ;; (org-level-5                    :bold t :height ,(nth 4 poly-dark-header-scales))
+               ;; ;; (org-level-6                    :bold t :height ,(nth 5 poly-dark-header-scales))
+               ;; ;; (org-level-7                    :bold t :height ,(nth 6 poly-dark-header-scales))
 
-               (mu4e-unread-face                            :inherit font-lock-keyword-face :weight bold)
                (mu4e-trashed-face                            :inherit font-lock-comment-face :strike-through t)
                (mu4e-draft-face                              :inherit font-lock-string-face)
                (mu4e-flagged-face                            :inherit font-lock-constant-face :weight bold)
                (mu4e-replied-face                          :inherit font-lock-builtin-face :weight normal :slant normal)
                (mu4e-forwarded-face                          :inherit font-lock-builtin-face :weight normal :slant normal)
                (mu4e-header-face                               :inherit default)
-               (mu4e-related-face                              :inherit default :slant ,poly-dark-theme-use-italic)
+               (mu4e-related-face                              :inherit default :slant ,poly-dark-use-italic)
                (mu4e-header-title-face                      :inherit font-lock-type-face)
-               ;; (mu4e-header-highlight-face                  :inherit hl-line :weight bold :underline t
-               ;;               ,@(and (>= emacs-major-version 27) '(:extend t)
-               (mu4e-header-marks-face                       :inherit font-lock-preprocessor-face)
-               (mu4e-header-key-face                        :inherit message-header-name :weight bold)
-               (mu4e-header-value-face                         :inherit font-lock-type-face)
-               (mu4e-special-header-value-face                  :inherit font-lock-builtin-face)
-               (mu4e-link-face                             :inherit link)
-               (mu4e-contact-face                          :inherit font-lock-variable-name-face)
-               (mu4e-highlight-face                         :inherit highlight)
-               (mu4e-title-face                             :inherit font-lock-type-face :weight bold)
-               (mu4e-modeline-face                           :inherit font-lock-string-face :weight bold)
-               (mu4e-footer-face                             :inherit font-lock-comment-face)
-               (mu4e-url-number-face                         :inherit font-lock-constant-face :weight bold)
-               (mu4e-system-face                             :inherit font-lock-comment-face :slant ,poly-dark-theme-use-italic)
-               (mu4e-ok-face                                 :inherit font-lock-comment-face :weight bold :slant normal)
-               (mu4e-warning-face                            :inherit font-lock-warning-face :weight bold :slant normal)
-               (mu4e-compose-separator-face                  :inherit message-separator :slant ,poly-dark-theme-use-italic)
-               (mu4e-region-code                             :background "DarkSlateGray")
-               (mu4e-attach-number-face                     :inherit font-lock-variable-name-face :weight bold)
-               (mu4e-cited-1-face                            :inherit font-lock-builtin-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-cited-2-face                            :inherit font-lock-preprocessor-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-cited-3-face                            :inherit font-lock-variable-name-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-cited-4-face                            :inherit font-lock-keyword-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-cited-5-face                            :inherit font-lock-comment-face :weight normal :slant poly-dark-theme-use-italic)
-               (mu4e-cited-6-face                            :inherit font-lock-comment-delimiter-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-cited-7-face                            :inherit font-lock-type-face :weight normal :slant ,poly-dark-theme-use-italic)
-               (mu4e-compose-header-face                     :inherit message-separator :slant ,poly-dark-theme-use-italic)
-               (mu4e-context-face                            :inherit mu4e-title-face :weight bold)
-               ;; `(mu4e-moved-face                           ())))
-               (mu4e-view-body-face                          :inherit default)
-               (mu4e-modeline-face                           :inherit font-lock-string-face :weight bold)
+               (mu4e-header-highlight-face                  :inherit hl-line :weight bold :underline t
+							    ,@(and (>= emacs-major-version 27) '(:extend t)))
+	       (mu4e-header-value-face                         :inherit font-lock-type-face)
+	       (mu4e-special-header-value-face                  :inherit font-lock-builtin-face)
+	       (mu4e-link-face                             :inherit link)
+	       (mu4e-contact-face                          :inherit font-lock-variable-name-face)
+	       (mu4e-title-face                             :inherit font-lock-type-face :weight bold)
+	       (mu4e-modeline-face                           :inherit font-lock-string-face :weight bold)
+	       (mu4e-footer-face                             :inherit font-lock-comment-face)
+	       (mu4e-url-number-face                         :inherit font-lock-constant-face :weight bold)
+	       (mu4e-system-face                             :inherit font-lock-comment-face :slant ,poly-dark-use-italic)
+	       (mu4e-ok-face                                 :inherit font-lock-comment-face :weight bold :slant normal)
+	       (mu4e-warning-face                            :inherit font-lock-warning-face :weight bold :slant normal)
+	       (mu4e-compose-separator-face                  :inherit message-separator :slant ,poly-dark-use-italic)
+	       (mu4e-region-code                             :background "DarkSlateGray")
+	       (mu4e-attach-number-face                     :inherit font-lock-variable-name-face :weight bold)
+	       (mu4e-compose-header-face                     :inherit message-separator :slant ,poly-dark-use-italic)
+	       (mu4e-context-face                            :inherit mu4e-title-face :weight bold)
+	       ;; ;; `(mu4e-moved-face                           ())))
+	       (mu4e-view-body-face                          :inherit default)
 
-               ;; Treemacs
-               (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
+	      ;; Treemacs
+	      (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
 
-               (fill-column-indicator          :foreground ,bg+2)
+	      (fill-column-indicator          :foreground ,bg+2)
 
-               (scroll-bar                     :foreground ,fg-1)
+	      (scroll-bar                     :foreground ,fg-1)
 
-               (tab-bar                        :background ,bg+2)
-               (tab-bar-tab                    :inverse-video t :bold t :background ,blue :foreground ,bg+2)
-               (tab-bar-tab-inactive           :inherit shadow)
-               (tab-bar-tab-ungrouped :inherit ,bg+2)
-	       ;; (tab-bar-tab-group-current      ())))
-	       ;; (tab-bar-tab-group-inactive     ())
-	       (icomplete-first-match :inherit mode-line-emphasis)
-	       (mode-line-buffer-id :foreground "Light Blue")
-	       (font-lock-variable-name-face :foreground "#50fa7b")
-	       ;; (highlight-indentation-face (:inherit default :foreground "#878787"))))
-	       ;; (hl-line :background ,bg+1)
-	       (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
-	       (orderless-match-face-1 :inherit error :weight bold)
-	       (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
-	       (orderless-match-face-3 :inherit font-lock-keyword-face :weight bold)
-	       (font-lock-variable-name-face :foreground "#50fa7b")
-	       (highlight-indentation-face :inherit default :foreground "#878787")
-	       (hl-line :background "DodgerBlue4")
-	       (mode-line :foreground ,purple :background ,red)
-	       ;; `(mode-line-inactive (:family "Noto Sans" :height 100))))
 
-	       ;; auto-highlight-symbol
-	       (ahs-definition-face :foreground ,magenta :background unspecified :slant normal)
-	       (ahs-definition-face-unfocused :foreground ,magenta :background unspecified :slant normal)
-	       (ahs-edit-mode-face :foreground ,bg+1 :background ,magenta)
-	       (ahs-face :foreground ,magenta :background unspecified)
-	       (ahs-face-unfocused :foreground ,magenta :background unspecified)
-	       (ahs-plugin-bod-face :foreground ,magenta :background unspecified)
-	       (ahs-plugin-default-face :foreground ,magenta :background unspecified)
-	       (ahs-plugin-default-face-unfocused :foreground ,magenta :background unspecified)
-	       (ahs-plugin-whole-buffer-face :foreground ,magenta  :background unspecified)
-	       (ahs-warning-face :foreground ,red :weight bold)
+	      (icomplete-first-match :inherit mode-line-emphasis)
+	      (mode-line-buffer-id :foreground "Light Blue")
+	      (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
+	      (orderless-match-face-1 :inherit error :weight bold)
+	      (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
+	      (orderless-match-face-3 :inherit font-lock-keyword-face :weight bold)
+
+	      (hl-line :background "DodgerBlue4")
+
+	      ;; auto-highlight-symbol
+	      (ahs-definition-face :foreground ,magenta :background unspecified :slant normal)
+	      (ahs-definition-face-unfocused :foreground ,magenta :background unspecified :slant normal)
+	      (ahs-edit-mode-face :foreground ,bg+1 :background ,magenta)
+	      (ahs-face :foreground ,magenta :background unspecified)
+	      (ahs-face-unfocused :foreground ,magenta :background unspecified)
+	      (ahs-plugin-bod-face :foreground ,magenta :background unspecified)
+	      (ahs-plugin-default-face :foreground ,magenta :background unspecified)
+	      (ahs-plugin-default-face-unfocused :foreground ,magenta :background unspecified)
+	      (ahs-plugin-whole-buffer-face :foreground ,magenta  :background unspecified)
+	      (ahs-warning-face :foreground ,red :weight bold)
+
+	      (cursor :background ,fg3)
+	      (completions-first-difference :foreground ,pink :weight bold)
+	       (default :background ,bg :foreground ,fg)
+	       (default-italic :slant italic)
+	       (ffap :foreground ,fg4)
+	       (fringe :background ,bg :foreground ,fg4)
+	       (highlight :foreground ,fg3 :background ,bg3)
+	       ;; (hl-line :background ,current :extend t)
+	       (info-quoted-name :foreground ,orange)
+	       (info-string :foreground ,yellow)
+	       (lazy-highlight :foreground ,fg2 :background ,bg2)
+	       (link :foreground ,cyan :underline t)
+	       (linum :slant italic :foreground ,bg4 :background ,bg)
+	       (line-number :slant italic :foreground ,bg4 :background ,bg)
+	       (match :background ,yellow :foreground ,bg)
+	       (minibuffer-prompt
+		,@(if poly-dark-alternate-mode-line-and-minibuffer
+		      (list :weight 'normal :foreground fg)
+		    (list :weight 'bold :foreground pink)))
+	       (read-multiple-choice-face :inherit completions-first-difference)
+	       (region :inherit match :extend t)
+	       (trailing-whitespace :foreground nil :background ,orange)
+	       (vertical-border :foreground ,bg2)
+	       (success :foreground ,green)
+	       (warning :foreground ,orange)
+	       (error :foreground ,red)
+	       (header-line :background ,bg)
+	       ;; syntax
+	       (font-lock-builtin-face :foreground ,orange)
+	       (font-lock-comment-face :foreground ,comment :italic t)
+	       (font-lock-comment-delimiter-face :foreground ,comment :italic t)
+	       (font-lock-constant-face :foreground ,cyan)
+	       (font-lock-doc-face :foreground ,comment)
+	       (font-lock-function-name-face :foreground ,green :weight bold)
+	       (font-lock-keyword-face :weight bold :foreground ,pink)
+	       (font-lock-negation-char-face :foreground ,cyan)
+	       (font-lock-preprocessor-face :foreground ,orange)
+	       (font-lock-reference-face :foreground ,cyan)
+	       (font-lock-regexp-grouping-backslash :foreground ,cyan)
+	       (font-lock-regexp-grouping-construct :foreground ,purple)
+	       (font-lock-string-face :foreground ,yellow)
+	       (font-lock-type-face :foreground ,purple)
+	       (font-lock-variable-name-face :foreground ,fg
+					     ;; :weight bold
+					     )
+	       (font-lock-warning-face :foreground ,orange :background ,bg2)
+	       ;; Font Locks
+	       ;; (font-lock-comment-face         :foreground ,comment :italic t)
+	       ;; (font-lock-comment-delimiter-face        :foreground ,comment :italic t)
+	       ;; (font-lock-string-face          :foreground ,yellow)
+	       ;; (font-lock-doc-face             :foreground ,blue :italic t)
+	       ;; (font-lock-builtin-face         :foreground ,purple)
+	       ;; (font-lock-type-face            :forground ,green)
+	       ;; (font-lock-variable-name-face   :foreground ,white)
+	       (font-lock-operator-face   :foreground ,red)
+	       ;; (font-lock-keyword-face         :foreground ,red)
+	       (font-lock-number-face         :foreground ,purple)
+	       (font-lock-delimiter-face         :foreground ,white)
+	       (font-lock-bracket-face         :foreground ,red)
+	       (font-lock-escape-face         :foreground ,red)
+	       (font-lock-property-face         :foreground ,red)
+	       ;; (font-lock-constant-face        :foreground ,purple)
+	       ;; (font-lock-function-name-face   :foreground ,green2)
+	       ;; (font-lock-warning-face         :foreground ,orange)
+	       ;; (font-lock-preprocessor-face    :inherit font-lock-constant-face)
+
+
+	       ;; auto-complete
+	       (ac-completion-face :underline t :foreground ,pink)
+	       ;; company
+	       (company-echo-common :foreground ,bg :background ,fg)
+	       (company-preview :background ,bg :foreground ,alt-blue)
+	       (company-preview-common :foreground ,bg2 :foreground ,fg3)
+	       (company-preview-search :foreground ,purple :background ,bg)
+	       (company-scrollbar-bg :background ,bg3)
+	       (company-scrollbar-fg :foreground ,pink)
+	       (company-template-field :inherit match)
+	       (company-tooltip :foreground ,fg2 :background ,bg :weight bold)
+	       (company-tooltip-annotation :foreground ,cyan)
+	       (company-tooltip-common :foreground ,fg3)
+	       (company-tooltip-common-selection :foreground ,yellow)
+	       (company-tooltip-mouse :inherit highlight)
+	       (company-tooltip-selection :background ,bg3 :foreground ,fg3)
+	       ;; diff-hl
+	       (diff-hl-change :foreground ,orange :background ,orange)
+	       (diff-hl-delete :foreground ,red :background ,red)
+	       (diff-hl-insert :foreground ,green :background ,green)
+	       ;; dired
+	       (dired-directory :foreground ,green :weight normal)
+	       (dired-flagged :foreground ,pink)
+	       (dired-header :foreground ,fg3 :background ,bg)
+	       (dired-ignored :inherit shadow)
+	       (dired-mark :foreground ,fg :weight bold)
+	       (dired-marked :foreground ,orange :weight bold)
+	       (dired-perm-write :foreground ,fg3 :underline t)
+	       (dired-symlink :foreground ,yellow :weight normal :slant italic)
+	       (dired-warning :foreground ,orange :underline t)
+	       (diredp-compressed-file-name :foreground ,fg3)
+	       (diredp-compressed-file-suffix :foreground ,fg4)
+	       (diredp-date-time :foreground ,fg)
+	       (diredp-deletion-file-name :foreground ,pink :background ,current)
+	       (diredp-deletion :foreground ,pink :weight bold)
+	       (diredp-dir-heading :foreground ,fg2 :background ,bg4)
+	       (diredp-dir-name :inherit dired-directory)
+	       (diredp-dir-priv :inherit dired-directory)
+	       (diredp-executable-tag :foreground ,orange)
+	       (diredp-file-name :foreground ,fg)
+	       (diredp-file-suffix :foreground ,fg4)
+	       (diredp-flag-mark-line :foreground ,fg2 :slant italic :background ,current)
+	       (diredp-flag-mark :foreground ,fg2 :weight bold :background ,current)
+	       (diredp-ignored-file-name :foreground ,fg)
+	       (diredp-mode-line-flagged :foreground ,orange)
+	       (diredp-mode-line-marked :foreground ,orange)
+	       (diredp-no-priv :foreground ,fg)
+	       (diredp-number :foreground ,cyan)
+	       (diredp-other-priv :foreground ,orange)
+	       (diredp-rare-priv :foreground ,orange)
+	       (diredp-read-priv :foreground ,purple)
+	       (diredp-write-priv :foreground ,pink)
+	       (diredp-exec-priv :foreground ,yellow)
+	       (diredp-symlink :foreground ,orange)
+	       (diredp-link-priv :foreground ,orange)
+	       (diredp-autofile-name :foreground ,yellow)
+	       (diredp-tagged-autofile-name :foreground ,yellow)
+	       ;; enh-ruby
+	       (enh-ruby-heredoc-delimiter-face :foreground ,yellow)
+	       (enh-ruby-op-face :foreground ,pink)
+	       (enh-ruby-regexp-delimiter-face :foreground ,yellow)
+	       (enh-ruby-string-delimiter-face :foreground ,yellow)
+	       ;; flyspell
+	       (flyspell-duplicate :underline (:style wave :color ,orange))
+	       (flyspell-incorrect :underline (:style wave :color ,red))
+	       ;; font-latex
+	       (font-latex-bold-face :foreground ,purple)
+	       (font-latex-italic-face :foreground ,pink :slant italic)
+	       (font-latex-match-reference-keywords :foreground ,cyan)
+	       (font-latex-match-variable-keywords :foreground ,fg)
+	       (font-latex-string-face :foreground ,yellow)
+	       ;; gnus-group
+	       (gnus-group-mail-1 :foreground ,pink :weight bold)
+	       (gnus-group-mail-1-empty :inherit gnus-group-mail-1 :weight normal)
+	       (gnus-group-mail-2 :foreground ,cyan :weight bold)
+	       (gnus-group-mail-2-empty :inherit gnus-group-mail-2 :weight normal)
+	       (gnus-group-mail-3 :foreground ,comment :weight bold)
+	       (gnus-group-mail-3-empty :inherit gnus-group-mail-3 :weight normal)
+	       (gnus-group-mail-low :foreground ,current :weight bold)
+	       (gnus-group-mail-low-empty :inherit gnus-group-mail-low :weight normal)
+	       (gnus-group-news-1 :foreground ,pink :weight bold)
+	       (gnus-group-news-1-empty :inherit gnus-group-news-1 :weight normal)
+	       (gnus-group-news-2 :foreground ,cyan :weight bold)
+	       (gnus-group-news-2-empty :inherit gnus-group-news-2 :weight normal)
+	       (gnus-group-news-3 :foreground ,comment :weight bold)
+	       (gnus-group-news-3-empty :inherit gnus-group-news-3 :weight normal)
+	       (gnus-group-news-4 :inherit gnus-group-news-low)
+	       (gnus-group-news-4-empty :inherit gnus-group-news-low-empty)
+	       (gnus-group-news-5 :inherit gnus-group-news-low)
+	       (gnus-group-news-5-empty :inherit gnus-group-news-low-empty)
+	       (gnus-group-news-6 :inherit gnus-group-news-low)
+	       (gnus-group-news-6-empty :inherit gnus-group-news-low-empty)
+	       (gnus-group-news-low :foreground ,current :weight bold)
+	       (gnus-group-news-low-empty :inherit gnus-group-news-low :weight normal)
+	       (gnus-header-content :foreground ,pink)
+	       (gnus-header-from :foreground ,fg)
+	       (gnus-header-name :foreground ,purple)
+	       (gnus-header-subject :foreground ,green :weight bold)
+	       (gnus-summary-markup-face :foreground ,cyan)
+	       (gnus-summary-high-unread :foreground ,pink :weight bold)
+	       (gnus-summary-high-read :inherit gnus-summary-high-unread :weight normal)
+	       (gnus-summary-high-ancient :inherit gnus-summary-high-read)
+	       (gnus-summary-high-ticked :inherit gnus-summary-high-read :underline t)
+	       (gnus-summary-normal-unread :foreground ,alt-blue :weight bold)
+	       (gnus-summary-normal-read :foreground ,comment :weight normal)
+	       (gnus-summary-normal-ancient :inherit gnus-summary-normal-read :weight light)
+	       (gnus-summary-normal-ticked :foreground ,pink :weight bold)
+	       (gnus-summary-low-unread :foreground ,comment :weight bold)
+	       (gnus-summary-low-read :inherit gnus-summary-low-unread :weight normal)
+	       (gnus-summary-low-ancient :inherit gnus-summary-low-read)
+	       (gnus-summary-low-ticked :inherit gnus-summary-low-read :underline t)
+	       (gnus-summary-selected :inverse-video t)
+	       ;; haskell-mode
+	       (haskell-operator-face :foreground ,pink)
+	       (haskell-constructor-face :foreground ,purple)
+	       ;; helm
+	       (helm-bookmark-w3m :foreground ,purple)
+	       (helm-buffer-not-saved :foreground ,purple :background ,bg)
+	       (helm-buffer-process :foreground ,orange :background ,bg)
+	       (helm-buffer-saved-out :foreground ,fg :background ,bg)
+	       (helm-buffer-size :foreground ,fg :background ,bg)
+	       (helm-candidate-number :foreground ,bg :background ,fg)
+	       (helm-ff-directory :foreground ,green :background ,bg :weight bold)
+	       (helm-ff-dotted-directory :foreground ,green :background ,bg :weight normal)
+	       (helm-ff-executable :foreground ,alt-blue :background ,bg :weight normal)
+	       (helm-ff-file :foreground ,fg :background ,bg :weight normal)
+	       (helm-ff-invalid-symlink :foreground ,pink :background ,bg :weight bold)
+	       (helm-ff-prefix :foreground ,bg :background ,pink :weight normal)
+	       (helm-ff-symlink :foreground ,pink :background ,bg :weight bold)
+	       (helm-grep-cmd-line :foreground ,fg :background ,bg)
+	       (helm-grep-file :foreground ,fg :background ,bg)
+	       (helm-grep-finish :foreground ,fg2 :background ,bg)
+	       (helm-grep-lineno :foreground ,fg :background ,bg)
+	       (helm-grep-match :foreground nil :background nil :inherit helm-match)
+	       (helm-grep-running :foreground ,green :background ,bg)
+	       (helm-header :foreground ,fg2 :background ,bg :underline nil :box nil)
+	       (helm-moccur-buffer :foreground ,green :background ,bg)
+	       (helm-selection :background ,bg2 :underline nil)
+	       (helm-selection-line :background ,bg2)
+	       (helm-separator :foreground ,purple :background ,bg)
+	       (helm-source-go-package-godoc-description :foreground ,yellow)
+	       (helm-source-header :foreground ,pink :background ,bg :underline nil :weight bold)
+	       (helm-time-zone-current :foreground ,orange :background ,bg)
+	       (helm-time-zone-home :foreground ,purple :background ,bg)
+	       (helm-visible-mark :foreground ,bg :background ,bg3)
+	       ;; highlight-indentation minor mode
+	       (highlight-indentation-face :background ,bg2)
+
+	       (icicle-whitespace-highlight :background ,fg)
+	       (icicle-special-candidate :foreground ,fg2)
+	       (icicle-extra-candidate :foreground ,fg2)
+	       (icicle-search-main-regexp-others :foreground ,fg)
+	       (icicle-search-current-input :foreground ,pink)
+	       (icicle-search-context-level-8 :foreground ,orange)
+	       (icicle-search-context-level-7 :foreground ,orange)
+	       (icicle-search-context-level-6 :foreground ,orange)
+	       (icicle-search-context-level-5 :foreground ,orange)
+	       (icicle-search-context-level-4 :foreground ,orange)
+	       (icicle-search-context-level-3 :foreground ,orange)
+	       (icicle-search-context-level-2 :foreground ,orange)
+	       (icicle-search-context-level-1 :foreground ,orange)
+	       (icicle-search-main-regexp-current :foreground ,fg)
+	       (icicle-saved-candidate :foreground ,fg)
+	       (icicle-proxy-candidate :foreground ,fg)
+	       (icicle-mustmatch-completion :foreground ,purple)
+	       (icicle-multi-command-completion :foreground ,fg2 :background ,bg2)
+	       (icicle-msg-emphasis :foreground ,green)
+	       (icicle-mode-line-help :foreground ,fg4)
+	       (icicle-match-highlight-minibuffer :foreground ,orange)
+	       (icicle-match-highlight-Completions :foreground ,green)
+	       (icicle-key-complete-menu-local :foreground ,fg)
+	       (icicle-key-complete-menu :foreground ,fg)
+	       (icicle-input-completion-fail-lax :foreground ,pink)
+	       (icicle-input-completion-fail :foreground ,pink)
+	       (icicle-historical-candidate-other :foreground ,fg)
+	       (icicle-historical-candidate :foreground ,fg)
+	       (icicle-current-candidate-highlight :foreground ,orange :background ,bg3)
+	       (icicle-Completions-instruction-2 :foreground ,fg4)
+	       (icicle-Completions-instruction-1 :foreground ,fg4)
+	       (icicle-completion :foreground ,fg)
+	       (icicle-complete-input :foreground ,orange)
+	       (icicle-common-match-highlight-Completions :foreground ,purple)
+	       (icicle-candidate-part :foreground ,fg)
+	       (icicle-annotation :foreground ,fg4)
+	       ;; icomplete
+	       (icompletep-determined :foreground ,orange)
+	       ;; ido
+	       (ido-first-match
+		,@(if poly-dark-alternate-mode-line-and-minibuffer
+		      (list :weight 'normal :foreground green)
+		    (list :weight 'bold :foreground pink)))
+	       (ido-only-match :foreground ,orange)
+	       (ido-subdir :foreground ,yellow)
+	       (ido-virtual :foreground ,cyan)
+	       (ido-incomplete-regexp :inherit font-lock-warning-face)
+	       (ido-indicator :foreground ,fg :background ,pink)
+	       ;; isearch
+	       (isearch :inherit match :weight bold)
+	       (isearch-fail :foreground ,bg :background ,orange)
+	       ;; jde-java
+	       (jde-java-font-lock-constant-face :foreground ,cyan)
+	       (jde-java-font-lock-modifier-face :foreground ,pink)
+	       (jde-java-font-lock-number-face :foreground ,fg)
+	       (jde-java-font-lock-package-face :foreground ,fg)
+	       (jde-java-font-lock-private-face :foreground ,pink)
+	       (jde-java-font-lock-public-face :foreground ,pink)
+	       ;; js2-mode
+	       (js2-external-variable :foreground ,purple)
+	       (js2-function-param :foreground ,cyan)
+	       (js2-jsdoc-html-tag-delimiter :foreground ,yellow)
+	       (js2-jsdoc-html-tag-name :foreground ,alt-blue)
+	       (js2-jsdoc-value :foreground ,yellow)
+	       (js2-private-function-call :foreground ,cyan)
+	       (js2-private-member :foreground ,fg3)
+	       ;; js3-mode
+	       (js3-error-face :underline ,orange)
+	       (js3-external-variable-face :foreground ,fg)
+	       (js3-function-param-face :foreground ,pink)
+	       (js3-instance-member-face :foreground ,cyan)
+	       (js3-jsdoc-tag-face :foreground ,pink)
+	       (js3-warning-face :underline ,pink)
+	       ;; magit
+	       (magit-branch-local :foreground ,cyan)
+	       (magit-branch-remote :foreground ,green)
+	       (magit-tag :foreground ,orange)
+	       (magit-section-heading :foreground ,pink :weight bold)
+	       (magit-section-highlight :background ,bg3 :extend t)
+	       (magit-diff-context-highlight :background ,bg3
+					     :foreground ,fg3
+					     :extend t)
+	       (magit-diff-highlight           :background ,bg+1)
+	       (magit-diff-revision-summary :foreground ,orange
+					    :background ,bg
+					    :weight bold)
+	       (magit-diff-revision-summary-highlight :foreground ,orange
+						      :background ,bg3
+						      :weight bold
+						      :extend t)
+	       ;; the four following lines are just a patch of the
+	       ;; upstream color to add the extend keyword.
+	       (magit-diff-added :background "#335533"
+				 :foreground "#ddffdd"
+				 :extend t)
+	       (magit-diff-added-highlight :background "#336633"
+					   :foreground "#cceecc"
+					   :extend t)
+	       (magit-diff-removed :background "#553333"
+				   :foreground "#ffdddd"
+				   :extend t)
+	       (magit-diff-removed-highlight :background "#663333"
+					     :foreground "#eecccc"
+					     :extend t)
+	       (magit-diff-file-heading :foreground ,fg)
+	       (magit-diff-file-heading-highlight :inherit magit-section-highlight)
+	       (magit-diffstat-added :foreground ,green)
+	       (magit-diffstat-removed :foreground ,red)
+	       (magit-hash :foreground ,fg2)
+	       (magit-hunk-heading :background ,bg3)
+	       (magit-hunk-heading-highlight :background ,bg3)
+	       (magit-item-highlight :background ,bg3)
+	       (magit-log-author :foreground ,fg3)
+	       (magit-process-ng :foreground ,orange :weight bold)
+	       (magit-process-ok :foreground ,green :weight bold)
+	       ;; markdown
+	       (markdown-blockquote-face :foreground ,orange)
+	       (markdown-code-face :foreground ,orange)
+	       (markdown-footnote-face :foreground ,alt-blue)
+	       (markdown-header-face :weight normal)
+	       (markdown-header-face-1
+		:inherit bold :foreground ,pink
+		,@(when poly-dark-enlarge-headings
+		    (list :height poly-dark-height-title-1)))
+	       (markdown-header-face-2
+		:inherit bold :foreground ,purple
+		,@(when poly-dark-enlarge-headings
+		    (list :height poly-dark-height-title-2)))
+	       (markdown-header-face-3
+		:foreground ,green
+		,@(when poly-dark-enlarge-headings
+		    (list :height poly-dark-height-title-3)))
+	       (markdown-header-face-4 :foreground ,yellow)
+	       (markdown-header-face-5 :foreground ,cyan)
+	       (markdown-header-face-6 :foreground ,orange)
+	       (markdown-header-face-7 :foreground ,alt-blue)
+	       (markdown-header-face-8 :foreground ,fg)
+	       (markdown-inline-code-face :foreground ,yellow)
+	       (markdown-plain-url-face :inherit link)
+	       (markdown-pre-face :foreground ,orange)
+	       (markdown-table-face :foreground ,purple)
+	       ;; message
+	       (message-mml :foreground ,green :weight normal)
+	       (message-header-xheader :foreground ,cyan :weight normal)
+	       ;; mode-line
+	       (mode-line :background ,current
+			  :box ,current :inverse-video nil
+			  ,@(if poly-dark-alternate-mode-line-and-minibuffer
+				(list :foreground fg3)
+			      (list :foreground nil)))
+	       (mode-line-inactive
+		:inverse-video nil
+		,@(if poly-dark-alternate-mode-line-and-minibuffer
+		      (list :foreground comment :background bg
+			    :box bg)
+		    (list :foreground fg :background bg2 :box bg2)))
+	       ;; mu4e
+	       (mu4e-unread-face :foreground ,pink :weight normal)
+	       (mu4e-view-url-number-face :foreground ,purple)
+	       (mu4e-highlight-face :background ,bg
+				    :foreground ,yellow
+				    :extend t)
+	       (mu4e-header-highlight-face :background ,current
+					   :foreground ,fg
+					   :underline nil :weight bold
+					   :extend t)
+	       (mu4e-header-key-face :inherit message-mml)
+	       (mu4e-header-marks-face :foreground ,purple)
+	       (mu4e-cited-1-face :foreground ,purple)
+	       (mu4e-cited-2-face :foreground ,orange)
+	       (mu4e-cited-3-face :foreground ,comment)
+	       (mu4e-cited-4-face :foreground ,fg2)
+	       (mu4e-cited-5-face :foreground ,fg3)
+               (mu4e-cited-6-face                            :inherit font-lock-comment-delimiter-face :weight normal :slant t)
+	       (mu4e-cited-7-face                            :inherit font-lock-type-face :weight normal :slant t)
+	       ;; org
+	       (org-agenda-date :foreground ,cyan :underline nil)
+	       (org-agenda-dimmed-todo-face :foreground ,comment)
+	       (org-agenda-done :foreground ,green)
+	       (org-agenda-structure :foreground ,purple)
+	       (org-block :foreground ,orange)
+	       (org-code :inherit font-lock-constant-face :foreground ,yellow)
+	       (org-column :background ,bg4)
+	       (org-column-title :inherit org-column :weight bold :underline t)
+	       (org-date :foreground ,cyan :underline t)
+	       (org-document-info :foreground ,alt-blue)
+	       (org-document-info-keyword :foreground ,comment)
+	       (org-document-title :inherit font-lock-string-face :weight bold :foreground ,orange
+				   ,@(when poly-dark-enlarge-headings
+				       (list :height poly-dark-height-doc-title)))
+	       (org-done :foreground ,green)
+	       (org-ellipsis :foreground ,comment)
+	       (org-footnote :foreground ,alt-blue)
+	       (org-formula :foreground ,pink)
+	       (org-headline-done :foreground ,comment
+				  :weight normal :strike-through t)
+	       (org-hide :foreground ,bg :background ,bg)
+	       (org-level-1 :inherit bold :foreground ,pink
+			    ,@(when poly-dark-enlarge-headings
+				(list :height poly-dark-height-title-1)))
+	       (org-level-2 :inherit bold :foreground ,purple
+			    ,@(when poly-dark-enlarge-headings
+				(list :height poly-dark-height-title-2)))
+	       (org-level-3 :weight normal :foreground ,green
+			    ,@(when poly-dark-enlarge-headings
+				(list :height poly-dark-height-title-3)))
+	       (org-level-4 :weight normal :foreground ,yellow)
+	       (org-level-5 :weight normal :foreground ,cyan)
+	       (org-level-6 :weight normal :foreground ,orange)
+	       (org-level-7 :weight normal :foreground ,alt-blue)
+	       (org-level-8 :weight normal :foreground ,fg)
+	       (org-link :foreground ,cyan :underline t)
+	       (org-priority :foreground ,cyan)
+	       (org-scheduled :foreground ,green)
+	       (org-scheduled-previously :foreground ,yellow)
+	       (org-scheduled-today :foreground ,green)
+	       (org-sexp-date :foreground ,fg4)
+	       (org-special-keyword :foreground ,yellow)
+	       (org-table :foreground ,purple)
+	       (org-tag :foreground ,pink :weight bold :background ,bg2)
+	       (org-todo :foreground ,orange :weight bold :background ,bg2)
+	       (org-upcoming-deadline :foreground ,yellow)
+	       (org-warning :weight bold :foreground ,pink)
+	       ;; outline
+	       (outline-1 :foreground ,pink)
+	       (outline-2 :foreground ,purple)
+	       (outline-3 :foreground ,green)
+	       (outline-4 :foreground ,yellow)
+	       (outline-5 :foreground ,cyan)
+	       (outline-6 :foreground ,orange)
+	       ;; powerline
+	       (powerline-evil-base-face :foreground ,bg2)
+	       (powerline-evil-emacs-face :inherit powerline-evil-base-face :background ,yellow)
+	       (powerline-evil-insert-face :inherit powerline-evil-base-face :background ,cyan)
+	       (powerline-evil-motion-face :inherit powerline-evil-base-face :background ,purple)
+	       (powerline-evil-normal-face :inherit powerline-evil-base-face :background ,green)
+	       (powerline-evil-operator-face :inherit powerline-evil-base-face :background ,pink)
+	       (powerline-evil-replace-face :inherit powerline-evil-base-face :background ,red)
+	       (powerline-evil-visual-face :inherit powerline-evil-base-face :background ,orange)
+	       ;; rainbow-delimiters
+	       (rainbow-delimiters-depth-1-face :foreground ,fg)
+	       (rainbow-delimiters-depth-2-face :foreground ,cyan)
+	       (rainbow-delimiters-depth-3-face :foreground ,purple)
+	       (rainbow-delimiters-depth-4-face :foreground ,pink)
+	       (rainbow-delimiters-depth-5-face :foreground ,orange)
+	       (rainbow-delimiters-depth-6-face :foreground ,green)
+	       (rainbow-delimiters-depth-7-face :foreground ,yellow)
+	       (rainbow-delimiters-depth-8-face :foreground ,alt-blue)
+	       (rainbow-delimiters-unmatched-face :foreground ,orange)
+	       ;; rpm-spec
+	       (rpm-spec-dir-face :foreground ,green)
+	       (rpm-spec-doc-face :foreground ,pink)
+	       (rpm-spec-ghost-face :foreground ,purple)
+	       (rpm-spec-macro-face :foreground ,yellow)
+	       (rpm-spec-obsolete-tag-face :inherit font-lock-warning-face)
+	       (rpm-spec-package-face :foreground ,purple)
+	       (rpm-spec-section-face :foreground ,yellow)
+	       (rpm-spec-tag-face :foreground ,cyan)
+	       (rpm-spec-var-face :foreground ,orange)
+	       ;; show-paren
+	       (show-paren-match-face :background unspecified
+				      :foreground ,cyan
+				      :weight bold)
+	       (show-paren-match :background unspecified
+				 :foreground ,cyan
+				 :weight bold)
+	       (show-paren-match-expression :inherit match)
+	       (show-paren-mismatch :inherit font-lock-warning-face)
+	       ;; slime
+	       (slime-repl-inputed-output-face :foreground ,purple)
+	       ;; spam
+	       (spam :inherit gnus-summary-normal-read :foreground ,orange
+		     :strike-through t :slant oblique)
+	       ;; tab-bar & tab-line (since Emacs 27.1)
+	       (tab-bar                        :background ,bg+2)
+	       (tab-bar-tab-inactive           :inherit shadow
+					       :background ,bg2)
+	       (tab-bar-tab-ungrouped :inherit :background ,bg+2)
+	       (tab-bar-tab :bold t :foreground ,blue :background ,bg
+			    :box (:line-width 2 :color ,bg :style nil))
+	       (tab-line :foreground ,purple :background ,current
+			 :height 0.9 :inherit variable-pitch)
+	       (tab-line-tab :foreground ,pink :background ,bg
+			     :box (:line-width 2 :color ,bg :style nil))
+	       (tab-line-tab-inactive :foreground ,purple :background ,bg2
+				      :box (:line-width 2 :color ,bg2 :style nil))
+	       (tab-line-tab-current :inherit tab-line-tab)
+	       (tab-line-close-highlight :foreground ,red)
+	       ;; term
+	       (term :foreground ,fg :background ,bg)
+	       (term-color-black :foreground ,bg :background ,bg)
+	       (term-color-blue :foreground ,purple :background ,purple)
+	       (term-color-cyan :foreground ,cyan :background ,cyan)
+	       (term-color-green :foreground ,green :background ,green)
+	       (term-color-magenta :foreground ,pink :background ,pink)
+	       (term-color-red :foreground ,red :background ,red)
+	       (term-color-white :foreground ,fg :background ,fg)
+	       (term-color-yellow :foreground ,yellow :background ,yellow)
+	       ;; undo-tree
+	       (undo-tree-visualizer-current-face :foreground ,orange)
+	       (undo-tree-visualizer-default-face :foreground ,fg2)
+	       (undo-tree-visualizer-register-face :foreground ,purple)
+	       (undo-tree-visualizer-unmodified-face :foreground ,fg)
+	       ;; web-mode
+	       (web-mode-builtin-face :inherit ,font-lock-builtin-face)
+	       (web-mode-comment-face :inherit ,font-lock-comment-face)
+	       (web-mode-constant-face :inherit ,font-lock-constant-face)
+	       (web-mode-doctype-face :inherit ,font-lock-comment-face)
+	       (web-mode-function-name-face :inherit ,font-lock-function-name-face)
+	       (web-mode-html-attr-name-face :foreground ,purple)
+	       (web-mode-html-attr-value-face :foreground ,green)
+	       (web-mode-html-tag-face :foreground ,pink :weight bold)
+	       (web-mode-keyword-face :foreground ,pink)
+	       (web-mode-string-face :foreground ,yellow)
+	       (web-mode-type-face :inherit ,font-lock-type-face)
+	       (web-mode-warning-face :inherit ,font-lock-warning-face)
+	       ;; which-func
+	       (which-func :inherit ,font-lock-function-name-face)
+	       ;; whitespace
+	       (whitespace-big-indent :background ,red :foreground ,red)
+	       (whitespace-empty :background ,orange :foreground ,red)
+	       (whitespace-hspace :background ,bg3 :foreground ,comment)
+	       (whitespace-indentation :background ,orange :foreground ,red)
+	       (whitespace-line :background ,bg :foreground ,pink)
+	       (whitespace-newline :foreground ,comment)
+	       (whitespace-space :background ,bg :foreground ,comment)
+	       (whitespace-space-after-tab :background ,orange :foreground ,red)
+	       (whitespace-space-before-tab :background ,orange :foreground ,red)
+	       (whitespace-tab :background ,bg2 :foreground ,comment)
+	       (whitespace-trailing :inherit trailing-whitespace)
+	       ;; yard-mode
+	       (yard-tag-face :inherit ,font-lock-builtin-face)
 	       )))
 
   (apply #'custom-theme-set-faces
-         'poly-dark
-         (let* ((color-names (mapcar #'car colors))
+	 'poly-dark
+	 (let* ((color-names (mapcar #'car colors))
 		(graphic-colors (mapcar #'cadr colors))
 		(term-colors (mapcar #'car (mapcar #'cddr colors)))
 		(tty-colors (mapcar #'car (mapcar #'last colors)))
