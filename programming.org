@@ -411,37 +411,23 @@ If INTERACTIVE, prompt user for details."
 	      ;;		  '(cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
 	      ))
 
-  (with-eval-after-load 'eglot
-    (setq eglot-workspace-configuration
-	  '((:gopls . ((staticcheck . nil)
-		       (matcher . "CaseSensitive")
-		       (gofumpt . t)
-		       (usePlaceholders . t)
-		       (completeUnimported . t)
-		       ;; (experimentalWorkspaceModule . t)
-		       (completionBudget . "150ms")
-		       (diagnosticsDelay  .  "800ms")
-		       ;; (directoryFilters . ["-vendor"])
-		       (analyses . ((unusedparams . t) (unusedwrite . t)))
-		       (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
-		       (codelenses . ((vendor . t)))
-		       ;; (buildFlags . ["-mod=vendor"])
-		       (allowImplicitNetworkAccess . t)
-		       (allowModfileModifications . t)
-		       ))))
-
-    ;; (setq eglot-workspace-configuration
-    ;; 	'((:gopls . ((staticcheck . t)
-    ;; 		     (matcher . "CaseSensitive")
-    ;; 		     (gofumpt . t)
-    ;; 		     (usePlaceholders . t)
-    ;; 		     (UsePlaceholders . t)
-    ;; 		     (completeUnimported . t)
-    ;; 		     (experimentalWorkspaceModule . t)
-    ;; 		     (completionBudget . "150ms")
-    ;; 		     (diagnosticsDelay  .  "800ms")))))
-    )
-
+  (setq eglot-workspace-configuration
+	`((:gopls . ((staticcheck . nil)
+		     (matcher . "CaseSensitive")
+		     (gofumpt . t)
+		     (usePlaceholders . t)
+		     (completeUnimported . t)
+		     ;; (experimentalWorkspaceModule . t)
+		     (completionBudget . "150ms")
+		     (diagnosticsDelay  .  "800ms")
+		     ;; (directoryFilters . ["-vendor"])
+		     (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
+		     (codelenses . ((vendor . t)))
+		     ;; (buildFlags . ["-mod=vendor"])
+		     (allowImplicitNetworkAccess . t)
+		     (allowModfileModifications . t)
+		     (analyses . ,(mapcar (lambda (a) (cons a :json-false))
+					  '(unusedparams unusedwrite composites ST1003  ST1021 ST1016 SA5011 ST1020 ST1005 SA9003 SA4006 ST1022 S1023 SA4011 SA4010 ST1018)))))))
   ;; (add-hook 'eglot-managed-mode-hook
   ;;	    (lambda()
   ;;	      (make-local-variable 'company-backends)
@@ -478,37 +464,36 @@ If INTERACTIVE, prompt user for details."
 	      ("C-c C-f" . eglot-format-buffer))
   )
 
-
 (defun poly/go-workspace-organize-imports()
   "Run organize-imports action in workspace with changed go files."
   (interactive)
   (save-excursion
-  (when-let ((filename (buffer-file-name))
-	     (directory-name (file-name-directory filename))
-	     (files (magit-changed-files "HEAD")))
-    (dolist (go-file files)
-      (when (s-suffix? ".go" go-file)
-	(let* ((full-filename (expand-file-name go-file directory-name))
-	       (buffer (find-file-noselect full-filename))
-	       (results))
-	  (when buffer
-	    (with-current-buffer buffer
-	      (when (fboundp 'eglot-code-action-organize-imports)
-		(setq results (call-interactively 'eglot-code-action-organize-imports (point-min)))
-		(when results
-		  (let ((el (seq-elt results 0))
-			(edit)
-			(idx 0))
-		    (when (< idx (length results))
-		      (setq edit (plist-get el :edit))
-		      (if edit
-			  (eglot--apply-workspace-edit edit)
-			(message (format "nothing need to import: %s" go-file)))
-		      (setq el (seq-elt results idx))
-		      (setq idx (1+ idx))))))
-	      (message (format "organize imports & save buffer: %s" go-file))
-	      (save-buffer))
-	    )))))))
+    (when-let ((filename (buffer-file-name))
+	       (directory-name (file-name-directory filename))
+	       (files (magit-changed-files "HEAD")))
+      (dolist (go-file files)
+	(when (s-suffix? ".go" go-file)
+	  (let* ((full-filename (expand-file-name go-file directory-name))
+		 (buffer (find-file-noselect full-filename))
+		 (results))
+	    (when buffer
+	      (with-current-buffer buffer
+		(when (fboundp 'eglot-code-action-organize-imports)
+		  (setq results (call-interactively 'eglot-code-action-organize-imports (point-min)))
+		  (when results
+		    (let ((el (seq-elt results 0))
+			  (edit)
+			  (idx 0))
+		      (when (< idx (length results))
+			(setq edit (plist-get el :edit))
+			(if edit
+			    (eglot--apply-workspace-edit edit)
+			  (message (format "nothing need to import: %s" go-file)))
+			(setq el (seq-elt results idx))
+			(setq idx (1+ idx))))))
+		(message (format "organize imports & save buffer: %s" go-file))
+		(save-buffer))
+	      )))))))
 
 
 (defun lsp/non-greedy-eglot ()

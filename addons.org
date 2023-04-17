@@ -758,7 +758,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		     :host nil
 		     :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git"
 		     ;; :host github :repo "shuxiao9058/tabnine"
-		     :files ("*.el" "*.sh"))
+		     ;; :files ("*.el")
+)
   :custom
   (tabnine-wait 1)
   :init

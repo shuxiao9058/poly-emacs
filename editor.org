@@ -551,8 +551,11 @@ WIN-ID : Window index."
 #+begin_src emacs-lisp
 
 (defun current-monitor-pixel-dimensions ()
-  (let* ((monitor-attributes (display-monitor-attributes-list
-			      (frame-parameter nil 'display))))
+  "Get current monitor pixel dimensions."
+  (let* ((current-frame (selected-frame))
+	  (monitor-attributes (display-monitor-attributes-list
+			      ;; (frame-parameter nil 'display)
+			      current-frame)))
     (list (nth 3 (assq 'geometry (nth 0 monitor-attributes)))
 	  (nth 4 (assq 'geometry (nth 0 monitor-attributes))))))
 
