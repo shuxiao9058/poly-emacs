@@ -82,6 +82,15 @@
 (bind-key "s-SPC" #'set-mark-command)
 (bind-key "M-RET" #'toggle-frame-fullscreen)
 (unbind-key "C-z")
+
+(defun poly/recentf-open-files ()
+  "Open `recent-list' item in a new buffer.
+    The user's $HOME directory is abbreviated as a tilde."
+  (interactive)
+  (let* ((files (mapcar 'abbreviate-file-name recentf-list))
+	 (filter-files (cl-remove-if-not #'file-exists-p files)))
+    ;; (princ files)
+    (find-file (completing-read "Find recent file: " files nil t))))
 #+end_src
 
 

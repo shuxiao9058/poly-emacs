@@ -1,4 +1,4 @@
-;;; -*- lexical-binding: t -*-
+;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
 ;; Define helper command for reloading configuration
 (defun poly-refresh ()

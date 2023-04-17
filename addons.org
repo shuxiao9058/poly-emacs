@@ -104,7 +104,7 @@ Configuration for addons, additional features provided by individual packages.
 
 ** selectrum
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package selectrum
   :disabled t
   :straight t
@@ -128,21 +128,11 @@ Configuration for addons, additional features provided by individual packages.
 	 ("<up>" .  selectrum-previous-candidate)
 	 ("C-k"  .  selectrum-previous-candidate)
 	 ("<backtab>" . selectrum-previous-candidate)))
-
-
-(defun poly/recentf-open-files ()
-  "Open `recent-list' item in a new buffer.
-    The user's $HOME directory is abbreviated as a tilde."
-  (interactive)
-  (let* ((files (mapcar 'abbreviate-file-name recentf-list))
-	 (filter-files (cl-remove-if-not #'file-exists-p files)))
-    ;; (princ files)
-    (find-file (completing-read "Find recent file: " files nil t))))
 #+end_src
 
 ** marginalia
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package marginalia
   :disabled t
   :straight t
@@ -220,7 +210,7 @@ Configuration for addons, additional features provided by individual packages.
 
 This is a completion style, it's a back-end for completion and is used by a  front-end that provides a completion UI.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package orderless
   :straight t
   :after selectrum
@@ -305,7 +295,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ** selectrum-prescient
 
-#+begin_src  emacs-lisp
+#+begin_src  emacs-lisp :tangle no
 (use-package selectrum-prescient
   :straight t
   :after selectrum
@@ -316,7 +306,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ** Consult without consultation fees
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package consult
   :disabled t
   :straight t

@@ -428,41 +428,13 @@ If INTERACTIVE, prompt user for details."
 		     (allowModfileModifications . t)
 		     (analyses . ,(mapcar (lambda (a) (cons a :json-false))
 					  '(unusedparams unusedwrite composites ST1003  ST1021 ST1016 SA5011 ST1020 ST1005 SA9003 SA4006 ST1022 S1023 SA4011 SA4010 ST1018)))))))
-  ;; (add-hook 'eglot-managed-mode-hook
-  ;;	    (lambda()
-  ;;	      (make-local-variable 'company-backends)
-  ;;	      (setq-local company-backends
-  ;;			  '(company-tabnine-capf company-capf company-tabnine
-  ;;						 (company-dabbrev company-dabbrev-code)
-  ;;						 company-keywords company-files))))
-  ;; (add-hook 'eglot-managed-mode-hook (lambda()
-  ;;				       (make-local-variable 'company-backends)
-  ;;				       ;; (setq-local company-backends nil)
-  ;;				       ;; (setq company-backends
-  ;;				       ;;	     '(company-capf
-  ;;				       ;;	       ;; company-dabbrev-code
-  ;;				       ;;	       (company-files          ; files & directory
-  ;;				       ;;		company-keywords       ; keywords
-  ;;				       ;;		)
-  ;;				       ;;	       (company-abbrev company-dabbrev)))
-  ;;				       (setq-local company-backends
-  ;;						   ;; '((company-tabnine :with company-capf :separate)
-  ;;						   '(company-tabnine
-  ;;						     company-dabbrev-code
-  ;;						     (company-files          ; files & directory
-  ;;						      company-keywords       ; keywords
-  ;;						      )
-  ;;						     (company-abbrev company-dabbrev)))
-  ;;				       ))
-  ;; )
   :bind (:map eglot-mode-map
 	      ("C-c C-r" . poly/eglot-rename)
 	      ("C-c o" . eglot-code-action-organize-imports)
 	      ("C-c h" . eldoc)
 	      ("<f6>" . xref-find-definitions)
 	      ("C-c C-a" . eglot-code-actions)
-	      ("C-c C-f" . eglot-format-buffer))
-  )
+	      ("C-c C-f" . eglot-format-buffer)))
 
 (defun poly/go-workspace-organize-imports()
   "Run organize-imports action in workspace with changed go files."
@@ -815,6 +787,20 @@ fix xref issue =(wrong-type-argument listp 0)=
 #+end_src
 ** Go Language
 #+begin_src emacs-lisp
+(defun poly/install-go-tool (pkg)
+  "Install or update go PKG/tools."
+  (interactive)
+  (unless (executable-find "go")
+    (user-error "Unable to find `go' in `exec-path'!"))
+  (message "Installing go tool...")
+  (set-process-sentinel
+   (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg "@latest"))
+   (lambda (proc _)
+     (let ((status (process-exit-status proc)))
+       (if (= 0 status)
+           (message "Installed %s" pkg)
+         (message "Failed to install %s: %d" pkg status))))))
+
 (use-package go-mode
   :disabled t
   :straight t
@@ -827,22 +813,7 @@ fix xref issue =(wrong-type-argument listp 0)=
   ;; so that that notification reports the actual contents that will be saved.
   (defun eglot-format-buffer-on-save ()
     (add-hook 'before-save-hook #'eglot-format-buffer -10 t))
-  (add-hook 'go-mode-hook #'eglot-format-buffer-on-save)
-  ;; :init
-  ;; (defun lsp-go-install-save-hooks()
-  ;;   ;; (add-hook 'before-save-hook #'lsp-format-buffer t t)
-  ;;   ;; (add-hook 'before-save-hook #'lsp-organize-imports t t)
-  ;;   (setq-local lsp-enable-on-type-formatting t))
-
-  ;; (defun eglot-go-install-save-hooks()
-  ;;   (add-hook 'before-save-hook #'eglot-format-buffer t t))
-
-  ;; (if poly-use-lsp-mode
-  ;;     (eval-after-load 'lsp
-  ;;	(add-hook 'go-mode-hook #'lsp-go-install-save-hooks))
-  ;;   (eval-after-load 'eglot
-  ;;     (add-hook 'go-mode-hook #'eglot-go-install-save-hooks)))
-  )
+  (add-hook 'go-mode-hook #'eglot-format-buffer-on-save))
 
 (use-package gorepl-mode
   :straight t
@@ -911,12 +882,49 @@ fix xref issue =(wrong-type-argument listp 0)=
   :bind (:map go-mode-map
 	      ("C-c t a" . go-tag-add)
 	      ("C-c t r" . go-tag-remove))
-  :init (setq go-tag-args (list "-transform" "camelcase")))
+  :init (setq go-tag-args (list "-transform" "camelcase"))
+  :config
+  (unless (executable-find "gomodifytags")
+    (poly/install-go-tool "github.com/fatih/gomodifytags")))
+
+(use-package go-fill-struct
+  :straight
+  :after go-mode
+  :config
+  ;; fillstruct - fills a struct literal with default values
+  (unless (executable-find "fillstruct")
+    (poly/install-go-tool "github.com/davidrjenni/reftools/cmd/fillstruct")))
+
+(use-package go-dlv
+  :straight t
+  :after go-mode
+  :config
+  ;; Delve is a debugger for the Go programming language.
+  (unless (executable-find "dlv")
+    (poly/install-go-tool "github.com/go-delve/delve/cmd/dlv")))
+
+(use-package go-errcheck
+  :straight t
+  :after go-mode
+  :bind (:map go-mode-map
+              ("C-c C-e" . go-errcheck))
+  :config
+  ;; errcheck is a program for checking for unchecked errors in Go code.
+  (unless (executable-find "errcheck")
+    (poly/install-go-tool "github.com/kisielk/errcheck")))
 
 (use-package go-gen-test
   :straight t
   :bind (:map go-mode-map
 	      ("C-c t g" . go-gen-test-dwim)))
+
+(use-package go-impl
+  :straight t
+  :commands (go-impl)
+  :after go-mode
+  :config
+  (unless (executable-find "impl")
+    (poly/install-go-tool "github.com/josharian/impl")))
 
 (use-package gotest
   :straight t
@@ -933,7 +941,10 @@ fix xref issue =(wrong-type-argument listp 0)=
 (use-package go-playground
   :straight t
   :diminish
-  :commands (go-playground-mode))
+  :commands (go-playground-mode)
+  :config
+  (unless (executable-find "goplay")
+    (poly/install-go-tool "github.com/haya14busa/goplay/cmd/goplay")))
 #+end_src
 * lisp
 
