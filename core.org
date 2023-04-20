@@ -359,7 +359,6 @@ Accepts the same arguments as `message'."
   (load-theme 'poly-dark t))
 
 (poly/reload-theme)
-(global-hl-line-mode 1)
 #+end_src
 
 ** gc timer

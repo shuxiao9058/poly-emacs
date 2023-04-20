@@ -119,8 +119,19 @@
 	(load bootstrap-file nil 'nomessage))))
   (straight-use-package 'use-package))
 
+
 ;; Straight configs
+(setq straight-check-for-modifications '(check-on-save find-when-checking))
 (setq straight-vc-git-default-clone-depth 1)
+(setq use-package-expand-minimally t)
+
+(add-to-list 'straight-built-in-pseudo-packages 'dired)
+(add-to-list 'straight-built-in-pseudo-packages 'dired-async)
+(add-to-list 'straight-built-in-pseudo-packages 'replace)
+(add-to-list 'straight-built-in-pseudo-packages 'isearch)
+(add-to-list 'straight-built-in-pseudo-packages 'abbrev)
+(add-to-list 'straight-built-in-pseudo-packages 'ediff)
+(add-to-list 'straight-built-in-pseudo-packages 'org)
 #+end_src
 
 ** deal with org issue
@@ -130,9 +141,8 @@
   (straight-use-package 'org)
   (straight-use-package 'org-contrib)
   ;; Pin org-mode version.
-  (add-to-list 'straight-x-pinned-packages
-	       ;; e0b05b07528dea684f3439c017370436b8d37b50 means v9.5.4
-               '("org" . "e0b05b07528dea684f3439c017370436b8d37b50")))
+  ;; (add-to-list 'straight-x-pinned-packages '("org" . "c9f5804f0964cb3a9aed1a0bd3e92ee3aaea444c"))
+  )
 #+end_src
 
 ** env

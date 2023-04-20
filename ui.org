@@ -146,20 +146,20 @@
 
 ;; Disable most GUI widgets early on
 (setq default-frame-alist '((horizontal-scroll-bars . nil)
-                            ;; (alpha . (0.90 0.90))
-                            (ns-appearance . dark)
-                            (ns-transparent-titlebar . t)
-                            (drag-internal-border . 1)
-                            (drag-with-tab-line . t)
-                            (internal-border-width . 0)
-                            ;; (internal-border-width . 5)
-                            (vertical-scroll-bars . nil)
-                            ;; (menu-bar-lines . 0)
-                            (tool-bar-lines . 0)
-                            (fullscreen . maximized)
-                            (height . 50)
-                            (width . 95)
-                            (undecorated . t) ;; remove title bar
+			    ;; (alpha . (0.90 0.90))
+			    (ns-appearance . dark)
+			    (ns-transparent-titlebar . t)
+			    (drag-internal-border . 1)
+			    (drag-with-tab-line . t)
+			    (internal-border-width . 0)
+			    ;; (internal-border-width . 5)
+			    (vertical-scroll-bars . nil)
+			    ;; (menu-bar-lines . 0)
+			    (tool-bar-lines . 0)
+			    (fullscreen . maximized)
+			    (height . 50)
+			    (width . 95)
+			    (undecorated . t) ;; remove title bar
 			    ;; (font . "JetBrains Mono-14")
 			    ;; (line-spacing . 0.2)
 			    ))
@@ -171,16 +171,16 @@
   (let ((frame  (selected-frame)))
     (when (display-graphic-p frame)
       (let* ((current-alpha (or (car (cdr (assoc 'alpha (frame-parameters frame)))) 1.0))
-             (new-alpha (or (cl-case current-alpha ((0.85) 1.0)
-				 ;; ((100) 93)
-				 ;; ((93) 91)
-				 ;; ((91) 78) ((78) 66) ((66) 50)
-				 ;; (t 100)
+	     (new-alpha (or (cl-case current-alpha ((0.85) 1.0)
+				     ;; ((100) 93)
+				     ;; ((93) 91)
+				     ;; ((91) 78) ((78) 66) ((66) 50)
+				     ;; (t 100)
 				     ) 0.85)))
 	;; (princ current-alpha)
 	(when new-alpha (set-frame-parameter frame 'alpha `(,new-alpha ,new-alpha)))))))
 
-;; (my-toggle-transparency)
+(my-toggle-transparency)
 #+end_src
 
 ** fix macOS switch desktop lose focus
@@ -207,7 +207,8 @@
 
 ;; (setq +ufont-family "Sarasa Mono SC")
 (defvar +ufont-family "PingFang SC") ;; chinese font
-(setq +fixed-pitch-family "Sarasa Mono SC")
+;; (setq +fixed-pitch-family "Sarasa Mono SC")
+(setq +fixed-pitch-family "JetBrains Mono")
 (setq +variable-pitch-family "Sarasa Mono SC")
 
 (defun poly/font-exist-p (fontname)
@@ -244,16 +245,17 @@
 	(set-fontset-font "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
       (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size 13) nil 'prepend)))
 
-  ;; (let* ((font-spec (format "%s-%d" +font-family +font-size))
-  ;;        (variable-pitch-font-spec (format "%s-%d" +variable-pitch-family +font-size))
-  ;;        (fixed-pitch-font-spec (format "%s-%d" +fixed-pitch-family +font-size)))
-  ;;   (set-fontset-font nil nil (font-spec :family +font-family
-  ;;           :size +font-size
-  ;;           :width 'normal
-  ;;           ) frame)
-  ;;   ;; (set-frame-font font-spec frame)
-  ;;   (set-face-attribute 'variable-pitch nil :font variable-pitch-font-spec)
-  ;;   (set-face-attribute 'fixed-pitch nil :font fixed-pitch-font-spec))
+  (let* ((+font-size 12)
+	 (font-spec (format "%s-%d" +font-family 12))
+         (variable-pitch-font-spec (format "%s-%d" +variable-pitch-family +font-size))
+         (fixed-pitch-font-spec (format "%s-%d" +fixed-pitch-family +font-size)))
+    (set-fontset-font nil nil (font-spec :family +font-family
+					 :size +font-size
+					 :width 'normal
+					 ) frame)
+    ;; (set-frame-font font-spec frame)
+    (set-face-attribute 'variable-pitch nil :font variable-pitch-font-spec)
+    (set-face-attribute 'fixed-pitch nil :font fixed-pitch-font-spec))
   ;; (+load-ext-font)
   )
 

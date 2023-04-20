@@ -89,8 +89,7 @@
   (interactive)
   (let* ((files (mapcar 'abbreviate-file-name recentf-list))
 	 (filter-files (cl-remove-if-not #'file-exists-p files)))
-    ;; (princ files)
-    (find-file (completing-read "Find recent file: " files nil t))))
+    (find-file (completing-read "Find recent file: " filter-files nil t))))
 #+end_src
 
 
@@ -203,18 +202,18 @@ This configuration sticks with Meow for modal editing.
 		  cperl-mode
 		  perl-mode
 		  debuffer-mode
-                  ielm-mode
-                  inferior-python-mode
-                  go-dot-mod-mode
+		  ielm-mode
+		  inferior-python-mode
+		  go-dot-mod-mode
 		  go-mod-mode
 		  mu4e-view-mode
-                  diff-mode))
+		  diff-mode))
     (add-to-list 'meow-mode-state-list `(,mode . normal)))
 
   ;; motion mode list
   (dolist (mode '(xeft-mode
-                  Info-mode
-                  ghelp-page-mode
+		  Info-mode
+		  ghelp-page-mode
 		  git-commit-mode
 		  magit-log-edit-mode
 		  ;; notmuch-hello-mode
@@ -235,84 +234,85 @@ This configuration sticks with Meow for modal editing.
 		  ;; notmuch-hello-mode
 		  ;; notmuch-search-mode
 		  notmuch-message-mode))
-      (add-to-list 'meow-mode-state-list `(,mode . insert)))
+    (add-to-list 'meow-mode-state-list `(,mode . insert)))
 
-    ;; specific font so that line won't break
-    (advice-add 'meow-cheatsheet :after (lambda ()
-					  (interactive)
-					  (setq buffer-face-mode-face '(:family "Menlo"))
-					  (buffer-face-mode +1)))
-    (add-to-list 'meow-grab-fill-commands 'eval-expression)
+  ;; specific font so that line won't break
+  (advice-add 'meow-cheatsheet :after (lambda ()
+					(interactive)
+					(setq buffer-face-mode-face '(:family "Menlo"))
+					(buffer-face-mode +1)))
+  (add-to-list 'meow-grab-fill-commands 'eval-expression)
 
-    (setq meow-cursor-type-keypad 'box)
-    (setq meow-cursor-type-insert '(bar . 2))
+  (setq meow-cursor-type-keypad 'box)
+  (setq meow-cursor-type-insert '(bar . 2))
 
-    (setq
-     ;; meow-visit-sanitize-completion nil
-     meow-esc-delay 0.001
-     meow-keypad-describe-delay 0.5
-     meow-select-on-change t
-     meow-cursor-type-normal 'box
-     meow-cursor-type-insert '(bar . 4)
-     meow-selection-command-fallback '((meow-replace . meow-page-up)
-				       (meow-change . meow-change-char)
-				       (meow-save . meow-save-empty)
-				       (meow-kill . meow-C-k)
-				       (meow-cancel . keyboard-quit)
-				       (meow-pop . meow-pop-grab)
-				       (meow-delete . meow-C-d)))
+  (setq
+   ;; meow-visit-sanitize-completion nil
+   meow-esc-delay 0.001
+   meow-keypad-describe-delay 0.5
+   meow-select-on-change t
+   meow-cursor-type-normal 'box
+   meow-cursor-type-insert '(bar . 4)
+   meow-selection-command-fallback '((meow-replace . meow-page-up)
+				     (meow-change . meow-change-char)
+				     (meow-save . meow-save-empty)
+				     (meow-kill . meow-C-k)
+				     (meow-cancel . keyboard-quit)
+				     (meow-pop . meow-pop-grab)
+				     (meow-delete . meow-C-d)))
 
-    (add-to-list 'meow-char-thing-table '(?\] . line))
-    (add-to-list 'meow-char-thing-table '(?\[ . line))
+  (add-to-list 'meow-char-thing-table '(?\] . line))
+  (add-to-list 'meow-char-thing-table '(?\[ . line))
 
-    (dolist (hook '(git-commit-mode-hook
-		    magit-log-edit-mode-hook))
-      (add-hook hook (lambda()(meow--switch-state 'insert))))
+  (dolist (hook '(git-commit-mode-hook
+		  magit-log-edit-mode-hook))
+    (add-hook hook (lambda()(meow--switch-state 'insert))))
 
-    ;; disable <backspace> work as meow-keypad-undo
-    ;; since some useful command may use <backspace> key
-    ;; such as C-x BS
-    (define-key meow-keypad-state-keymap (kbd "<backspace>")
-      'meow-keypad-self-insert)
+  ;; disable <backspace> work as meow-keypad-undo
+  ;; since some useful command may use <backspace> key
+  ;; such as C-x BS
+  (define-key meow-keypad-state-keymap (kbd "<backspace>")
+	      'meow-keypad-self-insert)
 
-    (define-key meow-keypad-state-keymap (kbd "DEL")
-      'meow-keypad-self-insert)
+  (define-key meow-keypad-state-keymap (kbd "DEL")
+	      'meow-keypad-self-insert)
 
-    (meow-leader-define-key
-     '( "e" . poly/recentf-open-files)
-       ;; "e" . consult-recent-file)
-     ;; '("e" . my/icomplete-recentf)
-     ;; '("." . find-file)
-     '("." . poly/find-file)
-     '("p" . projectile-command-map)
-     '("b" . switch-to-buffer)
-     ;; '("b" . poly/switch-to-buffer)
-     '("s" . save-buffer)
-     '("j" . sp-join-sexp)
-     '("(" . sp-wrap-round)
-     '("[" . sp-wrap-square)
-     '("{" . sp-wrap-curly)
-     '("o" . ace-window)
-     '("a" . delete-other-windows)
-     '("-" . split-window-below)
-     '("/" . swiper)
-     '("\\" . split-window-right)
-     '("w" . ace-swap-window)
-     '("k" . kill-buffer)
-     )
-    ;; meow-setup is your custom function, see below
-    (meow-setup)
-    ;; If you want relative line number in NORMAL s tate(for display-line-numbers-mode)
-    (meow-setup-line-number)
-    ;; If you need setup indicator, see `meow-indicator' for customizing by hand.
-    (meow-setup-indicator)
+  (meow-leader-define-key
+   '( "e" . recentf-open)
+   ;; ( "e" . poly/recentf-open-files)
+   ;; "e" . consult-recent-file)
+   ;; '("e" . my/icomplete-recentf)
+   ;; '("." . find-file)
+   '("." . poly/find-file)
+   '("p" . projectile-command-map)
+   '("b" . switch-to-buffer)
+   ;; '("b" . poly/switch-to-buffer)
+   '("s" . save-buffer)
+   '("j" . sp-join-sexp)
+   '("(" . sp-wrap-round)
+   '("[" . sp-wrap-square)
+   '("{" . sp-wrap-curly)
+   '("o" . ace-window)
+   '("a" . delete-other-windows)
+   '("-" . split-window-below)
+   '("/" . swiper)
+   '("\\" . split-window-right)
+   '("w" . ace-swap-window)
+   '("k" . kill-buffer)
+   )
+  ;; meow-setup is your custom function, see below
+  (meow-setup)
+  ;; If you want relative line number in NORMAL s tate(for display-line-numbers-mode)
+  (meow-setup-line-number)
+  ;; If you need setup indicator, see `meow-indicator' for customizing by hand.
+  (meow-setup-indicator)
 
-    ;; custom indicator
-    (when (IS-GUI)
-      (setq meow-replace-state-name-list
-            '((normal . "🅝")
-              (beacon . "🅑")
-              (insert . "🅘")
-              (motion . "🅜")
-              (keypad . "🅚")))))
+  ;; custom indicator
+  (when (IS-GUI)
+    (setq meow-replace-state-name-list
+	  '((normal . "🅝")
+	    (beacon . "🅑")
+	    (insert . "🅘")
+	    (motion . "🅜")
+	    (keypad . "🅚")))))
 #+end_src
