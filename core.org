@@ -78,7 +78,7 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-package-always-pdump t
   "always set :pdump to use-package")
 
-(defvar poly-use-lsp-mode nil
+(defvar poly-use-lsp-mode t
   "use lsp-mode for completion")
 
 (defvar poly-use-company nil
@@ -111,6 +111,42 @@ Core configuration of poly emacs, global variable declare.
       require-final-newline               t
       ;; silence ad-handle-definition about advised functions getting redefined
       ad-redefinition-action 'accept)
+
+
+;;; Scrolling
+;; Fix the whole huge-jumps-scrolling-between-windows nastiness.
+(setq scroll-conservatively 4)
+;; Don't hscroll unless needed.
+(setq hscroll-margin 1)
+;; Start scrolling when 2 lines from top/bottom.  Set to 0 on systems where I
+;; use ansi-term a lot.  Eshell is okay with this.  Disabling by default.
+;; (setq scroll-margin 2)
+;; Keeps the cursor in the same relative row during pgups and downs.
+(setq scroll-preserve-screen-position t)
+
+;;; Mouse wheel scrolling
+;; Scroll in 1-line increments for the buffer under pointer.
+(setq mouse-wheel-follow-mouse t)
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+
+;; Make cursor stay in the same column when scrolling using pgup/dn.
+;; Previously pgup/dn clobbers column position, moving it to the beginning of
+;; the line.
+;; http://www.dotemacs.de/dotfiles/ElijahDaniel.emacs.html
+(defadvice scroll-up (around ewd-scroll-up first act)
+  "Keep cursor in the same column."
+  (let ((col (current-column)))
+    ad-do-it
+    (move-to-column col)))
+(defadvice scroll-down (around ewd-scroll-down first act)
+  "Keep cursor in the same column."
+  (let ((col (current-column)))
+    ad-do-it
+    (move-to-column col)))
+
+;; Change C-x C-b behavior so it uses bs; shows only interesting buffers.  The
+;; `a' key will toggle visibility of all.
+(global-set-key (kbd "C-x C-b") 'bs-show)
 #+end_src
 
 

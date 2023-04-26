@@ -55,8 +55,21 @@ This is consulted on every `require', `load' and various path/io functions.  You
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-;; Enable disabled command
+;; Gets rid of disabled commands prompting.
 (setq disabled-command-function nil)
+
+;; Allow seamless editing of files in a tar/jar/zip file.
+(auto-compression-mode 1)
+
+
+;; Completion ignores case.
+(setq read-buffer-completion-ignore-case t)
+(setq read-file-name-completion-ignore-case t)
+
+
+;; Completion ignores filenames ending in any string in this list.
+(setq completion-ignored-extensions
+      '(".o" ".elc" ".class" "java~" ".ps" ".abs" ".mx" ".~jv" ".bak" ))
 
 ;; ;;; lisp
 ;; (setq ;; lisp-body-indent   2
@@ -391,11 +404,13 @@ Tab bar represents a named persistent window configuration.
   :straight nil
   :custom
   (tab-bar-close-button-show nil)
+  (tab-bar-new-tab-choice "*scratch*")
   (tab-bar-close-last-tab-choice 'tab-bar-mode-disable)
   (tab-bar-close-tab-select 'recent)
   ;; Start a new tab with the current buffer.
-  (tab-bar-new-tab-choice t)
-  (tab-bar-new-tab-to 'right)
+  ;; (tab-bar-new-tab-choice t)
+  ;; (tab-bar-new-tab-to 'right)
+  (tab-bar-new-tab-to 'rightmost)
   (tab-bar-position nil)
   ;; Keep tab-bar hidden.
   (tab-bar-show t)
