@@ -1,5 +1,13 @@
 ;;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
+;; Shut off message buffer.  To debug Emacs, comment these out so you can see
+;; output from message function calls.
+;; (setq message-log-max nil)
+;; Check if message buffer exists before killing (not doing so errors
+;; eval-buffer of an init file).
+;; (when (get-buffer "*Messages*")
+;;   (kill-buffer "*Messages*"))
+
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
 

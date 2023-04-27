@@ -9,6 +9,15 @@
 ;; Hide the mouse while typing:
 (setq make-pointer-invisible t)
 
+;; Make bell visible, not aural.
+;; (setq visible-bell t)
+
+;; Always flash for parens.
+(show-paren-mode 1)
+
+;; Rearrange the menubars, so it goes tools | buffers | help.
+(setq menu-bar-final-items '(tools buffer help-menu))
+
 (when EMACS27+
   ;; very long line performence optimizy
   (global-so-long-mode t))

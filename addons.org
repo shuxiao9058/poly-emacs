@@ -5805,3 +5805,47 @@ valign for org-mode & markdown table
   :custom
   (tributary-api-url "http://wiki.17usoft.com/rest/api/content/"))
  #+end_src
+
+
+*** open with vscode
+
+#+begin_src emacs-lisp
+(defun poly/open-in-vscode (&optional arg)
+  "Open current file or dir in vscode.
+
+URL `http://xahlee.info/emacs/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version: 2020-02-13 2021-01-18 2022-08-04"
+  ;; (interactive)
+  (interactive "P")
+  (let* ((file-directory (expand-file-name default-directory))
+	 (project-root-directory
+	  (if (fboundp 'project-root)
+	      (project-root (project-current t)) file-directory))
+	 (file-path (if buffer-file-name buffer-file-name file-directory))
+	 (xpath (if arg file-path project-root-directory)))
+    (message "path is %s" xpath)
+    (cond
+     ((string-equal system-type "darwin")
+      (shell-command (format "open -a Visual\\ Studio\\ Code.app %s" (shell-quote-argument xpath))))
+     ((string-equal system-type "windows-nt")
+      (shell-command (format "code.cmd %s" (shell-quote-argument xpath))))
+     ((string-equal system-type "gnu/linux")
+      (shell-command (format "code %s" (shell-quote-argument xpath)))))
+    ))
+
+;; (defun open-in-vscode ()
+;;   "Open current file or dir in vscode.
+
+;; URL `http://xahlee.info/emacs/emacs/emacs_dired_open_file_in_ext_apps.html'
+;; Version: 2020-02-13 2021-01-18 2022-08-04"
+;;   (interactive)
+;;   (let ((xpath (if buffer-file-name buffer-file-name (expand-file-name default-directory))))
+;;     (message "path is %s" xpath)
+;;     (cond
+;;      ((string-equal system-type "darwin")
+;;       (shell-command (format "open -a Visual\\ Studio\\ Code.app %s" (shell-quote-argument xpath))))
+;;      ((string-equal system-type "windows-nt")
+;;       (shell-command (format "code.cmd %s" (shell-quote-argument xpath))))
+;;      ((string-equal system-type "gnu/linux")
+;;       (shell-command (format "code %s" (shell-quote-argument xpath)))))))
+#+end_src
