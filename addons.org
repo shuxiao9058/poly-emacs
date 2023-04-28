@@ -5822,30 +5822,26 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
 	  (if (fboundp 'project-root)
 	      (project-root (project-current t)) file-directory))
 	 (file-path (if buffer-file-name buffer-file-name file-directory))
-	 (xpath (if arg file-path project-root-directory)))
+	 (xpath (if arg file-path project-root-directory))
+	 (line (line-number-at-pos))
+	 (character (max 0 (- (point) (line-beginning-position))))
+	 (shell-cmd-str))
     (message "path is %s" xpath)
     (cond
      ((string-equal system-type "darwin")
-      (shell-command (format "open -a Visual\\ Studio\\ Code.app %s" (shell-quote-argument xpath))))
+      ;; VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
+      (setq shell-cmd-str (format "VSCODE_CWD=\"%s\" open -n -b \"com.microsoft.VSCode\" %s"
+				  (shell-quote-argument project-root-directory)
+				  (if buffer-file-name
+				      (format "--args -g %s:%d:%d %s"
+					      (shell-quote-argument buffer-file-name)
+					      line
+					      (1+ character)
+					      (shell-quote-argument project-root-directory)) "")))
+      ;; (message shell-cmd-str)
+      (shell-command shell-cmd-str))
      ((string-equal system-type "windows-nt")
       (shell-command (format "code.cmd %s" (shell-quote-argument xpath))))
      ((string-equal system-type "gnu/linux")
-      (shell-command (format "code %s" (shell-quote-argument xpath)))))
-    ))
-
-;; (defun open-in-vscode ()
-;;   "Open current file or dir in vscode.
-
-;; URL `http://xahlee.info/emacs/emacs/emacs_dired_open_file_in_ext_apps.html'
-;; Version: 2020-02-13 2021-01-18 2022-08-04"
-;;   (interactive)
-;;   (let ((xpath (if buffer-file-name buffer-file-name (expand-file-name default-directory))))
-;;     (message "path is %s" xpath)
-;;     (cond
-;;      ((string-equal system-type "darwin")
-;;       (shell-command (format "open -a Visual\\ Studio\\ Code.app %s" (shell-quote-argument xpath))))
-;;      ((string-equal system-type "windows-nt")
-;;       (shell-command (format "code.cmd %s" (shell-quote-argument xpath))))
-;;      ((string-equal system-type "gnu/linux")
-;;       (shell-command (format "code %s" (shell-quote-argument xpath)))))))
+      (shell-command (format "code %s" (shell-quote-argument xpath)))))))
 #+end_src
