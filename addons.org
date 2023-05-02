@@ -1764,7 +1764,7 @@ To manage the git repository, use builtin package ~vc~.
 
 Automatically add a git signoff line based on discovered environmental identity.
 
-#+begin_src  emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun mb/auto-git-commit-signoff ()
   "Automatically add a git signoff line based on environmental identity"
   (beginning-of-buffer)
@@ -2287,14 +2287,10 @@ session
 	     (buf (cl-find-if
 		   (lambda (b)
 		     (setq pwd (with-current-buffer b default-directory))
-		     ;; (message "pwd: %s" pwd)
-		     (equal pwd path)
-		     ) vterm-toggle--buffer-list)))
-	(if buf (list buf path)
+		     (equal pwd path)) vterm-toggle--buffer-list)))
+	(if buf (list buf pwd)
 	  (let ((buf (car vterm-toggle--buffer-list)))
-	    (list buf (with-current-buffer buf default-directory))
-	    ))
-	)))
+	    (list buf (with-current-buffer buf default-directory)))))))
 
   (defun +vterm/here (arg)
     "Open a terminal buffer in the current window at project root.
@@ -2324,11 +2320,13 @@ Returns the vterm buffer."
 	      (with-current-buffer vterm-buffer
 		(vterm-send-string cd-cmd t)
 		(vterm-send-return)))
-	    (switch-to-buffer vterm-buffer))
+	    (unless (eq vterm-buffer (current-buffer))
+	      (switch-to-buffer vterm-buffer)))
 	(if (equal (file-truename default-directory) (file-truename dir))
 	    (vterm-toggle-insert-cd)
 	  (vterm-toggle-cd dir)))
-      (vterm-toggle-show t)))
+      ;; (vterm-toggle-show t)
+      ))
 
   ;; (defun poly/vterm-filter(process input)
   ;;   (when-let* ((vterm-buffer (poly/get-vterm-toggle-buffer 'forward 1))
@@ -4202,7 +4200,6 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 
 ** org-mode config
 #+begin_src emacs-lisp
-
 (with-eval-after-load "org"
   ;; NOTE org-fold-core-style needs to be set before org is loaded
   (setq org-fold-core-style 'overlays)
