@@ -84,6 +84,7 @@
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (unbind-key "C-z")
 (unbind-key "s-o")
+(unbind-key "C-x C-q")
 
 (defun poly/recentf-open-files ()
   "Open `recent-list' item in a new buffer.

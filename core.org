@@ -337,8 +337,6 @@ Accepts the same arguments as `message'."
 					"-message" ,(shell-quote-argument message))
 				      " ")))
     (shell-command notify-command)))
-
-;; (terminal-notify "aabb" "ddddd")
 #+end_src
 
 ** ui
