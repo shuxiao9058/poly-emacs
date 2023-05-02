@@ -165,6 +165,7 @@
   ;; (setq exec-path-from-shell-arguments '("-l"))
   (setq exec-path-from-shell-variables
 	'("PATH"
+	  "PWD"
 	  "PYENV_ROOT"
 	  "JAVA_HOME"
 	  "GOPATH"

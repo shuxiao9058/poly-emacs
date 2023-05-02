@@ -81,6 +81,9 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-lsp-mode t
   "use lsp-mode for completion")
 
+(defvar poly-vscode-extensions-json-file (expand-file-name ".vscode/extensions/extensions.json" "~")
+"vscode extensions.json 文件路径")
+
 (defvar poly-use-company nil
   "use company for completion"
   )
@@ -416,4 +419,65 @@ Accepts the same arguments as `message'."
                                                (my/timer (garbage-collect)))))
                            (with-current-buffer "*Messages*"
 	                     (insert gc-msg "\n"))))))
+#+end_src
+
+
+** some useful functions
+
+#+begin_src emacs-lisp
+(defmacro poly/json-decode (str)
+  "Read json string STR.  and return the decoded object."
+  (if (progn
+        (require 'json)
+        (fboundp 'json-parse-string))
+      `(json-parse-string ,str
+                          :array-type 'array
+                          :object-type 'plist
+                          :null-object nil
+                          :false-object :json-false)
+    `(let ((json-array-type 'vector)
+           (json-object-type 'plist)
+           (json-false nil))
+       (json-read-from-string ,str))))
+
+(defmacro poly/json-encode (params)
+  (if (progn
+        (require 'json)
+        (fboundp 'json-serialize))
+      `(json-serialize ,params
+                       :null-object nil
+                       :false-object :json-false)
+    `(let ((json-false :json-false))
+       (json-encode ,params))))
+
+(defun poly/file-read-all (filename)
+  "Return the contents of FILENAME."
+  (with-temp-buffer
+    (insert-file-contents filename)
+    (buffer-string)))
+#+end_src
+
+
+** vscode
+
+#+begin_src emacs-lisp
+(defun poly/vscode-extension-info(name)
+  (when poly-vscode-extensions-json-file
+    (when-let* ((json-content (poly/file-read-all poly-vscode-extensions-json-file))
+		(extensions (poly/json-decode json-content))
+		(extention (cl-find-if
+		  (lambda (it) (when-let* ((identifier (plist-get it :identifier))
+					   (lang-id (plist-get identifier :id)))
+				 (equal lang-id name)
+				 )
+		    ) extensions))
+		)
+            extention)))
+
+(defun poly/vscode-extension-install-path (name)
+  (when-let* ((extention (poly/vscode-extension-info name))
+	      (location (plist-get extention :location)))
+    (plist-get location :path)))
+
+;; (poly/vscode-extension-install-path "sumneko.lua")
 #+end_src
