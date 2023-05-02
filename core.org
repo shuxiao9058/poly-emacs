@@ -81,8 +81,12 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-lsp-mode t
   "use lsp-mode for completion")
 
-(defvar poly-vscode-extensions-json-file (expand-file-name ".vscode/extensions/extensions.json" "~")
-"vscode extensions.json 文件路径")
+(defvar poly-vscode-extensions-json-file
+  (expand-file-name ".vscode/extensions/extensions.json" "~")
+  "vscode extensions.json file path")
+
+(defvar poly-vterm-directory-cached ""
+  "vterm cached directory")
 
 (defvar poly-use-company nil
   "use company for completion"

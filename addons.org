@@ -2229,6 +2229,7 @@ session
 	      :map vterm-copy-mode-map
 	      ("C-c t" . 'vterm-copy-mode))
   :config
+  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq-local default-directory path))))
   (advice-add 'vterm-copy-mode-done :after
               (lambda (&rest _) (funcall #'vterm-exit-visual-insert)))
 
@@ -2280,6 +2281,21 @@ session
 	 ([f2] . vterm-toggle)
 	 )
   :config
+  (defun poly/vterm-buffer(path)
+    (when vterm-toggle--buffer-list
+      (let* ((pwd)
+	     (buf (cl-find-if
+		   (lambda (b)
+		     (setq pwd (with-current-buffer b default-directory))
+		     ;; (message "pwd: %s" pwd)
+		     (equal pwd path)
+		     ) vterm-toggle--buffer-list)))
+	(if buf (list buf path)
+	  (let ((buf (car vterm-toggle--buffer-list)))
+	    (list buf (with-current-buffer buf default-directory))
+	    ))
+	)))
+
   (defun +vterm/here (arg)
     "Open a terminal buffer in the current window at project root.
 
@@ -2287,20 +2303,45 @@ If prefix ARG is non-nil, cd into `default-directory' instead of project root.
 
 Returns the vterm buffer."
     (interactive "P")
-    (let* (;; (dir (expand-file-name default-directory))
-	   (project-root (or default-directory))
-           (default-directory
+    (let* ((project-root (or default-directory))
+           (dir
             (if arg
 		default-directory
 	      project-root))
-	   (vterm-buffer (get-buffer vterm-buffer-name))
-	   (cd-cmd (concat "cd " default-directory)))
+	   (result (poly/vterm-buffer dir))
+	   (cd-cmd (concat "cd " dir))
+	   (vterm-buffer)
+	   (vterm-pwd))
+      (when result
+        (setq  vterm-buffer (car result))
+	(setq vterm-pwd (car (cdr result))))
+
       (if vterm-buffer
-	  (with-current-buffer vterm-buffer
-	    (vterm-send-string cd-cmd t)
-	    (vterm-send-return))
-	(vterm-toggle-cd default-directory))
+	  (progn
+	    ;; (message "vterm-pwd: %s, dir: %s" vterm-pwd dir)
+	    (if (equal vterm-pwd (file-truename dir))
+		(switch-to-buffer vterm-buffer)
+	      (with-current-buffer vterm-buffer
+		(vterm-send-string cd-cmd t)
+		(vterm-send-return)))
+	    (switch-to-buffer vterm-buffer))
+	(if (equal (file-truename default-directory) (file-truename dir))
+	    (vterm-toggle-insert-cd)
+	  (vterm-toggle-cd dir)))
       (vterm-toggle-show t)))
+
+  ;; (defun poly/vterm-filter(process input)
+  ;;   (when-let* ((vterm-buffer (poly/get-vterm-toggle-buffer 'forward 1))
+  ;; 		(last-line (with-current-buffer vterm-buffer
+  ;; 			     (save-excursion
+  ;; 			       (goto-char (point-max))
+  ;; 			       (thing-at-point 'line t)))))
+
+  ;;     (when (and last-line (or (s-contains? "% cd " last-line) (s-contains? "  cd " last-line)))
+  ;; 	(message "contains cd command")
+  ;; 	(setq poly-vterm-directory-cached ""))))
+
+  ;; (advice-add 'vterm--filter :after 'poly/vterm-filter)
 
   (defun mb/vterm-right-here ()
     (interactive)
