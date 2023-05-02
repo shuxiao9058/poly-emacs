@@ -2179,184 +2179,190 @@ session
 * vterm
 
 #+begin_src emacs-lisp
-  (use-package vterm
-    :straight (vterm :type git :flavor melpa
-		     :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
-		     :host github :repo "akermu/emacs-libvterm"
-		     :no-native-compile t)
-    :demand
-    :commands (vterm ds/vterm)
-    :custom
-    (vterm-max-scrollback 10000)
-    (vterm-timer-delay 0.01)
-    (vterm-ignore-blink-cursor nil)
-    (vterm-always-compile-module t)
-    (vterm-shell "/opt/local/bin/zsh")
-    (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
-    :init
-    (defun ds/vterm-send-C-x ()
-      (interactive)
-      (vterm-send "C-x"))
-    (defun ds/vterm-send-C-z ()
-      (interactive)
-      (vterm-send "C-z"))
-    (defun ds/vterm-send-C-s ()
-      (interactive)
-      (vterm-send "C-s"))
-    (defun ds/vterm-send-C-h ()
-      (interactive)
-      (vterm-send "C-h"))
-    (defun vterm-enter (&rest _)
-      (interactive)
-      (meow-insert-mode))
+(use-package vterm
+  :straight (vterm :type git :flavor melpa
+		   :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
+		   :host github :repo "akermu/emacs-libvterm"
+		   :no-native-compile t)
+  :demand
+  :commands (vterm ds/vterm)
+  :custom
+  (vterm-max-scrollback 10000)
+  (vterm-timer-delay 0.01)
+  (vterm-ignore-blink-cursor nil)
+  (vterm-always-compile-module t)
+  (vterm-shell "/opt/local/bin/zsh")
+  (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
+  :init
+  (defun ds/vterm-send-C-x ()
+    (interactive)
+    (vterm-send "C-x"))
+  (defun ds/vterm-send-C-z ()
+    (interactive)
+    (vterm-send "C-z"))
+  (defun ds/vterm-send-C-s ()
+    (interactive)
+    (vterm-send "C-s"))
+  (defun ds/vterm-send-C-h ()
+    (interactive)
+    (vterm-send "C-h"))
+  (defun vterm-enter (&rest _)
+    (interactive)
+    (meow-insert-mode))
 
-    (defun vterm-buffer-change ()
-      (when (derived-mode-p 'vterm-mode)
-	(vterm-enter)))
+  (defun vterm-buffer-change ()
+    (when (derived-mode-p 'vterm-mode)
+      (vterm-enter)))
 
-    ;; (defun poly/decrease-vterm-font-size ()
-    ;;   (interactive)
-    ;; (text-scale-decrease 0.5))
+  ;; (defun poly/decrease-vterm-font-size ()
+  ;;   (interactive)
+  ;; (text-scale-decrease 0.5))
 
-    (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
-    (when noninteractive
-      (advice-add #'vterm-module-compile :override #'ignore)
-      (provide 'vterm-module))
-    :bind (:map vterm-mode-map
-		("C-c t" . vterm-copy-mode)
-		("C-x C-x" . ds/vterm-send-C-x)
-		("C-z" . vterm-send-C-z)
-		:map vterm-copy-mode-map
-		("C-c t" . 'vterm-copy-mode))
-    :config
-    (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq-local default-directory path))))
-    (advice-add 'vterm-copy-mode-done :after
-		(lambda (&rest _) (funcall #'vterm-exit-visual-insert)))
+  (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
+  (when noninteractive
+    (advice-add #'vterm-module-compile :override #'ignore)
+    (provide 'vterm-module))
+  :bind (:map vterm-mode-map
+	      ("C-c t" . vterm-copy-mode)
+	      ("C-x C-x" . ds/vterm-send-C-x)
+	      ("C-z" . vterm-send-C-z)
+	      :map vterm-copy-mode-map
+	      ("C-c t" . 'vterm-copy-mode))
+  :config
+  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq-local default-directory path))))
+  (advice-add 'vterm-copy-mode-done :after
+	      (lambda (&rest _) (funcall #'vterm-exit-visual-insert)))
 
-    (define-key vterm-mode-map (kbd "C-h") #'ds/vterm-send-C-h)
-    (define-key vterm-mode-map (kbd "C-z") #'ds/vterm-send-C-z)
-    (define-key vterm-mode-map (kbd "C-s") #'ds/vterm-send-C-s)
-    (defun vterm-send-meta-left ()
-      "Send `M-<left>' to the libvterm."
-      (interactive)
-      (vterm-send-key "<left>" nil t))
+  (define-key vterm-mode-map (kbd "C-h") #'ds/vterm-send-C-h)
+  (define-key vterm-mode-map (kbd "C-z") #'ds/vterm-send-C-z)
+  (define-key vterm-mode-map (kbd "C-s") #'ds/vterm-send-C-s)
+  (defun vterm-send-meta-left ()
+    "Send `M-<left>' to the libvterm."
+    (interactive)
+    (vterm-send-key "<left>" nil t))
 
-    (defun vterm-send-meta-right ()
-      "Send `M-<right>' to the libvterm."
-      (interactive)
-      (vterm-send-key "<right>" nil t))
-    (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-meta-left)
-    (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-meta-right)
-    (setq vterm-keymap-exceptions (remove "C-h" vterm-keymap-exceptions))
-    ;; (defun vterm-send-C-k-and-kill ()
-    ;;   "Send `C-k' to libvterm, and put content in kill-ring."
-    ;;   (interactive)
-    ;;   (kill-ring-save (point) (vterm-end-of-line))
-    ;;   (vterm-send-key "k" nil nil t))
-    (add-hook 'vterm-mode-hook
-	      (lambda ()
-		(global-hl-line-mode 0)
-		(setq confirm-kill-processes nil)
-		(setq hscroll-margin 0)
-		(set (make-local-variable 'buffer-face-mode-face) 'fixed-pitch)
-		(buffer-face-mode t)))
-    (defun ds/vterm (&optional name)
-      (interactive "MName: ")
-      (if (< 0 (length name))
-	  (if (get-buffer name)
-	      (switch-to-buffer name)
-	    (vterm name))
-	(vterm)))
-    (setq vterm-kill-buffer-on-exit t)
-    (setq vterm-max-scrollback 10000))
+  (defun vterm-send-meta-right ()
+    "Send `M-<right>' to the libvterm."
+    (interactive)
+    (vterm-send-key "<right>" nil t))
+  (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-meta-left)
+  (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-meta-right)
+  (setq vterm-keymap-exceptions (remove "C-h" vterm-keymap-exceptions))
+  ;; (defun vterm-send-C-k-and-kill ()
+  ;;   "Send `C-k' to libvterm, and put content in kill-ring."
+  ;;   (interactive)
+  ;;   (kill-ring-save (point) (vterm-end-of-line))
+  ;;   (vterm-send-key "k" nil nil t))
+  (add-hook 'vterm-mode-hook
+	    (lambda ()
+	      (global-hl-line-mode 0)
+	      (setq confirm-kill-processes nil)
+	      (setq hscroll-margin 0)
+	      (set (make-local-variable 'buffer-face-mode-face) 'fixed-pitch)
+	      (buffer-face-mode t)))
+  (defun ds/vterm (&optional name)
+    (interactive "MName: ")
+    (if (< 0 (length name))
+	(if (get-buffer name)
+	    (switch-to-buffer name)
+	  (vterm name))
+      (vterm)))
+  (setq vterm-kill-buffer-on-exit t)
+  (setq vterm-max-scrollback 10000))
 
-  (use-package vterm-toggle
-    :straight t
-    :when (memq window-system '(mac ns x))
-    :bind (([f2] . mb/vterm-right-here)
-	   ("C-<return>" . mb/vterm-right-here)
-	   :map vterm-mode-map
-	   ([f2] . other-window))
-    :custom
-    (vterm-toggle-cd-auto-create-buffer nil)
-    :config
-    (defun poly/vterm-buffer(path)
-      (when vterm-toggle--buffer-list
-	(let* ((pwd)
-	       (buf (cl-find-if
-		     (lambda (b)
-		       (setq pwd (with-current-buffer b default-directory))
-		       (equal pwd path)) vterm-toggle--buffer-list)))
-	  (if buf (list buf pwd)
-	    (let ((buf (car vterm-toggle--buffer-list)))
-	      (list buf (with-current-buffer buf default-directory)))))))
+(use-package vterm-toggle
+  :straight t
+  :when (memq window-system '(mac ns x))
+  :bind (([f2] . mb/vterm-right-here)
+	 ("C-<return>" . mb/vterm-right-here)
+	 :map vterm-mode-map
+	 ([f2] . mb/vterm-right-here))
+  :custom
+  (vterm-toggle-cd-auto-create-buffer nil)
+  :config
+  (defun poly/vterm-buffer(path)
+    (when vterm-toggle--buffer-list
+      (let* ((pwd)
+	     (buf (cl-find-if
+		   (lambda (b)
+		     (setq pwd (with-current-buffer b default-directory))
+		     (equal pwd path)) vterm-toggle--buffer-list)))
+	(if buf (list buf pwd)
+	  (let ((buf (car vterm-toggle--buffer-list)))
+	    (list buf (with-current-buffer buf default-directory)))))))
 
-    (defun poly/buffer-frame-same(buf1 buf2)
-      (when-let* ((win1 (get-buffer-window buf1))
-		  (frame1 (window-frame win1))
-		  (win2 (get-buffer-window buf2))
-		  (frame2 (window-frame win2)))
-	(equal frame1 frame2)))
+  (defun poly/buffer-frame-same(buf1 buf2)
+    (when-let* ((win1 (get-buffer-window buf1))
+		(frame1 (window-frame win1))
+		(win2 (get-buffer-window buf2))
+		(frame2 (window-frame win2)))
+      (equal frame1 frame2)))
 
-    (defun +vterm/here (arg)
-      "Open a terminal buffer in the current window at project root.
+  (defun +vterm/here (arg)
+    "Open a terminal buffer in the current window at project root.
 
   If prefix ARG is non-nil, cd into `default-directory' instead of project root.
 
   Returns the vterm buffer."
-      (interactive "P")
-      (let* ((project-root (or default-directory))
-	     (dir
-	      (if arg
-		  default-directory
-		project-root))
-	     (result (poly/vterm-buffer dir))
-	     (cd-cmd (concat "cd " dir))
-	     (curr-buffer (current-buffer))
-	     (vterm-buffer)
-	     (vterm-win)
-	     (vterm-pwd))
-	(when result
-	  (setq vterm-buffer (car result))
-	  (setq vterm-pwd (car (cdr result))))
+    (interactive "P")
+    (let* ((project-root (or default-directory))
+	   (dir
+	    (if arg
+		default-directory
+	      project-root))
+	   (result (poly/vterm-buffer dir))
+	   (cd-cmd (concat "cd " dir))
+	   (curr-buffer (current-buffer))
+	   (vterm-buffer)
+	   (vterm-win)
+	   (vterm-pwd))
+      (when result
+	(setq vterm-buffer (car result))
+	(setq vterm-pwd (car (cdr result))))
 
-	(if vterm-buffer
-	    (progn
-	      (setq vterm-win (get-buffer-window vterm-buffer))
-	      (if (equal vterm-pwd (file-truename dir))
-		  (if (poly/buffer-frame-same vterm-buffer curr-buffer)
-		      (select-window vterm-win nil)
-		    (switch-to-buffer vterm-buffer))
-		(with-current-buffer vterm-buffer
-		  (vterm-send-string cd-cmd t)
-		  (vterm-send-return)))
-	      (if (poly/buffer-frame-same vterm-buffer curr-buffer)
-		  (select-window vterm-win nil)
-		(switch-to-buffer vterm-buffer)))
-	  (if (equal (file-truename default-directory) (file-truename dir))
-	      (vterm-toggle-insert-cd)
-	    (vterm-toggle-cd dir)))
-	;; (vterm-toggle-show t)
-	))
+      (if vterm-buffer
+	  (progn
+	    (with-current-buffer vterm-buffer
+	      (when (bound-and-true-p read-only-mode)
+		(read-only-mode -1)))
 
-    (defun mb/vterm-right-here ()
-      (interactive)
+	    (setq vterm-win (get-buffer-window vterm-buffer))
+	    (if (equal vterm-pwd (file-truename dir))
+		(if (poly/buffer-frame-same vterm-buffer curr-buffer)
+		    (select-window vterm-win nil)
+		  (switch-to-buffer vterm-buffer))
+	      (with-current-buffer vterm-buffer
+		(vterm-send-string cd-cmd t)
+		(vterm-send-return)))
+	    (if (poly/buffer-frame-same vterm-buffer curr-buffer)
+		(select-window vterm-win nil)
+	      (switch-to-buffer vterm-buffer)))
+	(if (equal (file-truename default-directory) (file-truename dir))
+	    (vterm-toggle-insert-cd)
+	  (vterm-toggle-cd dir)))
+      ;; (vterm-toggle-show t)
+      ))
+
+  (defun mb/vterm-right-here ()
+    (interactive)
+    (if (eq major-mode 'vterm-mode)
+	(vterm-toggle)
       (let ((current-prefix-arg '-))
-	(call-interactively '+vterm/here)))
+	(call-interactively '+vterm/here))))
 
-    (defun poly/vterm-compile-auto-exit ()
-      (when-let* ((vterm-build-buffer (get-buffer vterm-install-buffer-name))
-		  (buffer-str (with-current-buffer vterm-build-buffer (buffer-string))))
-	(when (s-contains? "[100%] Built target vterm-module" buffer-str)
-	  (run-at-time 3 nil #'kill-buffer vterm-build-buffer))))
-    (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit))
+  (defun poly/vterm-compile-auto-exit ()
+    (when-let* ((vterm-build-buffer (get-buffer vterm-install-buffer-name))
+		(buffer-str (with-current-buffer vterm-build-buffer (buffer-string))))
+      (when (s-contains? "[100%] Built target vterm-module" buffer-str)
+	(run-at-time 3 nil #'kill-buffer vterm-build-buffer))))
+  (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit))
 
-  (use-package meow-vterm
-    :straight (meow-vterm
-	       :host github
-	       :repo "accelbread/meow-vterm")
-    :config
-    (meow-vterm-enable))
+(use-package meow-vterm
+  :straight (meow-vterm
+	     :host github
+	     :repo "accelbread/meow-vterm")
+  :config
+  (meow-vterm-enable))
 #+end_src
 
 * Hideshow
