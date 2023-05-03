@@ -51,18 +51,22 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 ;;    (expand-file-name "private_template.org" user-emacs-directory)
 ;;    (expand-file-name "private.org" user-emacs-directory)))
 
-;; (setq warning-minimum-level :debug)
-;; (setq debug-on-error t)
-;; (setq stack-trace-on-error t)
+(setq warning-minimum-level :debug)
+(setq debug-on-error t)
+(setq stack-trace-on-error t)
 
-(setq warning-minimum-level :emergency)
-(setq debug-on-error nil)
+;; (setq warning-minimum-level :emergency)
+;; (setq debug-on-error nil)
+;; ;; (setq warning-minimum-level :debug)
+;; ;; (setq debug-on-error t)
+;; ;; (setq stack-trace-on-error t)
 
 ;; Native compilation settings
 (when (featurep 'native-compile)
   (let ((poly-local-dir (expand-file-name ".local" user-emacs-directory)))
     ;; Silence compiler warnings as they can be pretty disruptive
-    (setq native-comp-async-report-warnings-errors nil)
+    (setq native-comp-async-report-warnings-errors nil
+	  native-comp-warning-on-missing-source nil)
 
     ;; Make native compilation happens asynchronously
     (setq native-comp-deferred-compilation t)

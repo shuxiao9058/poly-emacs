@@ -35,6 +35,21 @@
 ;; (when (and IS-MAC IS-GUI)
 ;;   (add-to-list 'default-frame-alist '(fullscreen . maximized)))
 
+;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
+;; (push '(menu-bar-lines . 0) default-frame-alist)
+;; (push '(tool-bar-lines . 0) default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
+(push '(inhibit-double-buffering . t) default-frame-alist)
+
+;; Resizing the Emacs frame can be a terribly expensive part of changing the
+;; font. By inhibiting this, we easily halve startup times with fonts that are
+;; larger than the system default.
+(setq frame-inhibit-implied-resize t)
+
+(add-hook 'window-size-change-functions
+            #'frame-hide-title-bar-when-maximized)
+
+
 (when IS-MAC
   (setq frame-resize-pixelwise t
 	mac-command-modifier 'super
@@ -309,7 +324,7 @@ enable ligatures with emacs-mac, must install font first
   ;; (doom-modeline-buffer-file-name-style 'truncate-with-project)
   ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
   (doom-modeline-buffer-file-name-style 'relative-to-project)
-  (doom-modeline-modal-icon t)
+  (doom-modeline-modal-icon nil)
   (doom-modeline-icon t)
   (doom-modeline-major-mode-icon t)
   (doom-modeline-minor-modes nil)
@@ -317,22 +332,22 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-persp-name t)
   (doom-modeline-persp-icon t)
   (doom-modeline-lsp t)
-  (doom-modeline-mu4e t)
+  (doom-modeline-mu4e nil)
   ;; Whether display github notifications or not. Requires `ghub+` package.
   (doom-modeline-github nil)
   ;; The interval of checking github.
   (doom-modeline-github-interval (* 30 60))
-  (doom-modeline-height 25)
+  (doom-modeline-height 12)
   (doom-modeline-bar-width 3)
   (doom-modeline-vcs-max-length 20)
   (doom-modeline-checker-simple-format t)
-  (doom-modeline-env-version t)
+  (doom-modeline-env-version nil)
   (doom-modeline-env-enable-python t)
   (doom-modeline-env-enable-ruby t)
   (doom-modeline-env-enable-perl t)
-  (doom-modeline-env-enable-go t)
+  (doom-modeline-env-enable-go nil)
   (doom-modeline-env-enable-elixir t)
-  (doom-modeline-env-enable-rust t)
+  (doom-modeline-env-enable-rust nil)
   (doom-modeline-env-python-executable "python")
   (doom-modeline-env-ruby-executable "ruby")
   (doom-modeline-env-perl-executable "perl")
@@ -344,12 +359,26 @@ enable ligatures with emacs-mac, must install font first
   :config
   (doom-modeline-def-modeline 'my-simple-line
     '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
-    '(objed-state misc-info persp-name mu4e lsp minor-modes indent-info buffer-encoding major-mode process vcs checker))
+    '(objed-state misc-info persp-name mu4e lsp minor-modes indent-info buffer-encoding major-mode process vcs checker)
+    )
+
+  (doom-modeline-def-modeline 'my-simple-line-v2
+    '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
+    '(;; objed-state
+      misc-info
+      persp-name
+      lsp ;; minor-modes
+      indent-info;
+      ;; buffer-encoding
+      major-mode process vcs checker)
+    )
 
   ;; Add to `doom-modeline-mode-hook` or other hooks
+  ;; (add-hook 'doom-modeline-mode-hook
+  ;; 	    (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
   (add-hook 'doom-modeline-mode-hook
-	    (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
-  (doom-modeline-mode +1))
+	    (lambda() (doom-modeline-set-modeline 'my-simple-line-v2 'default)))
+  (doom-modeline-mode t))
 #+end_src
 * treemacs
 #+begin_src emacs-lisp
@@ -411,41 +440,45 @@ enable ligatures with emacs-mac, must install font first
      (treemacs-git-mode 'deferred))
     (`(t . _)
      (treemacs-git-mode 'simple)))
-  (if (fboundp 'define-fringe-bitmap)
-      (define-fringe-bitmap 'treemacs--fringe-indicator-bitmap
-        (vector #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111
-                #b00000111111)))
+  ;; (if (fboundp 'define-fringe-bitmap)
+  ;;     (define-fringe-bitmap 'treemacs--fringe-indicator-bitmap
+  ;;       (vector #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111
+  ;;               #b00000111111)))
   :bind (([f8]        . treemacs)
+         ("C-x t t"   . treemacs)
+         ("C-x t d"   . treemacs-select-directory)
          ("C-`"       . treemacs-select-window)
          ("M-0"       . treemacs-select-window)
-         ("C-x 1"     . treemacs-delete-other-windows)
          ("C-x t 1"   . treemacs-delete-other-windows)
+	 ("s-t"       . treemacs-display-current-project-exclusively)
+         ("s-T"       . treemacs-add-and-display-current-project)
          ("C-x t t"   . treemacs)
          ("C-x t b"   . treemacs-bookmark)
+         ;; ("C-x t B"   . treemacs-bookmark)
          ("C-x t C-t" . treemacs-find-file)
          ("C-x t M-t" . treemacs-find-tag)
 	 :map treemacs-mode-map

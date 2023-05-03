@@ -1354,7 +1354,7 @@ _C-j_
 _h_:       left tab              _<_: tab to left               _n_: new tab                  _rr_: rename
 _l_:       right tab             _>_: tab to right              _N_: new tab with name        _rp_: rename default
 [_1_.._9_]: switch [1st..last]     [_m1_..._9_]: move [1st..last]   _x_: kill                     _U_ : undo
-											_R_ : redo
+_t_:      select tab 											_R_ : redo
 "
 
   ;; ("u" winner-undo)
@@ -1408,6 +1408,8 @@ _l_:       right tab             _>_: tab to right              _N_: new tab wit
   ;; winner
   ("U" winner-undo)
   ("R" winner-redo)
+
+  ("t" my/tab-bar-select-tab-dwim)
 
   ("q" nil "cancel" :color blue)
   )
@@ -2194,6 +2196,16 @@ session
   (vterm-shell "/opt/local/bin/zsh")
   (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
   :init
+  (defun poly/vterm-compile-auto-exit ()
+    (when-let* ((vterm-build-buffer (get-buffer vterm-install-buffer-name))
+		(buffer-str (with-current-buffer vterm-build-buffer (buffer-string))))
+      (when (s-contains? "[100%] Built target vterm-module" buffer-str)
+	(run-at-time 3 nil (lambda(buf)
+			     (let ((win (get-buffer-window buf)))
+			       (kill-buffer buf)
+			       (delete-window win))) vterm-build-buffer))))
+
+  (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit)
   (defun ds/vterm-send-C-x ()
     (interactive)
     (vterm-send "C-x"))
@@ -2350,12 +2362,7 @@ session
       (let ((current-prefix-arg '-))
 	(call-interactively '+vterm/here))))
 
-  (defun poly/vterm-compile-auto-exit ()
-    (when-let* ((vterm-build-buffer (get-buffer vterm-install-buffer-name))
-		(buffer-str (with-current-buffer vterm-build-buffer (buffer-string))))
-      (when (s-contains? "[100%] Built target vterm-module" buffer-str)
-	(run-at-time 3 nil #'kill-buffer vterm-build-buffer))))
-  (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit))
+  )
 
 (use-package meow-vterm
   :straight (meow-vterm

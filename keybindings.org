@@ -82,6 +82,8 @@
 (bind-key "s-SPC" #'set-mark-command)
 (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
+(bind-key (kbd "C-c f r" ) #'rename-visited-file)
+(bind-key (kbd "C-x C-b") #'ibuffer)
 (unbind-key "C-z")
 (unbind-key "s-o")
 (unbind-key "C-x C-q")

@@ -112,10 +112,23 @@ Core configuration of poly emacs, global variable declare.
 
 (setq x-select-enable-clipboard           t
       x-select-enable-primary             t
+      history-length 100000
+      history-delete-duplicates t
+      resize-mini-windows t
+      sentence-end-double-space nil           ;; Use a single space after dots
+      truncate-string-ellipsis "…"
       save-interprogram-paste-before-kill t
+      cursor-type '(hbar .  2)
+      cursor-in-non-selected-windows nil
+      use-dialog-box nil
+      global-auto-revert-non-file-buffers t
       apropos-do-all                      t
-      mouse-yank-at-point                 t
       require-final-newline               t
+      mouse-yank-at-point                 t
+      mouse-drag-mode-line-buffer t
+      mouse-drag-and-drop-region-cross-program t
+      mouse-drag-and-drop-region-scroll-margin t
+      mouse-drag-copy-region 'non-empty
       ;; silence ad-handle-definition about advised functions getting redefined
       ad-redefinition-action 'accept)
 
@@ -374,16 +387,6 @@ Accepts the same arguments as `message'."
 ;; ;; we must prevent Emacs from doing it early!
 ;; (setq package-enable-at-startup nil)
 ;; (advice-add #'package--ensure-init-file :override #'ignore)
-
-;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
-;; (push '(menu-bar-lines . 0) default-frame-alist)
-;; (push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
-
-;; Resizing the Emacs frame can be a terribly expensive part of changing the
-;; font. By inhibiting this, we easily halve startup times with fonts that are
-;; larger than the system default.
-(setq frame-inhibit-implied-resize t)
 #+end_src
 
 

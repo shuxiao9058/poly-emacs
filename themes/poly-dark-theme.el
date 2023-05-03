@@ -278,7 +278,7 @@ You may want to set this to window's border color.")
 
 
 	       (icomplete-first-match :inherit mode-line-emphasis)
-	       (mode-line-buffer-id :foreground "Light Blue")
+	       (mode-line-buffer-id :foreground "Light Blue" :weight bold)
 	       (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
 	       (orderless-match-face-1 :inherit error :weight bold)
 	       (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
@@ -669,6 +669,13 @@ You may want to set this to window's border color.")
 		      (list :foreground comment :background bg
 			    :box bg)
 		    (list :foreground fg :background bg2 :box bg2)))
+               ;;;; mode-line / header-line
+	       (mode-line-active    :inherit mode-line)
+	       (mode-line-emphasis  ::inherit highlight :distant-foreground ,bg)
+	       (mode-line-highlight :inherit highlight :distant-foreground ,bg)
+	       ;; (mode-line-buffer-id :weight 'bold)
+	       (header-line :inherit mode-line)
+	       (header-line-highlight :inherit mode-line-highlight)
 	       ;; mu4e
 	       (mu4e-unread-face :foreground ,pink :weight normal)
 	       (mu4e-view-url-number-face :foreground ,purple)
@@ -845,6 +852,11 @@ You may want to set this to window's border color.")
 	       (whitespace-trailing :inherit trailing-whitespace)
 	       ;; yard-mode
 	       (yard-tag-face :inherit ,font-lock-builtin-face)
+               (persp-selected-face :foreground ,purple :weight bold)
+               ;;;; persp-mode
+	       (persp-face-lighter-default :foreground ,fg3 :weight bold)
+	       (persp-face-lighter-buffer-not-in-persp :foreground ,alt-blue)
+	       (persp-face-lighter-nil-persp :foreground ,comment)
 	       )))
 
   (apply #'custom-theme-set-faces
