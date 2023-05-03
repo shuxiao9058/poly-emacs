@@ -80,13 +80,15 @@
 (bind-key "s-c" #'copy-to-clipboard)
 (bind-key "s-v" #'paste-from-clipboard)
 (bind-key "s-SPC" #'set-mark-command)
-(bind-key "M-RET" #'toggle-frame-fullscreen)
+(bind-key "<f11>" #'toggle-frame-maximized)
+;; (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (bind-key (kbd "C-c f r" ) #'rename-visited-file)
 (bind-key (kbd "C-x C-b") #'ibuffer)
+(bind-key "<f9>"  #'hide-mode-line-mode)
 (unbind-key "C-z")
 (unbind-key "s-o")
-(unbind-key "C-x C-q")
+;; (unbind-key "C-x C-q")
 
 (defun poly/recentf-open-files ()
   "Open `recent-list' item in a new buffer.
@@ -196,6 +198,7 @@ This configuration sticks with Meow for modal editing.
   :init
   (meow-global-mode 1)
   :custom
+  (meow-use-cursor-position-hack t)
   (meow-expand-hint-remove-delay 3.0)
   :config
   (dolist (mode '(inf-iex-mode
@@ -212,6 +215,11 @@ This configuration sticks with Meow for modal editing.
 		  go-dot-mod-mode
 		  go-mod-mode
 		  mu4e-view-mode
+		  text-mode
+		  prog-mode
+		  conf-mode
+		  json-mode
+		  fundamental-mode
 		  diff-mode))
     (add-to-list 'meow-mode-state-list `(,mode . normal)))
 
@@ -238,6 +246,8 @@ This configuration sticks with Meow for modal editing.
 		  ;; notmuch-tree-mode
 		  ;; notmuch-hello-mode
 		  ;; notmuch-search-mode
+		  vterm-mode
+		  eww-mode
 		  notmuch-message-mode))
     (add-to-list 'meow-mode-state-list `(,mode . insert)))
 
@@ -284,6 +294,7 @@ This configuration sticks with Meow for modal editing.
 
   (meow-leader-define-key
    '( "e" . recentf-open)
+   '("r" . recentf-open)
    ;; ( "e" . poly/recentf-open-files)
    ;; "e" . consult-recent-file)
    ;; '("e" . my/icomplete-recentf)

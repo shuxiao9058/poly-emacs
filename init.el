@@ -25,7 +25,7 @@
 				 t)))
     (find-file (expand-file-name (format "%s.org" config) user-emacs-directory))))
 
-(global-set-key (kbd "<f9>") 'poly-open-configuration)
+;; (global-set-key (kbd "<f9>") 'poly-open-configuration)
 (global-set-key (kbd "<f12>") 'poly-refresh)
 
 ;; Load main configuration

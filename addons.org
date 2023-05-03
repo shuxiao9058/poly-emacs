@@ -2303,7 +2303,7 @@ session
 	  (let ((buf (car vterm-toggle--buffer-list)))
 	    (list buf (with-current-buffer buf default-directory)))))))
 
-  (defun poly/buffer-frame-same(buf1 buf2)
+  (defun poly/buffer-frame-same-p(buf1 buf2)
     (when-let* ((win1 (get-buffer-window buf1))
 		(frame1 (window-frame win1))
 		(win2 (get-buffer-window buf2))
@@ -2340,13 +2340,15 @@ session
 
 	    (setq vterm-win (get-buffer-window vterm-buffer))
 	    (if (equal vterm-pwd (file-truename dir))
-		(if (poly/buffer-frame-same vterm-buffer curr-buffer)
+		(if (and (poly/buffer-frame-same-p vterm-buffer curr-buffer) (window-live-p vterm-win))
 		    (select-window vterm-win nil)
-		  (switch-to-buffer vterm-buffer))
+		  (if (equal (length vterm-toggle--buffer-list) 1)
+		      (vterm-toggle)
+		    (switch-to-buffer vterm-buffer)))
 	      (with-current-buffer vterm-buffer
 		(vterm-send-string cd-cmd t)
 		(vterm-send-return)))
-	    (if (poly/buffer-frame-same vterm-buffer curr-buffer)
+	    (if (and (poly/buffer-frame-same-p vterm-buffer curr-buffer) (window-live-p vterm-win))
 		(select-window vterm-win nil)
 	      (switch-to-buffer vterm-buffer)))
 	(if (equal (file-truename default-directory) (file-truename dir))
@@ -5614,8 +5616,6 @@ Prefix arguments are interpreted by `org-refile'."
 	     (tl/open-hammerspoon-url "Clocking" "status" "No Task")))
 	  ((string= event "org-pomodoro-killed-or-break-finished")
 	   (tl/open-hammerspoon-url "Clocking" "status" "No Task")))))
-
-;; (poly/org-clock-tick)
 
 (use-package org-pomodoro
   :straight t

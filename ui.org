@@ -10,7 +10,7 @@
 (setq make-pointer-invisible t)
 
 ;; Make bell visible, not aural.
-;; (setq visible-bell t)
+(setq visible-bell t)
 
 ;; Always flash for parens.
 (show-paren-mode 1)
@@ -18,12 +18,14 @@
 ;; Rearrange the menubars, so it goes tools | buffers | help.
 (setq menu-bar-final-items '(tools buffer help-menu))
 
-(when EMACS27+
-  ;; very long line performence optimizy
-  (global-so-long-mode t))
+;; very long line performence optimizy
+(global-so-long-mode t)
 
   ;;; highlight current line
 (global-hl-line-mode)
+
+;; disable mode-line
+(global-hide-mode-line-mode 1)
 
 ;; Removes *scratch* from buffer after the mode has been set.
 (defun remove-scratch-buffer ()
@@ -31,9 +33,14 @@
       (kill-buffer "*scratch*")))
 (add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
 
-;; ;; auto maximized frame
+(add-to-list 'warning-suppress-types '(undo discard-info))
+
+;; auto maximized frame
 ;; (when (and IS-MAC IS-GUI)
-;;   (add-to-list 'default-frame-alist '(fullscreen . maximized)))
+;;   ;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;;   ;; (add-to-list 'default-frame-alist '(fullscreen . fullheight))
+;;  ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+;;  )
 
 ;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
 ;; (push '(menu-bar-lines . 0) default-frame-alist)
@@ -41,14 +48,8 @@
 (push '(vertical-scroll-bars) default-frame-alist)
 (push '(inhibit-double-buffering . t) default-frame-alist)
 
-;; Resizing the Emacs frame can be a terribly expensive part of changing the
-;; font. By inhibiting this, we easily halve startup times with fonts that are
-;; larger than the system default.
-(setq frame-inhibit-implied-resize t)
-
 (add-hook 'window-size-change-functions
-            #'frame-hide-title-bar-when-maximized)
-
+          #'frame-hide-title-bar-when-maximized)
 
 (when IS-MAC
   (setq frame-resize-pixelwise t
@@ -138,7 +139,6 @@
 
 (setq mode-line-compact 'long)
 
-
 (defun up-slightly () (interactive) (scroll-up 5))
 (defun down-slightly () (interactive) (scroll-down 5))
 (global-set-key [mouse-4] 'down-slightly)
@@ -153,6 +153,68 @@
 (defun down-a-lot () (interactive) (scroll-down))
 (global-set-key [(control mouse-4)] 'down-a-lot)
 (global-set-key [(control mouse-5)] 'up-a-lot)
+
+(when IS-GUI
+  (defun toggle-fullscreen ()
+    "Toggle full screen"
+    (interactive)
+    (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
+
+  ;; ;; Give focus to emacs window at startup
+  ;; (x-focus-frame nil)
+
+  ;; (defun toggle-fullframe(&optional arg)
+  ;;   "Toggle full frame"
+  ;;   (interactive)
+  ;;   (let* ((param (frame-parameter nil 'fullscreen))
+  ;; 	   (must-enable (or (eq t arg) (and arg (> arg 0))))
+  ;; 	   (must-disable (and (not must-enable) (and arg (<= arg 0))))
+  ;; 	   (maximized (if must-enable 'maximized
+  ;; 			(unless must-disable
+  ;; 			  ;; get current set opposite
+  ;; 			  (unless (and param (equal param 'maximized))
+  ;; 			    'maximized)))))
+  ;;     ;; Handle multiple monitors gracefully
+  ;;     ;; (when (or (>= (eval (frame-parameter nil 'top)) (display-pixel-height))
+  ;;     ;;          (>= (eval (frame-parameter nil 'left)) (display-pixel-width)))
+  ;;     (when (equal maximized 'maximized)
+  ;; 	(set-frame-parameter nil 'top 36)
+  ;; 	(set-frame-parameter nil 'left 0)
+  ;; 	(message "message set let & top")
+  ;; 	)
+  ;;     (set-frame-parameter nil 'fullscreen maximized)))
+
+  (add-hook 'emacs-startup-hook
+	    (lambda()
+       (let* ((top (frame-parameter nil 'top))
+       (left (frame-parameter nil 'left))
+       (fullscreen (frame-parameter nil 'fullscreen)))
+        (unless (eq 'maximized fullscreen)
+         (toggle-frame-maximized))
+         (when (or (> top 50) (> left 50))
+        (message "set left & top, fullscreen: %s" fullscreen)
+          	(set-frame-parameter nil 'top 36)
+   	        (set-frame-parameter nil 'left 0)
+        )))))
+
+;; Call this function to increase/decrease font size.
+(defun bcm/zoom (n)
+  "With positive N, increase the font size, otherwise decrease it."
+  (set-face-attribute 'default (selected-frame) :height
+                      (+ (face-attribute 'default :height)
+                         (* (if (> n 0) 1 -1) 10))))
+;; Add some zoom keybindings.
+(global-set-key (kbd "C-+") #'(lambda () (interactive) (bcm/zoom 1)))
+(global-set-key (kbd "C--") #'(lambda () (interactive) (bcm/zoom -1)))
+
+
+(add-hook 'focus-in-hook
+	  (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/pid-str)))
+
+(add-hook 'focus-out-hook
+	  (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/pid-str)))
 #+end_src
 
 *  since emacs 28
@@ -166,27 +228,6 @@
 #+begin_src emacs-lisp
 ;; Visit files opened outside of Emacs in existing frame, not a new one
 (setq ns-pop-up-frames nil)
-
-
-;; Disable most GUI widgets early on
-(setq default-frame-alist '((horizontal-scroll-bars . nil)
-			    ;; (alpha . (0.90 0.90))
-			    (ns-appearance . dark)
-			    (ns-transparent-titlebar . t)
-			    (drag-internal-border . 1)
-			    (drag-with-tab-line . t)
-			    (internal-border-width . 0)
-			    ;; (internal-border-width . 5)
-			    (vertical-scroll-bars . nil)
-			    ;; (menu-bar-lines . 0)
-			    (tool-bar-lines . 0)
-			    (fullscreen . maximized)
-			    (height . 50)
-			    (width . 95)
-			    (undecorated . t) ;; remove title bar
-			    ;; (font . "JetBrains Mono-14")
-			    ;; (line-spacing . 0.2)
-			    ))
 
 ;; reference | http://d.hatena.ne.jp/IMAKADO/20090215/1234699972
 (defun my-toggle-transparency ()
@@ -213,7 +254,7 @@
 
  https://github.com/doomemacs/doomemacs/issues/2156
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (when IS-MAC
   (defun doom-init-menu-bar-in-gui-frames-h (&optional frame)
     "Re-enable menu-bar-lines in GUI frames."

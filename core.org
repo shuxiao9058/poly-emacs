@@ -16,6 +16,8 @@ Core configuration of poly emacs, global variable declare.
 (defconst IS-BSD     (or IS-MAC (eq system-type 'berkeley-unix)))
 (defvar IS-GUI (display-graphic-p))
 (defconst IS-CONSOLE (not IS-GUI))
+(defconst poly/pid (emacs-pid))
+(defconst poly/pid-str (number-to-string poly/pid))
 #+end_src
 
 ** Core function

@@ -679,7 +679,9 @@ fix xref issue =(wrong-type-argument listp 0)=
   (lsp-go-hover-kind "NoDocumentation")
   (lsp-go-links-in-hover nil)
   (lsp-go-use-gofumpt t)
+  (lsp-go-use-placeholders t)
   (lsp-go-symbol-matcher "FastFuzzy")
+  ;; (lsp-go-env '((GOFLAGS . "-mod=mod")))
   (lsp-go-directory-filters ["-_bazel_out"
 			     "-_bazel_bin"
 			     "-_bazel_testlogs"
@@ -695,11 +697,6 @@ fix xref issue =(wrong-type-argument listp 0)=
   (lsp-beancount-langserver-executable (expand-file-name "workspace/beancount-language-server/target/release/beancount-language-server" "~"))
   (lsp-beancount-journal-file (expand-file-name ".emacs.d/.local/beancount/beancount.beancount" "~"))
   :config
-  ;; (defun lsp-clients-lua-language-server-test ()
-  ;;   "Test Lua language server binaries and files."
-  ;;   (and ;; (f-exists? lsp-clients-lua-language-server-main-location)
-  ;;    (f-exists? lsp-clients-lua-language-server-bin)))
-
   ;; (lsp-ensure-server 'css-ls)
   ;; (lsp-ensure-server 'dockerfile-ls)
   ;; (lsp-ensure-server 'eslint)
@@ -720,12 +717,11 @@ fix xref issue =(wrong-type-argument listp 0)=
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]internal$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.gocache$")
   (add-hook 'hack-local-variables-hook #'my/local-variables-hook)
-  (setq lsp-go-env '((GOFLAGS . "-mod=mod")))
   (lsp-register-custom-settings
-   `(;; ("gopls.experimentalWorkspaceModule" t t)
+   `(
      ;; ("gopls.allExperiments" nil nil)
      ;; ("gopls.experimentalPackageCacheKey" t t)
-     ("gopls.usePlaceholders" t t)
+     ;; ("gopls.usePlaceholders" t t)
      ("gopls.deepCompletion" t t)
      ("gopls.completeUnimported" t t)
      ("gopls.staticcheck" ,(if (executable-find "staticcheck") t nil) t)
@@ -735,15 +731,17 @@ fix xref issue =(wrong-type-argument listp 0)=
      ("gopls.matcher" "Fuzzy" t)
      ("gopls.hoverKind" "NoDocumentation" nil)
      ;; ("gopls.codelenses" '((gc_details . t) (generate . t) (regenerate_cgo . t) (test . t) (tidy . t) (upgrade_dependency . t) (vendor . t)))
-     ("gopls.codelenses"  t t)
-     ;; opts a user into the experimental support for multi-module workspaces
-     ("gopls.experimentalWorkspaceModule" t t)
+     ("gopls.codelenses"  ((gc_details . :json-false)
+			    (generate . t)
+			    (regenerate_cgo . t)
+			    (tidy . t)
+			    (upgrade_dependency . t)
+			    (vendor . t)) nil)
      ;;disables -mod=readonly, allowing imports from out-of-scope module
      ("gopls.allowModfileModifications" t t)
+     ("gopls.vulncheck" "Imports" nil)
      ;;disables GOPROXY=off, allowing implicit module downloads rather than requiring user action
      ("gopls.allowImplicitNetworkAccess" t t)
-     ;; enables gopls to fall back on outdated package metadata
-     ("gopls.experimentalUseInvalidMetadata" t t)
      ;; ("gopls.analyses.unusedparams" nil nil)
      ;; ST1003 CamelCase
      ;; ST1021 comment on exported type
@@ -758,10 +756,14 @@ fix xref issue =(wrong-type-argument listp 0)=
      ;; S1007 should use raw string (`...`) with regexp.Compile to avoid having to escape twice
      ("gopls.analyses" ,(mapcar (lambda (a) (cons a :json-false))
 				'(unusedparams composites ST1003  ST1021 ST1016 SA5011 ST1020 ST1005 SA9003 SA4006 ST1022 S1023 SA4011 SA4010)))
+     ("gopls.annotations" ,(mapcar (lambda (a) (cons a :json-false))
+				   '(bounds escape inline nil)))
      ;; ("gopls.buildFlags" ["-mod=readonly"])
      ("gopls.env" lsp-go-env)
      ("gopls.linkTarget" lsp-go-link-target)
      ("gopls.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
+     ("gopls.experimentalPostfixCompletions" t t)
+     ("gopls.semanticTokens" t t)
      ;; ("gopls.directoryFilters" lsp-go-directory-filters)
      ;; ("gopls.directoryFilters" ["-vendor" "-internal" "-.gocache" "-.git" "-!out"])
      ("Lua.runtime.version" "LuaJIT" t)
