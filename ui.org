@@ -370,7 +370,8 @@ enable ligatures with emacs-mac, must install font first
       lsp ;; minor-modes
       indent-info;
       ;; buffer-encoding
-      major-mode process vcs checker)
+      ;; major-mode
+      process vcs checker)
     )
 
   ;; Add to `doom-modeline-mode-hook` or other hooks

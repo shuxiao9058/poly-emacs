@@ -30,8 +30,6 @@ The theme has to be reloaded after changing anything in this group."
   '(1.6 1.4 1.2 1.2 1.2 1.1 1.0)
   "Scales for headers.")
 
-
-
 (defcustom poly-dark-height-title-1 1.3
   "Font size 100%."
   :type 'number
@@ -52,14 +50,10 @@ The theme has to be reloaded after changing anything in this group."
   :type 'number
   :group 'poly-dark)
 
-					; (defcustom poly-dark-height-doc-title 1.44
-					;   "Font size 144%."
-					;   :type 'number
-					;   :group 'poly-dark)
-
-(defvar poly-dark-main-color "#00AAAA"
-  "The main color used for some places.
-You may want to set this to window's border color.")
+;; (defcustom poly-dark-height-doc-title 1.44
+;;   "Font size 144%."
+;;   :type 'number
+;;   :group 'poly-dark)
 
 (defcustom poly-dark-alternate-mode-line-and-minibuffer nil
   "Use less bold and pink in the minibuffer."
@@ -68,6 +62,12 @@ You may want to set this to window's border color.")
 
 (defface tabnine-face '((t (:inherit font-lock-string-face)))
   "TabNine face")
+
+(defface meow-cursor-base '((t (:inherit cursor)))
+  "Meow cursor base face")
+
+(defface meow-indicator-base '((t (:inherit fill-column-indicator)))
+  "Meow indicator base face")
 
 ;;
 ;; Assigment form: VARIABLE COLOR [TTY-COLOR]
@@ -149,15 +149,7 @@ You may want to set this to window's border color.")
                ;; Yasnippet
                (yas-field-highlight-face       :background ,region2)
 
-               ;; Meow
-               (meow-keypad-indicator          :foreground "black" :background ,red)
-               (meow-insert-indicator          :foreground "black" :background ,green)
-               ;; (meow-normal-indicator          ((t (:foreground "black" :background ,yellow))))
-               (meow-normal-indicator          :foreground "black" :background ,yellow)
-               (meow-motion-indicator          :foreground "black" :background ,blue)
-               (meow-beacon-indicator          :foreground "black" :background ,purple)
-               ;; (meow-keypad-cursor             ((t ())))
-               (meow-insert-cursor             :background ,green)
+
 
                ;; Cider
                (cider-result-overlay-face      :background "black")
@@ -857,6 +849,21 @@ You may want to set this to window's border color.")
 	       (persp-face-lighter-default :foreground ,fg3 :weight bold)
 	       (persp-face-lighter-buffer-not-in-persp :foreground ,alt-blue)
 	       (persp-face-lighter-nil-persp :foreground ,comment)
+
+	       ;; Meow
+               (meow-indicator-base     :foreground ,bg)
+               (meow-keypad-indicator          :inherit meow-indicator-base :background ,red)
+               (meow-insert-indicator          :inherit meow-indicator-base :background ,green)
+               (meow-normal-indicator          :inherit meow-indicator-base :background ,yellow)
+               (meow-motion-indicator          :inherit meow-indicator-base :background ,blue)
+               (meow-beacon-indicator          :inherit meow-indicator-base :background ,purple)
+
+	       (meow-cursor-base         :foreground ,bg)
+               (meow-keypad-cursor              :inherit meow-cursor-base :background ,red)
+               (meow-insert-cursor             :inherit meow-cursor-base :background ,green)
+               (meow-normal-cursor :inherit meow-cursor-base :background ,yellow)
+ 	       (meow-motion-cursor :inherit meow-cursor-base :background ,blue)
+	       (meow-beacon-cursor :inherit meow-cursor-base :background ,purple)
 	       )))
 
   (apply #'custom-theme-set-faces
@@ -876,7 +883,6 @@ You may want to set this to window's border color.")
         			,(funcall expand-for-kind term-colors spec))
         		       (t                       ; should be only tty-like envs
         			,(funcall expand-for-kind tty-colors spec))))))
-
 	 ))
 
 
