@@ -2206,22 +2206,19 @@ session
 			       (kill-buffer buf)
 			       (delete-window win))) vterm-build-buffer))))
   (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit)
-  ;; (defun vterm-enter (&rest _)
-  ;;   (interactive)
-  ;;   (meow-insert-mode))
 
-  ;; (defun vterm-buffer-change ()
-  ;;   (when (derived-mode-p 'vterm-mode)
-  ;;     (vterm-enter)))
+  (defun vterm-buffer-change ()
+    (when (derived-mode-p 'vterm-mode)
+      (unless (meow-insert-mode-p)
+	(meow-insert-mode t))))
 
-  ;; (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
+  (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
   (when noninteractive
     (advice-add #'vterm-module-compile :override #'ignore)
     (provide 'vterm-module))
   :bind (:map vterm-mode-map
 	      ("C-c t" . vterm-copy-mode)
 	      ("C-x C-x" . ds/vterm-send-C-x)
-	      ;; ("C-z" . vterm-send-C-z)
 	      :map vterm-copy-mode-map
 	      ("C-c t" . 'vterm-copy-mode))
   :config
