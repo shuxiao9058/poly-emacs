@@ -1855,10 +1855,10 @@ Magit with cz
   ;; (rime-librime-root (concat user-emacs-directory "librime/dist"))
   (rime-librime-root "/opt/librime")
   (rime-emacs-module-header-root "/opt/local/include/emacs")
-  ;; (rime-show-candidate 'minibuffer)
   (rime-show-preedit t)
-  (rime-show-candidate 'posframe)
-  ;; (rime-show-candidate 'minibuffer)
+  ;; (rime-show-candidate 'posframe)
+  ;; (rime-show-candidate 'popup)
+  (rime-show-candidate 'minibuffer)
   ;; (rime-posframe-properties (list :background-color "#202325"
   ;;				  :foreground-color "#ddddde" ;; "#dedddd"
   ;;				  :internal-border-width 6))
@@ -2191,6 +2191,7 @@ session
   :custom
   (vterm-max-scrollback 10000)
   (vterm-timer-delay 0.01)
+  (vterm-kill-buffer-on-exit t)
   (vterm-ignore-blink-cursor nil)
   (vterm-always-compile-module t)
   (vterm-shell "/opt/local/bin/zsh")
@@ -2204,40 +2205,23 @@ session
 			     (let ((win (get-buffer-window buf)))
 			       (kill-buffer buf)
 			       (delete-window win))) vterm-build-buffer))))
-
   (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit)
-  (defun ds/vterm-send-C-x ()
-    (interactive)
-    (vterm-send "C-x"))
-  (defun ds/vterm-send-C-z ()
-    (interactive)
-    (vterm-send "C-z"))
-  (defun ds/vterm-send-C-s ()
-    (interactive)
-    (vterm-send "C-s"))
-  (defun ds/vterm-send-C-h ()
-    (interactive)
-    (vterm-send "C-h"))
-  (defun vterm-enter (&rest _)
-    (interactive)
-    (meow-insert-mode))
-
-  (defun vterm-buffer-change ()
-    (when (derived-mode-p 'vterm-mode)
-      (vterm-enter)))
-
-  ;; (defun poly/decrease-vterm-font-size ()
+  ;; (defun vterm-enter (&rest _)
   ;;   (interactive)
-  ;; (text-scale-decrease 0.5))
+  ;;   (meow-insert-mode))
 
-  (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
+  ;; (defun vterm-buffer-change ()
+  ;;   (when (derived-mode-p 'vterm-mode)
+  ;;     (vterm-enter)))
+
+  ;; (add-hook 'buffer-list-update-hook #'vterm-buffer-change)
   (when noninteractive
     (advice-add #'vterm-module-compile :override #'ignore)
     (provide 'vterm-module))
   :bind (:map vterm-mode-map
 	      ("C-c t" . vterm-copy-mode)
 	      ("C-x C-x" . ds/vterm-send-C-x)
-	      ("C-z" . vterm-send-C-z)
+	      ;; ("C-z" . vterm-send-C-z)
 	      :map vterm-copy-mode-map
 	      ("C-c t" . 'vterm-copy-mode))
   :config
@@ -2245,21 +2229,20 @@ session
   (advice-add 'vterm-copy-mode-done :after
 	      (lambda (&rest _) (funcall #'vterm-exit-visual-insert)))
 
-  (define-key vterm-mode-map (kbd "C-h") #'ds/vterm-send-C-h)
-  (define-key vterm-mode-map (kbd "C-z") #'ds/vterm-send-C-z)
-  (define-key vterm-mode-map (kbd "C-s") #'ds/vterm-send-C-s)
-  (defun vterm-send-meta-left ()
-    "Send `M-<left>' to the libvterm."
-    (interactive)
-    (vterm-send-key "<left>" nil t))
+  (defmacro poly/vterm-define-key (key)
+    "Define a command that sends KEY."
+    (declare (indent defun)
+	     (doc-string 3))
+    `(progn (defun ,(intern (format "poly/vterm-send-%s" key)) ()
+	      ,(format "Sends %s to the libvterm."  key)
+	      (interactive)
+	      (vterm-send ,key))))
 
-  (defun vterm-send-meta-right ()
-    "Send `M-<right>' to the libvterm."
-    (interactive)
-    (vterm-send-key "<right>" nil t))
-  (define-key vterm-mode-map (kbd "M-<left>") 'vterm-send-meta-left)
-  (define-key vterm-mode-map (kbd "M-<right>") 'vterm-send-meta-right)
   (setq vterm-keymap-exceptions (remove "C-h" vterm-keymap-exceptions))
+  (dolist (key '("C-h" "C-z" "C-s" "C-p" "C-n" "<backspace>" "DEL" "M-<left>" "M-<right>"))
+    (eval `(poly/vterm-define-key ,key))
+    (define-key vterm-mode-map (kbd key) (intern (format "poly/vterm-send-%s" key))))
+
   ;; (defun vterm-send-C-k-and-kill ()
   ;;   "Send `C-k' to libvterm, and put content in kill-ring."
   ;;   (interactive)
@@ -2268,6 +2251,7 @@ session
   (add-hook 'vterm-mode-hook
 	    (lambda ()
 	      (global-hl-line-mode 0)
+	      ;; (hide-mode-line-mode 0)
 	      (setq confirm-kill-processes nil)
 	      (setq hscroll-margin 0)
 	      (set (make-local-variable 'buffer-face-mode-face) 'fixed-pitch)
@@ -2278,9 +2262,7 @@ session
 	(if (get-buffer name)
 	    (switch-to-buffer name)
 	  (vterm name))
-      (vterm)))
-  (setq vterm-kill-buffer-on-exit t)
-  (setq vterm-max-scrollback 10000))
+      (vterm))))
 
 (use-package vterm-toggle
   :straight t
@@ -2313,9 +2295,9 @@ session
   (defun +vterm/here (arg)
     "Open a terminal buffer in the current window at project root.
 
-  If prefix ARG is non-nil, cd into `default-directory' instead of project root.
+    If prefix ARG is non-nil, cd into `default-directory' instead of project root.
 
-  Returns the vterm buffer."
+    Returns the vterm buffer."
     (interactive "P")
     (let* ((project-root (or default-directory))
 	   (dir
@@ -2359,7 +2341,7 @@ session
 
   (defun mb/vterm-right-here ()
     (interactive)
-    (if (eq major-mode 'vterm-mode)
+    (if (derived-mode-p 'vterm-mode)
 	(vterm-toggle)
       (let ((current-prefix-arg '-))
 	(call-interactively '+vterm/here))))

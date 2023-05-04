@@ -696,6 +696,9 @@ fix xref issue =(wrong-type-argument listp 0)=
 			     ])
   (lsp-beancount-langserver-executable (expand-file-name "workspace/beancount-language-server/target/release/beancount-language-server" "~"))
   (lsp-beancount-journal-file (expand-file-name ".emacs.d/.local/beancount/beancount.beancount" "~"))
+  :init
+  ;; Buffer local variable for storing number of lines.
+  (defvar lsp--log-lines)
   :config
   ;; (lsp-ensure-server 'css-ls)
   ;; (lsp-ensure-server 'dockerfile-ls)
@@ -732,11 +735,11 @@ fix xref issue =(wrong-type-argument listp 0)=
      ("gopls.hoverKind" "NoDocumentation" nil)
      ;; ("gopls.codelenses" '((gc_details . t) (generate . t) (regenerate_cgo . t) (test . t) (tidy . t) (upgrade_dependency . t) (vendor . t)))
      ("gopls.codelenses"  ((gc_details . :json-false)
-			    (generate . t)
-			    (regenerate_cgo . t)
-			    (tidy . t)
-			    (upgrade_dependency . t)
-			    (vendor . t)) nil)
+			   (generate . t)
+			   (regenerate_cgo . t)
+			   (tidy . t)
+			   (upgrade_dependency . t)
+			   (vendor . t)) nil)
      ;;disables -mod=readonly, allowing imports from out-of-scope module
      ("gopls.allowModfileModifications" t t)
      ("gopls.vulncheck" "Imports" nil)

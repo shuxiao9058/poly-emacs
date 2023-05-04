@@ -24,8 +24,8 @@
   ;;; highlight current line
 (global-hl-line-mode)
 
-;; disable mode-line
-(global-hide-mode-line-mode 1)
+;; ;; disable mode-line
+;; (global-hide-mode-line-mode 1)
 
 ;; Removes *scratch* from buffer after the mode has been set.
 (defun remove-scratch-buffer ()
@@ -130,8 +130,8 @@
 ;;                    (abbreviate-file-name (buffer-file-name))
 ;;                  "%b"))))
 
-(setq frame-title-format '(multiple-frames "%b"
-					   ("" invocation-name "@" system-name)))
+;; (setq frame-title-format '(multiple-frames "%b"
+;; 					   ("" invocation-name "@" system-name)))
 
 ;; ;; Activate winner mode for quickly changing window sizes, etc
 ;; (when (fboundp 'winner-mode)
@@ -162,42 +162,20 @@
      nil 'fullscreen
      (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
 
-  ;; ;; Give focus to emacs window at startup
-  ;; (x-focus-frame nil)
+  (defun poly/startup-maximize-frame()
+    (let* ((top (frame-parameter nil 'top))
+	   (left (frame-parameter nil 'left))
+	   (fullscreen (frame-parameter nil 'fullscreen)))
+      (unless (eq 'maximized fullscreen)
+	(toggle-frame-maximized))
+      (when (or (> top 50) (> left 50))
+	;; (message "set left & top, fullscreen: %s" fullscreen)
+        (set-frame-parameter nil 'top 36)
+   	(set-frame-parameter nil 'left 0)
+	;; Give focus to emacs window at startup
+	(x-focus-frame nil))))
 
-  ;; (defun toggle-fullframe(&optional arg)
-  ;;   "Toggle full frame"
-  ;;   (interactive)
-  ;;   (let* ((param (frame-parameter nil 'fullscreen))
-  ;; 	   (must-enable (or (eq t arg) (and arg (> arg 0))))
-  ;; 	   (must-disable (and (not must-enable) (and arg (<= arg 0))))
-  ;; 	   (maximized (if must-enable 'maximized
-  ;; 			(unless must-disable
-  ;; 			  ;; get current set opposite
-  ;; 			  (unless (and param (equal param 'maximized))
-  ;; 			    'maximized)))))
-  ;;     ;; Handle multiple monitors gracefully
-  ;;     ;; (when (or (>= (eval (frame-parameter nil 'top)) (display-pixel-height))
-  ;;     ;;          (>= (eval (frame-parameter nil 'left)) (display-pixel-width)))
-  ;;     (when (equal maximized 'maximized)
-  ;; 	(set-frame-parameter nil 'top 36)
-  ;; 	(set-frame-parameter nil 'left 0)
-  ;; 	(message "message set let & top")
-  ;; 	)
-  ;;     (set-frame-parameter nil 'fullscreen maximized)))
-
-  (add-hook 'emacs-startup-hook
-	    (lambda()
-       (let* ((top (frame-parameter nil 'top))
-       (left (frame-parameter nil 'left))
-       (fullscreen (frame-parameter nil 'fullscreen)))
-        (unless (eq 'maximized fullscreen)
-         (toggle-frame-maximized))
-         (when (or (> top 50) (> left 50))
-        (message "set left & top, fullscreen: %s" fullscreen)
-          	(set-frame-parameter nil 'top 36)
-   	        (set-frame-parameter nil 'left 0)
-        )))))
+  (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame))
 
 ;; Call this function to increase/decrease font size.
 (defun bcm/zoom (n)
@@ -209,12 +187,11 @@
 (global-set-key (kbd "C-+") #'(lambda () (interactive) (bcm/zoom 1)))
 (global-set-key (kbd "C--") #'(lambda () (interactive) (bcm/zoom -1)))
 
-
-(add-hook 'focus-in-hook
-	  (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/pid-str)))
-
-(add-hook 'focus-out-hook
-	  (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/pid-str)))
+(when (and IS-GUI IS-MAC)
+  (add-hook 'focus-in-hook
+	    (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/emacs-pid-str)))
+  (add-hook 'focus-out-hook
+	    (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/emacs-pid-str))))
 #+end_src
 
 *  since emacs 28
@@ -326,7 +303,6 @@
 
 (when (IS-GUI)
   (+load-font nil))
-
 (add-hook 'after-init-hook
 	  (lambda ()
 	    (when (IS-GUI)

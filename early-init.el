@@ -1,8 +1,23 @@
-;;; -*- mode: emacs-lisp; lexical-binding: t -*-
+;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
+
+(defvar poly/debug t
+  "debug flag")
+
+;; fix env issue
+(defun my-append-env-var (var-name value)
+  "Append VALUE to the beginning of current value of env variable VAR-NAME."
+  (setenv var-name (if (getenv var-name)
+                       (format "%s:%s" value (getenv var-name))
+                     value)))
+
+(let ((gccjitpath "/opt/local/lib/gcc11:/opt/local/lib/gcc12:/opt/local/lib/"))
+  (mapc (lambda (var-name) (my-append-env-var var-name gccjitpath))
+        '("LIBRARY_PATH" "LD_LIBRARY_PATH" "PATH")))
 
 ;; Shut off message buffer.  To debug Emacs, comment these out so you can see
 ;; output from message function calls.
-;; (setq message-log-max nil)
+(unless poly/debug
+  (setq message-log-max nil))
 ;; Check if message buffer exists before killing (not doing so errors
 ;; eval-buffer of an init file).
 ;; (when (get-buffer "*Messages*")
@@ -10,6 +25,39 @@
 
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
+
+;; Resizing the Emacs frame can be a terribly expensive part of changing the
+;; font. By inhibiting this, we easily halve startup times with fonts that are
+;; larger than the system default.
+(setq frame-inhibit-implied-resize t)
+
+;; Disable most GUI widgets early on
+(setq default-frame-alist '((horizontal-scroll-bars . nil)
+			    ;; (alpha . (0.90 0.90))
+			    (ns-appearance . dark)
+			    (ns-transparent-titlebar . t)
+			    ;; (drag-internal-border . 1)
+			    ;; (drag-internal-border . 0)
+			    (drag-with-tab-line . t)
+			    (internal-border-width . 0)
+			    ;; (internal-border-width . 5)
+			    (vertical-scroll-bars . nil)
+			    (menu-bar-lines . 0)
+			    (tool-bar-lines . 0)
+			    (fullscreen . maximized)
+			    ;; (height . 50)
+			    ;; (width . 95)
+			    (undecorated . t) ;; remove title bar
+			    ;; (font . "JetBrains Mono-14")
+			    (line-spacing . 0.2)))
+
+;; Set the initial screen location to be top-left
+(setq initial-frame-alist
+      (append
+       (list
+        '(top . 0) '(left . 0)
+        '(cursor-type . bar))
+       default-frame-alist))
 
 ;; Ensure we have correct user-emacs-directory
 ;; The folder of meomacs can be placed anywhere, and started with
@@ -51,19 +99,16 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 ;;    (expand-file-name "private_template.org" user-emacs-directory)
 ;;    (expand-file-name "private.org" user-emacs-directory)))
 
-(defvar poly/debug t
-"debug flag")
-
 (if poly/debug
+    (progn
+      (setq warning-minimum-level :debug)
+      (setq debug-on-error t)
+      (setq stack-trace-on-error t))
   (progn
-  (setq warning-minimum-level :debug)
-(setq debug-on-error t)
-(setq stack-trace-on-error t))
-(progn
- (setq warning-minimum-level :emergency)
- (setq debug-on-error nil)
-  (setq stack-trace-on-error nil)
-))
+    (setq warning-minimum-level :emergency)
+    (setq debug-on-error nil)
+    (setq stack-trace-on-error nil)
+    ))
 
 ;; Native compilation settings
 (when (featurep 'native-compile)
