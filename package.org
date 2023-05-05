@@ -458,11 +458,11 @@
     (add-function :after after-focus-change-function #'gcmh-idle-garbage-collect)
     ))
 
-(use-package command-log-mode
-  :straight t
-  :ensure t
-  :config
-  (global-command-log-mode))
+;; (use-package command-log-mode
+;;   :straight t
+;;   :ensure t
+;;   :config
+;;   (global-command-log-mode))
 
 (use-package transient
   :straight t

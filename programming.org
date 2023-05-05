@@ -11,14 +11,12 @@ Configuration for programming and languages support.
 #+begin_src emacs-lisp
 (use-package format-all
   :straight t
-  ;; :straight (:host github :repo "lassik/emacs-format-all-the-code")
   :ensure t
   :hook ((
 	  fish-mode
 	  sh-mode
 	  ;; prog-mode
 	  ;; lua-mode
-	  ;; lua-ts-mode
 	  go-mode
 	  go-ts-mode
 	  go-mod-ts-mode
@@ -188,7 +186,7 @@ Configuration for programming and languages support.
 
   ;; lsp-format-buffer
   (eval-after-load 'format-all
-    (dolist (hook '(lua-mode-hook
+    (dolist (hook '(;; lua-mode-hook
 		    go-mode-hook
 		    go-ts-mode-hook
 		    go-mod-ts-mode-hook
@@ -212,7 +210,7 @@ Configuration for programming and languages support.
 		'(
 		  ("Go" gofumpt)
 		  ;; ("Go" goimports)
-		  ("Lua" cpp-lua-format)
+		  ;; ("Lua" stylua)
 		  ("Java" my-clang-format)
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
@@ -289,12 +287,11 @@ Configuration for programming and languages support.
 
 Use eglot as LSP client.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (defun project-name (project)
   "A human-readable name for the project.
 	Nominally unique, but not enforced."
   (file-name-nondirectory (directory-file-name (project-root project))))
-
 
 ;; https://github.com/DEbling/dotfiles/blob/9dc0e347267dd68111baf8e7ab7d33c2e39ed404/.emacs.d/elisp/lang-java.el
 ;; (defconst jdt-jar-path "~/.emacs.d/.local/jar/org.eclipse.equinox.launcher.jar")
@@ -369,16 +366,16 @@ If INTERACTIVE, prompt user for details."
   (setq eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
   (setq eldoc-echo-area-use-multiline-p nil)
   ;; emmylua
-  (let ((emmylua-jar-path (expand-file-name "bin/EmmyLua-LS-all.jar" poly-local-dir)))
-    (add-to-list 'eglot-server-programs
-		 `((lua-mode lua-ts-mode)  . ("/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java" "-cp" ,emmylua-jar-path
-					      "com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))))
+  ;; (let ((emmylua-jar-path (f-join (poly/vscode-extension-install-path "tangzx.emmylua") "server/EmmyLua-LS-all.jar")))
+  ;;    (add-to-list 'eglot-server-programs
+  ;; 		 `((lua-mode lua-ts-mode)  . ("/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java" "-cp" ,emmylua-jar-path
+  ;; 					      "com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))))
 
-  ;; (let* ((lua-language-server-dir "/opt/local/lib/lua-language-server")
-  ;; 	 (lua-language-server-main (expand-file-name "bin/main.lua" lua-language-server-dir))
-  ;; 	 (lua-language-server-exec (expand-file-name "bin/lua-language-server" lua-language-server-dir)))
-  ;;   (add-to-list 'eglot-server-programs
-  ;; 		 `(lua-mode  . (,lua-language-server-exec "-E" "-e" "LANG=en" ,lua-language-server-main))))
+  (let* ((lua-language-server-dir (poly/vscode-extension-install-path "sumneko.lua"))
+	 (lua-language-server-main (expand-file-name "server/main.lua" lua-language-server-dir))
+	 (lua-language-server-exec (expand-file-name "server/bin/lua-language-server" lua-language-server-dir)))
+    (add-to-list 'eglot-server-programs
+		 `(lua-mode  . (,lua-language-server-exec "-E" "-e" "LANG=en" ,lua-language-server-main))))
 
   (add-to-list 'eglot-server-programs
 	       '(java-mode .  my-eclipse-jdt-contact))
@@ -399,7 +396,7 @@ If INTERACTIVE, prompt user for details."
 
   (when (executable-find "protobuf-language-server")
     (add-to-list 'eglot-server-programs '((protobuf-mode protobuf-ts-mode) "protobuf-language-server"
-					   )))
+					  )))
 
   (add-to-list 'eglot-server-programs
 	       `((swift-mode) ,(string-trim (shell-command-to-string "xcrun --find sourcekit-lsp"))))
@@ -411,15 +408,9 @@ If INTERACTIVE, prompt user for details."
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
 	      (progn
-		(flymake-mode -1)
-		;; (lsp/non-greedy-eglot)
-		;; (lsp/extra-capf)
+		;; (flymake-mode -1)
 		(poly/set-lsp-capf)
-		)
-	      ;; (make-local-variable 'completion-at-point-functions)
-	      ;; (setq-local completion-at-point-functions
-	      ;;		  '(cape-line cape-symbol cape-ispell cape-dabbrev cape-tex cape-file tags-completion-at-point-function))
-	      ))
+		)))
 
   (setq eglot-workspace-configuration
 	`((:gopls . ((staticcheck . nil)
@@ -427,15 +418,24 @@ If INTERACTIVE, prompt user for details."
 		     (gofumpt . t)
 		     (usePlaceholders . t)
 		     (completeUnimported . t)
+		     (deepCompletion . t)
 		     ;; (experimentalWorkspaceModule . t)
 		     (completionBudget . "150ms")
 		     (diagnosticsDelay  .  "800ms")
+		     (vulncheck . "Imports")
+		     (semanticTokens . t)
 		     ;; (directoryFilters . ["-vendor"])
 		     (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
-		     (codelenses . ((vendor . t)))
+		     (codelenses . ((gc_details . :json-false)
+				    (generate . t)
+				    (regenerate_cgo . t)
+				    (tidy . t)
+				    (upgrade_dependency . t)
+				    (vendor . t)))
 		     ;; (buildFlags . ["-mod=vendor"])
 		     (allowImplicitNetworkAccess . t)
 		     (allowModfileModifications . t)
+		     (experimentalPostfixCompletions . t)
 		     (analyses . ,(mapcar (lambda (a) (cons a :json-false))
 					  '(unusedparams unusedwrite composites ST1003  ST1021 ST1016 SA5011 ST1020 ST1005 SA9003 SA4006 ST1022 S1023 SA4011 SA4010 ST1018)))))))
   :bind (:map eglot-mode-map
@@ -532,7 +532,7 @@ fix xref issue =(wrong-type-argument listp 0)=
 
 ** lsp-mode
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defvar my-disable-lsp-completion nil
   "If non-nil, disable lsp-completion-enable, can work with .dir-locals
        ((nil . ((eval . (setq-local my-disable-lsp-completion t)))))
@@ -644,14 +644,11 @@ fix xref issue =(wrong-type-argument listp 0)=
   (lsp-prefer-flymake nil) ;; Use lsp-ui and flycheck
   (lsp-imenu-container-name-separator "⦿")
   (lsp-imenu-show-container-name t)
-  ;; (flymake-fringe-indicator-position 'right-fringe)
-  ;; (lsp-clients-emmy-lua-jar-path (expand-file-name  "bin/EmmyLua-LS-all.jar" poly-local-dir))
-  ;; (lsp-clients-emmy-lua-jar-path (expand-file-name "workspace/EmmyLua-LanguageServer/EmmyLua-LS/build/libs/EmmyLua-LS-all.jar" "~"))
+  (lsp-clients-emmy-lua-java-path "/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java")
   (lsp-clients-emmy-lua-jar-path (f-join (poly/vscode-extension-install-path "tangzx.emmylua") "server/EmmyLua-LS-all.jar"))
   (lsp-clients-emmy-lua-args '("com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))
   (lsp-clients-lua-language-server-install-dir (poly/vscode-extension-install-path "sumneko.lua"))
   (lsp-clients-lua-language-server-bin (expand-file-name "server/bin/lua-language-server" lsp-clients-lua-language-server-install-dir))
-  ;; (lsp-clients-lua-language-server-main-location "")
   (lsp-clients-lua-language-server-args '("-E"))
   (lsp-clients-lua-language-server-main-location (expand-file-name "server/main.lua" lsp-clients-lua-language-server-install-dir))
   ;; (lsp-clients-lua-language-server-main-location (expand-file-name "main.lua" lsp-clients-lua-language-server-install-dir))
@@ -661,7 +658,7 @@ fix xref issue =(wrong-type-argument listp 0)=
   (lsp-lua-workspace-max-preload 4096); Default: 300, Max preloaded files
   (lsp-lua-workspace-preload-file-size 1024) ; Default: 100, Skip files larger than this value (KB) when preloading.
   (lsp-lua-diagnostics-globals "'Lua.diagnostics.globals': ['use', 'awesome', 'client', 'root']")
-  (lsp-lua-workspace-library  `((,(intern (expand-file-name "workspace/openresty-lua/lualib" "~")) . t)))
+  ;; (lsp-lua-workspace-library  `((,(intern (expand-file-name "workspace/openresty-lua/lualib" "~")) . t)))
   (lsp-lua-completion-enable nil)
   (lsp-lua-diagnostics-disable t)
   (lsp-lua-diagnostics-enable nil)
@@ -673,7 +670,8 @@ fix xref issue =(wrong-type-argument listp 0)=
   (lsp-lua-window-progress-bar nil)
   (lsp-lua-window-status-bar nil)
   (lsp-lua-completion-display-context nil)
-  (lsp-go-gopls-server-path "/opt/local/bin/gopls")
+  (lsp-go-gopls-server-path "/usr/local/gopath/bin/gopls")
+  ;; (lsp-go-gopls-server-path "/opt/local/bin/gopls")
   ;; (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
   ;; 			   ))
   (lsp-go-hover-kind "NoDocumentation")
@@ -706,8 +704,8 @@ fix xref issue =(wrong-type-argument listp 0)=
   ;; (lsp-ensure-server 'html-ls)
   ;; (lsp-ensure-server 'json-ls)
   (require 'lsp-lua)
-  (lsp-ensure-server 'lua-language-server)
-  ;; (lsp-ensure-server 'emmy-lua)
+  ;; (lsp-ensure-server 'lua-language-server)
+  (lsp-ensure-server 'emmy-lua)
   (require 'lsp-go)
   (lsp-ensure-server 'gopls)
   ;; (lsp-ensure-server 'omnisharp)
@@ -782,7 +780,7 @@ fix xref issue =(wrong-type-argument listp 0)=
 	      priority)
       (error "No LSP client named %S" client)))
 
-  (set-lsp-priority 'lua-language-server 1)
+  ;; (set-lsp-priority 'lua-language-server 1)
 
   ;; cancel warning
   (advice-add 'lsp-warn
@@ -1037,11 +1035,18 @@ fix xref issue =(wrong-type-argument listp 0)=
 (add-hook 'c-ts-mode-hook #'c-ts-setup)
 (add-hook 'css-ts-mode-hook 'ts-css-setup)
 
+(defun poly/lsp-format-buffer()
+  (if (bound-and-true-p lsp-mode)
+      (lsp-format-buffer)
+    (when (bound-and-true-p eglot--managed-mode)
+      (eglot-format-buffer))))
+
 (defun lsp-format-buffer-on-save ()
   (add-hook 'before-save-hook
-	    (if poly-use-lsp-mode #'lsp-format-buffer #'eglot-format-buffer) -10 t))
+	    #'poly/lsp-format-buffer -10 t))
 
 (add-hook 'go-ts-mode-hook #'lsp-format-buffer-on-save)
+(add-hook 'lua-mode-hook #'lsp-format-buffer-on-save)
 
 (defun general-ts-mode-setup ()
   (treesit-font-lock-recompute-features

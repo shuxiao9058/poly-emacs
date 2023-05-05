@@ -80,7 +80,7 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-package-always-pdump t
   "always set :pdump to use-package")
 
-(defvar poly-use-lsp-mode t
+(defvar poly-use-lsp-mode nil
   "use lsp-mode for completion")
 
 (defvar poly-vscode-extensions-json-file
@@ -484,4 +484,37 @@ Accepts the same arguments as `message'."
     (plist-get location :path)))
 
 ;; (poly/vscode-extension-install-path "sumneko.lua")
+#+end_src
+
+** hammerspoon
+
+send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammerspoon, required by org-clock & pomo
+
+ https://github.com/deftsp/.emacs.d/blob/fe38ec59ae630c5b88df9d10f40e33a2159113fb/lisp/50hammerspoon.el
+
+#+begin_src emacs-lisp
+(defun tl/open-hammerspoon-url (event &rest params)
+  (let ((len (length params))
+	(url (concat "hammerspoon://" event)))
+    (when (> len 0)
+      (if (zerop (% len 2))
+	  (let ((querys (--reduce (format "%s&%s" acc it)
+				  (-map (lambda (l)
+					  (format "%s=%s" (url-encode-url (car l)) (url-encode-url (cadr l))))
+					(-partition-all 2 params)))))
+	    (setq url (concat url "?" querys)))
+	(error "illegal hammerspoon params")))
+    (tl/with-suppress-message "Shell command succeeded with"
+      (shell-command (format "open -g \"%s\""
+			     url)))))
+
+;; (defun tl/notify-hammerspoon-did-init ()
+;;   (tl/open-hammerspoon-url "emacs_did_init"))
+
+;; (add-hook 'after-init-hook #'tl/notify-hammerspoon-did-init t)
+
+;; (defun tl/notify-hammerspoon-did-kill ()
+;;   (tl/open-hammerspoon-url "emacs_did_kill"))
+
+;; (add-hook 'kill-emacs-hook #'tl/notify-hammerspoon-did-kill t)
 #+end_src
