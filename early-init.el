@@ -1,6 +1,6 @@
 ;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
-(defvar poly/debug nil,
+(defvar poly/debug nil
   "debug flag")
 
 ;; fix env issue

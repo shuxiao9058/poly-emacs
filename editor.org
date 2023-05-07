@@ -247,6 +247,12 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   ;;   (counsel-rg "" (projectile-project-root))
   ;;   )
   :config
+  (projectile-register-project-type
+   'npm '("package.json")
+   :compile "NODE_OPTIONS=--openssl-legacy-provider npm run build"
+   :test "npm run test"
+   :run "npm run start"
+   :test-suffix ".spec")
   (defun poly/switch-project-action ()
     (interactive)
     (if (magit-git-dir)

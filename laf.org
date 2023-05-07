@@ -193,6 +193,8 @@ Configuration for look and feels, make UI looks better.
 (when (and IS-GUI IS-MAC)
   (add-hook 'focus-in-hook
       (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/emacs-pid-str)))
+(add-hook 'emacs-startup-hook
+      (lambda() (tl/open-hammerspoon-url "Emacs" "action" "StartUp" "pid" poly/emacs-pid-str)))
   (add-hook 'focus-out-hook
       (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/emacs-pid-str))))
 #+end_src

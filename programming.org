@@ -6,6 +6,16 @@ Configuration for programming and languages support.
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+* auto-mode-alist
+
+#+begin_src emacs-lisp
+(setq-default js-indent-level 2)
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\'" . html-ts-mode))
+#+end_src
+
 * Format
 
 #+begin_src emacs-lisp
@@ -243,7 +253,11 @@ Configuration for programming and languages support.
   :custom
   (flycheck-check-syntax-automatically
    '(save idle-change mode-enabled))
-  (flycheck-checker-error-threshold nil))
+  (flycheck-checker-error-threshold nil)
+:config
+(flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
+(flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
+(flycheck-add-mode 'typescript-tslint 'tsx-ts-mode))
 
 (use-package flycheck-color-mode-line
   :straight t
@@ -423,10 +437,6 @@ Examples:
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
 
   (+eglot-register '(go-mode go-ts-mode) `("gopls"))
-
-  (setq-default js-indent-level 2)
-  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
   (add-to-list 'eglot-server-programs
@@ -607,17 +617,19 @@ Examples:
   :diminish
   :commands (lsp lsp-deferred lsp-enable-which-key-integration lsp-format-buffer lsp-organize-imports)
   :hook (((go-mode go-ts-mode go-dot-mod-mode go-mod-ts-mode
-		    java-mode
-		    beancount-mode web-mode
-		    python-mode python-ts-mode
-		    lua-mode lua-ts-mode
-		    scala-mode js-mode
-		    js2-mode typescript-mode typescript-ts-mode
-		    c-mode c++-mode clojure-mode cperl-mode
-		    shell-mode bash-mode markdown-mode sql-mode
-		    yaml-mode xml-mode nxml-mode
-		    ) . lsp-deferred)
-	  (lsp-mode . lsp-enable-which-key-integration))
+		   java-mode
+		   beancount-mode web-mode
+		   python-mode python-ts-mode
+		   lua-mode lua-ts-mode
+		   scala-mode js-mode js-ts-mode
+		   js2-mode typescript-mode typescript-ts-mode
+		   typescript-tsx-mode tsx-ts-mode
+		   html-ts-mode
+		   c-mode c++-mode clojure-mode cperl-mode
+		   shell-mode bash-mode markdown-mode sql-mode
+		   yaml-mode xml-mode nxml-mode
+		   ) . lsp-deferred)
+	 (lsp-mode . lsp-enable-which-key-integration))
   :custom
   (lsp-restart 'auto-restart)
   ;; (lsp-restart 'ignore)
@@ -729,7 +741,7 @@ Examples:
   (setq lsp-disabled-clients '(emmy-lua))
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
-			      json-ls beancount-ls css-ls dockerfile-ls ts-ls
+			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls nginx-ls bash-ls unified sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\].git$")
@@ -790,7 +802,21 @@ Examples:
      ("Lua.hint.arrayIndex" "Auto" t)
      ("Lua.format.defaultConfig.indent_style" "space" t)
      ("Lua.format.defaultConfig.indent_size" "2" t)
-     ))
+
+     ;; typescript
+     ("typescript.format.baseIndentSize" 0)
+     ("typescript.format.indentSize" 2)
+     ("typescript.format.indentStyle" "None")
+     ("typescript.format.trimTrailingWhitespace" t)
+     ("typescript.format.convertTabsToSpaces" t)
+     ("typescript.format.tabSize" 2)
+
+     ("javascript.format.baseIndentSize" 0)
+     ("javascript.format.indentSize" 2)
+     ("javascript.format.indentStyle" "None")
+     ("javascript.format.trimTrailingWhitespace" t)
+     ("javascript.format.convertTabsToSpaces" t)
+     ("javascript.format.tabSize" 2)))
   :bind (:map lsp-mode-map
 	      ("C-c r" . lsp-rename)
 	      ("C-c a" . lsp-organize-imports)
@@ -799,12 +825,12 @@ Examples:
 	      ([remap xref-find-definitions] . lsp-find-definition)
               ([remap xref-find-references] . lsp-find-references)
 	      ([remap xref-find-apropos]     . lsp-find-declaration))
-)
+  )
 
-  ;; ;; cancel warning
-  ;; (advice-add 'lsp-warn
-  ;; 	      :around (lambda (orig-func &rest r)
-  ;; 			(message (apply #'format-message r))))
+;; ;; cancel warning
+;; (advice-add 'lsp-warn
+;; 	      :around (lambda (orig-func &rest r)
+;; 			(message (apply #'format-message r))))
 
 (use-package lsp-pyright
   :ensure t
@@ -978,6 +1004,7 @@ Examples:
 	  (rust-mode . rust-ts-mode)
 	  (ruby-mode . ruby-ts-mode)
 	  (typescript-mode . typescript-ts-mode)
+	  (javascript-mode . js-ts-mode)
 	  (conf-toml-mode . toml-ts-mode)
 	  (yaml-mode . yaml-ts-mode)
 	  ;; (protobuf-mode . protobuf-ts-mode)
@@ -1043,19 +1070,6 @@ Examples:
 (add-hook 'c-ts-mode-hook #'c-ts-setup)
 (add-hook 'css-ts-mode-hook 'ts-css-setup)
 
-(defun poly/lsp-format-buffer()
-  (if (bound-and-true-p lsp-mode)
-      (lsp-format-buffer)
-    (when (bound-and-true-p eglot--managed-mode)
-      (eglot-format-buffer))))
-
-(defun lsp-format-buffer-on-save ()
-  (add-hook 'before-save-hook
-	    #'poly/lsp-format-buffer -10 t))
-
-(dolist (hook '(go-ts-mode-hook lua-mode-hook typescript-ts-mode-hook))
-  (add-hook hook #'lsp-format-buffer-on-save))
-
 (defun general-ts-mode-setup ()
   (treesit-font-lock-recompute-features
    nil
@@ -1079,6 +1093,21 @@ Examples:
 
 (defun ts-css-setup ()
   (treesit-font-lock-recompute-features nil '(variable function)))
+
+(defun poly/lsp-format-buffer()
+  (interactive)
+  (if (bound-and-true-p lsp-mode)
+      (lsp-format-buffer)
+    (when (bound-and-true-p eglot--managed-mode)
+      (eglot-format-buffer))))
+
+(defun lsp-format-buffer-on-save ()
+  (add-hook 'before-save-hook
+	    #'poly/lsp-format-buffer -10 t))
+
+(dolist (hook '(go-ts-mode-hook lua-mode-hook
+				typescript-ts-mode-hook javascript-ts-mode-hoo))
+  (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
 
 * Languages
@@ -1499,8 +1528,26 @@ Use clojure-mode for basic syntax support.
   "Return suffix of current buffer."
   (nth 0 (cdr (split-string (buffer-name) "\\."))))
 
+(defvar typescript-linter 'tslint
+  "The linter to use for typescript. Possible values are `tslint' `eslint'")
+
+;; (defun typescript/set-lsp-linter ()
+;;   (pcase typescript-linter
+;;     ('tslint (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode))
+;;     ;; This sets tslint unconditionally for all lsp clients which is wrong
+;;     ;; Must be set for respective modes only, see go layer for examples.
+;;     ('eslint (flycheck-add-mode 'javascript-eslint 'typescript-tsx-mode)
+;;              (flycheck-add-mode 'javascript-eslint 'typescript-mode))
+;;     (_ (message
+;;         "Invalid typescript-layer configuration, no such linter: %s" typescript-linter))))
+
+;; (typescript/set-lsp-linter)
+
+
+
 (use-package web-mode
   :straight t
+  :disabled t
   :hook
   (web-mode . (lambda()
 		(if (string= (my/current-buffer-suffix) "vue")

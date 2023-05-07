@@ -35,11 +35,11 @@
 
 ;; straight package
 (poly-load-org-config "package")
-(poly-load-org-config "keybindings")
 
 ;; Load configurations
 (poly-load-org-config "private")
 (poly-load-org-config "laf")
+(poly-load-org-config "keybindings")
 
 ;; (poly-load-org-config "project")
 (poly-load-org-config "editor")
