@@ -250,15 +250,15 @@ Configuration for look and feels, make UI looks better.
   (setq english-fonts `(,+font-family))
   (setq chinese-fonts `(,+ufont-family))
   (set-face-attribute 'default nil
-          ;; (format "%s-%d" (car english-fonts) 12)
+		      ;; (format "%s-%d" (car english-fonts) 12)
                       :font (format "%s:pixelsize=%d" (car english-fonts) english-font-size) ;; 11 13 17 19 23
-          )
+		      )
   (dolist (charset '(kana han symbol cjk-misc bopomofo))
     (set-fontset-font  nil ;; (frame-parameter nil 'font)
-           charset
-           (font-spec :family +ufont-family
-          ;; (car chinese-fonts)
-          :size chinese-font-size))) ;; 14 16 20 22 28
+		       charset
+		       (font-spec :family +ufont-family
+				  ;; (car chinese-fonts)
+				  :size chinese-font-size))) ;; 14 16 20 22 28
   (set-face-attribute 'variable-pitch nil :font (format "%s-%d" +ufont-family chinese-font-size))
   (set-face-attribute 'fixed-pitch nil :font (format "%s-%d" +ufont-family chinese-font-size))
 
@@ -268,35 +268,60 @@ Configuration for look and feels, make UI looks better.
   ;; emoji
   (when IS-MAC
     (if (version< "27.0" emacs-version)
-  (set-fontset-font "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
+	(set-fontset-font "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
       (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size 13) nil 'prepend)))
 
   (let* ((+font-size 12)
-   (font-spec (format "%s-%d" +font-family 12))
+	 (font-spec (format "%s-%d" +font-family 12))
          (variable-pitch-font-spec (format "%s-%d" +variable-pitch-family +font-size))
          (fixed-pitch-font-spec (format "%s-%d" +fixed-pitch-family +font-size)))
     (set-fontset-font nil nil (font-spec :family +font-family
-           :size +font-size
-           :width 'normal
-           ) frame)
+					 :size +font-size
+					 :width 'normal
+					 ) frame)
     ;; (set-frame-font font-spec frame)
     (set-face-attribute 'variable-pitch nil :font variable-pitch-font-spec)
     (set-face-attribute 'fixed-pitch nil :font fixed-pitch-font-spec))
   ;; (+load-ext-font)
   )
 
-(when (IS-GUI)
-  (+load-font nil))
-(add-hook 'after-init-hook
-    (lambda ()
-      (when (IS-GUI)
-        (+load-font nil))))
+;; (when (IS-GUI)
+;;   (+load-font nil))
+;; (add-hook 'after-init-hook
+;;     (lambda ()
+;;       (when (IS-GUI)
+;;         (+load-font nil))))
 
 ;; (add-hook 'telega-root-mode-hook '+load-font)
+;; (add-hook 'after-init-hook
+;;     (lambda ()
+;;       (when (IS-GUI)
+;;         (+load-font nil))))
+
+(defun max/set-font (FONT-NAME CN-FONT-NAME &optional INITIAL-SIZE CN-FONT-RESCALE-RATIO)
+  "Set different font-family for Latin and Chinese charactors."
+  (let* ((size (or INITIAL-SIZE 14))
+	 (ratio (or CN-FONT-RESCALE-RATIO 0.0))
+	 (main (font-spec :name FONT-NAME :size size))
+	 (cn (font-spec :name CN-FONT-NAME)))
+    (set-face-attribute 'default nil :font main)
+    (dolist (charset '(kana han symbol cjk-misc bopomofo))
+      (set-fontset-font t charset cn))
+    (setq face-font-rescale-alist (if (/= ratio 0.0) `((,CN-FONT-NAME . ,ratio)) nil))))
+
+
 (add-hook 'after-init-hook
-    (lambda ()
-      (when (IS-GUI)
-        (+load-font nil))))
+	  (lambda ()
+	    (when (IS-GUI)
+	      ;; (max/set-font "Monaco" "Sarasa Mono SC" 13 1.25)
+	      ;; (max/set-font "JetBrains Mono" "Hiragino Sans GB" 13 1.25)
+	      (max/set-font "Fira Code" "Source Han Serif SC" 13 1.3)
+              ;; (+load-font nil)
+	      )))
+
+;; (max/set-font "Fira Code" "Hiragino Sans GB" 13 1.25)
+
+
 
 ;; (set-face-attribute 'default nil :family "Jetbrains Mono NL" :height 135)
 ;; (set-face-attribute 'fixed-pitch nil :family "Jetbrains Mono NL")
@@ -319,21 +344,27 @@ enable ligatures with emacs-mac, must install font first
 
 * modeline
 ** doom-modeline
+
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :straight (doom-modeline
 	     :type git
 	     :host github
 	     :repo "seagle0128/doom-modeline")
-  ;; :pdump nil
   :custom
   ;; (doom-modeline-buffer-file-name-style 'truncate-with-project)
   ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
-  (doom-modeline-buffer-file-name-style 'relative-to-project)
-  (doom-modeline-modal-icon t)
+  ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
+  (doom-modeline-buffer-file-name-style 'truncate-all)
+  (doom-modeline-project-detection 'projectile)
+  (doom-modeline-modal-icon nil)
   (doom-modeline-icon nil)
-  (doom-modeline-major-mode-icon t)
-  (doom-modeline-minor-modes nil)
+  (doom-modeline-major-mode-icon nil)
+  (doom-modeline-buffer-state-icon nil)
+  (doom-modeline-buffer-modification-icon nil)
+  (doom-modeline-unicode-fallback t)
+  (doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
+  (doom-modeline-minor-modes t)
   (doom-modeline-major-mode-color-icon t)
   (doom-modeline-persp-name t)
   (doom-modeline-persp-icon t)
@@ -346,8 +377,8 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-height 15)
   (doom-modeline-bar-width 3)
   (doom-modeline-vcs-max-length 25)
-  (doom-modeline-checker-simple-format t)
-  (doom-modeline-env-version nil)
+  (doom-modeline-checker-simple-format nil)
+  (doom-modeline-env-version t)
   (doom-modeline-env-enable-python t)
   (doom-modeline-env-enable-ruby t)
   (doom-modeline-env-enable-perl t)
@@ -360,6 +391,7 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-env-go-executable "go")
   (doom-modeline-env-elixir-executable "iex")
   (doom-modeline-env-rust-executable "rustc")
+  (doom-modeline-env-load-string "...")
   :after (all-the-icons)
   :config
   (doom-modeline-def-modeline 'my-simple-line
@@ -385,7 +417,7 @@ enable ligatures with emacs-mac, must install font first
   (add-hook 'doom-modeline-mode-hook
 	    (lambda() (doom-modeline-set-modeline 'my-simple-line-v2 'default)))
   (doom-modeline-mode t))
-#+end_src
+#+END_SRC
 
 ** simple-modeline
 #+begin_src emacs-lisp :tangle no
@@ -408,6 +440,17 @@ enable ligatures with emacs-mac, must install font first
 	   simple-modeline-segment-major-mode))))
 #+end_src
 
+
+** Minions
+
+Implements a menu that lists enabled and disabled minor modes in the mode-line.
+
+#+begin_src emacs-lisp
+(use-package minions
+  :config (minions-mode)
+  :custom
+  (minions-mode-line-lighter "☰"))
+#+end_src
 * treemacs
 #+begin_src emacs-lisp
 (use-package treemacs
@@ -608,4 +651,18 @@ enable ligatures with emacs-mac, must install font first
   :hook (after-init . global-auto-highlight-symbol-mode)
   :config
   (setq ahs-default-range 'ahs-range-whole-buffer))
+#+end_src
+
+
+** hl-todo: highlight TODO keywords
+
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :custom-face
+  (hl-todo ((t (:inherit hl-todo :underline t))))
+  :custom
+  (hl-todo-keyword-faces '(("TODO"   . "#ff7060")
+                           ("FIXME"  . "#caa000")))
+  :config
+  (global-hl-todo-mode t))
 #+end_src

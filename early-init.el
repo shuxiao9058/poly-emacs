@@ -1,6 +1,6 @@
 ;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
-(defvar poly/debug nil
+(defvar poly/debug nil,
   "debug flag")
 
 ;; fix env issue
@@ -36,11 +36,11 @@
 			    ;; (alpha . (0.90 0.90))
 			    (ns-appearance . dark)
 			    (ns-transparent-titlebar . t)
-			    ;; (drag-internal-border . 1)
-			    ;; (drag-internal-border . 0)
+			    (drag-internal-border . 1)
+			    (drag-internal-border . 0)
 			    (drag-with-tab-line . t)
 			    (internal-border-width . 0)
-			    ;; (internal-border-width . 5)
+			    (internal-border-width . 5)
 			    (vertical-scroll-bars . nil)
 			    (menu-bar-lines . 0)
 			    (tool-bar-lines . 0)
