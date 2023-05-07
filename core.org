@@ -70,7 +70,6 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-pdump-packages '(cl-lib)
   "A list of package names to dump.")
 
-
 (defun poly-pdump-packages (&rest pkgs)
   "Mark pkgs should be dumped."
   (dolist (pkg pkgs)
@@ -80,12 +79,20 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-package-always-pdump t
   "always set :pdump to use-package")
 
-(defvar poly-use-lsp-mode nil
+(defvar poly-use-lsp-mode t
   "use lsp-mode for completion")
 
 (defvar poly-vscode-extensions-json-file
   (expand-file-name ".vscode/extensions/extensions.json" "~")
   "vscode extensions.json file path")
+
+(defconst poly-vscode-app-install-path
+  "/Applications/Visual Studio Code.app"
+  "VSCode app install path")
+
+(defconst poly-vscode-app-extension-path
+  (expand-file-name "Contents/Resources/app/extensions" poly-vscode-app-install-path)
+  "VSCode app extension path")
 
 (defvar poly-vterm-directory-cached ""
   "vterm cached directory")
@@ -116,6 +123,8 @@ Core configuration of poly emacs, global variable declare.
       x-select-enable-primary             t
       history-length 100000
       history-delete-duplicates t
+      confirm-nonexistent-file-or-buffer nil
+      large-file-warning-threshold 100000000
       resize-mini-windows t
       sentence-end-double-space nil           ;; Use a single space after dots
       truncate-string-ellipsis "…"

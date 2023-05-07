@@ -93,11 +93,10 @@ If FORCE-TANGLE is non-nil, always tangle before load."
       (load-file target))))
 
 ;; Prepare private.org when not exist.
-
-;; (unless (file-exists-p (expand-file-name "private.org" user-emacs-directory))
-;;   (copy-file
-;;    (expand-file-name "private_template.org" user-emacs-directory)
-;;    (expand-file-name "private.org" user-emacs-directory)))
+(unless (file-exists-p (expand-file-name "private.org" user-emacs-directory))
+  (copy-file
+   (expand-file-name "private_template.org" user-emacs-directory)
+   (expand-file-name "private.org" user-emacs-directory)))
 
 (if poly/debug
     (progn

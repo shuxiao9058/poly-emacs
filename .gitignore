@@ -19,3 +19,8 @@ recentf
 request/
 network-security.data
 tree-sitter/
+eshell
+elpa
+.cache
+.dap-breakpoints
+.mc-lists.el

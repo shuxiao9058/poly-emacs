@@ -802,10 +802,13 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ;; (on-first-input . (lambda () (run-with-timer 2 nil #'tabnine-capf-start-process)))
 	 (kill-emacs . tabnine-kill-process))
   :config
-  (add-to-list 'tabnine-disable-predicates #'meow-motion-mode-p)
-  (add-to-list 'tabnine-disable-predicates #'meow-normal-mode-p)
-  (add-to-list 'tabnine-disable-display-predicates #'meow-motion-mode-p)
-  (add-to-list 'tabnine-disable-display-predicates #'meow-normal-mode-p)
+  (defun +tabnine-disable-predicate()
+    (or (derived-mode-p 'vterm-mode)
+	(meow-motion-mode-p)
+	(meow-normal-mode-p)))
+
+  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
+  ;; (add-to-list 'tabnine-disable-display-predicates +tabnine-disable-predicate)
   :bind
   (:map tabnine-mode-map
 	("C-TAB" . tabnine-accept-completion-by-word)
@@ -864,37 +867,22 @@ Quick action with hydra
 (use-package hydra
   :straight t
   :ensure t
-  ;; :after outline
   :custom
   (hydra-if-helpful t)
   :commands (defhydra)
   :bind ("M-o" . hydra-base/body))
 
-;; (use-package hydra-posframe
-;;   :straight (hydra-posframe
-;;              :host github
-;;              :repo "Ladicle/hydra-posframe"
-;;              )
-;;   :defer t
-;;   :after (hydra posframe)
-;; :config
-;; (hydra-posframe-enable)
-;;   )
-
 (defhydra hydra-base ()
   "
-_a_genda
-_e_in
-_f_lycheck
-_n_otdeft
-_o_utline & outshine
-_s_traight
-_t_ab
-_w_indow
+_a_genda         | _f_lycheck         |      _n_otdeft
+_d_ap            | _l_sp              |      _o_utline & outshine
+_e_in            | _s_traight         |      _t_ab
+               |                  |      _w_indow
 "
   ("a" hydra-agenda-view/body :exit t)
-  ("d" dumb-jump-hydra/body :exit t)
+  ("d" dap-hydra/body :exit t)
   ("f" hydra-flycheck/body :exit t)
+  ("l" hydra-lsp/body :exit t)
   ("n" notdeft-global-hydra/body :exit t)
   ("w" hydra-window/body :exit t)
   ("o" hydra-outline/body :exit t)
@@ -1429,6 +1417,46 @@ _t_:      select tab 											_R_ : redo
 	 (next-ix (mod (+ ix n-tabs -1) n-tabs)))
     ;; use 1-based index
     (tab-bar-move-tab-to (+ 1 next-ix))))
+
+
+(defhydra hydra-lsp (:exit t :hint nil)
+  "
+ ^Buffer^               ^ ^                     ^Server^          ^Lens^
+-------------------------------------------------------------------------------------
+ [_d_] describe        [_o_] definition        [_ws_] describe    [_ls_] show
+ [_a_] execute         [_e_] references        [_wS_] shutdown    [_lh_] hide
+ [_f_] format          [_t_] to-definition     [_wr_] restart     [_lt_] toggle
+ [_r_] rename          [_i_] to-implem         [_wa_] add         [_ll_] saveLogs
+                                               [_wm_] switch
+          ^ ^                                  [_wd_] remove
+"
+  ("," xref-find-definitions )
+  ("'" xref-pop-marker-stack)
+  ("." xref-find-references)
+  ("o" xref-find-definitions-other-window )
+  ("d" lsp-describe-thing-at-point)
+  ("a" lsp-execute-code-action)
+  ("f" lsp-format-buffer)
+  ("r" lsp-rename)
+  ;; ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+  ;; ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+  ("d" lsp-describe-thing-at-point)
+  ("wr" lsp-restart-workspace)
+  ("wS" lsp-shutdown-workspace)
+  ("wa" lsp-workspace-folders-add)
+  ("wd" lsp-workspace-folders-remove)
+  ("wm" lsp-workspace-folders-switch)
+  ("ws" lsp-describe-session)
+  ("o" lsp-find-definition)
+  ("e" lsp-find-references)
+  ("t" lsp-goto-type-definition)
+  ("i" lsp-goto-implementation)
+  ("ls" lsp-lens-show)
+  ("lh" lsp-lens-hide)
+  ("lt" lsp-lens-mode)
+  ("ll" lsp-save-logs)
+  ("q" nil :color blue)
+)
 #+end_src
 
 * on
@@ -1836,7 +1864,7 @@ Magit with cz
 (defun +rime-disable-predicate()
   (and (not (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
        (or (rime-predicate-prog-in-code-p) (rime-predicate-after-alphabet-char-p)
-	   (meow-normal-mode-p) (meow-motion-mode-p) (meow-keypad-mode-p))))
+	   (meow-normal-mode-p) (meow-motion-mode-p) (meow-keypad-mode-p) (meow-beacon-mode-p))))
 
 (use-package rime
   :straight (rime
@@ -1920,7 +1948,7 @@ Use Telega as Telegram client.
   :commands (telega)
   :defer t
   :custom
-  ;; (telega-symbol-reply "?")
+  (telega-symbol-reply "?")
   (telega-root-show-avatars nil)
   ;; (telega-user-show-avatars nil)
   ;; (telega-avatar-factors-alist '((1 . (0.8 . 0.1))
@@ -1939,17 +1967,6 @@ Use Telega as Telegram client.
 	      (lambda (msg &rest args)
 		(let ((ht (telega--tl-get msg :content :web_page :type)))
 		  (-contains? '("video" "photo") ht))))
-
-  ;; (add-hook 'telega-chat-mode-hook
-  ;;	    (lambda ()
-  ;;	      (set (make-local-variable 'company-backends)
-  ;;		   (append '(telega-company-emoji
-  ;;			     telega-company-username
-  ;;			     telega-company-hashtag)
-  ;;			   (when (telega-chat-bot-p telega-chatbuf--chat)
-  ;;			     '(telega-company-botcmd))))
-  ;;	      ;; (company-mode 1)
-  ;;	      ))
   (unbind-key (kbd "k") telega-msg-button-map)  ;; delete marked or at point (doubled with d)
   (unbind-key (kbd "e") telega-msg-button-map)  ;; msg-edit
   (define-key telega-msg-button-map (kbd "E") 'telega-msg-edit)
@@ -1965,21 +1982,17 @@ Use Telega as Telegram client.
       (start-process "telega-open-video" nil "/opt/local/bin/mpv" file))
      (t
       (find-file file))))
-  (setq telega-open-message-as-file '(photo video)
-	telega-open-file-function '+telega-open-file)
-  )
+  (setq telega-open-message-as-file '(photo video) telega-open-file-function '+telega-open-file))
 #+end_src
 
 * Directory environment support with direnv
 
 #+begin_src emacs-lisp
-  (straight-use-package 'direnv)
+(straight-use-package 'direnv)
 
-  (setq direnv-always-show-summary nil)
+(setq direnv-always-show-summary nil)
 
-;;  (define-key toggle-map "e" 'direnv-mode)
-
-  (autoload 'direnv-mode "direnv" nil t)
+(autoload 'direnv-mode "direnv" nil t)
 #+end_src
 
 * saveplace

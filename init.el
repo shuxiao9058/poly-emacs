@@ -35,7 +35,6 @@
 
 ;; straight package
 (poly-load-org-config "package")
-(poly-load-org-config "ui")
 (poly-load-org-config "keybindings")
 
 ;; Load configurations

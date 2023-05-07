@@ -86,111 +86,127 @@
 (bind-key (kbd "C-c f r" ) #'rename-visited-file)
 (bind-key (kbd "C-x C-b") #'ibuffer)
 (bind-key "<f9>"  #'hide-mode-line-mode)
+(bind-key [remap dabbrev-expand] #'hippie-expand)
 (unbind-key "C-z")
 (unbind-key "s-o")
 ;; (unbind-key "C-x C-q")
-
-(defun poly/recentf-open-files ()
-  "Open `recent-list' item in a new buffer.
-    The user's $HOME directory is abbreviated as a tilde."
-  (interactive)
-  (let* ((files (mapcar 'abbreviate-file-name recentf-list))
-	 (filter-files (cl-remove-if-not #'file-exists-p files)))
-    (find-file (completing-read "Find recent file: " filter-files nil t))))
 #+end_src
-
 
 * Meow
 
 This configuration sticks with Meow for modal editing.
 
-#+begin_src emacs-lisp
-(defun meow-setup ()
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  (meow-motion-overwrite-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  (meow-leader-define-key
-   ;; SPC j/k will run the original command in MOTION state.
-   '("j" . "H-j")
-   '("k" . "H-k")
-   ;; Use SPC (0-9) for digit arguments.
-   '("1" . meow-digit-argument)
-   '("2" . meow-digit-argument)
-   '("3" . meow-digit-argument)
-   '("4" . meow-digit-argument)
-   '("5" . meow-digit-argument)
-   '("6" . meow-digit-argument)
-   '("7" . meow-digit-argument)
-   '("8" . meow-digit-argument)
-   '("9" . meow-digit-argument)
-   '("0" . meow-digit-argument)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
-   '("-" . negative-argument)
-   '(";" . meow-reverse)
-   '("," . meow-inner-of-thing)
-   '("." . meow-bounds-of-thing)
-   '("[" . meow-beginning-of-thing)
-   '("]" . meow-end-of-thing)
-   '("a" . meow-append)
-   '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
-   '("c" . meow-change)
-   '("d" . meow-delete)
-   '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
-   '("f" . meow-find)
-   '("g" . meow-cancel-selection)
-   '("G" . meow-grab)
-   '("h" . meow-left)
-   '("H" . meow-left-expand)
-   '("i" . meow-insert)
-   '("I" . meow-open-above)
-   '("j" . meow-next)
-   '("J" . meow-next-expand)
-   '("k" . meow-prev)
-   '("K" . meow-prev-expand)
-   '("l" . meow-right)
-   '("L" . meow-right-expand)
-   '("m" . meow-join)
-   '("n" . meow-search)
-   '("o" . meow-block)
-   '("O" . meow-to-block)
-   '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . goto-line)
-   '("r" . meow-replace)
-   '("R" . meow-swap-grab)
-   '("s" . meow-kill)
-   '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("v" . meow-visit)
-   '("w" . meow-mark-word)
-   '("W" . meow-mark-symbol)
-   '("x" . meow-line)
-   '("X" . meow-goto-line)
-   '("y" . meow-save)
-   '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
-   '("'" . repeat)
-   '("<escape>" . ignore)))
+*** Normal
 
+#+TBLNAME: normal-keybindings
+| key | command                 |
+|-----+-------------------------|
+| 0   | meow-expand-0           |
+| 9   | meow-expand-9           |
+| 8   | meow-expand-8           |
+| 7   | meow-expand-7           |
+| 6   | meow-expand-6           |
+| 5   | meow-expand-5           |
+| 4   | meow-expand-4           |
+| 3   | meow-expand-3           |
+| 2   | meow-expand-2           |
+| 1   | meow-expand-1           |
+| -   | negative-argument       |
+| ;   | meow-reverse            |
+| ,   | meow-inner-of-thing     |
+| .   | meow-bounds-of-thing    |
+| [   | meow-beginning-of-thing |
+| ]   | meow-end-of-thing       |
+| a   | meow-append             |
+| A   | meow-open-below         |
+| b   | meow-back-word          |
+| B   | meow-back-symbol        |
+| c   | meow-change             |
+| d   | meow-delete             |
+| D   | meow-backward-delete    |
+| e   | meow-next-word          |
+| E   | meow-next-symbol        |
+| f   | meow-find               |
+| g   | meow-cancel-selection   |
+| G   | meow-grab               |
+| h   | meow-left               |
+| H   | meow-left-expand        |
+| i   | meow-insert             |
+| I   | meow-open-above         |
+| j   | meow-next               |
+| J   | meow-next-expand        |
+| k   | meow-prev               |
+| K   | meow-prev-expand        |
+| l   | meow-right              |
+| L   | meow-right-expand       |
+| m   | meow-join               |
+| n   | meow-search             |
+| o   | meow-block              |
+| O   | meow-to-block           |
+| p   | meow-yank               |
+| q   | meow-quit               |
+| Q   | goto-line               |
+| r   | meow-replace            |
+| R   | meow-swap-grab          |
+| s   | meow-kill               |
+| t   | meow-till               |
+| u   | meow-undo               |
+| U   | meow-undo-in-selection  |
+| v   | meow-visit              |
+| w   | meow-mark-word          |
+| W   | meow-mark-symbol        |
+| x   | meow-line               |
+| X   | meow-goto-line          |
+| y   | meow-save               |
+| Y   | meow-sync-grab          |
+| z   | meow-pop-selection      |
+| '   | repeat                  |
+| <escape>    | ignore                        |
+
+*** Motion
+
+#+TBLNAME: motion-keybindings
+| key | command   |
+|-----+-----------|
+| j   | meow-next |
+| k   | meow-prev |
+| <escape>    | ignore          |
+
+*** Leader
+
+#+TBLNAME: leader-keybindings
+| key | command                  | description |
+|-----+--------------------------+-------------|
+|   j | H-j                      |             |
+|   k | H-k                      |             |
+|   1 | meow-digit-argument      |             |
+|   2 | meow-digit-argument      |             |
+|   3 | meow-digit-argument      |             |
+|   4 | meow-digit-argument      |             |
+|   5 | meow-digit-argument      |             |
+|   6 | meow-digit-argument      |             |
+|   7 | meow-digit-argument      |             |
+|   8 | meow-digit-argument      |             |
+|   9 | meow-digit-argument      |             |
+|   0 | meow-digit-argument      |             |
+|   / | meow-keypad-describe-key |             |
+|   ? | meow-cheatsheet          |             |
+
+** Define keys
+#+header: :var normal-keybindings=normal-keybindings :var motion-keybindings=motion-keybindings :var leader-keybindings=leader-keybindings
+#+begin_src emacs-lisp
+  (defun meow-setup ()
+    (let ((parse-def (lambda (x)
+                       (cons (format "%s" (car x))
+                             (if (string-prefix-p "dispatch:" (cadr x))
+                                 (string-trim (substring (cadr x) 9))
+                               (intern (cadr x)))))))
+      (apply #'meow-normal-define-key (mapcar parse-def normal-keybindings))
+      (apply #'meow-motion-overwrite-define-key (mapcar parse-def motion-keybindings))
+      (apply #'meow-leader-define-key (mapcar parse-def leader-keybindings))))
+#+end_src
+
+#+begin_src emacs-lisp
 (use-package meow
   :straight t
   :demand t
@@ -295,9 +311,6 @@ This configuration sticks with Meow for modal editing.
   (meow-leader-define-key
    '( "e" . recentf-open)
    '("r" . recentf-open)
-   ;; ( "e" . poly/recentf-open-files)
-   ;; "e" . consult-recent-file)
-   ;; '("e" . my/icomplete-recentf)
    ;; '("." . find-file)
    '("." . poly/find-file)
    '("p" . projectile-command-map)
@@ -331,4 +344,14 @@ This configuration sticks with Meow for modal editing.
 	    (insert . "🅘")
 	    (motion . "🅜")
 	    (keypad . "🅚")))))
+#+end_src
+
+* toggle map
+
+#+begin_src emacs-lisp
+(define-prefix-command 'toggle-map)
+(global-set-key (kbd "\C-c t") 'toggle-map)
+(bind-key "t" #'my-toggle-transparency 'toggle-map)
+(bind-key "i" #'imenu-list 'toggle-map)
+(bind-key "m" #'smerge-mode 'toggle-map)
 #+end_src
