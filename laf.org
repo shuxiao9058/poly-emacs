@@ -226,23 +226,6 @@ Configuration for look and feels, make UI looks better.
   (when new-alpha (set-frame-parameter frame 'alpha `(,new-alpha ,new-alpha)))))))
 #+end_src
 
-** fix macOS switch desktop lose focus
-
- HACK On MacOS, disabling the menu bar makes MacOS treat Emacs as a  non-application window -- which means it doesn't automatically capture  focus when it is started, among other things, so enable the menu-bar for  GUI frames, but keep it disabled in terminal frames because there it  activates an ugly, in-frame menu bar.
-
- https://github.com/doomemacs/doomemacs/issues/2156
-
-#+begin_src emacs-lisp :tangle no
-(when IS-MAC
-  (defun doom-init-menu-bar-in-gui-frames-h (&optional frame)
-    "Re-enable menu-bar-lines in GUI frames."
-    (when-let (frame (or frame (selected-frame)))
-      (when (display-graphic-p frame)
-        (set-frame-parameter frame 'menu-bar-lines 1))))
-  (add-hook 'window-setup-hook #'doom-init-menu-bar-in-gui-frames-h)
-  (add-hook 'after-make-frame-functions #'doom-init-menu-bar-in-gui-frames-h))
-#+end_src
-
 * Font
 
 #+begin_src emacs-lisp
@@ -335,12 +318,13 @@ enable ligatures with emacs-mac, must install font first
 #+end_src
 
 * modeline
+** doom-modeline
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :straight (doom-modeline
-       :type git
-       :host github
-       :repo "seagle0128/doom-modeline")
+	     :type git
+	     :host github
+	     :repo "seagle0128/doom-modeline")
   ;; :pdump nil
   :custom
   ;; (doom-modeline-buffer-file-name-style 'truncate-with-project)
@@ -399,9 +383,31 @@ enable ligatures with emacs-mac, must install font first
   ;; (add-hook 'doom-modeline-mode-hook
   ;;      (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
   (add-hook 'doom-modeline-mode-hook
-      (lambda() (doom-modeline-set-modeline 'my-simple-line-v2 'default)))
+	    (lambda() (doom-modeline-set-modeline 'my-simple-line-v2 'default)))
   (doom-modeline-mode t))
 #+end_src
+
+** simple-modeline
+#+begin_src emacs-lisp :tangle no
+(use-package simple-modeline
+  :straight t
+  :disabled t
+  :hook (after-init . simple-modeline-mode)
+  :config
+  (setq simple-modeline-segments
+	'((simple-modeline-segment-input-method
+	   ;; simple-modeline-segment-modified
+	   simple-modeline-segment-buffer-name
+	   simple-modeline-segment-position)
+	  (;; simple-modeline-segment-minor-modes
+	   ;; simple-modeline-segment-eol
+	   ;; simple-modeline-segment-encoding
+	   simple-modeline-segment-vc
+	   ;; simple-modeline-segment-misc-info
+	   simple-modeline-segment-process
+	   simple-modeline-segment-major-mode))))
+#+end_src
+
 * treemacs
 #+begin_src emacs-lisp
 (use-package treemacs

@@ -17,9 +17,9 @@ Configuration for programming and languages support.
 	  sh-mode
 	  ;; prog-mode
 	  ;; lua-mode
-	  go-mode
-	  go-ts-mode
-	  go-mod-ts-mode
+	  ;; go-mode
+	  ;; go-ts-mode
+	  ;; go-mod-ts-mode
 	  python-mode
 	  python-ts-mode
 	  java-mode
@@ -208,7 +208,7 @@ Configuration for programming and languages support.
 
   (setq-default format-all-formatters
 		'(
-		  ("Go" gofumpt)
+		  ;; ("Go" gofumpt)
 		  ;; ("Go" goimports)
 		  ;; ("Lua" stylua)
 		  ("Java" my-clang-format)
@@ -742,8 +742,8 @@ Examples:
   ;; ;; Buffer local variable for storing number of lines.
   ;; (defvar lsp--log-lines)
   :config
-  (add-to-list 'lsp-disabled-clients '(emmy-lua))
-  (add-to-list 'lsp-enabled-clients '(lua-language-server
+  (setq lsp-disabled-clients '(emmy-lua))
+  (setq lsp-enabled-clients '(lua-language-server
 				      pyright gopls
 				      json-ls beancount-ls css-ls dockerfile-ls ts-ls
 				      html-ls nginx-ls bash-ls unified sqls yamlls xmlls taplo))
