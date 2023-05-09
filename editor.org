@@ -854,13 +854,13 @@ Visualizing Color Codes with rainbow-mode.
 
 (use-package all-the-icons-dired
   :straight t
-  :if (or (IS-GUI) (daemonp))
+  :if IS-GUI
   :after (all-the-icons dired)
   :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package all-the-icons-ibuffer
   :straight t
-  :if (or (IS-GUI) (daemonp))
+  :if IS-GUI
   :after (all-the-icons ibuffer)
   :config
   (all-the-icons-ibuffer-mode t))
@@ -1174,6 +1174,7 @@ do not already have one."
      ;; (sqlite . t)
      ;; (R . t)
      ))
+  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
   (setq org-plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar")
 
   (add-hook 'org-babel-after-execute-hook
@@ -2514,6 +2515,26 @@ mermaid.initialize({
   (require 'notdeft-global-hydra))
 #+end_src
 
+*** plantuml
+
+#+begin_src emacs-lisp
+(use-package plantuml-mode
+  :straight (:host github :repo "shuxiao9058/plantuml-mode"
+		   :branch "develop")
+  :ensure t
+  :config
+  ;; (setq plantuml-mode-debug-enabled t)
+  (setq plantuml-default-exec-mode 'server
+	;; plantuml-server-url "http://localhost:8080"
+	;; plantuml-server-url "https://www.plantuml.com/plantuml"
+        plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"
+	;; plantuml-jar-args '("-Djava.awt.headless=true" "-jar" "-charset" "UTF-8")
+	)
+  ;; (add-to-list 'plantuml-executable-args "-config")
+  ;; (add-to-list 'plantuml-executable-args "~/.config/plantuml/config.cfg")
+  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml)))
+#+end_src
+
 valign for org-mode & markdown table
 
 #+begin_src emacs-lisp :tangle no
@@ -2649,4 +2670,52 @@ valign for org-mode & markdown table
                                              (svg-tag-make tag :beg 1 :end -1 :radius 8))))))
   (svg-tag-mode)
   (global-svg-tag-mode))
+#+end_src
+
+** sudo
+
+#+begin_src emacs-lisp
+
+(defun poly--sudo-file-path (file)
+  (let ((host (or (file-remote-p file 'host) "localhost")))
+    (concat "/" (when (file-remote-p file)
+                  (concat (file-remote-p file 'method) ":"
+                          (if-let (user (file-remote-p file 'user))
+                              (concat user "@" host)
+                            host)
+                          "|"))
+            "sudo:root@" host
+            ":" (or (file-remote-p file 'localname)
+                    file))))
+
+(defun poly/sudo-find-file (file)
+  "Open FILE as root."
+  (interactive "FOpen file as root: ")
+  (find-file (poly--sudo-file-path file)))
+
+(defun poly/sudo-this-file ()
+  "Open the current file as root."
+  (interactive)
+  (find-file
+   (poly--sudo-file-path
+    (or buffer-file-name
+        (when (or (derived-mode-p 'dired-mode)
+                  (derived-mode-p 'wdired-mode))
+          default-directory)))))
+
+(defun poly/sudo-save-buffer ()
+  "Save this file as root."
+  (interactive)
+  (let ((file (poly--sudo-file-path buffer-file-name)))
+    (if-let (buffer (find-file-noselect file))
+        (let ((origin (current-buffer)))
+          (copy-to-buffer buffer (point-min) (point-max))
+          (unwind-protect
+              (with-current-buffer buffer
+                (save-buffer))
+            (unless (eq origin buffer)
+              (kill-buffer buffer))
+            (with-current-buffer origin
+              (revert-buffer t t))))
+      (user-error "Unable to open %S" file))))
 #+end_src

@@ -61,19 +61,19 @@ Configuration for look and feels, make UI looks better.
     (setq ns-use-thin-smoothing t
           ns-use-fullscreen-animation t
           ns-use-native-fullscreen t
-          ns-use-proxy-icon t
+          ns-use-proxy-icon nil
           ns-use-mwheel-momentum t
           ns-use-mwheel-acceleration t)
     ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
     ;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
     ))
 
-;; Sets `ns-transparent-titlebar' and `ns-appearance' frame parameters so window
-;; borders will match the enabled theme.
-(and (or (daemonp)
-         (display-graphic-p))
-     (require 'ns-auto-titlebar nil t)
-     (ns-auto-titlebar-mode +1))
+;; ;; Sets `ns-transparent-titlebar' and `ns-appearance' frame parameters so window
+;; ;; borders will match the enabled theme.
+;; (and (or (daemonp)
+;;          (display-graphic-p))
+;;      (require 'ns-auto-titlebar nil t)
+;;      (ns-auto-titlebar-mode +1))
 
 ;; sane trackpad/mouse scroll settings
 (setq mac-redisplay-dont-reset-vscroll t
@@ -312,12 +312,12 @@ Configuration for look and feels, make UI looks better.
     (setq face-font-rescale-alist (if (/= ratio 0.0) `((,CN-FONT-NAME . ,ratio)) nil))))
 
 
+	    (when IS-GUI
 (add-hook 'after-init-hook
 	  (lambda ()
-	    (when (IS-GUI)
 	      ;; (max/set-font "Monaco" "Sarasa Mono SC" 13 1.25)
-	      ;; (max/set-font "JetBrains Mono" "Hiragino Sans GB" 13 1.25)
-	      (max/set-font "Fira Code" "Source Han Serif SC" 13 1.3)
+	      (max/set-font "JetBrains Mono" "Hiragino Sans GB" 13 1.25)
+	      ;; (max/set-font "Fira Code" "Source Han Serif SC" 13 1.3)
               ;; (+load-font nil)
 	      )))
 
@@ -342,6 +342,44 @@ enable ligatures with emacs-mac, must install font first
   ;; of `mac-auto-operator-composition-characters' if the font
   ;; supports such a composition.
   (mac-auto-operator-composition-mode t))
+#+end_src
+
+#+begin_src emacs-lisp
+(let ((ligatures `((?-  . ,(regexp-opt '("-|" "-~" "---" "-<<" "-<" "--" "->" "->>" "-->")))
+                   (?/  . ,(regexp-opt '("/**" "/*" "///" "/=" "/==" "/>" "//")))
+                   (?*  . ,(regexp-opt '("*>" "***" "*/")))
+                   (?<  . ,(regexp-opt '("<-" "<<-" "<=>" "<=" "<|" "<||" "<|||::=" "<|>" "<:" "<>" "<-<"
+                                         "<<<" "<==" "<<=" "<=<" "<==>" "<-|" "<<" "<~>" "<=|" "<~~" "<~"
+                                         "<$>" "<$" "<+>" "<+" "</>" "</" "<*" "<*>" "<->" "<!--")))
+                   (?:  . ,(regexp-opt '(":>" ":<" ":::" "::" ":?" ":?>" ":=")))
+                   (?=  . ,(regexp-opt '("=>>" "==>" "=/=" "=!=" "=>" "===" "=:=" "==")))
+                   (?!  . ,(regexp-opt '("!==" "!!" "!=")))
+                   (?>  . ,(regexp-opt '(">]" ">:" ">>-" ">>=" ">=>" ">>>" ">-" ">=")))
+                   (?&  . ,(regexp-opt '("&&&" "&&")))
+                   (?|  . ,(regexp-opt '("|||>" "||>" "|>" "|]" "|}" "|=>" "|->" "|=" "||-" "|-" "||=" "||")))
+                   (?.  . ,(regexp-opt '(".." ".?" ".=" ".-" "..<" "...")))
+                   (?+  . ,(regexp-opt '("+++" "+>" "++")))
+                   (?\[ . ,(regexp-opt '("[||]" "[<" "[|")))
+                   (?\{ . ,(regexp-opt '("{|")))
+                   (?\? . ,(regexp-opt '("??" "?." "?=" "?:")))
+                   (?#  . ,(regexp-opt '("####" "###" "#[" "#{" "#=" "#!" "#:" "#_(" "#_" "#?" "#(" "##")))
+                   (?\; . ,(regexp-opt '(";;")))
+                   (?_  . ,(regexp-opt '("_|_" "__")))
+                   (?\\ . ,(regexp-opt '("\\" "\\/")))
+                   (?~  . ,(regexp-opt '("~~" "~~>" "~>" "~=" "~-" "~@")))
+                   (?$  . ,(regexp-opt '("$>")))
+                   (?^  . ,(regexp-opt '("^=")))
+                   (?\] . ,(regexp-opt '("]#"))))))
+  (dolist (char-regexp ligatures)
+    (set-char-table-range composition-function-table (car char-regexp)
+                          `([,(cdr char-regexp) 0 font-shape-gstring]))))
+
+(global-auto-composition-mode -1)
+
+(defun aa/enable-auto-composition ()
+  (auto-composition-mode))
+
+(add-hook 'prog-mode-hook #'aa/enable-auto-composition)
 #+end_src
 
 * modeline
@@ -667,4 +705,11 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
                            ("FIXME"  . "#caa000")))
   :config
   (global-hl-todo-mode t))
+#+end_src
+
+
+** compilation color
+
+#+begin_src emacs-lisp
+(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 #+end_src

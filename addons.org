@@ -1627,13 +1627,17 @@ To manage the git repository, use builtin package ~vc~.
   :hook (magit-mode . turn-on-magit-gitflow)
   )
 
-;; ;; Show TODOs in magit
-;; (use-package magit-todos
-;;     :straight t
-;;     :diminish
-;;     :after magit
-;;     :config
-;;     (magit-todos-mode))
+;; Show TODOs in magit
+(use-package magit-todos
+  :straight t
+  :disabled t
+  :diminish
+  :after magit
+  :init
+  (setq magit-todos-ignored-keywords '("NOTE" "DONE" "FAIL" "PROG")
+	magit-todos-exclude-globs '("legacies/*" "vendor/"))
+  :config
+  (magit-todos-mode))
 
 ;; git-gutter-plus - View, stage and revert Git changes from the buffer (inspired by package of same name from vim)
 (use-package git-gutter+
@@ -1785,7 +1789,6 @@ To manage the git repository, use builtin package ~vc~.
   (setq code-review-gitlab-graphql-host nil)
   ;; (setq code-review-gitlab-graphql-host "git.17usoft.com/api")
   )
-
 #+end_src
 
 ****  Git sign-off line
@@ -1853,16 +1856,25 @@ Magit with cz
   (or (equal rime--current-input-key ?`)
       (equal rime--current-input-key ?~)))
 
+
 (defun +rime-inline-predicate()
-  (and (not (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
-       (or (rime-predicate-space-after-cc-p)
-	   (+rime-predicate-is-back-quote-or-tilde)
-	   (rime-predicate-current-uppercase-letter-p))))
+  (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
 
 (defun +rime-disable-predicate()
-  (and (not (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
-       (or (rime-predicate-prog-in-code-p) (rime-predicate-after-alphabet-char-p)
-	   (meow-normal-mode-p) (meow-motion-mode-p) (meow-keypad-mode-p) (meow-beacon-mode-p))))
+  (and (not (eq major-mode 'plantuml-mode))
+       (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode))))
+
+(defun +rime-predicate-in-code-string ()
+  (and (not (eq major-mode 'plantuml-mode))
+       (or (rime-predicate-prog-in-code-p) (eq (plist-get (text-properties-at (point)) 'face) 'font-lock-string-face))))
+
+(defun +rime-predicate-org-syntax-punc-p ()
+  (when (eq major-mode 'org-mode)
+    (member rime--current-input-key '(91 93 42 126))))
+
+(defun +rime-predicate-md-syntax-punc-p ()
+  (when (eq major-mode 'markdown-mode)
+    (member rime--current-input-key '(91 93 96))))
 
 (use-package rime
   :straight (rime
@@ -1871,10 +1883,28 @@ Magit with cz
 	     :files (:defaults "lib.c" "Makefile"))
   :defer t
   :custom
-  ;; Disable input method in non-insert state.
-  (rime-disable-predicates '(+rime-disable-predicate))
+  (rime-disable-predicates '(;; +rime-disable-predicate
+			     meow-normal-mode-p
+			     meow-motion-mode-p
+			     meow-keypad-mode-p
+			     meow-beacon-mode-p
+			     rime-predicate-evil-mode-p
+			     rime-predicate-after-alphabet-char-p
+			     rime-predicate-punctuation-line-begin-p
+			     rime-predicate-punctuation-after-space-cc-p
+			     rime-predicate-punctuation-after-ascii-p
+			     rime-predicate-space-after-cc-p
+			     ;; rime-predicate-prog-in-code-p
+			     +rime-predicate-in-code-string
+			     +rime-predicate-org-syntax-punc-p
+                             +rime-predicate-md-syntax-punc-p
+			     ))
   ;; Auto switch to inline ascii state when after a space after a non-ascii character.
-  (rime-inline-predicates '(+rime-inline-predicate))
+  (rime-inline-predicates '(;; +rime-inline-predicate
+			    rime-predicate-space-after-cc-p
+                            rime-predicate-current-uppercase-letter-p
+			    +rime-predicate-is-back-quote-or-tilde
+                            +rime-predicate-md-syntax-punc-p))
   (rime-translate-keybindings '("C-f" "C-b" "C-n" "C-p" "C-g"))
   (default-input-method "rime")
   ;; (rime-cursor "˰")
@@ -1882,6 +1912,10 @@ Magit with cz
   (rime-librime-root "/opt/librime")
   (rime-emacs-module-header-root "/opt/local/include/emacs")
   (rime-show-preedit t)
+  (rime-inline-ascii-holder ?a)
+  (rime-cursor "|")
+  (window-min-height 1)
+  (rime-title " ㄓ")
   ;; (rime-show-candidate 'posframe)
   ;; (rime-show-candidate 'popup)
   (rime-show-candidate 'minibuffer)
@@ -4156,6 +4190,7 @@ org-download-paste for clipboard images
 
 Configuration for writing with Emacs, specifically for Markdown and Org mode.
 
+#+begin_src emacs-lisp
 ;; pdf-tools - Emacs support library for PDF files.
 ;; https://github.com/politza/pdf-tools
 ;; http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
@@ -4208,7 +4243,6 @@ Configuration for writing with Emacs, specifically for Markdown and Org mode.
   :after org
   :custom
   (org-analyzer-org-directory org-beorg-directory))
-
 
 ;; devonthink
 (use-package org-devonthink

@@ -17,7 +17,8 @@
 ;; Shut off message buffer.  To debug Emacs, comment these out so you can see
 ;; output from message function calls.
 (unless poly/debug
-  (setq message-log-max nil))
+  ;; (setq message-log-max nil)
+  )
 ;; Check if message buffer exists before killing (not doing so errors
 ;; eval-buffer of an init file).
 ;; (when (get-buffer "*Messages*")

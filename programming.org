@@ -46,6 +46,8 @@ Configuration for programming and languages support.
 	  nginx-mode
 	  cperl-mode
 	  clojure-mode
+	  web-mode
+	  web-mode-prog-mode
 	  ;;  objc-mode
 	  ;;  swift-mode
 	  ;;  typescript-mode
@@ -209,6 +211,8 @@ Configuration for programming and languages support.
 		    ;; c++-mode-hook
 		    ;; clang-mode-hook
 		    ;; objc-mode-hook
+		    web-mode-hook
+		    web-mode-prog-mode
 		    nginx-mode-hook
 		    emacs-lisp-mode-hook
 		    markdown-mode-hook
@@ -229,7 +233,7 @@ Configuration for programming and languages support.
 		  ("Protocol Buffer" my-clang-format)
 		  ("SQL" pgformatter)
 		  ;; ("CSS" prettier)
-		  ;; ("HTML" prettier)
+		  ("HTML" prettier)
 		  ;; ("Dockerfile" dockfmt)
 		  ;; ("Shell" my-shfmt)
 		  ;; ("Python" py-autopep8)
@@ -624,7 +628,7 @@ Examples:
 		   scala-mode js-mode js-ts-mode
 		   js2-mode typescript-mode typescript-ts-mode
 		   typescript-tsx-mode tsx-ts-mode
-		   html-ts-mode
+		   ;; html-ts-mode
 		   c-mode c++-mode clojure-mode cperl-mode
 		   shell-mode bash-mode markdown-mode sql-mode
 		   yaml-mode xml-mode nxml-mode
@@ -742,12 +746,22 @@ Examples:
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
-			      html-ls nginx-ls bash-ls unified sqls yamlls xmlls taplo))
+			      html-ls emmet-ls nginx-ls bash-ls unified sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\].git$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]internal$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.gocache$")
   (add-hook 'hack-local-variables-hook #'my/local-variables-hook)
+  (add-hook 'html-ts-mode-hook (lambda()
+				 (when
+		                     ;; auto emerge emmet-ls
+		                     (require 'emmet-ls nil t)
+				   ;; auto emerge lsp-html
+				   (require 'lsp-html nil t)
+				   ;; auto emerge css-ls
+				   (require 'css-ls nil t)
+				   (lsp-deferred))
+				 ))
   (lsp-register-custom-settings
    `(("gopls.usePlaceholders" t t)
      ("gopls.deepCompletion" t t)
@@ -793,15 +807,20 @@ Examples:
      ("gopls.directoryFilters" lsp-go-directory-filters)
      ;; ("gopls.directoryFilters" ["-vendor" "-internal" "-.gocache" "-.git" "-!out"])
      ("Lua.runtime.version" "LuaJIT" t)
-     ("Lua.workspace.checkThirdParty" nil t)
+     ("Lua.workspace.checkThirdParty" t t)
      ("Lua.completion.enable" t t)
      ("Lua.completion.callSnippet" "Both" t)
      ("Lua.format.enable" t t)
      ("Lua.hint.enable" t t)
      ("Lua.hint.hover" t t)
+     ("Lua.hint.paramType" t t)
+     ("Lua.hint.paramName" t t)
      ("Lua.hint.arrayIndex" "Auto" t)
-     ("Lua.format.defaultConfig.indent_style" "space" t)
-     ("Lua.format.defaultConfig.indent_size" "2" t)
+     ("Lua.develop" :json-false)
+     ("Lua.format.defaultConfig.indent_style" "space")
+     ("Lua.format.defaultConfig.indent_size" "2")
+     ("Lua.format.defaultConfig.continuation_indent_size" "2")
+     ("Lua.format.defaultConfig.quote_style" "single")
 
      ;; typescript
      ("typescript.format.baseIndentSize" 0)
@@ -816,7 +835,15 @@ Examples:
      ("javascript.format.indentStyle" "None")
      ("javascript.format.trimTrailingWhitespace" t)
      ("javascript.format.convertTabsToSpaces" t)
-     ("javascript.format.tabSize" 2)))
+     ("javascript.format.tabSize" 2)
+
+("html.suggest.html5" t)
+("html.autoClosingTags" t)
+("html.validate.scripts" t)
+("html.validate.styles" t)
+("html.format.wrapLineLength" 120)
+("html.format.enable" t)
+))
   :bind (:map lsp-mode-map
 	      ("C-c r" . lsp-rename)
 	      ("C-c a" . lsp-organize-imports)
@@ -928,19 +955,18 @@ Examples:
   :diminish yas-global-mode
   :commands yas-global-mode
   :hook (after-init . yas-global-mode)
-  ;; :hook ((typescript-mode . yas-minor-mode)
-  ;;        (sh-mode . yas-minor-mode)
-  ;;        (c-mode . yas-minor-mode)
-  ;;        (c++-mode . yas-minor-mode)
-  ;;        (go-mode . yas-minor-mode)
-  ;;        (json-mode . yas-minor-mode)
-  ;;        (yaml-mode . yas-minor-mode)
-  ;;        (web-mode . yas-minor-mode)
-  ;;        (js2-mode . yas-minor-mode)
-  ;; 	 (lua-mode . yas-minor-mode))
+  :hook ((typescript-mode . yas-minor-mode)
+         (sh-mode . yas-minor-mode)
+         (c-mode . yas-minor-mode)
+         (c++-mode . yas-minor-mode)
+         (go-ts-mode . yas-minor-mode)
+         (json-mode . yas-minor-mode)
+         (yaml-mode . yas-minor-mode)
+         (web-mode . yas-minor-mode)
+         (js2-mode . yas-minor-mode)
+	 (lua-mode . yas-minor-mode))
   :after (yasnippet-snippets)
   :config
-  ;; (message "config yasnippet")
   (yas-reload-all))
 
 (use-package java-snippets
@@ -950,6 +976,42 @@ Examples:
 
 (use-package javadoc-lookup
   :straight t)
+
+(use-package cape-yasnippet
+  :defer t
+  :after cape yasnippet
+  ;; :init
+  :straight (:host github :repo "elken/cape-yasnippet")
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-yasnippet)
+  :config
+  (defun cae-yas-setup-capf ()
+  (make-variable-buffer-local 'completion-at-point-functions)
+  (cl-pushnew 'cape-yasnippet
+              completion-at-point-functions
+              :test #'eq))
+;; ;;;###autoload
+;; (defun cae-corfu-enable-in-minibuffer-h ()
+;;   (unless (or (bound-and-true-p mct--active)
+;;               (bound-and-true-p vertico--input)
+;;               (cl-member (minibuffer-prompt)
+;;                          '("I-search: "
+;;                            "Query replace "
+;;                            "Align regexp"
+;;                            "Expansion for ")
+;;                          :test #'string-match-p)
+;;               (memq this-command '(evil-ex
+;;                                    evil-ex-search-forward
+;;                                    evil-ex-search-backward))
+;;               (and (featurep 'helm-core)
+;;                    (helm--alive-p))
+
+;;               (corfu-mode +1))))
+  (dolist (hook '(prog-mode-hook
+                  text-mode-hook
+                  lsp-mode-hook
+                  sly-mode-hook))
+    (add-hook hook #'cae-yas-setup-capf)))
 #+end_src
 
 * treesitter
@@ -1547,26 +1609,13 @@ Use clojure-mode for basic syntax support.
 
 (use-package web-mode
   :straight t
-  :disabled t
-  :hook
-  (web-mode . (lambda()
-		(if (string= (my/current-buffer-suffix) "vue")
-		    (setq web-mode-style-padding 0
-			  web-mode-script-padding 0))
-
-		;; 设置缩进级别
-		(setq web-mode-markup-indent-offset my/web-mode-offset)
-		(setq web-mode-css-indent-offset my/web-mode-offset)
-		(setq web-mode-code-indent-offset my/web-mode-offset)
-		(setq web-mode-attr-indent-offset my/web-mode-offset)))
   :mode (;; ("\\.js\\'" . web-mode)
 	 ;; ("\\.jsx\\'" . web-mode)
 	 ("\\.vue\\'" . web-mode)
 	 ("\\.jinja\\'" . web-mode)
 	 ;; ("\\.ts\\'" . web-mode)
 	 ;; ("\\.tsx\\'" . web-mode)
-	 ;; ("\\.html$" . web-mode)
-	 )
+	 ("\\.html$" . web-mode))
   :custom
   (web-mode-markup-indent-offset 2)
   (web-mode-css-indent-offset 2)
@@ -1577,10 +1626,19 @@ Use clojure-mode for basic syntax support.
   (web-mode-enable-auto-pairing t)
   (web-mode-enable-comment-keywords t)
   (web-mode-enable-current-element-highlight t)
-  ;; (js2-basic-offset my/web-mode-offset)
-  ;; (js-indent-level my/web-mode-offset)
-  ;; (company-tooltip-align-annotations t)
-  ;; (sgml-basic-offset my/web-mode-offset)
+  (js2-basic-offset 2)
+  (js-indent-level 2)
+  (sgml-basic-offset 2)
+  :config
+  (defun open-html-file ()
+    "Open current html file in default browser."
+    (interactive)
+    (shell-command-on-region
+     (point-min)
+     (point-max)
+     (concat "open " (buffer-file-name))
+     "*open*"))
+  ;; (global-set-key (kbd "C-c h") 'open-html-file)
   )
 #+end_src
 

@@ -14,25 +14,18 @@ Core configuration of poly emacs, global variable declare.
 (defconst IS-LINUX   (eq system-type 'gnu/linux))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 (defconst IS-BSD     (or IS-MAC (eq system-type 'berkeley-unix)))
-(defvar IS-GUI (display-graphic-p))
+(defconst IS-GUI (display-graphic-p))
 (defconst IS-CONSOLE (not IS-GUI))
 (defconst poly/emacs-pid (emacs-pid))
 (defconst poly/emacs-pid-str (number-to-string poly/emacs-pid))
+(defconst IS-AARCH64
+  (string-match-p "aarch64-apple-darwin.+" system-configuration)
+  "Whether apple arm chip")
 #+end_src
 
 ** Core function
 
 #+begin_src emacs-lisp
-(defun IS-GUI()
-  (display-graphic-p))
-
-(defun IS-AARCH64 ()
-  (string-match-p "aarch64-apple-darwin.+" system-configuration))
-
-(defconst IS-AARCH64
-  (if (IS-AARCH64) t nil)
-  "Whether apple arm chip")
-
  ;;; Directories/files
 (defconst poly-emacs-dir
   (eval-when-compile (file-truename user-emacs-directory))
@@ -123,6 +116,7 @@ Core configuration of poly emacs, global variable declare.
       x-select-enable-primary             t
       history-length 100000
       history-delete-duplicates t
+      xref-history-storage 'xref-window-local-history
       confirm-nonexistent-file-or-buffer nil
       large-file-warning-threshold 100000000
       resize-mini-windows t
@@ -363,19 +357,19 @@ Accepts the same arguments as `message'."
 ** ui
 #+begin_src emacs-lisp
 ;; ;;; Automatic Optimization
-;; (defvar gc-cons-threshold-original gc-cons-threshold)
+(defvar gc-cons-threshold-original gc-cons-threshold)
 ;; ;; (setq gc-cons-threshold-original gc-cons-threshold)
-;; (setq gc-cons-threshold (* 1024 1024 100))
-;; (setq file-name-handler-alist-original file-name-handler-alist)
-;; (setq inhibit-compacting-font-caches nil)
-;; (setq file-name-handler-alist nil)
-;; ;; (run-with-idle-timer 5 t #'garbage-collect)
-;; (run-with-idle-timer 5 nil
-;; 		     (lambda ()
-;; 		       (setq gc-cons-threshold gc-cons-threshold-original)
-;; 		       (setq file-name-handler-alist file-name-handler-alist-original)
-;; 		       (makunbound 'gc-cons-threshold-original)
-;; 		       (makunbound 'file-name-handler-alist-original)))
+(setq gc-cons-threshold (* 1024 1024 100))
+(setq file-name-handler-alist-original file-name-handler-alist)
+(setq inhibit-compacting-font-caches nil)
+(setq file-name-handler-alist nil)
+;; (run-with-idle-timer 5 t #'garbage-collect)
+(run-with-idle-timer 5 nil
+		     (lambda ()
+		       (setq gc-cons-threshold gc-cons-threshold-original)
+		       (setq file-name-handler-alist file-name-handler-alist-original)
+		       (makunbound 'gc-cons-threshold-original)
+		       (makunbound 'file-name-handler-alist-original)))
 
 ;; Package initialize occurs automatically, before `user-init-file' is
 ;; loaded, but after `early-init-file'. We handle package
