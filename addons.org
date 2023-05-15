@@ -1856,7 +1856,6 @@ Magit with cz
   (or (equal rime--current-input-key ?`)
       (equal rime--current-input-key ?~)))
 
-
 (defun +rime-inline-predicate()
   (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode)))
 

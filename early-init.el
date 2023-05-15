@@ -3,17 +3,6 @@
 (defvar poly/debug nil
   "debug flag")
 
-;; fix env issue
-(defun my-append-env-var (var-name value)
-  "Append VALUE to the beginning of current value of env variable VAR-NAME."
-  (setenv var-name (if (getenv var-name)
-                       (format "%s:%s" value (getenv var-name))
-                     value)))
-
-(let ((gccjitpath "/opt/local/lib/gcc11:/opt/local/lib/gcc12:/opt/local/lib/"))
-  (mapc (lambda (var-name) (my-append-env-var var-name gccjitpath))
-        '("LIBRARY_PATH" "LD_LIBRARY_PATH" "PATH")))
-
 ;; Shut off message buffer.  To debug Emacs, comment these out so you can see
 ;; output from message function calls.
 (unless poly/debug

@@ -1630,7 +1630,7 @@ do not already have one."
 #+end_src
 ** Write codes in org-mode
 #+begin_src emacs-lisp
-  (use-package org-src
+(use-package org-src
   :straight nil
   :ensure nil
   :after org
@@ -1645,10 +1645,15 @@ do not already have one."
   (org-src-window-setup 'current-window)
   (org-confirm-babel-evaluate nil)
   (org-edit-src-content-indentation 0)
-  (org-src-lang-modes '(("C"      . c)
-                        ("C++"    . c++)
-                        ("bash"   . sh)
-                        ("cpp"    . c++)
+  (org-src-lang-modes '(("C"      . c-ts)
+                        ("C++"    . c++-ts)
+                        ("bash"   . bash-ts)
+			("go"   . go-ts)
+			("json"   . json-ts)
+			("dockerfile"   . dockerfile-ts)
+			("plantuml"   . plantuml)
+			("uml"   . plantuml)
+                        ("cpp"    . c++-ts)
                         ("dot"    . graphviz-dot)
                         ("elisp"  . emacs-lisp)
                         ("ocaml"  . tuareg)
@@ -1715,7 +1720,9 @@ do not already have one."
   :hook (org-mode . (lambda()
 		      (require 'ox-taskjuggler)))
   :config
+(require 'ox-md nil t)
   (add-to-list 'org-export-backends 'taskjuggler)
+  (add-to-list 'org-export-backends 'md)
   ;; (require 'ox-taskjuggler)
   ;; (require 'ox-taskjuggler)
   ;; (require 'taskjuggler-mode)
@@ -2352,7 +2359,9 @@ Prefix arguments are interpreted by `org-refile'."
   :straight t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
+	 ("\\.mdx\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode)
+	 )
   :commands (markdown-mode gfm-mode)
   :hook ((markdown-mode . markdown-toggle-inline-images)
 	 ;; (markdown-mode . variable-pitch-mode)
@@ -2367,6 +2376,7 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-hide-urls t)
   (markdown-hide-markup nil)
   (markdown-header-scaling t)
+  (markdown-list-indent-width 2)
   ;; (markdown-nested-imenu-heading-index nil)
   (markdown-command "multimarkdown")
   (markdown-coding-system 'utf-8)
@@ -2378,9 +2388,10 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-fontify-code-block-default-mode t)
   (markdown-make-gfm-checkboxes-buttons t)
   (markdown-gfm-uppercase-checkbox t)
-  (markdown-gfm-additional-languages '("Mermaid" "sh" "Go" "Java" "Python"))
+  (markdown-gfm-additional-languages '("Mermaid" "plantuml" "sh" "Go" "Java" "Python"))
   (markdown-content-type "application/xhtml+xml")
   (markdown-xhtml-header-content "\n<meta name=\"viewport\" content=\"width=device-width\">")
+  (markdown-split-window-direction 'right)
   :config
   ;; HACK Due to jrblevin/markdown-mode#578, invoking `imenu' throws a
   ;;      'wrong-type-argument consp nil' error if you use native-comp.

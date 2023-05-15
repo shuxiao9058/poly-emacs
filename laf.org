@@ -398,11 +398,11 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-buffer-file-name-style 'truncate-all)
   (doom-modeline-project-detection 'projectile)
   (doom-modeline-modal-icon nil)
-  (doom-modeline-icon nil)
-  (doom-modeline-major-mode-icon nil)
-  (doom-modeline-buffer-state-icon nil)
-  (doom-modeline-buffer-modification-icon nil)
-  (doom-modeline-unicode-fallback t)
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-buffer-state-icon t)
+  (doom-modeline-buffer-modification-icon t)
+  (doom-modeline-unicode-fallback nil)
   (doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
   (doom-modeline-minor-modes t)
   (doom-modeline-major-mode-color-icon t)
@@ -432,7 +432,6 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-env-elixir-executable "iex")
   (doom-modeline-env-rust-executable "rustc")
   (doom-modeline-env-load-string "...")
-  :after (all-the-icons)
   :config
   (doom-modeline-def-modeline 'my-simple-line
     '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
@@ -619,6 +618,8 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
   :defer t
   :config
   (treemacs-load-theme "all-the-icons"))
+
+(use-package nerd-icons)
 
 (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
   :straight t

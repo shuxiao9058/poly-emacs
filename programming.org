@@ -746,7 +746,7 @@ Examples:
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
-			      html-ls emmet-ls nginx-ls bash-ls unified sqls yamlls xmlls taplo))
+			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\].git$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]internal$")
