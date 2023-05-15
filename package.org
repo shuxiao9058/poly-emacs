@@ -53,7 +53,7 @@
 ;; Emacs wants to load `package.el' before the init file,
 ;; so we do the same with `straight.el'
 (setq straight-base-dir poly-local-dir
-      straight-repository-branch "develop"
+      straight-repository-branch "master"
       straight-use-package-by-default t
       straight-cache-autoloads t ;; we already do this, and better.
       ;; Doom doesn't encourage you to modify packages in place. Disabling this
@@ -245,7 +245,7 @@
   :hook (after-init . recentf-mode)
   :custom
   (recentf-save-file (expand-file-name "recentf" poly-cache-dir))
-  (recentf-max-saved-items 300)
+  (recentf-max-saved-items 5000)
   ;; disable recentf-cleanup on Emacs start, because it can cause
   (recentf-auto-cleanup 'never)
   ;; `recentf-add-file' will apply handlers first, then call `string-prefix-p'
@@ -253,7 +253,7 @@
   (recentf-filename-handlers '(abbreviate-file-name))
   ;; ;; recentf-auto-cleanup 600
   ;; recentf-filename-handlers '(file-truename abbreviate-file-name)
-  (recentf-max-menu-items 60)
+  (recentf-max-menu-items 100)
   (recentf-auto-save-timer (run-with-idle-timer 600 t 'recentf-save-list))
   ;; exclude ** from recentfiles buffer
   (recentf-exclude `(;; ,@(cl-loop  for f in `(

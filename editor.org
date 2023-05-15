@@ -882,8 +882,9 @@ Visualizing Color Codes with rainbow-mode.
   (ob-async-no-async-languages-alist '("python" "jupyter-python" "julia" "jupyter-julia"))
   :bind (("C-c C-x r" . jupyter-repl-restart-kernel)
          ("C-c C-x h" . jupyter-org-restart-and-execute-to-point))
-  :config
-  (setq jupyter--debug t))
+  ;; :config
+  ;; (setq jupyter--debug t)
+  )
 
 (use-package ob-jupyter
   :defer t

@@ -433,13 +433,14 @@ enable ligatures with emacs-mac, must install font first
   (doom-modeline-env-rust-executable "rustc")
   (doom-modeline-env-load-string "...")
   :config
-  (doom-modeline-def-modeline 'my-simple-line
-    '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
-    '(objed-state misc-info persp-name mu4e lsp minor-modes indent-info buffer-encoding major-mode process vcs checker)
-    )
+  ;; (doom-modeline-def-modeline 'my-simple-line
+  ;;   '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
+  ;;   '(objed-state misc-info persp-name mu4e lsp minor-modes indent-info buffer-encoding major-mode process vcs checker)
+  ;;   )
 
   (doom-modeline-def-modeline 'my-simple-line-v2
-    '(modals input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
+    '(;; modals
+      input-method bar matches buffer-info-simple remote-host buffer-position parrot selection-info)
     '(;; objed-state
       misc-info
       persp-name
@@ -454,7 +455,7 @@ enable ligatures with emacs-mac, must install font first
   ;; (add-hook 'doom-modeline-mode-hook
   ;;      (lambda() (doom-modeline-set-modeline 'my-simple-line 'default)))
   (add-hook 'doom-modeline-mode-hook
-	    (lambda() (doom-modeline-set-modeline 'my-simple-line-v2 'default)))
+	    (lambda() (doom-modeline-set-modeline 'my-simple-line-v2)))
   (doom-modeline-mode t))
 #+END_SRC
 

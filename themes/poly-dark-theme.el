@@ -889,10 +889,6 @@ The theme has to be reloaded after changing anything in this group."
 (when (> (frame-pixel-width) 3000)
   (custom-set-faces '(corfu-default ((t (:height 1.3))))))
 
-;; (set-face-attribute 'mode-line nil :inherit 'mode-line)
-;; (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
-
-
 ;;;###autoload
 (when load-file-name
   (add-to-list 'custom-theme-load-path
