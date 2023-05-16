@@ -164,11 +164,17 @@
 	 (t (use-package-error ":pin-ref wants a commit hash or a ref."))))))
 
   (defun use-package-handler/:pin-ref (name-symbol _keyword ref rest state)
-    (let ((body (use-package-process-keywords name-symbol rest state)))
+    (let ((body (use-package-process-keywords name-symbol rest state))
+	  (name (symbol-name name-symbol)))
+      (setq straight-x-pinned-packages
+	    (cl-remove-if (lambda(x)
+			    (when x
+			      (equal (car x) name)))
+			  straight-x-pinned-packages))
       (if (null ref)
           body
 	`((let ((straight-current-profile 'pinned))
-            (push '(,(symbol-name name-symbol) . ,ref) straight-x-pinned-packages)
+            (push '(,name . ,ref) straight-x-pinned-packages)
             ,(macroexp-progn body)))))))
 #+end_src
 
