@@ -143,10 +143,11 @@
   (add-to-list 'straight-profiles '(pinned . "pinned.el"))
   (require 'straight-x)
 
-  (autoload #'straight-x-pull-all "straight-x")
-  (autoload #'straight-x-freeze-versions "straight-x")
-  (defalias 'straight-pull-all #'straight-x-pull-all)
-  (defalias 'straight-freeze-versions #'straight-x-freeze-versions))
+  ;; (autoload #'straight-x-pull-all "straight-x")
+  ;; (autoload #'straight-x-freeze-versions "straight-x")
+  ;; (defalias 'straight-pull-all #'straight-x-pull-all)
+  ;; (defalias 'straight-freeze-versions #'straight-x-freeze-versions)
+  )
 
 ;; Allow pinning versions from `use-package' using the `:pin-ref' keyword
 (with-eval-after-load 'use-package-core
@@ -161,21 +162,25 @@
 	(cond
 	 ((stringp arg) arg)
 	 ((symbolp arg) (symbol-name arg))
-	 (t (use-package-error ":pin-ref wants a commit hash or a ref."))))))
+	 (t (use-package-error ":pin-ref wants a commit hash or a ref"))))))
 
   (defun use-package-handler/:pin-ref (name-symbol _keyword ref rest state)
     (let ((body (use-package-process-keywords name-symbol rest state))
-	  (name (symbol-name name-symbol)))
-      (setq straight-x-pinned-packages
-	    (cl-remove-if (lambda(x)
-			    (when x
-			      (equal (car x) name)))
-			  straight-x-pinned-packages))
+	  (package (symbol-name name-symbol)))
       (if (null ref)
-          body
-	`((let ((straight-current-profile 'pinned))
-            (push '(,name . ,ref) straight-x-pinned-packages)
-            ,(macroexp-progn body)))))))
+	  body
+	(progn
+	  (setq straight-x-pinned-packages
+		(cl-remove-if (lambda(x)
+				(when x
+				  (equal (car x) package)))
+			      straight-x-pinned-packages))
+	  `((let ((straight-current-profile 'pinned))
+	      ;; (push '(,package . ,ref) straight-x-pinned-packages)
+	      (add-to-list 'straight-x-pinned-packages '(,package . ,ref))
+	      ,(macroexp-progn body)))
+	  ))))
+  )
 #+end_src
 
 ** deal with org issue
