@@ -463,7 +463,6 @@ enable ligatures with emacs-mac, must install font first
 #+begin_src emacs-lisp :tangle no
 (use-package simple-modeline
   :straight t
-  :disabled t
   :hook (after-init . simple-modeline-mode)
   :config
   (setq simple-modeline-segments

@@ -6,48 +6,6 @@
 
 * Package Configuration with straight
 
-** add :pdump tag
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'use-package-core
-  (when (and (boundp 'use-package-keywords)
-	     (listp use-package-keywords))
-    (setq use-package-keywords (remq :pdump use-package-keywords))
-    (add-to-list 'use-package-keywords :pdump t))
-  ;; default :pdump to t when poly-use-package-always-pdump is t and no :pdump attribute
-  (add-to-list 'use-package-defaults
-	       '(:pdump poly-use-package-always-pdump
-			(lambda (name args)
-			  (and poly-use-package-always-pdump
-			       (not (plist-member args :pdump)))))))
-
-(defun use-package-normalize/:pdump (name-symbol keyword args)
-  (use-package-only-one (symbol-name keyword) args
-    (lambda (label arg)
-      ;; (princ (type-of arg))
-      ;; (princ arg)
-      (cond
-       ((and (listp arg) (keywordp (car arg))) arg)
-       ((consp arg) arg)
-       ((symbolp arg) (symbol-name arg))
-       ((stringp arg) (unless (string= "nil" arg) arg))
-       (t
-	(use-package-error
-	 ":pdump wants a bool value"))))))
-
-(defun use-package-handler/:pdump (name _keyword arg rest state)
-  ;; (princ arg)
-  (let* ((enable-pdump (if (and (stringp arg) (string= "nil" arg)) nil t)))
-    (when enable-pdump
-      (poly-pdump-packages `,name))
-    ;; arg may contain extra packages
-    (when (consp arg)
-      (cl-loop for cell in arg
-	       do
-	       (when  (symbolp cell)
-		 (poly-pdump-packages cell))))))
-#+end_src
-
 ** setting default directory
 #+begin_src emacs-lisp
 ;; Emacs wants to load `package.el' before the init file,
@@ -76,11 +34,12 @@
       straight-enable-use-package-integration t
       straight-disable-native-compile t
 
-      ;; Tell straight.el about the profiles we are going to be using.
-      straight-profiles
-      '((nil . "default.el")
-	;; Packages which are pinned to a specific commit.
-	(pinned . "pinned.el"))
+      ;; ;; Tell straight.el about the profiles we are going to be using.
+      ;; straight-profiles
+      ;; '((nil . "default.el")
+      ;; 	;; Packages which are pinned to a specific commit.
+      ;; 	(pinned . "pinned.el"))
+
       ;; ;; Set package.el variables just in case to avoid polluting
       ;; ;; the root directory.
       ;; package-enable-at-startup nil
@@ -119,7 +78,6 @@
 	(load bootstrap-file nil 'nomessage))))
   (straight-use-package 'use-package))
 
-
 ;; Straight configs
 (setq straight-check-for-modifications '(check-on-save find-when-checking))
 (setq straight-vc-git-default-clone-depth 1)
@@ -134,15 +92,91 @@
 (add-to-list 'straight-built-in-pseudo-packages 'org)
 #+end_src
 
+
+** add :pdump tag
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'use-package-core
+  (when (and (boundp 'use-package-keywords)
+	     (listp use-package-keywords))
+    (setq use-package-keywords (remq :pdump use-package-keywords))
+    (add-to-list 'use-package-keywords :pdump t))
+  ;; default :pdump to t when poly-use-package-always-pdump is t and no :pdump attribute
+  (add-to-list 'use-package-defaults
+	       '(:pdump poly-use-package-always-pdump
+			(lambda (name args)
+			  (and poly-use-package-always-pdump
+			       (not (plist-member args :pdump)))))))
+
+(defun use-package-normalize/:pdump (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      ;; (princ (type-of arg))
+      ;; (princ arg)
+      (cond
+       ((and (listp arg) (keywordp (car arg))) arg)
+       ((consp arg) arg)
+       ((symbolp arg) (symbol-name arg))
+       ((stringp arg) (unless (string= "nil" arg) arg))
+       (t
+	(use-package-error
+	 ":pdump wants a bool value"))))))
+
+(defun use-package-handler/:pdump (name _keyword arg rest state)
+  (let* ((enable-pdump (if (and (stringp arg) (string= "nil" arg)) nil t)))
+    (when enable-pdump
+      (poly-pdump-packages `,name))
+    ;; arg may contain extra packages
+    (when (consp arg)
+      (cl-loop for cell in arg
+	       do
+	       (when  (symbolp cell)
+		 (poly-pdump-packages cell))))))
+#+end_src
+
+
+** add :pin tag
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'straight
+  ;; Add a profile (and lockfile) for stable package revisions.
+  (add-to-list 'straight-profiles '(pinned . "pinned.el"))
+  (require 'straight-x)
+
+  (autoload #'straight-x-pull-all "straight-x")
+  (autoload #'straight-x-freeze-versions "straight-x")
+  (defalias 'straight-pull-all #'straight-x-pull-all)
+  (defalias 'straight-freeze-versions #'straight-x-freeze-versions))
+
+;; Allow pinning versions from `use-package' using the `:pin-ref' keyword
+(with-eval-after-load 'use-package-core
+  (when (and (boundp 'use-package-keywords)
+	     (listp use-package-keywords))
+    (setq use-package-keywords (remq :pin-ref use-package-keywords))
+    (add-to-list 'use-package-keywords :pin-ref))
+
+  (defun use-package-normalize/:pin-ref (_name-symbol keyword args)
+    (use-package-only-one (symbol-name keyword) args
+      (lambda (_label arg)
+	(cond
+	 ((stringp arg) arg)
+	 ((symbolp arg) (symbol-name arg))
+	 (t (use-package-error ":pin-ref wants a commit hash or a ref."))))))
+
+  (defun use-package-handler/:pin-ref (name-symbol _keyword ref rest state)
+    (let ((body (use-package-process-keywords name-symbol rest state)))
+      (if (null ref)
+          body
+	`((let ((straight-current-profile 'pinned))
+            (push '(,(symbol-name name-symbol) . ,ref) straight-x-pinned-packages)
+            ,(macroexp-progn body)))))))
+#+end_src
+
 ** deal with org issue
 
 #+begin_src emacs-lisp
-(let ((straight-current-profile 'pinned))
-  (straight-use-package 'org)
-  (straight-use-package 'org-contrib)
-  ;; Pin org-mode version.
-  ;; (add-to-list 'straight-x-pinned-packages '("org" . "c9f5804f0964cb3a9aed1a0bd3e92ee3aaea444c"))
-  )
+(straight-use-package 'org)
+(straight-use-package 'org-contrib)
 #+end_src
 
 ** env
