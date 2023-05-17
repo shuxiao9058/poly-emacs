@@ -784,6 +784,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 (use-package tabnine
   :after (on)
+  ;; :disabled t
   :commands (tabnine-start-process)
   :hook (prog-mode . tabnine-mode)
   :straight (tabnine :package "tabnine"
@@ -817,6 +818,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("C-g" . tabnine-clear-overlay)
 	 ("C-n" . tabnine-next-completion)
 	 ("C-p" . tabnine-previous-completion)))
+
+(use-package copilot
+  :disabled t
+  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :ensure t
+:custom
+(copilot-network-proxy
+      '(:host "127.0.0.1" :port 7890))
+  :bind
+  (:map copilot-completion-map
+	("<tab>" . copilot-accept-completion)
+	("TAB" . copilot-accept-completion)))
 #+end_src
 
 *** corfu-quick
@@ -2245,10 +2258,11 @@ session
     (when-let* ((vterm-build-buffer (get-buffer vterm-install-buffer-name))
 		(buffer-str (with-current-buffer vterm-build-buffer (buffer-string))))
       (when (s-contains? "[100%] Built target vterm-module" buffer-str)
-	(run-at-time 3 nil (lambda(buf)
-			     (let ((win (get-buffer-window buf)))
-			       (kill-buffer buf)
-			       (delete-window win))) vterm-build-buffer))))
+	(let* ((buf vterm-build-buffer)
+	       (win (get-buffer-window buf)))
+	  (sit-for 0.8)
+	  (kill-buffer buf)
+	  (delete-window win)))))
   (advice-add #'vterm-module-compile :after #'poly/vterm-compile-auto-exit)
 
   (defun vterm-buffer-change ()
@@ -2261,11 +2275,11 @@ session
     (advice-add #'vterm-module-compile :override #'ignore)
     (provide 'vterm-module))
   :bind (:map vterm-mode-map
-	     ;; ("C-c t" . vterm-copy-mode)
+	      ;; ("C-c t" . vterm-copy-mode)
 	      ("C-x C-x" . ds/vterm-send-C-x)
 	      ;; :map vterm-copy-mode-map
 	      ;; ("C-c t" . 'vterm-copy-mode)
-        )
+              )
   :config
   (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq-local default-directory path))))
   (advice-add 'vterm-copy-mode-done :after
