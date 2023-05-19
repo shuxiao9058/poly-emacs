@@ -797,6 +797,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :custom
   (tabnine-wait 1)
   (tabnine-minimum-prefix-length 0)
+  (tabnine-network-proxy "http://127.0.0.1:7890")
   :init
   (setq tabnine-executable-args (list "--log-level" "Trace" "--no-lsp" "true"))
   (setq tabnine-log-file-path "/tmp/tabnine-emacs.log")
@@ -823,9 +824,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :disabled t
   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :ensure t
-:custom
-(copilot-network-proxy
-      '(:host "127.0.0.1" :port 7890))
+  :custom
+  (copilot-network-proxy
+   '(:host "127.0.0.1" :port 7890))
   :bind
   (:map copilot-completion-map
 	("<tab>" . copilot-accept-completion)
