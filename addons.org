@@ -535,46 +535,53 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default)
-  (kind-icon-use-icon t)
+  (kind-icon-use-icons nil)
   (kind-icon-blend-background nil)
-  (kind-icon-blend-frac 0.08)
+  ;; (kind-icon-blend-frac 0.08)
   (svg-lib-icons-dir (expand-file-name "svg-lib" poly-cache-dir))
   :config
+  (setq kind-icon-default-style '(:padding -0.5 :stroke 0 :margin 0 :radius 0 :height 0.6 :scale 1.0))
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
   (setq kind-icon-mapping
-	'((array "a" :icon "code-brackets" :face font-lock-type-face)
-	  (boolean "b" :icon "circle-half-full" :face font-lock-builtin-face)
-	  (class "c" :icon "view-grid-plus-outline" :face font-lock-type-face)
-	  (color "#" :icon "palette" :face success)
-	  (constant "co" :icon "lock-remove-outline" :face font-lock-constant-face)
-	  (constructor "cn" :icon "table-column-plus-after" :face font-lock-function-name-face)
-	  (enum-member "em" :icon "format-list-checks" :face font-lock-builtin-face)
-	  (enum "e" :icon "format-list-bulleted-square" :face font-lock-builtin-face)
-	  (event "ev" :icon "lightning-bolt-outline" :face font-lock-warning-face)
-	  (field "fd" :icon "application-braces-outline" :face font-lock-variable-name-face)
-	  (file "f" :icon "file-document-outline" :face font-lock-string-face)
-	  (folder "d" :icon "folder" :face font-lock-doc-face)
-	  (interface "if" :icon "application-brackets-outline" :face font-lock-type-face)
-	  (keyword "kw" :icon "key-variant" :face font-lock-keyword-face)
-	  (macro "mc" :icon "lambda" :face font-lock-keyword-face)
-	  (method "m" :icon "function-variant" :face font-lock-function-name-face)
-	  (function "f" :icon "function" :face font-lock-function-name-face)
-	  (module "{" :icon "file-code-outline" :face font-lock-preprocessor-face)
-	  (numeric "nu" :icon "numeric" :face font-lock-builtin-face)
-	  (operator "op" :icon "plus-minus" :face font-lock-comment-delimiter-face)
-	  (param "pa" :icon "cog" :face default)
-	  (property "pr" :icon "application-parentheses-outline" :face font-lock-variable-name-face)
-	  (reference "rf" :icon "variable-box" :face font-lock-variable-name-face)
-	  (snippet "S" :icon "note-text-outline" :face font-lock-string-face)
-	  (string "s" :icon "sticker-text-outline" :face font-lock-string-face)
-	  (struct "%" :icon "code-braces" :face font-lock-variable-name-face)
-	  (text "tx" :icon "script-text-outline" :face shadow)
-	  (type-parameter "tp" :icon "format-list-bulleted-type" :face font-lock-type-face)
-	  (unit "u" :icon "ruler-square" :face shadow)
-	  (value "v" :icon "plus-circle-outline" :face font-lock-builtin-face)
-	  (variable "va" :icon "variable" :face font-lock-variable-name-face)
-	  (tabnine "tn" :icon "cloud" :face tabnine-face) ;; tabnine
-	  (t "." :icon "crosshairs-question" :face shadow)))
+        `(
+          (array ,(nerd-icons-codicon "nf-cod-symbol_array") :face font-lock-type-face)
+          (boolean ,(nerd-icons-codicon "nf-cod-symbol_boolean") :face font-lock-builtin-face)
+          (class ,(nerd-icons-codicon "nf-cod-symbol_class") :face font-lock-type-face)
+          (color ,(nerd-icons-codicon "nf-cod-symbol_color") :face success)
+          (command ,(nerd-icons-codicon "nf-cod-terminal") :face default)
+          (constant ,(nerd-icons-codicon "nf-cod-symbol_constant") :face font-lock-constant-face)
+          (constructor ,(nerd-icons-codicon "nf-cod-symbol_method") :face font-lock-function-name-face)
+          (enummember ,(nerd-icons-codicon "nf-cod-symbol_enum_member") :face font-lock-builtin-face)
+          (enum-member ,(nerd-icons-codicon "nf-cod-symbol_enum_member") :face font-lock-builtin-face)
+          (enum ,(nerd-icons-codicon "nf-cod-symbol_enum") :face font-lock-builtin-face)
+          (event ,(nerd-icons-codicon "nf-cod-symbol_event") :face font-lock-warning-face)
+          (field ,(nerd-icons-codicon "nf-cod-symbol_field") :face font-lock-variable-name-face)
+          (file ,(nerd-icons-codicon "nf-cod-symbol_file") :face font-lock-string-face)
+          (folder ,(nerd-icons-codicon "nf-cod-folder") :face font-lock-doc-face)
+          (interface ,(nerd-icons-codicon "nf-cod-symbol_interface") :face font-lock-type-face)
+          (keyword ,(nerd-icons-codicon "nf-cod-symbol_keyword") :face font-lock-keyword-face)
+          (macro ,(nerd-icons-codicon "nf-cod-symbol_misc") :face font-lock-keyword-face)
+          (magic ,(nerd-icons-codicon "nf-cod-wand") :face font-lock-builtin-face)
+          (method ,(nerd-icons-codicon "nf-cod-symbol_method") :face font-lock-function-name-face)
+          (function ,(nerd-icons-codicon "nf-cod-symbol_method") :face font-lock-function-name-face)
+          (module ,(nerd-icons-codicon "nf-cod-file_submodule") :face font-lock-preprocessor-face)
+          (numeric ,(nerd-icons-codicon "nf-cod-symbol_numeric") :face font-lock-builtin-face)
+          (operator ,(nerd-icons-codicon "nf-cod-symbol_operator") :face font-lock-comment-delimiter-face)
+          (param ,(nerd-icons-codicon "nf-cod-symbol_parameter") :face default)
+          (property ,(nerd-icons-codicon "nf-cod-symbol_property") :face font-lock-variable-name-face)
+          (reference ,(nerd-icons-codicon "nf-cod-references") :face font-lock-variable-name-face)
+          (snippet ,(nerd-icons-codicon "nf-cod-symbol_snippet") :face font-lock-string-face)
+          (string ,(nerd-icons-codicon "nf-cod-symbol_string") :face font-lock-string-face)
+          (struct ,(nerd-icons-codicon "nf-cod-symbol_structure") :face font-lock-variable-name-face)
+          (text ,(nerd-icons-codicon "nf-cod-text_size") :face font-lock-doc-face)
+          (typeparameter ,(nerd-icons-codicon "nf-cod-list_unordered") :face font-lock-type-face)
+          (type-parameter ,(nerd-icons-codicon "nf-cod-list_unordered") :face font-lock-type-face)
+          (unit ,(nerd-icons-codicon "nf-cod-symbol_ruler") :face font-lock-constant-face)
+          (value ,(nerd-icons-codicon "nf-cod-symbol_field") :face font-lock-builtin-face)
+          (variable ,(nerd-icons-codicon "nf-cod-symbol_variable") :face font-lock-variable-name-face)
+	  (tabnine ,(nerd-icons-codicon "nf-cod-hubot") :face font-lock-warning-face)
+          (unknown ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face)
+          (t ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face)))
   )
 
 ;; A few more useful configurations...
@@ -781,10 +788,16 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 (use-package editorconfig
   :straight t)
+#+end_src
 
+
+*** tabnine & copilot
+
+**** tabnine
+
+#+begin_src emacs-lisp
 (use-package tabnine
   :after (on)
-  ;; :disabled t
   :commands (tabnine-start-process)
   :hook (prog-mode . tabnine-mode)
   :straight (tabnine :package "tabnine"
@@ -819,18 +832,27 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("C-g" . tabnine-clear-overlay)
 	 ("C-n" . tabnine-next-completion)
 	 ("C-p" . tabnine-previous-completion)))
+#+end_src
 
+
+**** copilot
+
+#+begin_src emacs-lisp :tangle no
 (use-package copilot
-  :disabled t
   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :ensure t
+  :hook (prog-mode . copilot-mode)
   :custom
   (copilot-network-proxy
    '(:host "127.0.0.1" :port 7890))
   :bind
+  (:map copilot-mode-map
+	("C-n" . copilot-next-completion)
+	("C-p" . copilot-previous-completion))
   (:map copilot-completion-map
 	("<tab>" . copilot-accept-completion)
 	("TAB" . copilot-accept-completion)))
+
 #+end_src
 
 *** corfu-quick
@@ -924,7 +946,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   ("u" straight-push-all)
   ("U" straight-push-package)
   ("v" straight-x-freeze-versions)
-  ("V" straight-thaw-versions)
+  ("V" straight-x-thaw-pinned-versions)
   ("w" straight-watcher-start)
   ("W" straight-watcher-quit)
   ("g" straight-get-recipe)
@@ -2228,6 +2250,7 @@ session
     :straight t
     :init
     (setq +wakatime-hide-filenames t)
+    (setq wakatime-ignore-exit-codes '(0 1 102))
     (when IS-MAC
       (setq wakatime-cli-path "/usr/local/bin/wakatime"))
     :hook ((org-mode . wakatime-mode)
@@ -4333,3 +4356,34 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 (define-key global-map "[" 'insert-pair-bracket)
 (define-key global-map "<" 'insert-pair-angle-bracket)
 #+end_src
+
+
+*** proxy
+
+#+begin_src emacs-lisp :tangle no
+(use-package proxy-mode
+  :ensure t
+  :custom ((proxy-mode-emacs-socks-proxy '("Default server" "127.0.0.1" 7891 5))
+           (proxy-mode-emacs-http-proxy
+            '(("http"  . "127.0.0.1:7890") ; Privoxy
+              ("https" . "127.0.0.1:7890")
+              ;; NOTE: don't use `localhost', avoid local server like robe no response
+              ;; ("no_proxy" . "127.0.0.1")
+              )))
+  :commands (proxy-mode))
+
+;;; [ use-proxy ] -- Easy way to enable/disable proxies in Emacs and Elisp.
+
+(use-package use-proxy
+  :ensure t
+  :commands (use-proxy-mode
+             use-proxy-toggle-proxies-global
+             use-proxy-toggle-proto-proxy
+             use-proxy-with-custom-proxies
+             use-proxy-with-specified-proxies)
+  :custom ((use-proxy-http-proxy "localhost:7890")
+           (use-proxy-https-proxy "localhost:7890")
+           (use-proxy-no-proxy (regexp-opt '("localhost" "baidu.com")))))
+#+end_src
+
+

@@ -216,6 +216,7 @@ This configuration sticks with Meow for modal editing.
   :init
   (meow-global-mode 1)
   :custom
+  (meow-use-clipboard t)
   (meow-use-cursor-position-hack t)
   (meow-expand-hint-remove-delay 3.0)
   :config
@@ -345,7 +346,12 @@ This configuration sticks with Meow for modal editing.
 	    (beacon . "🅑")
 	    (insert . "🅘")
 	    (motion . "🅜")
-	    (keypad . "🅚")))))
+	    (keypad . "🅚"))))
+
+  ;; meow-thing-register THING INNER BOUNDS
+  (meow-thing-register 'arrow '(pair ("<") (">")) '(pair ("<") (">")))
+  (add-to-list 'meow-char-thing-table '(?a . arrow))
+  )
 #+end_src
 
 * toggle map

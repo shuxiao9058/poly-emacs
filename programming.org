@@ -26,7 +26,7 @@ Configuration for programming and languages support.
 	  fish-mode
 	  sh-mode
 	  ;; prog-mode
-	  ;; lua-mode
+	  lua-mode
 	  ;; go-mode
 	  ;; go-ts-mode
 	  ;; go-mod-ts-mode
@@ -39,7 +39,7 @@ Configuration for programming and languages support.
 	  clang-mode
 	  elisp-mode
 	  emacs-lisp-mode
-	  markdown-mode
+	  ;; markdown-mode
 	  yaml-mode
 	  nix-mode
 	  protobuf-mode
@@ -79,12 +79,23 @@ Configuration for programming and languages support.
 	     (cl-return (cadr choice))))))
   :config
   (define-format-all-formatter cpp-lua-format
-			       (:executable "lua-format")
+			       (:executable)
 			       (:install (macos ""))
 			       (:languages "Lua")
 			       (:features)
-			       (:format (format-all--buffer-easy executable "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
+			       (:format (format-all--buffer-easy (expand-file-name "bin/darwin/lua-format" (poly/vscode-extension-install-path "koihik.vscode-lua-format"))
+								 "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
 
+  (define-format-all-formatter my-stylua
+			       (:executable "stylua")
+			       (:install "cargo install stylua")
+			       (:languages "Lua")
+			       (:features)
+			       (:format (format-all--buffer-easy executable
+								 "--config-path"
+								 (expand-file-name "~/.config/stylua/stylua.toml") "-")))
+
+  (defvar-local dot-clang-format nil)
   (define-format-all-formatter my-clang-format
 			       (:executable "clang-format")
 			       (:install
@@ -95,7 +106,9 @@ Configuration for programming and languages support.
 			       (:format
 				(format-all--buffer-easy
 				 executable
-				 (concat "-assume-filename="
+				 (when dot-clang-format
+				   (concat "--style=file:" dot-clang-format))
+				 (concat "--assume-filename="
 					 (or (buffer-file-name)
 					     (cdr (assoc language
 							 '(("C"               . ".c")
@@ -193,7 +206,6 @@ Configuration for programming and languages support.
 			       (:install (macos "pip install crossplane"))
 			       (:languages "Nginx")
 			       (:features)
-			       ;; (:modes nginx-mode)
 			       (:format (format-all--buffer-easy executable)))
 
   ;; lsp-format-buffer
@@ -224,7 +236,8 @@ Configuration for programming and languages support.
 		'(
 		  ;; ("Go" gofumpt)
 		  ;; ("Go" goimports)
-		  ;; ("Lua" stylua)
+		  ;; ("Lua" my-stylua)
+		  ("Lua" cpp-lua-format)
 		  ("Java" my-clang-format)
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
@@ -696,6 +709,7 @@ Examples:
   (lsp-clients-emmy-lua-jar-path (f-join (poly/vscode-extension-install-path "tangzx.emmylua") "server/EmmyLua-LS-all.jar"))
   (lsp-clients-emmy-lua-args '("com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))
   (lsp-clients-lua-language-server-install-dir (poly/vscode-extension-install-path "sumneko.lua"))
+  ;; (lsp-clients-lua-language-server-command (expand-file-name "server/bin/lua-language-server" lsp-clients-lua-language-server-install-dir))
   (lsp-clients-lua-language-server-bin (expand-file-name "server/bin/lua-language-server" lsp-clients-lua-language-server-install-dir))
   (lsp-clients-lua-language-server-args '("-E"))
   (lsp-clients-lua-language-server-main-location (expand-file-name "server/main.lua" lsp-clients-lua-language-server-install-dir))
@@ -816,11 +830,12 @@ Examples:
      ("Lua.hint.paramType" t t)
      ("Lua.hint.paramName" t t)
      ("Lua.hint.arrayIndex" "Auto" t)
-     ("Lua.develop" :json-false)
+     ("Lua.develop.enable" :json-false)
+     ("Lua.format.enable" t)
      ("Lua.format.defaultConfig.indent_style" "space")
      ("Lua.format.defaultConfig.indent_size" "2")
      ("Lua.format.defaultConfig.continuation_indent_size" "2")
-     ("Lua.format.defaultConfig.quote_style" "single")
+     ("Lua.format.defaultConfig.quote_style" "none")
 
      ;; typescript
      ("typescript.format.baseIndentSize" 0)
@@ -837,13 +852,13 @@ Examples:
      ("javascript.format.convertTabsToSpaces" t)
      ("javascript.format.tabSize" 2)
 
-("html.suggest.html5" t)
-("html.autoClosingTags" t)
-("html.validate.scripts" t)
-("html.validate.styles" t)
-("html.format.wrapLineLength" 120)
-("html.format.enable" t)
-))
+     ("html.suggest.html5" t)
+     ("html.autoClosingTags" t)
+     ("html.validate.scripts" t)
+     ("html.validate.styles" t)
+     ("html.format.wrapLineLength" 120)
+     ("html.format.enable" t)
+     ))
   :bind (:map lsp-mode-map
 	      ("C-c r" . lsp-rename)
 	      ("C-c a" . lsp-organize-imports)
@@ -1167,7 +1182,7 @@ Examples:
   (add-hook 'before-save-hook
 	    #'poly/lsp-format-buffer -10 t))
 
-(dolist (hook '(go-ts-mode-hook lua-mode-hook
+(dolist (hook '(go-ts-mode-hook ;; lua-mode-hook
 				typescript-ts-mode-hook javascript-ts-mode-hoo))
   (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
