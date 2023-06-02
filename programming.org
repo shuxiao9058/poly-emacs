@@ -1074,6 +1074,9 @@ Examples:
 	  (dockerfile-mode . dockerfile-ts-mode)
 	  (go-mode . go-ts-mode)
 	  (json-mode . json-ts-mode)
+	  (bash-mode . bash-ts-mode)
+	  (shell-mode . bash-ts-mode)
+	  (sh-mode . bash-ts-mode)
 	  ;; (lua-mode . lua-ts-mode)
 	  (json-mode . json-ts-mode)
 	  (css-mode . css-ts-mode)
@@ -1083,9 +1086,7 @@ Examples:
 	  (typescript-mode . typescript-ts-mode)
 	  (javascript-mode . js-ts-mode)
 	  (conf-toml-mode . toml-ts-mode)
-	  (yaml-mode . yaml-ts-mode)
-	  ;; (protobuf-mode . protobuf-ts-mode)
-	  ))
+	  (yaml-mode . yaml-ts-mode)))
   :config
   (add-to-list 'treesit-extra-load-path (expand-file-name "tree-sitter" user-emacs-directory))
   (defun poly/treesit-install-all-languages ()
@@ -1183,7 +1184,7 @@ Examples:
 	    #'poly/lsp-format-buffer -10 t))
 
 (dolist (hook '(go-ts-mode-hook ;; lua-mode-hook
-				typescript-ts-mode-hook javascript-ts-mode-hoo))
+		typescript-ts-mode-hook javascript-ts-mode-hoo))
   (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
 

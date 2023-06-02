@@ -89,6 +89,9 @@
 (bind-key "<f9>"  #'hide-mode-line-mode)
 (bind-key (kbd "s-j")  #'rime-force-enable)
 (bind-key [remap dabbrev-expand] #'hippie-expand)
+;; Change C-x C-b behavior so it uses bs; shows only interesting buffers.  The
+;; `a' key will toggle visibility of all.
+(bind-key (kbd "C-x C-b") #'bs-show)
 (unbind-key "C-z")
 (unbind-key "s-o")
 ;; (unbind-key "C-x C-q")

@@ -799,7 +799,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (use-package tabnine
   :after (on)
   :commands (tabnine-start-process)
-  :hook (prog-mode . tabnine-mode)
+  :hook ((prog-mode vterm-mode) . tabnine-mode)
   :straight (tabnine :package "tabnine"
 		     :type git
 		     :host nil
@@ -818,20 +818,25 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 (kill-emacs . tabnine-kill-process))
   :config
   (defun +tabnine-disable-predicate()
-    (or (derived-mode-p 'vterm-mode)
-	(meow-motion-mode-p)
-	(meow-normal-mode-p)))
+    (or ;; (derived-mode-p 'vterm-mode)
+     (meow-motion-mode-p)
+     (meow-normal-mode-p)))
   (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
   :bind
   (:map tabnine-mode-map
-	("C-TAB" . tabnine-accept-completion-by-word)
-	("C-<tab>" . tabnine-accept-completion-by-word)
+	;; ("C-TAB" . tabnine-accept-completion-by-word)
+	;; ("C-<tab>" . tabnine-accept-completion-by-word)
+	("M-f" . tabnine-accept-completion-by-word)
+        ("M-<return>" . tabnine-accept-completion-by-line)
 	("TAB" . tabnine-accept-completion)
 	("<tab>" . tabnine-accept-completion))
   (:map  tabnine-completion-map
 	 ("C-g" . tabnine-clear-overlay)
-	 ("C-n" . tabnine-next-completion)
-	 ("C-p" . tabnine-previous-completion)))
+	 ("M-[" . tabnine-previous-completion)
+	 ("M-]" . tabnine-next-completion)
+	 ;; ("C-n" . tabnine-next-completion)
+	 ;; ("C-p" . tabnine-previous-completion)
+	 ))
 #+end_src
 
 
@@ -851,7 +856,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	("C-p" . copilot-previous-completion))
   (:map copilot-completion-map
 	("<tab>" . copilot-accept-completion)
-	("TAB" . copilot-accept-completion)))
+	("TAB" . copilot-accept-completion))
+  )
 
 #+end_src
 
@@ -2330,6 +2336,7 @@ session
   ;;   (vterm-send-key "k" nil nil t))
   (add-hook 'vterm-mode-hook
 	    (lambda ()
+	      (setq-local buffer-read-only nil)
 	      (global-hl-line-mode 0)
 	      ;; (hide-mode-line-mode 0)
 	      (setq confirm-kill-processes nil)
