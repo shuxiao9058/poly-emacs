@@ -18,6 +18,41 @@ Bind some keys for quick operations.
 This is consulted on every `require', `load' and various path/io functions.  You get a minor speed up by nooping this.
 
 #+begin_src emacs-lisp
+;; A few more useful configurations...
+(use-package emacs
+  :custom
+  ;; Resize the compilation window so that it doesn't take up half the frame
+  (compilation-window-height 16)
+  ;;  Always scroll the compilation window
+  (compilation-scroll-output t)
+  :init
+  ;; If there were no errors, there's not much to look at in a compilation
+  ;; buffer, so make it go away in 2 seconds.
+  (setq compilation-finish-functions
+	(lambda (buf str)
+          (if (or (string-match "exited abnormally" str)
+                  (string-match (buffer-name buf) "*grep*"))
+              ;; There were errors.
+              (message "Compilation errors, press C-x ` to visit.")
+            ;; No errors; make the compilation window go away in 2 seconds.
+            (run-at-time 2 nil 'delete-windows-on buf)
+            (message "Build Succeeded."))))
+  ;; Follow the compilation buffer scroll instead of remaining at the top line.
+  (setq compilation-scroll-output t)
+  ;; (setq compilation-scroll-output 'first-error)
+  (setq auto-revert-check-vc-info t)
+  ;; TAB cycle if there are only few candidates
+  (setq completion-cycle-threshold 3)
+
+  ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
+  ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
+  ;; (setq read-extended-command-predicate
+  ;;       #'command-completion-default-include-p)
+
+  ;; Enable indentation+completion using the TAB key.
+  ;; `completion-at-point' is often bound to M-TAB.
+  (setq tab-always-indent 'complete))
+
 (setq auth-sources '("~/.authinfo.gpg")
       ;; auth-sources '("~/.authinfo")
       make-backup-files nil

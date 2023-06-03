@@ -483,30 +483,16 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (use-package corfu
   :straight (:files (:defaults "extensions/*")
 		    :includes (corfu-history))
-  :bind (:map corfu-map
-	      ;; ("TAB" . corfu-next)
-	      ;; ("C-n" . corfu-next)
-	      ;; ("<tab>" . corfu-next)
-	      ;; ("S-TAB" . corfu-previous)
-	      ;; ("C-p" . corfu-previous)
-	      ;; ("<backtab>" . corfu-previous)
-	      ("RET"     . corfu-insert)
-	      ("<return>"  . corfu-insert)
-	      ("<escape>" . corfu-quit)
-	      ;; ("ESC"    . corfu-reset)
-	      ;; ("SPC" . corfu-move-to-minibuffer)
-	      ;; ("<space>" . corfu-move-to-minibuffer)
-	      ;; ([remap completion-at-point] . corfu-next)
-	      )
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
   (corfu-count 10) ;; Max # of candidates to show
   (corfu-commit-predicate nil)
   (corfu-auto-delay 0.5)
-  (corfu-auto-prefix 2)
+  (corfu-auto-prefix 1)
   (corfu-quit-at-boundary nil)
-  (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-separator ?\s)          ;; Orderless field separator
+  (corfu-separator  ?_)
   ;; (corfu-preview-current t)
   (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
@@ -514,19 +500,36 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-preselect-first t)
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
-  (corfu-echo-documentation '(1.0 . 0.2))
+  ;; (corfu-echo-documentation '(1.0 . 0.2))
+  (corfu-echo-documentation nil) ;; use corfu doc
   (corfu-min-width 30)
   ;; (corfu-min-width 99)
   ;; hide scroll-bar
   (corfu-bar-width 0)
   ;; (corfu-right-margin-width 0)
   (corfu-scroll-margin 5)        ;; Use scroll margin
-  ;; :hook (after-init-hook . global-corfu-mode)
   :init
   (global-corfu-mode)
   :config
   (unbind-key (kbd "TAB") corfu-map)
-  (unbind-key (kbd "<tab>") corfu-map))
+  (unbind-key (kbd "<tab>") corfu-map)
+  :bind (:map corfu-map
+	      ;; ("TAB" . corfu-next)
+	      ("C-n" . corfu-next)
+	      ;; ("<tab>" . corfu-next)
+	      ;; ("S-TAB" . corfu-previous)
+	      ("C-p" . corfu-previous)
+	      ("C-SPC" . corfu-insert-separator)
+	      ("C-g"      . corfu-quit)
+	      ;; ("<backtab>" . corfu-previous)
+
+	      ("<escape>" . corfu-quit)
+	      ("<return>" . corfu-insert)
+	      ("RET"     . corfu-insert)
+	      ("ESC"    . corfu-reset)
+	      ;; ("SPC" . corfu-move-to-minibuffer)
+	      ;; ("<space>" . corfu-move-to-minibuffer)
+	      ([remap completion-at-point] . corfu-next)))
 
 ;; Icon support
 (use-package kind-icon
@@ -584,43 +587,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
           (t ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face)))
   )
 
-;; A few more useful configurations...
-(use-package emacs
-  :custom
-  ;; Resize the compilation window so that it doesn't take up half the frame
-  (compilation-window-height 16)
-  ;;  Always scroll the compilation window
-  (compilation-scroll-output t)
-  :init
-  ;; If there were no errors, there's not much to look at in a compilation
-  ;; buffer, so make it go away in 2 seconds.
-  (setq compilation-finish-functions
-	(lambda (buf str)
-          (if (or (string-match "exited abnormally" str)
-                  (string-match (buffer-name buf) "*grep*"))
-              ;; There were errors.
-              (message "Compilation errors, press C-x ` to visit.")
-            ;; No errors; make the compilation window go away in 2 seconds.
-            (run-at-time 2 nil 'delete-windows-on buf)
-            (message "Build Succeeded."))))
-  ;; Follow the compilation buffer scroll instead of remaining at the top line.
-  (setq compilation-scroll-output t)
-  ;; (setq compilation-scroll-output 'first-error)
-  (setq auto-revert-check-vc-info t)
-  ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
-
-  ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
-  ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
-  ;; (setq read-extended-command-predicate
-  ;;       #'command-completion-default-include-p)
-
-  ;; Enable indentation+completion using the TAB key.
-  ;; `completion-at-point' is often bound to M-TAB.
-  (setq tab-always-indent 'complete))
-
-
-    ;;; Emacs bookmarks
+;;; Emacs bookmarks
 ;; C-x r m: create new bookmark
 ;; C-x r b: navigate to bookmark
 ;; C-x r l: list bookmarks.
@@ -632,20 +599,19 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :after corfu
   :init (corfu-history-mode))
 
-
-;; https://github.com/50ways2sayhard/.emacs.d/blob/1158200665431cc336c868ad1f9ecb43c249fc31/elisp/init-complete.el
 (defun poly/convert-super-capf (arg-capf)
   (list
-   #'cape-file
    ;; #'cape-dabbrev
    ;; #'cape-keyword
-   ;; #'cape-symbol
+   ;; #'cape-ispell
    (cape-capf-buster
     (cape-super-capf
+     #'tabnine-completion-at-point
      arg-capf
-     ;; #'ebdb-complete-mail
      #'tempel-expand)
     'equal)
+   #'cape-symbol
+   #'cape-file
    ;; #'cape-dabbrev
    ))
 
@@ -667,7 +633,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		 ;; #'notmuch-capf
 		 ;; #'ebdb-mail-dwim-completion-at-point-function
 		 ;; #'ebdb-complete-mail
-		 ;; #'tabnine-completion-at-point
+		 #'tabnine-completion-at-point
 		 ;; #'tabnine-capf
 		 ;; arg-capf
 		 #'tempel-expand)
@@ -742,19 +708,26 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (let ((completion-extra-properties corfu--extra)
 	completion-cycle-threshold completion-cycling)
     (apply #'consult-completion-in-region completion-in-region--data)))
-(define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
+
+;; Use dabbrev with Corfu!
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand)))
 
 (use-package corfu-doc
   :ensure t
   :straight t
-  :disabled t
+  ;; :disabled t
   :config
-  ;;hook
-  (add-hook 'corfu-mode-hook #'corfu-doc-mode)
-  ;;bind
-  (define-key corfu-map (kbd "M-p") #'corfu-doc-scroll-down) ;; corfu-next
-  (define-key corfu-map (kbd "M-n") #'corfu-doc-scroll-up)  ;; corfu-previous
-  (define-key corfu-map (kbd "M-d") #'corfu-doc-toggle))
+  :hook
+  (corfu-mode-hook . corfu-doc-mode)
+  ;; :bind
+  ;; (:map corfu-map
+  ;; ("M-p" . corfu-doc-scroll-down)
+  ;; ("M-n" . corfu-doc-scroll-up)
+  ;; ( "M-d" . corfu-doc-toggle))
+  )
 
 ;; Configure Tempel
 (use-package tempel
@@ -807,13 +780,14 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		     ;; :host github :repo "shuxiao9058/tabnine"
 		     ;; :files ("*.el")
 		     )
+  :diminish "⌬"
   :custom
   (tabnine-wait 1)
   (tabnine-minimum-prefix-length 0)
   (tabnine-network-proxy "http://127.0.0.1:7890")
+  (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   :init
-  (setq tabnine-executable-args (list "--log-level" "Trace" "--no-lsp" "true"))
-  (setq tabnine-log-file-path "/tmp/tabnine-emacs.log")
+  (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
   :hook ((on-first-input . tabnine-start-process)
 	 (kill-emacs . tabnine-kill-process))
   :config
@@ -826,11 +800,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (:map tabnine-mode-map
 	;; ("C-TAB" . tabnine-accept-completion-by-word)
 	;; ("C-<tab>" . tabnine-accept-completion-by-word)
-	("M-f" . tabnine-accept-completion-by-word)
-        ("M-<return>" . tabnine-accept-completion-by-line)
 	("TAB" . tabnine-accept-completion)
 	("<tab>" . tabnine-accept-completion))
   (:map  tabnine-completion-map
+	 ("M-f" . tabnine-accept-completion-by-word)
+         ("M-<return>" . tabnine-accept-completion-by-line)
 	 ("C-g" . tabnine-clear-overlay)
 	 ("M-[" . tabnine-previous-completion)
 	 ("M-]" . tabnine-next-completion)
