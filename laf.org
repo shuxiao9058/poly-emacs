@@ -721,9 +721,17 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
   (hl-todo ((t (:inherit hl-todo :underline t))))
   :custom
   (hl-todo-keyword-faces '(("TODO"   . "#ff7060")
+			   ("DEBUG" . "#A020F0")
+			   ("STUB"   . "#1E90FF")
                            ("FIXME"  . "#caa000")))
   :config
-  (global-hl-todo-mode t))
+  (global-hl-todo-mode t)
+  :bind
+  (:map hl-todo-mode-map
+	("C-c p" . hl-todo-previous)
+	("C-c n" . hl-todo-next)
+	("C-c o" . hl-todo-occur)
+	("C-c i" . hl-todo-insert)))
 #+end_src
 
 

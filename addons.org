@@ -491,19 +491,19 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-auto-delay 0.5)
   (corfu-auto-prefix 1)
   (corfu-quit-at-boundary nil)
-  ;; (corfu-separator ?\s)          ;; Orderless field separator
-  (corfu-separator  ?_)
+  (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-separator  ?_)
   ;; (corfu-preview-current t)
   (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
-  (corfu-preselect-first t)
+  (corfu-preselect 'valid)
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
   ;; (corfu-echo-documentation '(1.0 . 0.2))
   (corfu-echo-documentation nil) ;; use corfu doc
-  (corfu-min-width 30)
-  ;; (corfu-min-width 99)
+  ;; (corfu-min-width 30)
+  (corfu-min-width 99)
   ;; hide scroll-bar
   (corfu-bar-width 0)
   ;; (corfu-right-margin-width 0)
@@ -610,7 +610,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      arg-capf
      #'tempel-expand)
     'equal)
-   #'cape-symbol
+   ;; #'cape-symbol
    #'cape-file
    ;; #'cape-dabbrev
    ))
@@ -712,13 +712,13 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;; Use dabbrev with Corfu!
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-completion)
-         ("C-M-/" . dabbrev-expand)))
+  ;; :bind (("M-/" . dabbrev-completion)
+  ;;        ("C-M-/" . dabbrev-expand))
+  )
 
 (use-package corfu-doc
   :ensure t
   :straight t
-  ;; :disabled t
   :config
   :hook
   (corfu-mode-hook . corfu-doc-mode)
@@ -782,7 +782,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		     )
   :diminish "⌬"
   :custom
-  (tabnine-wait 1)
+  (tabnine-wait 0.5)
   (tabnine-minimum-prefix-length 0)
   (tabnine-network-proxy "http://127.0.0.1:7890")
   (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
@@ -796,21 +796,22 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      (meow-motion-mode-p)
      (meow-normal-mode-p)))
   (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
-  :bind
-  (:map tabnine-mode-map
-	;; ("C-TAB" . tabnine-accept-completion-by-word)
-	;; ("C-<tab>" . tabnine-accept-completion-by-word)
-	("TAB" . tabnine-accept-completion)
-	("<tab>" . tabnine-accept-completion))
-  (:map  tabnine-completion-map
-	 ("M-f" . tabnine-accept-completion-by-word)
-         ("M-<return>" . tabnine-accept-completion-by-line)
-	 ("C-g" . tabnine-clear-overlay)
-	 ("M-[" . tabnine-previous-completion)
-	 ("M-]" . tabnine-next-completion)
-	 ;; ("C-n" . tabnine-next-completion)
-	 ;; ("C-p" . tabnine-previous-completion)
-	 ))
+  ;; :bind
+  ;; (:map tabnine-mode-map
+  ;; 	;; ("C-TAB" . tabnine-accept-completion-by-word)
+  ;; 	;; ("C-<tab>" . tabnine-accept-completion-by-word)
+  ;; 	("TAB" . tabnine-accept-completion)
+  ;; 	("<tab>" . tabnine-accept-completion))
+  ;; (:map  tabnine-completion-map
+  ;; 	 ("M-f" . tabnine-accept-completion-by-word)
+  ;;        ("M-<return>" . tabnine-accept-completion-by-line)
+  ;; 	 ("C-g" . tabnine-clear-overlay)
+  ;; 	 ("M-[" . tabnine-previous-completion)
+  ;; 	 ("M-]" . tabnine-next-completion)
+  ;; 	 ;; ("C-n" . tabnine-next-completion)
+  ;; 	 ;; ("C-p" . tabnine-previous-completion)
+  ;; 	 )
+  )
 #+end_src
 
 
