@@ -122,7 +122,18 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq ring-bell-function 'ignore)
 
-					; From Mastering Emacs
+
+;; Use normal tabs in makefiles
+(add-hook 'makefile-mode-hook 'indent-tabs-mode)
+
+;; Makefile
+(add-hook 'makefile-mode-hook
+          (lambda ()
+            (setq-local whitespace-style '(tab-mark))
+	    (indent-tabs-mode)
+            (whitespace-mode)))
+
+;; From Mastering Emacs
 ;; https://masteringemacs.org/article/working-coding-systems-unicode-emacs
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
@@ -911,31 +922,6 @@ Visualizing Color Codes with rainbow-mode.
   ;; (set-face-attribute 'hl-paren-face nil :weight 'bold)
   ;; (custom-set-faces '(show-paren-match ((t (:foreground "SpringGreen1" :underline t)))))
   )
-#+end_src
-
-* icon
-
-#+begin_src emacs-lisp
-(use-package all-the-icons
-  :straight t
-  :if IS-GUI
-  ;; :if (or IS-GUI (daemonp))
-  ;; :init
-  ;; (setq all-the-icons-scale-factor 0.8)
-  )
-
-(use-package all-the-icons-dired
-  :straight t
-  :if IS-GUI
-  :after (all-the-icons dired)
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package all-the-icons-ibuffer
-  :straight t
-  :if IS-GUI
-  :after (all-the-icons ibuffer)
-  :config
-  (all-the-icons-ibuffer-mode t))
 #+end_src
 
 * python

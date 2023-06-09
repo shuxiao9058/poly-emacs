@@ -388,20 +388,25 @@
 ;; trying another undo package
 ;; https://gitlab.com/ideasman42/emacs-undo-fu
 (use-package undo-fu
-  :straight (undo-fu
-	     :host gitlab
-	     :repo "ideasman42/emacs-undo-fu"
-	     :files ("undo-fu.el"))
+  ;; :straight (undo-fu
+  ;; 	     :host gitlab
+  ;; 	     :repo "ideasman42/emacs-undo-fu"
+  ;; 	     :files ("undo-fu.el"))
   :ensure t
   :demand t
   :custom
   ;; Store more undo history to prevent loss of data
   (undo-limit 400000)
   (undo-strong-limit 3000000)
-  (undo-outer-limit 3000000))
+  (undo-outer-limit 3000000)
+  :init
+  (global-unset-key (kbd "C-z"))
+  (global-set-key (kbd "C-z")   'undo-fu-only-undo)
+  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
 
 ;; persistent undo across sessions
 (use-package undo-fu-session
+  :disabled t
   :straight t
   :after undo-fu
   :demand t

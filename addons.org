@@ -195,18 +195,6 @@ Configuration for addons, additional features provided by individual packages.
 		    (apply orig-fun args)))))
 #+end_src
 
-** all-the-icons-completion
-
-#+begin_src emacs-lisp
-(use-package all-the-icons-completion
-  :straight t
-  :after marginalia
-  :commands all-the-icons-completion-marginalia-setup
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init
-  (all-the-icons-completion-mode))
-#+end_src
-
 ** Orderless
 
 This is a completion style, it's a back-end for completion and is used by a  front-end that provides a completion UI.
@@ -491,9 +479,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-auto-delay 0.5)
   (corfu-auto-prefix 1)
   (corfu-quit-at-boundary nil)
-  (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-separator  ?_)
-  ;; (corfu-preview-current t)
+  ;; (corfu-separator ?\s)          ;; Orderless field separator
+  (corfu-separator  ?_)
   (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
@@ -502,8 +489,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
   ;; (corfu-echo-documentation '(1.0 . 0.2))
   (corfu-echo-documentation nil) ;; use corfu doc
-  ;; (corfu-min-width 30)
-  (corfu-min-width 99)
+  (corfu-min-width 30)
+  ;; (corfu-min-width 99)
   ;; hide scroll-bar
   (corfu-bar-width 0)
   ;; (corfu-right-margin-width 0)
@@ -682,6 +669,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (add-to-list 'completion-at-point-functions #'cape-line)
   :hook ((prog-mode . poly/set-basic-capf)
 	 (org-mode . poly/set-basic-capf)
+	 (text-mode . poly/set-basic-capf)
 	 (emacs-lisp-mode . (lambda ()
 			      (poly/convert-super-capf #'elisp-completion-at-point)))
 	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
@@ -772,7 +760,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (use-package tabnine
   :after (on)
   :commands (tabnine-start-process)
-  :hook ((prog-mode vterm-mode) . tabnine-mode)
+  :hook ((prog-mode text-mode vterm-mode) . tabnine-mode)
   :straight (tabnine :package "tabnine"
 		     :type git
 		     :host nil
@@ -784,8 +772,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :custom
   (tabnine-wait 0.5)
   (tabnine-minimum-prefix-length 0)
-  (tabnine-network-proxy "http://127.0.0.1:7890")
-  (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
+  ;; (tabnine-network-proxy "http://127.0.0.1:7890")
+  ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
   :hook ((on-first-input . tabnine-start-process)
@@ -4369,3 +4357,19 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 #+end_src
 
 
+*** zeal
+
+#+begin_src emacs-lisp :tangle no
+(use-package zeal-at-point
+  :straight (zeal-at-point :host github
+                           :repo "jinzhu/zeal-at-point"
+                           :branch "master")
+  :bind
+  ("\C-cd" . 'zeal-at-point)
+  ("\C-cz" . 'zeal-at-point)
+  :config
+  (setq zeal-at-point-zeal-version "0.6.1")
+  (add-to-list 'zeal-at-point-mode-alist '(go-mode . "go"))
+  (add-to-list 'zeal-at-point-mode-alist '(rustic-mode . "rust"))
+  (add-to-list 'zeal-at-point-mode-alist '(gitlab-ci-mode . "gitlab-ci")))
+#+end_src

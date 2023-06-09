@@ -28,8 +28,8 @@ Configuration for programming and languages support.
 	  ;; prog-mode
 	  lua-mode
 	  ;; go-mode
-	  ;; go-ts-mode
-	  ;; go-mod-ts-mode
+	  go-ts-mode
+	  go-mod-ts-mode
 	  python-mode
 	  python-ts-mode
 	  java-mode
@@ -234,7 +234,7 @@ Configuration for programming and languages support.
 
   (setq-default format-all-formatters
 		'(
-		  ;; ("Go" gofumpt)
+		  ("Go" gofumpt)
 		  ;; ("Go" goimports)
 		  ;; ("Lua" my-stylua)
 		  ("Lua" cpp-lua-format)
@@ -1183,7 +1183,8 @@ Examples:
   (add-hook 'before-save-hook
 	    #'poly/lsp-format-buffer -10 t))
 
-(dolist (hook '(go-ts-mode-hook ;; lua-mode-hook
+(dolist (hook '(;; go-ts-mode-hook
+		;; lua-mode-hook
 		typescript-ts-mode-hook javascript-ts-mode-hoo))
   (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
