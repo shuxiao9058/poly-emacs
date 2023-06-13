@@ -2349,17 +2349,20 @@ session
 
     Returns the vterm buffer."
     (interactive "P")
-    (let* ((project-root (or default-directory))
-	   (dir
-	    (if arg
-		default-directory
-	      project-root))
-	   (result (poly/vterm-buffer dir))
-	   (cd-cmd (concat "cd " dir))
-	   (curr-buffer (current-buffer))
-	   (vterm-buffer)
-	   (vterm-win)
-	   (vterm-pwd))
+    (let* ( (project-root  (if (fboundp 'project-root)
+			       (project-root (project-current))
+			     default-directory))
+	    ;; (project-root (or default-directory))
+	    (dir
+	     (if arg
+		 default-directory
+	       project-root))
+	    (result (poly/vterm-buffer dir))
+	    (cd-cmd (concat "cd " dir))
+	    (curr-buffer (current-buffer))
+	    (vterm-buffer)
+	    (vterm-win)
+	    (vterm-pwd))
       (when result
 	(setq vterm-buffer (car result))
 	(setq vterm-pwd (car (cdr result))))
@@ -2393,9 +2396,10 @@ session
     (interactive)
     (if (derived-mode-p 'vterm-mode)
 	(vterm-toggle)
-      (let ((current-prefix-arg '-))
-	(call-interactively '+vterm/here))))
-
+      (call-interactively #'+vterm/here)
+      ;; (let ((current-prefix-arg '-))
+      ;; 	(call-interactively '+vterm/here))
+      ))
   )
 
 (use-package meow-vterm
