@@ -28,8 +28,8 @@ Configuration for programming and languages support.
 	  ;; prog-mode
 	  lua-mode
 	  ;; go-mode
-	  go-ts-mode
-	  go-mod-ts-mode
+	  ;; go-ts-mode
+	  ;; go-mod-ts-mode
 	  python-mode
 	  python-ts-mode
 	  java-mode
@@ -120,6 +120,20 @@ Configuration for programming and languages support.
 							   ("Objective-C" . ".m")
 							   ("Objective-C" . ".mm")
 							   ("Protocol Buffer" . ".proto")))))))))
+
+
+  (define-format-all-formatter buf-format
+			       (:executable "buf")
+			       (:install
+				(macos ""))
+			       (:languages "Protocol Buffer")
+			       (:features)
+			       (:format
+				(format-all--buffer-easy
+				 executable
+				 "format"
+				 (when (buffer-file-name)
+				   (buffer-file-name)))))
 
   (define-format-all-formatter goimports-gofmt
 			       (:executable "/bin/sh")
@@ -244,6 +258,7 @@ Configuration for programming and languages support.
 		  ("C++" my-clang-format)
 		  ;; ("Objective-C" my-clang-format)
 		  ("Protocol Buffer" my-clang-format)
+		  ;; ("Protocol Buffer" buf-format)
 		  ("SQL" pgformatter)
 		  ;; ("CSS" prettier)
 		  ("HTML" prettier)
@@ -624,8 +639,6 @@ Examples:
 			'cperl-mode
 			'go-dot-mod-mode
 			'perl-mode)
-    ;; ;; https://github.com/golang/tools/commit/b2d8b0336
-    ;; (setq-local lsp-completion-filter-on-incomplete nil)
     (lsp-deferred)))
 
 (use-package lsp-mode
@@ -645,6 +658,7 @@ Examples:
 		   c-mode c++-mode clojure-mode cperl-mode
 		   shell-mode bash-mode markdown-mode sql-mode
 		   yaml-mode yaml-ts-mode xml-mode nxml-mode
+		   protobuf-mode
 		   ) . lsp-deferred)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :custom
@@ -678,19 +692,17 @@ Examples:
   (lsp-completion-enable-additional-text-edit nil)
   (lsp-response-timeout 5)
   (lsp-tcp-connection-timeout 2)
-  (lsp-enable-folding nil)             ;; use `evil-matchit' instead
-  ;; (lsp-diagnostic-package :none)   ;; prefer flycheck disable
-  (lsp-diagnostic-package :flycheck)   ;; prefer flycheck disable
-  (lsp-modeline-diagnostics-enable nil)
-  (lsp-diagnostics-disabled-modes '(js-mode go-mode))
+  (lsp-enable-folding t)
+  (lsp-diagnostic-package :flycheck)
+  (lsp-modeline-diagnostics-enable t)
+  (lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode js-mode go-mode go-ts-mode protobuf-mode))
   (lsp-flycheck-live-reporting nil)    ;; obey `flycheck-check-syntax-automatically'
-  (lsp-completion-provider :none)    ;; set company-backends manually
+  (lsp-completion-provider :none)
   (lsp-enable-file-watchers nil)       ;; turn off for better performance
   ;; (lsp-file-watch-threshold 10000)
   (lsp-enable-text-document-color nil) ;; as above
   (lsp-enable-symbol-highlighting nil) ;; as above
   (lsp-enable-on-type-formatting nil)  ;; disable formatting on the fly
-  (lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode))
   (lsp-before-save-edits nil)
   (lsp-auto-guess-root t)              ;; auto guess root
   (lsp-keep-workspace-alive nil)       ;; auto kill lsp server
@@ -700,9 +712,8 @@ Examples:
   (lsp-eldoc-render-all nil)
   (lsp-enable-snippet t)
   (lsp-enable-imenu t)
-  (lsp-enable-links nil) ;;
+  (lsp-enable-links t)
   (lsp-lens-enable t)
-  (lsp-prefer-flymake t) ;; Use lsp-ui and flycheck
   (lsp-imenu-container-name-separator "⦿")
   (lsp-imenu-show-container-name t)
   (lsp-clients-emmy-lua-java-path "/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java")
@@ -755,9 +766,22 @@ Examples:
   (lsp-beancount-langserver-executable (expand-file-name "workspace/beancount-language-server/target/release/beancount-language-server" "~"))
   (lsp-beancount-journal-file (expand-file-name ".emacs.d/.local/beancount/beancount.beancount" "~"))
   :config
+  (defun my-flycheck-lsp-advice (orig &rest args)
+    "Ensure user-defined `flycheck-checker' isn't overwritten by `lsp'."
+    (if flycheck-checker
+        (progn
+	  (let ((old-checker flycheck-checker))
+          (apply orig args)
+          (setq-local flycheck-checker old-checker)))
+      (apply orig args))
+    (apply orig args))
+
+  (advice-add 'lsp-diagnostics-flycheck-enable :around #'my-flycheck-lsp-advice)
+
   (setq lsp-disabled-clients '(emmy-lua))
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
+			      protobuf-pls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
@@ -958,6 +982,12 @@ Examples:
           ;; ([remap xref-go-back]          . lsp-ui-peek-jump-backward)
           ;; ([remap xref-go-forward]       . lsp-ui-peek-jump-forward)
 	  )))
+
+(use-package lsp-protobuf
+  :straight (lsp-protobuf :package "lsp-protobuf"
+			  :type git
+			  :host nil
+			  :repo "ssh://git@h.jiya.net:9922/shuxiao9058/lsp-protobuf.git"))
 #+end_src
 
 ** yas parameter complete in place required
@@ -1248,7 +1278,6 @@ Examples:
   :ensure t
   :hook (c++-mode . modern-c++-font-lock-mode))
 
-
 (use-package cmake-mode
   :straight t
   :ensure t
@@ -1317,36 +1346,21 @@ Examples:
 
 ;; Install: See https://github.com/golangci/golangci-lint#install
 (use-package flycheck-golangci-lint
-  :straight t
   :after (flycheck)
-  ;; :hook (go-mode . flycheck-golangci-lint-setup)
-  :hook ((go-mode go-ts-mode) . (lambda ()
-				  "Enable golangci-lint."
-				  (setq flycheck-disabled-checkers '(go-gofmt
-								     go-golint
-								     go-vet
-								     go-build
-								     go-test
-								     ;; go-staticcheck
-								     ;; go-errcheck
-								     ))
-				  (flycheck-golangci-lint-setup)))
+  :hook ((go-mode go-ts-mode) .
+	 (lambda()
+           (flycheck-golangci-lint-setup)
+           (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
   :defines flycheck-disabled-checkers
+  :init
+  (setenv "GO111MODULE" "on")
   :custom
+  (flycheck-golangci-lint-enable-all t)
+  (flycheck-golangci-lint-deadline "1m")
   ;; (flycheck-golangci-lint-enable-all t)
   (flycheck-golangci-lint-fast t)
   (flycheck-golangci-lint-config
-   (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
-  ;; (flycheck-golangci-lint-tests t)
-  :config
-  (eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
-  (add-hook 'go-ts-mode-hook (lambda()
-                               (flycheck-golangci-lint-setup)
-                               (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
-  (add-hook 'go-mode-hook (lambda()
-                            (flycheck-golangci-lint-setup)
-                            (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint)))))))))
+   (expand-file-name "golangci.yml" "~/.config/golangci-lint")))
 
 (use-package go-eldoc
   :straight t
@@ -1798,6 +1812,18 @@ Use clojure-mode for basic syntax support.
     '((c-basic-offset . 2)
       (indent-tabs-mode . nil)))
   (add-hook 'protobuf-mode-hook (lambda () (c-add-style "my-style" my-protobuf-style t))))
+
+(use-package flycheck-buf-lint
+  :straight (flycheck-buf-lint :package "flycheck-buf-lint"
+			       :type git
+			       :host nil
+			       :repo "ssh://git@h.jiya.net:9922/shuxiao9058/flycheck-buf-lint.git")
+  :init
+  (push 'buf-lint flycheck-checkers)
+  :config
+  (defun poly/flycheck-buf-lint-setup()
+    (flycheck-buf-lint-setup))
+  :hook (protobuf-mode . poly/flycheck-buf-lint-setup))
 #+end_src
 
 ** python

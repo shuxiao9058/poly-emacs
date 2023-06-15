@@ -1094,10 +1094,20 @@ do not already have one."
   (setq prettify-symbols-unprettify-at-point 'right-edge)
   (add-hook 'org-mode-hook
             (lambda ()
-              "Beautify Org Checkbox Symbol"
-              (push '("[ ]" . "☐") prettify-symbols-alist)
-              (push '("[X]" . "☑") prettify-symbols-alist)
-              (push '("[-]" . "❍") prettify-symbols-alist)
+	      (setq-local prettify-symbols-alist
+			  '(("#+begin_src" . "»")
+			    ("#+end_src" . "«")
+			    ("#+begin_example" . "❯")
+			    ("#+end_example" . "❮")
+			    ("#+begin_quote" . "‟")
+			    ("#+end_quote" . "‟")
+			    ("[X]" . "⦿")
+			    ("[ ]" . "🞆")
+			    ("[-]" . "⦾")))
+              ;; "Beautify Org Checkbox Symbol"
+              ;; (push '("[ ]" . "☐") prettify-symbols-alist)
+              ;; (push '("[X]" . "☑") prettify-symbols-alist)
+              ;; (push '("[-]" . "❍") prettify-symbols-alist)
               (prettify-symbols-mode)))
 
   (setq org-agenda-files (list
@@ -2423,9 +2433,8 @@ Prefix arguments are interpreted by `org-refile'."
 	 )
   :commands (markdown-mode gfm-mode)
   :hook ((markdown-mode . markdown-toggle-inline-images)
-	 ;; (markdown-mode . variable-pitch-mode)
-	 ;; (markdown-mode . visual-line-mode)
-	 )
+	 (markdown-mode . variable-pitch-mode)
+	 (markdown-mode . visual-line-mode))
   :custom
   (markdown-list-item-bullets '("●" "○" "•"))
   (markdown-hide-markup nil)
@@ -2452,6 +2461,17 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-xhtml-header-content "\n<meta name=\"viewport\" content=\"width=device-width\">")
   (markdown-split-window-direction 'right)
   :config
+    ;; https://github.com/cadadr/emacs.d
+    (defun gk-markdown-preview-buffer ()
+      (interactive)
+      (require 'shr)
+      (let* ((buf-this (buffer-name (current-buffer)))
+             (buf-html (get-buffer-create
+                        (format "*md-html (%s)*" buf-this))))
+        (markdown-other-window (buffer-name buf-html))
+        (shr-render-buffer buf-html)
+        (eww-mode)
+        (kill-buffer buf-html)))
   ;; HACK Due to jrblevin/markdown-mode#578, invoking `imenu' throws a
   ;;      'wrong-type-argument consp nil' error if you use native-comp.
   (setq markdown-nested-imenu-heading-index (not (ignore-errors (native-comp-available-p))))

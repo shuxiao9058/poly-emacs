@@ -495,6 +495,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-bar-width 0)
   ;; (corfu-right-margin-width 0)
   (corfu-scroll-margin 5)        ;; Use scroll margin
+  (corfu-right-margin-width 2.0)
+  (corfu-left-margin-width 1.0)
   :init
   (global-corfu-mode)
   :config
@@ -819,9 +821,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	("C-p" . copilot-previous-completion))
   (:map copilot-completion-map
 	("<tab>" . copilot-accept-completion)
-	("TAB" . copilot-accept-completion))
-  )
-
+	("TAB" . copilot-accept-completion)))
 #+end_src
 
 *** corfu-quick
