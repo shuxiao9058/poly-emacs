@@ -781,7 +781,7 @@ Examples:
   (setq lsp-disabled-clients '(emmy-lua))
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
-			      protobuf-pls
+			      protobuf-bufls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
@@ -987,7 +987,9 @@ Examples:
   :straight (lsp-protobuf :package "lsp-protobuf"
 			  :type git
 			  :host nil
-			  :repo "ssh://git@h.jiya.net:9922/shuxiao9058/lsp-protobuf.git"))
+			  :repo "ssh://git@h.jiya.net:9922/shuxiao9058/lsp-protobuf.git")
+  :custom
+  (lsp-protobuf-bufls-server-path "/usr/local/gopath/bin/bufls"))
 #+end_src
 
 ** yas parameter complete in place required

@@ -37,7 +37,8 @@
 			    (fullscreen . maximized)
 			    ;; (height . 50)
 			    ;; (width . 95)
-			    (undecorated . t) ;; remove title bar
+			    ;; (undecorated . t) ;; remove title bar
+			    (undecorated-round . t)
 			    ;; (font . "JetBrains Mono-14")
 			    (line-spacing . 0.2)))
 
@@ -47,7 +48,8 @@
        (list
         '(top . 0) '(left . 0)
         '(cursor-type . bar))
-       default-frame-alist))
+       ;; default-frame-alist
+       ))
 
 ;; Ensure we have correct user-emacs-directory
 ;; The folder of meomacs can be placed anywhere, and started with
@@ -106,8 +108,11 @@ If FORCE-TANGLE is non-nil, always tangle before load."
     (setq native-comp-async-report-warnings-errors nil
 	  native-comp-warning-on-missing-source nil)
 
-    ;; Make native compilation happens asynchronously
-    (setq native-comp-deferred-compilation t)
+    (setq native-comp-jit-compilation nil
+          native-comp-enable-subr-trampolines nil)
+
+    ;; ;; Make native compilation happens asynchronously
+    ;; (setq native-comp-deferred-compilation t)
 
     ;; Set the right directory to store the native compilation cache
     ;; NOTE the method for setting the eln-cache directory depends on the emacs version

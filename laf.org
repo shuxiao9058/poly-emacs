@@ -23,7 +23,7 @@ Configuration for look and feels, make UI looks better.
 ;; very long line performence optimizy
 (global-so-long-mode t)
 
-  ;;; highlight current line
+;;; highlight current line
 (global-hl-line-mode)
 
 ;; ;; disable mode-line
@@ -55,8 +55,8 @@ Configuration for look and feels, make UI looks better.
 
 (when IS-MAC
   (setq frame-resize-pixelwise t
-  mac-command-modifier 'super
-  mac-option-modifier  'meta)
+	mac-command-modifier 'super
+	mac-option-modifier  'meta)
   (when (featurep 'ns)
     (setq ns-use-thin-smoothing t
           ns-use-fullscreen-animation t
@@ -165,18 +165,19 @@ Configuration for look and feels, make UI looks better.
 
   (defun poly/startup-maximize-frame()
     (let* ((top (frame-parameter nil 'top))
-     (left (frame-parameter nil 'left))
-     (fullscreen (frame-parameter nil 'fullscreen)))
+	   (left (frame-parameter nil 'left))
+	   (fullscreen (frame-parameter nil 'fullscreen)))
       (unless (eq 'maximized fullscreen)
-  (toggle-frame-maximized))
+	(toggle-frame-maximized))
       (when (or (> top 50) (> left 50))
-  ;; (message "set left & top, fullscreen: %s" fullscreen)
+	;; (message "set left & top, fullscreen: %s" fullscreen)
         (set-frame-parameter nil 'top 36)
-    (set-frame-parameter nil 'left 0)
-  ;; Give focus to emacs window at startup
-  (x-focus-frame nil))))
+	(set-frame-parameter nil 'left 0)
+	;; Give focus to emacs window at startup
+	(x-focus-frame nil))))
 
-  (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame))
+  ;; (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame)
+  )
 
 ;; Call this function to increase/decrease font size.
 (defun bcm/zoom (n)
@@ -190,11 +191,11 @@ Configuration for look and feels, make UI looks better.
 
 (when (and IS-GUI IS-MAC)
   (add-hook 'focus-in-hook
-      (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/emacs-pid-str)))
-(add-hook 'emacs-startup-hook
-      (lambda() (tl/open-hammerspoon-url "Emacs" "action" "StartUp" "pid" poly/emacs-pid-str)))
+	    (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusIn" "pid" poly/emacs-pid-str)))
+  (add-hook 'emacs-startup-hook
+	    (lambda() (tl/open-hammerspoon-url "Emacs" "action" "StartUp" "pid" poly/emacs-pid-str)))
   (add-hook 'focus-out-hook
-      (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/emacs-pid-str))))
+	    (lambda() (tl/open-hammerspoon-url "Emacs" "action" "FocusOut" "pid" poly/emacs-pid-str))))
 #+end_src
 
 *  since emacs 28
