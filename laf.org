@@ -754,7 +754,7 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 
 (use-package treemacs-all-the-icons
   :straight t
-  :disabled t
+  :disabled
   :after treemacs
   :defer t
   :config

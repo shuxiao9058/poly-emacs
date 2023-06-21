@@ -298,7 +298,7 @@
   (recentf-filename-handlers '(abbreviate-file-name))
   ;; ;; recentf-auto-cleanup 600
   ;; recentf-filename-handlers '(file-truename abbreviate-file-name)
-  (recentf-max-menu-items 100)
+  (recentf-max-menu-items 500)
   (recentf-auto-save-timer (run-with-idle-timer 600 t 'recentf-save-list))
   ;; exclude ** from recentfiles buffer
   (recentf-exclude `(;; ,@(cl-loop  for f in `(
@@ -307,7 +307,9 @@
 		     ;; ,no-littering-var-directory
 		     ;; ,no-littering-etc-directory)
 		     ;;        collect (abbreviate-file-name f))
-		     "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\)$"
+		     "\\.?cache" ".cask" "url"
+		     "bookmarks"
+		     "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
 		     "^/tmp/" "^/ssh:" "\\.?ido\\.last$" "\\.revive$" "/TAGS$"
 		     "^/var/folders\\.*" "\\.git/config" "\\.git/COMMIT_EDITMSG"
 		     "COMMIT_MSG"
@@ -321,6 +323,7 @@
 		     ;; Folders on MacOS start
 		     "^/private/tmp/"
 		     "^/var/folders/"
+		     "/persp-confs/"
 		     ;; Folders on MacOS end
 		     "^/tmp/"
 		     "/ssh\\(x\\)?:"
@@ -406,7 +409,7 @@
 
 ;; persistent undo across sessions
 (use-package undo-fu-session
-  :disabled t
+  :disabled
   :straight t
   :after undo-fu
   :demand t

@@ -803,7 +803,7 @@ Examples:
    `(("gopls.usePlaceholders" t t)
      ("gopls.deepCompletion" t t)
      ("gopls.completeUnimported" t t)
-     ("gopls.staticcheck" ,(if (executable-find "staticcheck") t nil) t)
+     ("gopls.staticcheck" :json-false)
      ("gopls.completionBudget" "200ms" nil)
      ("gopls.semanticTokens" t t)
      ("gopls.allExperiments" t t)
@@ -1328,7 +1328,7 @@ Examples:
 	 (message "Failed to install %s: %d" pkg status))))))
 
 (use-package go-mode
-  :disabled t
+  :disabled
   :straight t
   :ensure t
   :commands (godoc gofmt gofmt-before-save)
@@ -1422,6 +1422,7 @@ Examples:
 
 (use-package go-errcheck
   :straight t
+  :disabled
   :after go-mode
   :bind (:map go-mode-map
 	      ("C-c C-e" . go-errcheck))
@@ -1659,7 +1660,7 @@ Use clojure-mode for basic syntax support.
 	 ;; ("\\.jsx\\'" . web-mode)
 	 ("\\.vue\\'" . web-mode)
 	 ("\\.jinja\\'" . web-mode)
-	 ;; ("\\.ts\\'" . web-mode)
+	 ("\\.tpl\\'" . web-mode)
 	 ;; ("\\.tsx\\'" . web-mode)
 	 ("\\.html$" . web-mode))
   :custom

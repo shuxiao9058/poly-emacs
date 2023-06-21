@@ -364,13 +364,18 @@ Accepts the same arguments as `message'."
 
 #+begin_src emacs-lisp
 (add-to-list 'load-path
-       (expand-file-name "themes" user-emacs-directory))
+	     (expand-file-name "themes" user-emacs-directory))
 
 (defun poly/reload-theme()
   "reload theme"
   (interactive)
-  (require 'poly-dark-theme)
-  (load-theme 'poly-dark t))
+  ;; (require 'poly-dark-theme)
+  ;; (load-theme 'poly-dark t)
+  (require 'catppuccin-theme)
+  (setq catppuccin-flavor 'latte)
+  ;; (setq catppuccin-flavor 'macchiato)
+  ;; (setq catppuccin-flavor 'frappe)
+  (load-theme 'catppuccin t))
 
 (poly/reload-theme)
 #+end_src

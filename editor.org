@@ -55,6 +55,11 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq auth-sources '("~/.authinfo.gpg")
       ;; auth-sources '("~/.authinfo")
+      uniquify-buffer-name-style 'post-forward-angle-brackets ;; Show path if names are same
+      adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*"
+      adaptive-fill-first-line-regexp "^* *$"
+      sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*"
+      sentence-end-double-space nil
       make-backup-files nil
       enable-local-eval t
       enable-local-variables :all
@@ -2442,7 +2447,7 @@ Prefix arguments are interpreted by `org-refile'."
   (markdown-max-image-size '(400 . 400))
   (markdown-indent-on-enter 'indent-and-new-item)
   (markdown-hide-urls t)
-  (markdown-hide-markup nil)
+  (markdown-hide-markup t)
   (markdown-header-scaling t)
   (markdown-list-indent-width 2)
   ;; (markdown-nested-imenu-heading-index nil)

@@ -106,7 +106,7 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp :tangle no
 (use-package selectrum
-  :disabled t
+  :disabled
   :straight t
   :hook (after-init . selectrum-mode)
   :custom
@@ -134,7 +134,7 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
   (use-package marginalia
-    ;; :disabled t
+    ;; :disabled
     :straight t
     ;; :after selectrum
     :ensure t
@@ -297,7 +297,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp :tangle no
 (use-package consult
-  :disabled t
+  :disabled
   :straight t
   :ensure t
   :demand t
@@ -484,7 +484,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
-  (corfu-preselect 'valid)
+  (corfu-preselect 'first)
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
   ;; (corfu-echo-documentation '(1.0 . 0.2))
@@ -812,9 +812,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :ensure t
   :hook (prog-mode . copilot-mode)
-  :custom
-  (copilot-network-proxy
-   '(:host "127.0.0.1" :port 7890))
+  ;; :custom
+  ;; (copilot-network-proxy
+  ;;  '(:host "127.0.0.1" :port 7890))
   :bind
   (:map copilot-mode-map
 	("C-n" . copilot-next-completion)
@@ -1480,7 +1480,7 @@ To manage the git repository, use builtin package ~vc~.
 
 (use-package emacsql
   :straight t
-  :disabled t
+  :disabled
   :ensure t)
 
 (use-package magit
@@ -1635,7 +1635,7 @@ To manage the git repository, use builtin package ~vc~.
 ;; Show TODOs in magit
 (use-package magit-todos
   :straight t
-  :disabled t
+  :disabled
   :diminish
   :after magit
   :init
@@ -1707,7 +1707,7 @@ To manage the git repository, use builtin package ~vc~.
   :straight t)
 
 (use-package forge
-  :disabled t
+  :disabled
   :straight t
   :after (magit yaml)
   :commands forge-create-pullreq forge-create-issue
@@ -1770,7 +1770,7 @@ To manage the git repository, use builtin package ~vc~.
   :straight t)
 
 (use-package code-review
-  :disabled t
+  :disabled
   :straight t
   :bind (:map forge-topic-mode-map
 	      ("C-c r" . code-review-forge-pr-at-point)
@@ -2848,7 +2848,7 @@ there are no attachments."
 ** notmuch
 #+begin_src emacs-lisp :tangle no
 (use-package notmuch
-  :disabled t
+  :disabled
   :straight t
   :commands notmuch
   :bind (("C-c m" . notmuch)
@@ -4283,7 +4283,7 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
     (cond
      ((string-equal system-type "darwin")
       ;; VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
-      (setq shell-cmd-str (format "VSCODE_CWD=\"%s\" open -n -b \"com.microsoft.VSCode\" %s"
+      (setq shell-cmd-str (format "VSCODE_CWD=\"%s\" open -n -b \"com.microsoft.VSCodeInsiders\" %s"
 				  (shell-quote-argument project-root-directory)
 				  (if buffer-file-name
 				      (format "--args -g %s:%d:%d %s"
@@ -4376,4 +4376,18 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (add-to-list 'zeal-at-point-mode-alist '(go-mode . "go"))
   (add-to-list 'zeal-at-point-mode-alist '(rustic-mode . "rust"))
   (add-to-list 'zeal-at-point-mode-alist '(gitlab-ci-mode . "gitlab-ci")))
+#+end_src
+
+*** help emacs-devel collect gc stats
+
+#+begin_src emacs-lisp
+(use-package emacs-gc-stats
+  :straight
+  (emacs-gc-stats :package "emacs-gc-stats"
+		  :type git
+		  :host nil
+		  :repo "https://git.sr.ht/~yantar92/emacs-gc-stats")
+  :config
+  (setq emacs-gc-stats-gc-defaults 'emacs-defaults)
+  (emacs-gc-stats-mode +1))
 #+end_src
