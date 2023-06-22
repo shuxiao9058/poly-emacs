@@ -753,7 +753,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :straight t)
 #+end_src
 
-
 *** tabnine & copilot
 
 **** tabnine
@@ -4360,7 +4359,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
            (use-proxy-no-proxy (regexp-opt '("localhost" "baidu.com")))))
 #+end_src
 
-
 *** zeal
 
 #+begin_src emacs-lisp :tangle no
@@ -4390,4 +4388,15 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :config
   (setq emacs-gc-stats-gc-defaults 'emacs-defaults)
   (emacs-gc-stats-mode +1))
+#+end_src
+
+*** restclient
+
+#+begin_src emacs-lisp
+(use-package restclient
+  :mode ("\\.http\\'" . restclient-mode)
+  :config
+  (use-package restclient-test
+    :diminish
+    :hook (restclient-mode . restclient-test-mode)))
 #+end_src

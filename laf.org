@@ -525,7 +525,9 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
   (treemacs-show-cursor                   nil)
   (treemacs-show-hidden-files             t)
   (treemacs-silent-filewatch              t)
-  (treemacs-sorting                       'alphabetic-case-insensitive-asc)
+  (treemacs-sorting                 'alphabetic-asc)
+  (treemacs-missing-project-action  'remove)
+  ;; (treemacs-sorting                       'alphabetic-case-insensitive-asc)
   (treemacs-space-between-root-nodes      t)
   (treemacs-tag-follow-cleanup            t)
   (treemacs-tag-follow-delay              1.5)
@@ -723,7 +725,7 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
   :straight t
   :after persp-mode
   :commands treemacs-set-scope-type
-  :init (treemacs-set-scope-type 'Frames))
+  :init (treemacs-set-scope-type 'Perspectives))
 #+end_src
 
 * icon

@@ -94,6 +94,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
       xref-prompt-for-identifier nil
 
       ;; clipboard
+      kill-ring-max 2000
+      save-interprogram-paste-before-kill t
       x-select-enable-clipboard           t
       x-select-enable-primary             t
       history-length 100000
@@ -104,7 +106,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       resize-mini-windows t
       sentence-end-double-space nil           ;; Use a single space after dots
       truncate-string-ellipsis "…"
-      save-interprogram-paste-before-kill t
       cursor-type '(hbar .  2)
       cursor-in-non-selected-windows nil
       use-dialog-box nil
@@ -2813,4 +2814,20 @@ valign for org-mode & markdown table
             (with-current-buffer origin
               (revert-buffer t t))))
       (user-error "Unable to open %S" file))))
+#+end_src
+
+** kill-ring
+
+#+begin_src emacs-lisp
+;; Kill & Mark things easily
+(use-package easy-kill
+  :bind (([remap kill-ring-save] . easy-kill)
+         ([remap mark-sexp] . easy-mark)))
+
+;; Interactively insert and edit items from kill-ring
+(use-package browse-kill-ring
+  :bind ("C-c k" . browse-kill-ring)
+  :hook (after-init . browse-kill-ring-default-keybindings)
+  :init (setq browse-kill-ring-separator "────────────────"
+              browse-kill-ring-separator-face 'shadow))
 #+end_src

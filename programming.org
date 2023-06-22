@@ -890,6 +890,10 @@ Examples:
      ("html.format.wrapLineLength" 120)
      ("html.format.enable" t)
      ))
+  :init
+  (let* ((yaml-language-server-dir (poly/vscode-extension-install-path "redhat.vscode-yaml"))
+	 (yaml-language-server-main (expand-file-name "dist/languageserver.js" yaml-language-server-dir)))
+    (setq lsp-yaml-server-command (list "node" yaml-language-server-main "--stdio")))
   :bind (:map lsp-mode-map
 	      ("C-c r" . lsp-rename)
 	      ("C-c a" . lsp-organize-imports)
