@@ -22,7 +22,6 @@ The theme has to be reloaded after changing anything in this group."
 (defvar poly-dark-use-italic t
   "Non-nil means use italic for comment and docstring.")
 
-
 (defcustom poly-dark-enlarge-headings t
   "Use different font sizes for some headings and titles."
   :type 'boolean
@@ -82,6 +81,7 @@ The theme has to be reloaded after changing anything in this group."
 		(purple "#9580FF" "#9986F9" "brightmagenta") ; Purple
 		(red "#FF9580" "#F99986" "red")              ; Red
 		(yellow "#FFFF80" "#F9F986" "yellow")        ; Yellow
+                (dogblue4 "#104e8b" "#104e8b" "DodgerBlue4") ;; DodgerBlue4
 
 		;; Other colors
 		(bg2     "#201F2E" "#2B293D" "brightblack")
@@ -260,7 +260,7 @@ The theme has to be reloaded after changing anything in this group."
 	       ;; Treemacs
 	       (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
 
-	       (fill-column-indicator          :foreground ,bg+2)
+	       (fill-column-indicator          :foreground ,bg+2 :height 0.10)
 
 	       (scroll-bar                     :foreground ,fg-1)
 
@@ -271,8 +271,6 @@ The theme has to be reloaded after changing anything in this group."
 	       (orderless-match-face-1 :inherit error :weight bold)
 	       (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
 	       (orderless-match-face-3 :inherit font-lock-keyword-face :weight bold)
-
-	       (hl-line :background "DodgerBlue4")
 
 	       ;; auto-highlight-symbol
 	       (ahs-definition-face :foreground ,magenta :background unspecified :slant normal)
@@ -293,7 +291,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (ffap :foreground ,fg4)
 	       (fringe :background ,bg :foreground ,fg4)
 	       (highlight :foreground ,fg3 :background ,bg3)
-	       ;; (hl-line :background ,current :extend t)
+               (hl-line :background ,dogblue4 :extend t)
 	       (info-quoted-name :foreground ,orange)
 	       (info-string :foreground ,yellow)
 	       (lazy-highlight :foreground ,fg2 :background ,bg2)

@@ -945,10 +945,7 @@ Visualizing Color Codes with rainbow-mode.
                                                  (:kernel . "julia-1.8")))
   (ob-async-no-async-languages-alist '("python" "jupyter-python" "julia" "jupyter-julia"))
   :bind (("C-c C-x r" . jupyter-repl-restart-kernel)
-         ("C-c C-x h" . jupyter-org-restart-and-execute-to-point))
-  ;; :config
-  ;; (setq jupyter--debug t)
-  )
+         ("C-c C-x h" . jupyter-org-restart-and-execute-to-point)))
 
 (use-package ob-jupyter
   :defer t
@@ -961,26 +958,14 @@ Visualizing Color Codes with rainbow-mode.
         ("C-<down>" . jupyter-repl-history-next)))
 
 (use-package zmq
-  :custom
-  (module-file-suffix ".a")
   :straight(zmq :type git :host github
                 :repo "dzop/emacs-zmq"
-                :files (:defaults "Makefile" "src" "*.so")))
-
-(use-package simple-httpd
-  :straight t)
-
-(setenv "PYDEVD_DISABLE_FILE_VALIDATION" "1")
-
-(use-package ansi-color
-  :straight t
-  :ensure t
+                :files (:defaults "Makefile" "src"))
+  :disabled
   :init
-  (defun colorize-compilation-buffer ()
-    (read-only-mode)
-    (ansi-color-apply-on-region compilation-filter-start (point))
-    (read-only-mode))
-  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+  (setenv "ZMQ_CFLAGS" "-I/opt/local/include")
+  (setenv "ZMQ_LIBS" "-L/opt/local/lib -lzmq"))
+
 #+end_src
 
 

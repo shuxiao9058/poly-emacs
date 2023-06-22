@@ -856,5 +856,15 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 ** compilation color
 
 #+begin_src emacs-lisp
-(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+(use-package ansi-color
+  :straight t
+  :ensure t
+  :init
+  (defun colorize-compilation-buffer ()
+    (read-only-mode)
+    (ansi-color-apply-on-region compilation-filter-start (point))
+    (read-only-mode))
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+  ;; (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+  )
 #+end_src

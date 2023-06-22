@@ -369,13 +369,14 @@ Accepts the same arguments as `message'."
 (defun poly/reload-theme()
   "reload theme"
   (interactive)
-  ;; (require 'poly-dark-theme)
-  ;; (load-theme 'poly-dark t)
-  (require 'catppuccin-theme)
-  (setq catppuccin-flavor 'latte)
+  (require 'poly-dark-theme)
+  (load-theme 'poly-dark t)
+  ;; (require 'catppuccin-theme)
+  ;; (setq catppuccin-flavor 'latte)
   ;; (setq catppuccin-flavor 'macchiato)
   ;; (setq catppuccin-flavor 'frappe)
-  (load-theme 'catppuccin t))
+  ;; (load-theme 'catppuccin t)
+  )
 
 (poly/reload-theme)
 #+end_src
