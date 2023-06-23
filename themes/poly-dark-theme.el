@@ -104,7 +104,6 @@ The theme has to be reloaded after changing anything in this group."
 		(black "#17161D" "#35334D" "brightblack")
 		(white "#E0E0E0" "#B3B3B3" "white")
 		(blue "#009F9F" "#846EF7" "brightblue")
-		(green2 "#8AFF80" "#8FF986" "green")
 		(light-purple "#B28CE2" "brightblue")
 		(brown "#CFA300" "#F9C986" "brightred")
 		(region "#454158" "#3F3D5C" "brightblack")
@@ -123,9 +122,6 @@ The theme has to be reloaded after changing anything in this group."
                (xref-match                     :inherit match)
                (secondary-selection           :background ,region2 :extend t)
 
-               ;; ISearch
-               (isearch                        :background ,green :foreground ,black)
-               (isearch-fail                   :backgronud ,red :foreground ,orange)
 
                (compilation-info               :inherit font-lock-function-name-face)
                (compilation-warning            :inherit font-lock-warning-face)
@@ -266,7 +262,6 @@ The theme has to be reloaded after changing anything in this group."
 
 
 	       (icomplete-first-match :inherit mode-line-emphasis)
-	       (mode-line-buffer-id :foreground "Light Blue" :weight bold)
 	       (orderless-match-face-0 :inherit font-lock-type-face :weight bold)
 	       (orderless-match-face-1 :inherit error :weight bold)
 	       (orderless-match-face-2 :inherit font-lock-string-face :weight bold)
@@ -328,28 +323,14 @@ The theme has to be reloaded after changing anything in this group."
 	       (font-lock-type-face :foreground ,purple)
 	       (font-lock-variable-name-face :foreground ,fg
 					     ;; :weight bold
-					     )
+                                             )
 	       (font-lock-warning-face :foreground ,orange :background ,bg2)
-	       ;; Font Locks
-	       ;; (font-lock-comment-face         :foreground ,comment :italic t)
-	       ;; (font-lock-comment-delimiter-face        :foreground ,comment :italic t)
-	       ;; (font-lock-string-face          :foreground ,yellow)
-	       ;; (font-lock-doc-face             :foreground ,blue :italic t)
-	       ;; (font-lock-builtin-face         :foreground ,purple)
-	       ;; (font-lock-type-face            :forground ,green)
-	       ;; (font-lock-variable-name-face   :foreground ,white)
 	       (font-lock-operator-face   :foreground ,red)
-	       ;; (font-lock-keyword-face         :foreground ,red)
 	       (font-lock-number-face         :foreground ,purple)
 	       (font-lock-delimiter-face         :foreground ,white)
 	       (font-lock-bracket-face         :foreground ,red)
 	       (font-lock-escape-face         :foreground ,red)
 	       (font-lock-property-face         :foreground ,red)
-	       ;; (font-lock-constant-face        :foreground ,purple)
-	       ;; (font-lock-function-name-face   :foreground ,green2)
-	       ;; (font-lock-warning-face         :foreground ,orange)
-	       ;; (font-lock-preprocessor-face    :inherit font-lock-constant-face)
-
 
 	       ;; auto-complete
 	       (ac-completion-face :underline t :foreground ,pink)
@@ -367,10 +348,30 @@ The theme has to be reloaded after changing anything in this group."
 	       (company-tooltip-common-selection :foreground ,yellow)
 	       (company-tooltip-mouse :inherit highlight)
 	       (company-tooltip-selection :background ,bg3 :foreground ,fg3)
+
+               (custom-changed :foreground "#8Fd4FF" :background ,blue
+			       :extend t)
+               (diff-added-face :background "#335533"
+				:foreground "#ddffdd"
+				:extend t)
+	       (diff-changed  :foreground "#0000FF" :background "#DDDDFF"
+                              :extend t)
+	       (diff-removed-face :background "#553333"
+				  :foreground "#ffdddd"
+				  :extend t)
+	       (diff-context-face :foreground ,fg3)
+	       (diff-file-header-face :foreground "gold" :background unspecified)
+	       (diff-function-face :foreground "gray50" :background unspecified)
+	       (diff-header-face :foreground "gold" :background unspecified)
+	       (diff-hunk-header-face :foreground "gold")
+	       (diff-index-face :bold t :background "gray70")
+	       (diff-nonexistent-face :bold t :background "gray70")
+
 	       ;; diff-hl
 	       (diff-hl-change :foreground ,orange :background ,orange)
 	       (diff-hl-delete :foreground ,red :background ,red)
 	       (diff-hl-insert :foreground ,green :background ,green)
+
 	       ;; dired
 	       (dired-directory :foreground ,green :weight normal)
 	       (dired-flagged :foreground ,pink)
@@ -548,6 +549,9 @@ The theme has to be reloaded after changing anything in this group."
 	       (ido-incomplete-regexp :inherit font-lock-warning-face)
 	       (ido-indicator :foreground ,fg :background ,pink)
 	       ;; isearch
+               ;; ;; ISearch
+               ;; (isearch                        :background ,green :foreground ,black)
+               ;; (isearch-fail                   :backgronud ,red :foreground ,orange)
 	       (isearch :inherit match :weight bold)
 	       (isearch-fail :foreground ,bg :background ,orange)
 	       ;; jde-java
@@ -614,6 +618,32 @@ The theme has to be reloaded after changing anything in this group."
 	       (magit-log-author :foreground ,fg3)
 	       (magit-process-ng :foreground ,orange :weight bold)
 	       (magit-process-ok :foreground ,green :weight bold)
+
+               (ediff-current-diff-face-A :background ,green :foreground "firebrick")
+	       (ediff-current-diff-face-Ancestor :background "VioletRed" :foreground "Black")
+	       (ediff-current-diff-face-B :background "Yellow" :foreground "DarkOrchid")
+	       (ediff-current-diff-face-C :background "Pink" :foreground "Navy")
+	       (ediff-even-diff-face-A :background "light grey" :foreground "Black")
+	       (ediff-even-diff-face-Ancestor :background "Grey" :foreground "White")
+	       (ediff-even-diff-face-B :background "Grey" :foreground "White")
+	       (ediff-even-diff-face-C :background "light grey" :foreground "Black")
+	       (ediff-fine-diff-face-A :background "sky blue" :foreground "Navy")
+	       (ediff-fine-diff-face-Ancestor :background "Green" :foreground "Black")
+	       (ediff-fine-diff-face-B :background "cyan" :foreground "Black")
+	       (ediff-fine-diff-face-C :background "Turquoise" :foreground "Black")
+	       (ediff-odd-diff-face-A :background "Grey" :foreground "White")
+	       (ediff-odd-diff-face-Ancestor :background "light grey" :foreground "Black")
+	       (ediff-odd-diff-face-B :background "light grey" :foreground "Black")
+	       (ediff-odd-diff-face-C :background "Grey" :foreground "White")
+
+               (smerge-base-face :foreground ,red)
+	       (smerge-markers-face :background ,fg3)
+	       (smerge-mine-face :foreground ,blue)
+	       (smerge-other-face :foreground "DarkOliveGreen4")
+
+               (log-view-file-face :bold t :background ,fg3 :weight bold)
+	       (log-view-message-face :foreground ,orange)
+
 	       ;; markdown
 	       (markdown-blockquote-face :foreground ,orange)
 	       (markdown-code-face :foreground ,orange)
@@ -659,6 +689,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (mode-line-active    :inherit mode-line)
 	       (mode-line-emphasis  ::inherit highlight :distant-foreground ,bg)
 	       (mode-line-highlight :inherit highlight :distant-foreground ,bg)
+               (mode-line-buffer-id :foreground "Light Blue" :weight bold)
 	       ;; (mode-line-buffer-id :weight 'bold)
 	       (header-line :inherit mode-line)
 	       (header-line-highlight :inherit mode-line-highlight)

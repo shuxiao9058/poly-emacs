@@ -64,7 +64,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       enable-local-eval t
       enable-local-variables :all
       bidi-display-reordering 'left-to-right
-      cursor-in-non-selected-windows nil
       fast-but-imprecise-scrolling t
       redisplay-skip-fontification-on-input t
       ffap-machine-p-known 'reject
@@ -107,7 +106,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       sentence-end-double-space nil           ;; Use a single space after dots
       truncate-string-ellipsis "…"
       cursor-type '(hbar .  2)
-      cursor-in-non-selected-windows nil
       use-dialog-box nil
       global-auto-revert-non-file-buffers t
       apropos-do-all                      t
@@ -117,8 +115,15 @@ This is consulted on every `require', `load' and various path/io functions.  You
       mouse-drag-and-drop-region-cross-program t
       mouse-drag-and-drop-region-scroll-margin t
       mouse-drag-copy-region 'non-empty
+      large-file-warning-threshold 200000000
       ;; silence ad-handle-definition about advised functions getting redefined
-      ad-redefinition-action 'accept)
+      ad-redefinition-action 'accept
+      left-fringe-width 1
+      right-fringe-width 0
+      indicate-empty-lines t    ;在左侧边缘显示行尾空行标志
+      imenu-auto-rescan t
+      cursor-in-non-selected-windows 'hollow ; 在没有激活的 window 上显示一个空心正方形
+      )
 
 ;; @see https://github.com/emacs-lsp/lsp-mode#performance
 (setq read-process-output-max (* 3 1024 1024))
@@ -2580,6 +2585,9 @@ mermaid.initialize({
          (pandoc-mode . pandoc-load-default-settings)))
 #+end_src
 
+#+RESULTS:
+| pandoc-load-default-settings |
+
 ** notdeft
 
 #+begin_src emacs-lisp
@@ -2606,12 +2614,13 @@ mermaid.initialize({
   :config
   ;; (setq plantuml-mode-debug-enabled t)
   (setq plantuml-default-exec-mode 'server
-	;; plantuml-server-url "http://localhost:8080"
+	plantuml-server-url "http://localhost:8080"
+	;; plantuml-server-url "https://ops.shmao.net/plantuml"
 	;; plantuml-server-url "https://www.plantuml.com/plantuml"
+	plantuml-output-type "svg"
         plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"
-	;; plantuml-jar-args '("-Djava.awt.headless=true" "-jar" "-charset" "UTF-8")
+	plantuml-jar-args '("-Djava.awt.headless=true" "-jar" "-charset" "UTF-8")
 	)
-  ;; (add-to-list 'plantuml-executable-args "-config")
   ;; (add-to-list 'plantuml-executable-args "~/.config/plantuml/config.cfg")
   (add-to-list 'org-src-lang-modes '("plantuml" . plantuml)))
 #+end_src
@@ -2811,6 +2820,7 @@ valign for org-mode & markdown table
 
 ;; Interactively insert and edit items from kill-ring
 (use-package browse-kill-ring
+  :disabed
   :bind ("C-c k" . browse-kill-ring)
   :hook (after-init . browse-kill-ring-default-keybindings)
   :init (setq browse-kill-ring-separator "────────────────"
