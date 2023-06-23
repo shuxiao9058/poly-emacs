@@ -1318,6 +1318,7 @@ Examples:
 #+begin_src emacs-lisp
 (defconst go--tools
   '((goplay . "github.com/haya14busa/goplay/cmd/goplay")
+    (gopls . "golang.org/x/tools/gopls")
     (dlv . "github.com/go-delve/delve/cmd/dlv")
     (impl . "github.com/josharian/impl")
     (errcheck . "github.com/kisielk/errcheck")
@@ -1327,6 +1328,23 @@ Examples:
     (goimports . "golang.org/x/tools/cmd/goimports")
     (staticcheck . "honnef.co/go/tools/cmd/staticcheck")
     (fillstruct . "github.com/davidrjenni/reftools/cmd/fillstruct")
+    (goconst . "github.com/jgautheron/goconst/cmd/goconst")
+    (wire . "github.com/google/wire/cmd/wire")
+    (gofumpt . "mvdan.cc/gofumpt")
+    (revive . "github.com/mgechev/revive")
+    (gocritic . "github.com/go-critic/go-critic/cmd/gocritic")
+    (unparam . "mvdan.cc/unparam")
+    (unused . "honnef.co/go/tools/cmd/unused")
+    (ineffassign . "github.com/gordonklaus/ineffassign")
+    (pet . "github.com/knqyf263/pet")
+    (protovalidate-go . "github.com/bufbuild/protovalidate-go")
+    (protobuf-go . "google.golang.org/protobuf/cmd/protoc-gen-go")
+    (protoc-gen-go-grpc . "google.golang.org/grpc/cmd/protoc-gen-go-grpc")
+    (protoc-gen-grpc-gateway . "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
+    (protoc-gen-openapiv2 . ("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2" "v2.16.0"))
+    (protoc-gen-doc . "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc")
+    (bufls . "github.com/bufbuild/buf-language-server/cmd/bufls")
+    (buf . ("github.com/bufbuild/buf/cmd/buf" "v1.21.0"))
     (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")
     ))
 
@@ -1335,10 +1353,17 @@ Examples:
   (unless (executable-find "go")
     (user-error "Unable to find `go' in `exec-path'!"))
   (message "Installing go tool [%s] ..." (symbol-name pkg))
-  (let ((pkg-repo (alist-get pkg go--tools)))
+  (let ((pkg-repo (alist-get pkg go--tools))
+	 (pkg-version))
+    (pcase (type-of pkg-repo)
+      ('cons
+       (setq pkg-version (cadr pkg-repo))
+       (setq pkg-repo (car pkg-repo)))
+      (_
+       (setq pkg-version "latest")))
     (when pkg-repo
       (set-process-sentinel
-       (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg-repo "@latest"))
+       (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg-repo  "@" pkg-version))
        (lambda (proc _)
 	 (let ((status (process-exit-status proc)))
 	   (if (= 0 status)
@@ -1363,6 +1388,9 @@ Examples:
   (defun eglot-format-buffer-on-save ()
     (add-hook 'before-save-hook #'eglot-format-buffer -10 t))
   (add-hook 'go-mode-hook #'eglot-format-buffer-on-save))
+
+(unless (executable-find "gopls")
+  (poly/install-go-tool 'gopls))
 
 (use-package gorepl-mode
   :straight t
