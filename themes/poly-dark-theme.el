@@ -349,13 +349,15 @@ The theme has to be reloaded after changing anything in this group."
 	       (company-tooltip-mouse :inherit highlight)
 	       (company-tooltip-selection :background ,bg3 :foreground ,fg3)
 
-               (custom-changed :foreground "#8Fd4FF" :background ,blue
+               ;; (custom-changed :foreground "#8Fd4FF" :background "#DDDDFF"
+	       ;;  	       :extend t)
+               (custom-changed :foreground "#F8F8F8" :background "#4A410D"
 			       :extend t)
                (diff-added-face :background "#335533"
 				:foreground "#ddffdd"
 				:extend t)
-	       (diff-changed  :foreground "#0000FF" :background "#DDDDFF"
-                              :extend t)
+	       (diff-changed :foreground "#F8F8F8" :background "#4A410D"
+                             :extend t)
 	       (diff-removed-face :background "#553333"
 				  :foreground "#ffdddd"
 				  :extend t)
