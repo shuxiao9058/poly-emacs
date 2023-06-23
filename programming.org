@@ -1316,19 +1316,39 @@ Examples:
 #+end_src
 ** Go Language
 #+begin_src emacs-lisp
+(defconst go--tools
+  '((goplay . "github.com/haya14busa/goplay/cmd/goplay")
+    (dlv . "github.com/go-delve/delve/cmd/dlv")
+    (impl . "github.com/josharian/impl")
+    (errcheck . "github.com/kisielk/errcheck")
+    (gomodifytags . "github.com/fatih/gomodifytags")
+    (gogetdoc . "github.com/zmb3/gogetdoc")
+    (gotests . "github.com/cweill/gotests/...")
+    (goimports . "golang.org/x/tools/cmd/goimports")
+    (staticcheck . "honnef.co/go/tools/cmd/staticcheck")
+    (fillstruct . "github.com/davidrjenni/reftools/cmd/fillstruct")
+    (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")
+    ))
+
 (defun poly/install-go-tool (pkg)
   "Install or update go PKG/tools."
-  (interactive)
   (unless (executable-find "go")
     (user-error "Unable to find `go' in `exec-path'!"))
-  (message "Installing go tool...")
-  (set-process-sentinel
-   (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg "@latest"))
-   (lambda (proc _)
-     (let ((status (process-exit-status proc)))
-       (if (= 0 status)
-	   (message "Installed %s" pkg)
-	 (message "Failed to install %s: %d" pkg status))))))
+  (message "Installing go tool [%s] ..." (symbol-name pkg))
+  (let ((pkg-repo (alist-get pkg go--tools)))
+    (when pkg-repo
+      (set-process-sentinel
+       (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg-repo "@latest"))
+       (lambda (proc _)
+	 (let ((status (process-exit-status proc)))
+	   (if (= 0 status)
+	       (message "Go tool installed successfully!")
+	     (message "Failed to install the go tool.")
+	     )
+	   ;; (if (= 0 status)
+	   ;; 	   (message "Installed %s" pkg)
+	   ;; 	 (message "Failed to install %s: %d" pkg status))
+	   ))))))
 
 (use-package go-mode
   :disabled
@@ -1365,7 +1385,11 @@ Examples:
   ;; (flycheck-golangci-lint-enable-all t)
   (flycheck-golangci-lint-fast t)
   (flycheck-golangci-lint-config
-   (expand-file-name "golangci.yml" "~/.config/golangci-lint")))
+   (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
+  :config
+  (unless (executable-find "golangci-lint")
+    (poly/install-go-tool 'golangci-lint))
+  )
 
 (use-package go-eldoc
   :straight t
@@ -1405,7 +1429,7 @@ Examples:
   :init (setq go-tag-args (list "-transform" "camelcase"))
   :config
   (unless (executable-find "gomodifytags")
-    (poly/install-go-tool "github.com/fatih/gomodifytags")))
+    (poly/install-go-tool  'gomodifytags)))
 
 (use-package go-fill-struct
   :straight t
@@ -1413,7 +1437,7 @@ Examples:
   :config
   ;; fillstruct - fills a struct literal with default values
   (unless (executable-find "fillstruct")
-    (poly/install-go-tool "github.com/davidrjenni/reftools/cmd/fillstruct")))
+    (poly/install-go-tool 'fillstruct)))
 
 (use-package go-dlv
   :straight t
@@ -1421,7 +1445,7 @@ Examples:
   :config
   ;; Delve is a debugger for the Go programming language.
   (unless (executable-find "dlv")
-    (poly/install-go-tool "github.com/go-delve/delve/cmd/dlv")))
+    (poly/install-go-tool 'dlv)))
 
 (use-package go-errcheck
   :straight t
@@ -1432,7 +1456,7 @@ Examples:
   :config
   ;; errcheck is a program for checking for unchecked errors in Go code.
   (unless (executable-find "errcheck")
-    (poly/install-go-tool "github.com/kisielk/errcheck")))
+    (poly/install-go-tool 'errcheck)))
 
 (use-package go-gen-test
   :straight t
@@ -1445,7 +1469,7 @@ Examples:
   :after go-mode
   :config
   (unless (executable-find "impl")
-    (poly/install-go-tool "github.com/josharian/impl")))
+    (poly/install-go-tool 'impl)))
 
 (use-package gotest
   :straight t
@@ -1465,7 +1489,13 @@ Examples:
   :commands (go-playground-mode)
   :config
   (unless (executable-find "goplay")
-    (poly/install-go-tool "github.com/haya14busa/goplay/cmd/goplay")))
+    (poly/install-go-tool 'goplay)))
+
+(defun go-install-tools ()
+  "Install or update go PKG/tools."
+  (interactive)
+  (dolist (pkg go--tools)
+    (poly/install-go-tool (car pkg))))
 #+end_src
 * lisp
 

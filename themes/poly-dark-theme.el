@@ -62,7 +62,7 @@ The theme has to be reloaded after changing anything in this group."
   :group 'poly-dark)
 
 (defface tabnine-face '((t (:inherit font-lock-string-face)))
-  "TabNine face")
+  "TabNine face.")
 
 ;;
 ;; Assigment form: VARIABLE COLOR [TTY-COLOR]
