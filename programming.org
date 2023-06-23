@@ -1329,6 +1329,7 @@ Examples:
     (staticcheck . "honnef.co/go/tools/cmd/staticcheck")
     (fillstruct . "github.com/davidrjenni/reftools/cmd/fillstruct")
     (goconst . "github.com/jgautheron/goconst/cmd/goconst")
+    (godoc . "golang.org/x/tools/cmd/godoc")
     (wire . "github.com/google/wire/cmd/wire")
     (gofumpt . "mvdan.cc/gofumpt")
     (revive . "github.com/mgechev/revive")
