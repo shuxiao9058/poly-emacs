@@ -305,6 +305,10 @@ The theme has to be reloaded after changing anything in this group."
 	       (success :foreground ,green)
 	       (warning :foreground ,orange)
 	       (error :foreground ,red)
+
+               (flymake-errline :underline ,red :foreground ,red :background nil :inherit nil)
+               (flymake-warnline :underline ,orange :foreground ,orange :background nil :inherit nil)
+
 	       (header-line :background ,bg)
 	       ;; syntax
 	       (font-lock-builtin-face :foreground ,orange)

@@ -739,8 +739,8 @@ Examples:
   (lsp-lua-window-status-bar nil)
   (lsp-lua-completion-display-context nil)
   (lsp-go-gopls-server-path "/opt/local/bin/gopls")
-  (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
-			   ))
+  ;; (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
+  ;; 			   ))
   (lsp-go-hover-kind "NoDocumentation")
   (lsp-go-links-in-hover nil)
   (lsp-go-use-gofumpt t)
@@ -766,13 +766,18 @@ Examples:
   (lsp-beancount-langserver-executable (expand-file-name "workspace/beancount-language-server/target/release/beancount-language-server" "~"))
   (lsp-beancount-journal-file (expand-file-name ".emacs.d/.local/beancount/beancount.beancount" "~"))
   :config
+  ;; cancel warning
+  (advice-add 'lsp-warn
+	      :around (lambda (orig-func &rest r)
+			(message (apply #'format-message r))))
+
   (defun my-flycheck-lsp-advice (orig &rest args)
     "Ensure user-defined `flycheck-checker' isn't overwritten by `lsp'."
     (if flycheck-checker
         (progn
 	  (let ((old-checker flycheck-checker))
-          (apply orig args)
-          (setq-local flycheck-checker old-checker)))
+            (apply orig args)
+            (setq-local flycheck-checker old-checker)))
       (apply orig args))
     (apply orig args))
 
@@ -803,7 +808,7 @@ Examples:
    `(("gopls.usePlaceholders" t t)
      ("gopls.deepCompletion" t t)
      ("gopls.completeUnimported" t t)
-     ("gopls.staticcheck" :json-false)
+     ("gopls.staticcheck" nil nil)
      ("gopls.completionBudget" "200ms" nil)
      ("gopls.semanticTokens" t t)
      ("gopls.allExperiments" t t)
@@ -835,13 +840,13 @@ Examples:
 				'(;; unusedparams
 				  ;; composites
 				  ;; ST1003
-					     ST1021 ST1016 SA5011 ST1020 ;; ST1005
-						    ;; SA9003
-						    ;; SA4006
-						    ST1022 ;; S1023
-						    ;; SA4011
-						    ;; SA4010
-					     )))
+				  ST1021 ST1016 SA5011 ST1020 ;; ST1005
+				  ;; SA9003
+				  ;; SA4006
+				  ST1022 ;; S1023
+				  ;; SA4011
+				  ;; SA4010
+				  )))
      ("gopls.annotations" ,(mapcar (lambda (a) (cons a :json-false))
 				   '(bounds escape inline nil)))
      ;; ("gopls.buildFlags" ["-mod=readonly"])
@@ -901,13 +906,7 @@ Examples:
 	      ("C-c C-i"     . lsp-find-implementation)
 	      ([remap xref-find-definitions] . lsp-find-definition)
               ([remap xref-find-references] . lsp-find-references)
-	      ([remap xref-find-apropos]     . lsp-find-declaration))
-  )
-
-;; ;; cancel warning
-;; (advice-add 'lsp-warn
-;; 	      :around (lambda (orig-func &rest r)
-;; 			(message (apply #'format-message r))))
+	      ([remap xref-find-apropos]     . lsp-find-declaration)))
 
 (use-package lsp-pyright
   :ensure t

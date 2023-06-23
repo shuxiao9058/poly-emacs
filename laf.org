@@ -390,7 +390,6 @@ enable ligatures with emacs-mac, must install font first
 	     :type git
 	     :host github
 	     :repo "seagle0128/doom-modeline")
-  ;; :pin-ref "9d322f53c35f6e815f88afa1821c9782f9df323a"
   :custom
   ;; (doom-modeline-buffer-file-name-style 'truncate-with-project)
   ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
