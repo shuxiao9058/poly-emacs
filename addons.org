@@ -4488,35 +4488,11 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :config
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 
-(defun go-doc()
-  (interactive)
-  (setq-local dash-docs-docsets '("Go")))
-
-(defun rust-doc()
-  (interactive)
-  (setq-local dash-docs-docsets '("Rust")))
-
-(defun python-doc()
-  (interactive)
-  (setq-local dash-docs-docsets '("Python 3")))
-
-(defun emacs-lisp-doc()
-  (interactive)
-  (setq-local dash-docs-docsets '("Emacs Lisp")))
-
 (use-package dash-docs
   :config
-  (add-hook 'go-mode-hook 'go-doc)
-  (add-hook 'go-ts-mode-hook 'go-doc)
-  (add-hook 'python-mode-hook 'python-doc)
-  (add-hook 'python-ts-mode-hook 'python-doc)
-  (add-hook 'rustic-mode-hook 'rust-doc)
-  (add-hook 'rustic-ts-mode-hook 'rust-doc)
-  (add-hook 'emacs-lisp-mode-hook 'emacs-lisp-doc)
   (setq dash-docs-docsets-path (expand-file-name "Library/Application Support/Zeal/Zeal/docsets" "~"))
   ;; (setq dash-docs-browser-func 'eww)
-  (setq dash-docs-browser-func 'poly/docs-browse-url)
-  )
+  (setq dash-docs-browser-func 'poly/docs-browse-url))
 
 (use-package counsel-dash
   :commands (counsel-dash counsel-dash-at-point counsel-dash-install-docset)
@@ -4546,8 +4522,8 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (add-hook 'go-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("Go"))))
   (add-hook 'lua-mode-hook (lambda () (setq-local counsel-dash-docsets '("Lua"))))
   (add-hook 'html-mode-hook (lambda () (setq-local counsel-dash-docsets '("HTML" "Javascript"))))
-  (add-hook 'python-mode-hook (lambda () (setq-local counsel-dash-docsets '("Python 3"))))
-  (add-hook 'python-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("Python 3"))))
+  (add-hook 'python-mode-hook (lambda () (setq-local counsel-dash-docsets '("python_3"))))
+  (add-hook 'python-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("python_3"))))
   :config
   (setq counsel-dash-docsets-path (expand-file-name "Library/Application Support/Zeal/Zeal/docsets" "~"))
   (setq counsel-dash-enable-debugging nil)
