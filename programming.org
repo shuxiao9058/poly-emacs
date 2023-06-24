@@ -19,6 +19,41 @@ Configuration for programming and languages support.
 * Format
 
 #+begin_src emacs-lisp
+(use-package apheleia
+  :delight "\U000f0276"
+  :straight (:host github :repo "radian-software/apheleia" :branch "main")
+  :defer t
+  :hook ((prog-mode . apheleia-mode))
+  :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
+  :config
+  (push '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-"))
+	apheleia-formatters)
+  (push '(jsbeautify-css . (npx "js-beautify" "--type=css" "--quiet" "-"))
+	apheleia-formatters)
+  (push '(jsbeautify-html . (npx "js-beautify" "--type=html" "--quiet" "-"))
+	apheleia-formatters)
+  (push '(jsbeautify-js . (npx "js-beautify" "--type=js" "--quiet" "-"))
+	apheleia-formatters)
+  (push '(erb-formatter . ("erb-format" "--stdin"))
+	apheleia-formatters)
+  (push '(rufo . ("rufo" "--simple-exit"))
+	apheleia-formatters)
+  (setf (alist-get 'ruby-mode apheleia-mode-alist)
+	'(rufo))
+
+  (dolist (alist '((markdown-mode . prettier-markdown)
+		   (gfm-mode . prettier-markdown)
+		   (dockerfile-ts-mode . shfmt)
+		   (protobuf-ts-mode . clang-format)
+		   (protobuf-mode . clang-format)
+		   (emacs-lisp-mode . lisp-indent)
+		   (go-ts-mode . gofumpt)
+		   (sql-mode . sql-format)))
+    (add-to-list 'apheleia-mode-alist alist))
+  )
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
 (use-package format-all
   :straight t
   :ensure t

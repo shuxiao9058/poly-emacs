@@ -122,7 +122,6 @@ The theme has to be reloaded after changing anything in this group."
                (xref-match                     :inherit match)
                (secondary-selection           :background ,region2 :extend t)
 
-
                (compilation-info               :inherit font-lock-function-name-face)
                (compilation-warning            :inherit font-lock-warning-face)
 
@@ -141,8 +140,6 @@ The theme has to be reloaded after changing anything in this group."
                ;; Yasnippet
                (yas-field-highlight-face       :background ,region2)
 
-
-
                ;; Cider
                (cider-result-overlay-face      :background "black")
                (cider-repl-stderr-face         :foreground ,blue)
@@ -155,10 +152,11 @@ The theme has to be reloaded after changing anything in this group."
                (ivy-highlight-face            :inherit highlight)
                (ivy-yanked-word               :inherit highlight)
                (ivy-remote                    :foreground ,pink)
+               ;; (ivy-current-match :foreground ,orange :inverse-video t)
                (ivy-current-match
-		,@(if poly-dark-alternate-mode-line-and-minibuffer
-		      (list :weight 'normal :foreground green)
-		    (list :weight 'bold :foreground pink)))
+	        ,@(if poly-dark-alternate-mode-line-and-minibuffer
+	              (list :weight 'normal :foreground green)
+	            (list :weight 'bold :foreground pink)))
                (ivy-minibuffer-match-highlight :foreground ,orange)
                (ivy-minibuffer-match-face-1   :background ,dogblue4 :foreground ,bg)
                (ivy-minibuffer-match-face-2   :background ,green :foreground ,bg)

@@ -4454,23 +4454,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
            (use-proxy-no-proxy (regexp-opt '("localhost" "baidu.com")))))
 #+end_src
 
-*** zeal
-
-#+begin_src emacs-lisp :tangle no
-(use-package zeal-at-point
-  :straight (zeal-at-point :host github
-                           :repo "jinzhu/zeal-at-point"
-                           :branch "master")
-  :bind
-  ("\C-cd" . 'zeal-at-point)
-  ("\C-cz" . 'zeal-at-point)
-  :config
-  (setq zeal-at-point-zeal-version "0.6.1")
-  (add-to-list 'zeal-at-point-mode-alist '(go-mode . "go"))
-  (add-to-list 'zeal-at-point-mode-alist '(rustic-mode . "rust"))
-  (add-to-list 'zeal-at-point-mode-alist '(gitlab-ci-mode . "gitlab-ci")))
-#+end_src
-
 *** help emacs-devel collect gc stats
 
 #+begin_src emacs-lisp

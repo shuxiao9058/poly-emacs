@@ -2822,7 +2822,7 @@ valign for org-mode & markdown table
 
 ;; Interactively insert and edit items from kill-ring
 (use-package browse-kill-ring
-  :disabed
+  :disabled
   :bind ("C-c k" . browse-kill-ring)
   :hook (after-init . browse-kill-ring-default-keybindings)
   :init (setq browse-kill-ring-separator "────────────────"
