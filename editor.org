@@ -246,13 +246,14 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
   :demand t
   :commands
   (persp-mode)
-  :config
-  (persp-mode)
   :bind
   ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
   :custom
-  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
-  )
+  (persp-mode-prefix-key (kbd "C-x x"))
+  (persp-suppress-no-prefix-key-warning t)
+  ;; (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  :config
+  (persp-mode))
 
 (use-package persp-projectile
   :straight t)
@@ -341,6 +342,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   ;;   (counsel-rg "" (projectile-project-root))
   ;;   )
   :config
+  (projectile-mode +1)
   (add-to-list 'projectile-project-root-files "go.mod")
   (add-to-list 'projectile-project-root-files "buf.yaml")
   (projectile-register-project-type

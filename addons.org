@@ -1492,7 +1492,7 @@ To manage the git repository, use builtin package ~vc~.
   (magit-revert-buffers 'silent)
   (git-commit-summary-max-length 50)
   (magit-log-section-commit-count 5)
-  (magit-diff-options (quote ("--minimal" "--patience")))
+  (magit-diff-options (quote ("--minimal" "--patience" "-b")))
   (magit-tag-arguments (quote ("--annotate" "--sign")))
   (magit-merge-arguments (quote ("--no-ff")))
   (magit-rebase-arguments (quote ("--autostash")))
@@ -1533,6 +1533,7 @@ To manage the git repository, use builtin package ~vc~.
   ;; ;; Use flyspell in the commit buffer
   ;; (add-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   :config
+  (setq magit-define-global-key-bindings t)
   (setq magit-status-sections-hook
 	'(
 	  magit-insert-status-headers
@@ -1710,7 +1711,6 @@ To manage the git repository, use builtin package ~vc~.
   :straight t)
 
 (use-package forge
-  :disabled
   :straight t
   :after (magit yaml)
   :commands forge-create-pullreq forge-create-issue
@@ -1724,6 +1724,10 @@ To manage the git repository, use builtin package ~vc~.
 	(append forge-alist
 		'(("git.17usoft.com" "git.17usoft.com/api/v4" "git.17usoft.com" forge-gitlab-repository)
 		  ("github.com" "api.github.com" "github.com" forge-github-repository))))
+  (transient-append-suffix 'forge-dispatch '(0)
+    ["Edit"
+     ("e a" "assignees" forge-edit-topic-assignees)
+     ("e r" "review requests" forge-edit-topic-review-requests)])
   ;; ;; remove some hooks for magit performance-s
   ;; (remove-hook 'magit-status-sections-hook 'forge-insert-pullreqs)
   ;; (remove-hook 'magit-status-sections-hook 'forge-insert-issues)
@@ -4505,7 +4509,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (counsel-dash-ignored-docsets nil)
   (dash-docs-common-docsets '("Django"  "Go" "Flask" "NumPy" "Pandas" "Scala" "Rust" "Python 3" "Java_SE17"))
   :init
-  (add-hook 'emacs-lisp-mode-hook (lambda () (setq-local counsel-dash-docsets '("Emacs Lisp"))))
+  (add-hook 'emacs-lisp-mode-hook (lambda () (setq-local counsel-dash-docsets '("Emacs_Lisp"))))
   (add-hook 'scala-mode-hook (lambda () (setq-local counsel-dash-docsets '("Scala" "Akka" "Play_Scala" "Java"))))
   (add-hook 'java-mode-hook (lambda () (setq-local counsel-dash-docsets '("Java" "Play_Java"))))
   (add-hook 'rust-mode-hook (lambda () (setq-local counsel-dash-docsets '("Rust"))))
@@ -4529,39 +4533,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (setq counsel-dash-enable-debugging nil)
   :bind
   (("C-c d" . counsel-dash-at-point)))
-
-(defun ar/dash-parse-apple-api-query (query)
-  "Parse QUERY if recognized as dash-apple-api://. Nil otherwise.
-
-dash-apple-api://load?request_key=hsM5TRxINf#<dash_entry_language=swift><dash_entry_menuDescription=MKMapRect><dash_entry_name=MKMapRect>
-
-'((\"dash_entry_language\" . \"swift\")
-  (\"dash_entry_menuDescription\" . \"MKMapRect\")
-  (\"dash_entry_name\" . \"MKMapRect\"))"
-  (when (s-prefix-p "dash-apple-api://" query)
-    (mapcar (lambda (item)
-              (let ((values (s-split "=" item)))
-                (cons (nth 0 values) (nth 1 values))))
-            (thread-last (nth 1 (s-split "#" query))
-                         (s-chop-suffix ">")
-                         (s-chop-prefix "<")
-                         (s-split "><")))))
-
-(defun adviced:dash-docs-result-url (orig-fun &rest r)
-  "Transforms dash-apple-api:// queries to dash://."
-  (let* ((filename (nth 1 r))
-         (apple-api-query (ar/dash-parse-apple-api-query filename)))
-    (if apple-api-query
-        (format "dash://%s" (map-elt apple-api-query "dash_entry_name" nil 'string-equal))
-      (apply orig-fun r))))
-
-(setq dash-docs-browser-func 'poly/docs-browse-url
-      browse-url-firefox-program "/Applications/Firefox.app/Contents/MacOS/firefox"
-      browse-url-generic-program "/usr/bin/open")
-
-(advice-add #'dash-docs-result-url
-            :around
-            #'adviced:dash-docs-result-url)
 
 (defun poly/docs-browse-url (url &optional _new-window)
   (set-process-sentinel
