@@ -205,15 +205,6 @@ The theme has to be reloaded after changing anything in this group."
                (web-mode-symbol-face           :foreground ,purple)
                (css-selector                   :foreground ,purple)
 
-               ;; ;; ;; Markdown
-               ;; ;; (markdown-header-face-1         :bold t :height ,(nth 0 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-2         :bold t :height ,(nth 1 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-3         :bold t :height ,(nth 2 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-4         :bold t :height ,(nth 3 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-5         :bold t :height ,(nth 4 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-6         :bold t :height ,(nth 5 poly-dark-header-scales))
-               ;; ;; (markdown-header-face-7         :bold t :height ,(nth 6 poly-dark-header-scales))
-
                ;; Telega
                (telega-entity-type-code        :inherit font-lock-string-face)
                (telega-msg-heading             :inherit hl-line)
@@ -884,12 +875,6 @@ The theme has to be reloaded after changing anything in this group."
 	       (persp-face-lighter-default :foreground ,fg3 :weight bold)
 	       (persp-face-lighter-buffer-not-in-persp :foreground ,alt-blue)
 	       (persp-face-lighter-nil-persp :foreground ,comment)
-
-               ;; (meow-keypad-indicator          :foreground ,bg :background ,red)
-               ;; (meow-insert-indicator          :foreground ,bg :background ,green)
-               ;; (meow-normal-indicator          :foreground ,bg :background ,yellow)
-               ;; (meow-motion-indicator          :foreground ,bg :background ,blue)
-               ;; (meow-beacon-indicator          :foreground ,bg :background ,purple)
 
 	       (meow-keypad-indicator          :inherit mode-line :foreground ,red)
                (meow-insert-indicator          :inherit mode-line :foreground ,green)
