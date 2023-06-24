@@ -134,9 +134,7 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
   (use-package marginalia
-    ;; :disabled
     :straight t
-    ;; :after selectrum
     :ensure t
     :demand t
     :defer 1
@@ -156,10 +154,9 @@ Configuration for addons, additional features provided by individual packages.
 	    (projectile-recentf . project-file)
 	    (projectile-display-buffer . project-buffer)
 	    (projectile-switch-to-buffer . project-buffer)
-	    ;; (projectile-commander . project)
+	    (projectile-commander . project)
 	    ))
-    :bind (;; ("M-A" . marginalia-cycle)
-	   :map minibuffer-local-map
+    :bind (:map minibuffer-local-map
 	   ("M-A" . marginalia-cycle))
     :config
     (marginalia-mode)
@@ -167,9 +164,9 @@ Configuration for addons, additional features provided by individual packages.
     ;; Display more annotations - e.g. docstring with M-x
     (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
 
-    ;; ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
-    ;; (advice-add #'marginalia-cycle :after
-    ;; 	       (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
+    ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
+    (advice-add #'marginalia-cycle :after
+	       (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
     )
 
   ;; -----------------------------------------------------------------------------
@@ -4536,14 +4533,11 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 (defun poly/docs-browse-url (url &optional _new-window)
   (set-process-sentinel
-   (start-process "docs-brower" "*docs brower*" "osascript" "-e"  (format "tell application \"Firefox\" to open location \"%s\"" url))
+   (start-process "docs-brower" "*docs brower*" "osascript" "-e"  (format "tell application \"Firefox\"\n activate\n open location \"%s\"\n end tell" url))
    (lambda (proc _)
      (let ((status (process-exit-status proc)))
        (if (= 0 status)
-	   (progn
-	     (set-process-sentinel
-	      (start-process "docs-brower" "*docs brower*" "osascript" "-e"  "tell application \"Firefox\" to activate") nil)
-	     (message "Open docset success"))
+	   (message "Open docset success")
 	 (message "Open docset failed")
 	 )))))
 #+end_src

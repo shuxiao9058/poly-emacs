@@ -367,7 +367,7 @@ Accepts the same arguments as `message'."
 	     (expand-file-name "themes" user-emacs-directory))
 
 (defun poly/reload-theme()
-  "reload theme"
+  "Reload theme."
   (interactive)
   (require 'poly-dark-theme)
   (load-theme 'poly-dark t)
