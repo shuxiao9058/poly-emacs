@@ -152,15 +152,22 @@ The theme has to be reloaded after changing anything in this group."
                (clojure-character-face         :foreground ,purple)
 
                ;; ;; Ivy
-               ;; ;; (ivy-highlight-face             ((t ())))
-               (ivy-yanked-word                :background "yellow" :foreground "black")
-               ;; ;; (ivy-remote                     ((t ())))
-               (ivy-current-match              :foreground ,bg :background ,bg)
-               ;; ;; (ivy-minibuffer-match-highlight ((t ())))
-               ;; ;; (ivy-minibuffer-match-face-1    ((t ())))
-               ;; ;; `(ivy-minibuffer-match-face-2    ((t ())))
-               ;; ;; `(ivy-minibuffer-match-face-3    ((t ())))
-               ;; ;; `(ivy-minibuffer-match-face-4    ((t ())))
+               (ivy-highlight-face            :inherit highlight)
+               (ivy-yanked-word               :inherit highlight)
+               (ivy-remote                    :foreground ,pink)
+               (ivy-current-match
+		,@(if poly-dark-alternate-mode-line-and-minibuffer
+		      (list :weight 'normal :foreground green)
+		    (list :weight 'bold :foreground pink)))
+               (ivy-minibuffer-match-highlight :foreground ,orange)
+               (ivy-minibuffer-match-face-1   :background ,dogblue4 :foreground ,bg)
+               (ivy-minibuffer-match-face-2   :background ,green :foreground ,bg)
+               (ivy-minibuffer-match-face-3   :background ,yellow :foreground ,bg)
+               (ivy-minibuffer-match-face-4   :background ,pink :foreground ,bg)
+               (ivy-virtual :foreground ,cyan)
+               (ivy-subdir :foreground ,yellow)
+               (ivy-confirm-face :foreground ,orange)
+               (ivy-match-required-face :foreground ,red)
                ;; ;; (counsel-outline-default        ((t ())))
                (swiper-background-match-face-1  :inherit hl-line)
                (swiper-background-match-face-2  :inherit hl-line)
@@ -556,8 +563,6 @@ The theme has to be reloaded after changing anything in this group."
 	       (ido-indicator :foreground ,fg :background ,pink)
 	       ;; isearch
                ;; ;; ISearch
-               ;; (isearch                        :background ,green :foreground ,black)
-               ;; (isearch-fail                   :backgronud ,red :foreground ,orange)
 	       (isearch :inherit match :weight bold)
 	       (isearch-fail :foreground ,bg :background ,orange)
 	       ;; jde-java
@@ -841,6 +846,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (term-color-red :foreground ,red :background ,red)
 	       (term-color-white :foreground ,fg :background ,fg)
 	       (term-color-yellow :foreground ,yellow :background ,yellow)
+
 	       ;; undo-tree
 	       (undo-tree-visualizer-current-face :foreground ,orange)
 	       (undo-tree-visualizer-default-face :foreground ,fg2)

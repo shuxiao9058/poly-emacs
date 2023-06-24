@@ -1346,6 +1346,8 @@ Examples:
     (protoc-gen-doc . "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc")
     (bufls . "github.com/bufbuild/buf-language-server/cmd/bufls")
     (buf . ("github.com/bufbuild/buf/cmd/buf" "v1.21.0"))
+    (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
+    (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
     (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")
     ))
 
