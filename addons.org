@@ -750,6 +750,17 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :straight t)
 #+end_src
 
+*** ldap-mode
+
+#+begin_src emacs-lisp
+(use-package ldap-mode
+  :straight (ldap-mode :package "ldap-mode"
+		       :type git
+		       :host nil
+		       :repo "ssh://git@h.jiya.net:9922/shuxiao9058/ldap-mode.git")
+  :mode (("\\.ldif\\'" . ldap-mode)))
+#+end_src
+
 *** tabnine & copilot
 
 **** tabnine
@@ -2510,24 +2521,6 @@ session
  text folding minor mode
 
 #+begin_src emacs-lisp
-;; (defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
-;; (defun hideshow-folded-overlay-fn (ov)
-;;   (when (eq 'code (overlay-get ov 'hs))
-;;     (let* ((nlines (count-lines (overlay-start ov) (overlay-end ov)))
-;;            (info (format " ... #%d " nlines)))
-;;       (overlay-put ov 'display (propertize info 'face hideshow-folded-face)))))
-;; (setq hs-set-up-overlay 'hideshow-folded-overlay-fn)
-
-;;  (defvar my-hs-hide nil
-;;       "Current state of hideshow for toggling all.")
-;;  (defun my-toggle-hideshow-all ()
-;;       "Toggle hideshow all."
-;;       (interactive)
-;;       (setq my-hs-hide (not my-hs-hide))
-;;       (if my-hs-hide
-;;           (hs-hide-all)
-;;         (hs-show-all)))
-
 (use-package hideshow
   :straight (:type built-in)
   :diminish hs-minor-mode
@@ -2539,7 +2532,42 @@ session
   ;; Nicer code-folding overlays (with fringe indicators)
   :hook (prog-mode . hs-minor-mode)
   :custom
-  (hs-hide-comments-when-hiding-all nil))
+  (hs-hide-comments-when-hiding-all nil)
+  (hs-set-up-overlay #'hideshow-folded-overlay-fn)
+  :config
+  (defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
+
+  (defface hideshow-border-face
+    '((((background light))
+       :background "rosy brown" :extend t)
+      (t
+       :background "sandy brown" :extend t))
+    "Face used for hideshow fringe."
+    :group 'hideshow)
+
+  (define-fringe-bitmap 'hideshow-folded-fringe
+    (vector #b00000000
+            #b00000000
+            #b00000000
+            #b11000011
+            #b11100111
+            #b01111110
+            #b00111100
+            #b00011000))
+
+  (defun hideshow-folded-overlay-fn (ov)
+    "Display a folded region indicator with the number of folded lines."
+    (when (eq 'code (overlay-get ov 'hs))
+      (let* ((nlines (count-lines (overlay-start ov) (overlay-end ov)))
+             (info (format " ... [#%d] " ;; " (%d)..."
+			   nlines)))
+        ;; fringe indicator
+        (overlay-put ov 'before-string
+		     (propertize " "
+                                 'display '(left-fringe hideshow-folded-fringe
+                                                        hideshow-border-face)))
+        ;; folding indicator
+        (overlay-put ov 'display (propertize info 'face hideshow-folded-face))))))
 #+end_src
 
 * gpg
@@ -4521,7 +4549,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (add-hook 'js-mode-hook (lambda () (setq-local counsel-dash-docsets '("JavaScript"))))
   (add-hook 'go-mode-hook (lambda () (setq-local counsel-dash-docsets '("Go"))))
   (add-hook 'go-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("Go"))))
-  (add-hook 'lua-mode-hook (lambda () (setq-local counsel-dash-docsets '("Lua"))))
+  (add-hook 'lua-mode-hook (lambda () (setq-local counsel-dash-docsets '("Lua_5.4"))))
   (add-hook 'html-mode-hook (lambda () (setq-local counsel-dash-docsets '("HTML" "Javascript"))))
   (add-hook 'python-mode-hook (lambda () (setq-local counsel-dash-docsets '("python_3"))))
   (add-hook 'python-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("python_3"))))

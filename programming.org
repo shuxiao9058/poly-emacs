@@ -331,11 +331,11 @@ Configuration for programming and languages support.
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 
 
-(use-package flycheck-pos-tip
-  :straight t
-  :hook
-  (flycheck-mode . flycheck-pos-tip-mode)
-  :after flycheck)
+;; (use-package flycheck-pos-tip
+;;   :straight t
+;;   :hook
+;;   (flycheck-mode . flycheck-pos-tip-mode)
+;;   :after flycheck)
 
 ;; https://github.com/hlissner/doom-emacs/issues/2194
 ;; underline cant be a different color than the foreground on terminal
@@ -1451,6 +1451,7 @@ Examples:
            (flycheck-golangci-lint-setup)
            (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
   :defines flycheck-disabled-checkers
+  :disabled
   :init
   (setenv "GO111MODULE" "on")
   :custom
