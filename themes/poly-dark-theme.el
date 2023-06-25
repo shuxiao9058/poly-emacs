@@ -887,6 +887,11 @@ The theme has to be reloaded after changing anything in this group."
                (meow-normal-cursor :foreground ,bg  :background ,yellow)
  	       (meow-motion-cursor :foreground ,bg  :background ,blue)
 	       (meow-beacon-cursor :foreground ,bg :background ,purple)
+
+               (lsp-face-highlight-read :underline t :background nil :foreground nil)
+               (lsp-face-highlight-write :underline t :background nil :foreground nil)
+               (lsp-face-highlight-textual :underline t :background nil :foreground nil)
+               (lsp-ui-peek-highlight :inherit nil :background nil :foreground nil :weight semi-bold :box (:line-width -1))
 	       )))
 
   (apply #'custom-theme-set-faces

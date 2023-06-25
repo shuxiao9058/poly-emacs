@@ -1055,6 +1055,14 @@ Visualizing Color Codes with rainbow-mode.
         ("C-<up>" . jupyter-repl-history-previous)
         ("C-<down>" . jupyter-repl-history-next)))
 
+(use-package ob-restclient
+  :after org
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t)))  ; TODO: this may slow down org load
+  (add-hook 'org-babel-after-execute-hook (lambda () (let ((lang (nth 0 (org-babel-get-src-block-info))))
+                                                       (when (and buffer-file-name (string= lang "restclient"))
+                                                         (save-buffer))))))
+
 (use-package zmq
   :straight(zmq :type git :host github
                 :repo "dzop/emacs-zmq"

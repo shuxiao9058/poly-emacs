@@ -1493,8 +1493,14 @@ To manage the git repository, use builtin package ~vc~.
 (use-package magit
   :straight t
   :commands (magit-file-delete magit-status magit-checkout)
-  :hook (magit-pop-mode . hide-mode-line-mode)
+  :hook ((magit-pop-mode . hide-mode-line-mode)
+	 (git-commit-setup . git-commit-turn-on-flyspell)
+	 (magit-mode . hack-dir-local-variables-non-file-buffer))
   :custom
+  (magit-section-initial-visibility-alist '((stashes . show)
+                                            (unpushed . show)
+                                            (pullreqs . show)
+                                            (issues . show)))
   ;; (magit-refresh-verbose t) ;; debug only
   ;; (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (magit-revert-buffers 'silent)
