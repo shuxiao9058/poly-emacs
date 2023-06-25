@@ -19,6 +19,9 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 #+begin_src emacs-lisp
 ;; A few more useful configurations...
+(global-prettify-symbols-mode t)
+(global-display-fill-column-indicator-mode t)
+
 (use-package emacs
   :custom
   ;; Resize the compilation window so that it doesn't take up half the frame
@@ -215,6 +218,38 @@ Don't show *Buffer list* when opening multiple files at the same time.
 (add-hook 'before-save-hook 'whitespace-cleanup)
 #+end_src
 
+* Comment
+
+ #+begin_src emacs-lisp
+(use-package newcomment
+  :straight (:type built-in)
+  :ensure nil
+  :bind ([remap comment-dwim] . comment-or-uncomment)
+  :config
+  (defun comment-or-uncomment ()
+    "Comment or uncomment the current line or region.
+
+If the region is active and `transient-mark-mode' is on, call
+`comment-or-uncomment-region'.
+Else, if the current line is empty, insert a comment and indent
+it.
+Else, call `comment-or-uncomment-region' on the current line."
+    (interactive)
+    (if (region-active-p)
+        (comment-or-uncomment-region (region-beginning) (region-end))
+      (if (save-excursion
+            (beginning-of-line)
+            (looking-at "\\s-*$"))
+          (comment-dwim nil)
+        (comment-or-uncomment-region (line-beginning-position) (line-end-position)))))
+  :custom
+  ;; `auto-fill' inside comments.
+  ;;
+  ;; The quoted text in `message-mode' are identified as comments, so only
+  ;; quoted text can be `auto-fill'ed.
+  (comment-auto-fill-only-comments t))
+ #+end_src
+
 * Completion for key sequence
 
 ** Which-key
@@ -246,8 +281,6 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
   :demand t
   :commands
   (persp-mode)
-  :bind
-  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
   :custom
   (persp-mode-prefix-key (kbd "C-x x"))
   (persp-suppress-no-prefix-key-warning t)
@@ -310,6 +343,62 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   (interactive (list (deadgrep--read-search-term)))
   (let ((deadgrep-project-root-function #'projectile-project-root))
     (deadgrep search-term)))
+
+;; Buffer manager
+;;
+;; `sR': switch to saved filter groups
+(use-package ibuffer
+  :straight (:type built-in)
+  :ensure nil
+  :hook (ibuffer-mode . ibuffer-auto-mode)
+  :bind ([remap list-buffers] . ibuffer)
+  :custom
+  (ibuffer-expert t)
+  (ibuffer-movement-cycle nil)
+  (ibuffer-show-empty-filter-groups nil)
+  (ibuffer-saved-filter-groups
+   '(("Default"
+      ("Emacs" (or (name . "\\*scratch\\*")
+                   (name . "\\*dashboard\\*")
+                   (name . "\\*compilation\\*")
+                   (name . "\\*Backtrace\\*")
+                   (name . "\\*Packages\\*")
+                   (name . "\\*Messages\\*")
+                   (name . "\\*Customize\\*")))
+      ("Browser" (or (mode . eww-mode)
+                     (mode . xwidget-webkit-mode)))
+      ("Help" (or (name . "\\*Help\\*")
+                  (name . "\\*Apropos\\*")
+                  (name . "\\*info\\*")
+                  (mode . Man-mode)
+                  (mode . woman-mode)))
+      ("Repl" (or (mode . gnuplot-comint-mode)
+                  (mode . inferior-emacs-lisp-mode)
+                  (mode . inferior-python-mode)))
+      ("Term" (or (mode . term-mode)
+                  (mode . shell-mode)
+                  (mode . eshell-mode)))
+      ("Mail" (or (mode . mail-mode)
+                  (mode . message-mode)
+                  (derived-mode . gnus-mode)))
+      ("Conf" (or (mode . yaml-mode)
+                  (mode . conf-mode)))
+      ("Dict" (or (mode . fanyi-mode)
+                  (mode . dictionary-mode)))
+      ("Text" (and (derived-mode . text-mode)
+                   (not (starred-name))))
+      ("Magit" (or (mode . magit-repolist-mode)
+                   (mode . magit-submodule-list-mode)
+                   (mode . git-rebase-mode)
+                   (derived-mode . magit-section-mode)
+                   (mode . vc-annotate-mode)))
+      ("VC" (or (mode . diff-mode)
+                (derived-mode . log-view-mode)))
+      ("Prog" (and (derived-mode . prog-mode)
+                   (not (starred-name))))
+      ("Dired" (mode . dired-mode))
+      ("IRC" (or (mode . rcirc-mode)
+                 (mode . erc-mode)))))))
 
 (use-package ibuffer-projectile
   :straight t)

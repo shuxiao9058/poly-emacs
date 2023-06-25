@@ -2535,6 +2535,22 @@ session
   (hs-hide-comments-when-hiding-all nil)
   (hs-set-up-overlay #'hideshow-folded-overlay-fn)
   :config
+  (defvar hs-special-modes-alist
+    (mapcar 'purecopy
+	    '((c-mode "{" "}" "/[*/]" nil nil)
+	      (c++-mode "{" "}" "/[*/]" nil nil)
+	      (dart-mode "{" "}" "/[*/]" nil nil)
+	      (mint-mode "{" "}" "/[*/]" nil nil)
+	      (go-mode "{" "}" "/[*/]" nil nil)
+	      (ruby-mode
+	       "\\(def\\|do\\|{\\)" "\\(end\\|end\\|}\\)" "#" nil nil)
+	      (enh-ruby-mode
+	       "\\(def\\|do\\|{\\)" "\\(end\\|end\\|}\\)" "#" (lambda (arg) (enh-ruby-forward-sexp)) nil)
+	      (bibtex-mode ("@\\S(*\\(\\s(\\)" 1))
+	      (java-mode "{" "}" "/[*/]" nil nil)
+	      (js-mode "{" "}" "/[*/]" nil)
+              (js-mode "`" "`" "/[*/]" nil))))
+
   (defconst hideshow-folded-face '((t (:inherit 'font-lock-comment-face :box t))))
 
   (defface hideshow-border-face

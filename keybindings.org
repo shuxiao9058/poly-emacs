@@ -93,6 +93,8 @@
 ;; `a' key will toggle visibility of all.
 (bind-key (kbd "C-x C-b") #'bs-show)
 (bind-key (kbd "M-/") #'completion-at-point)
+(bind-key (kbd "C-x C-b")  #'ibuffer)         ; or use a nicer switcher, see below
+
 (unbind-key "C-z")
 (unbind-key "s-o")
 ;; (unbind-key "C-x C-q")

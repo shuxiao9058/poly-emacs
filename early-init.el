@@ -1,7 +1,7 @@
 ;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
 (defvar poly/debug nil
-  "debug flag")
+  "Debug flag.")
 
 ;; Shut off message buffer.  To debug Emacs, comment these out so you can see
 ;; output from message function calls.

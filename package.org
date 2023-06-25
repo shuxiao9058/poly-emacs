@@ -531,6 +531,22 @@
 	 ("C->" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)))
 
+;; Command line interpreter
+(use-package comint
+  :straight (:type built-in)
+  :ensure nil
+  :bind (:map comint-mode-map
+              ([remap kill-region]   . backward-kill-word))
+  :custom
+  ;; No paging
+  (comint-pager "cat")
+  ;; Make the prompt of "*Python*" buffer readonly
+  (comint-prompt-read-only t)
+  (comint-history-isearch 'dwim)
+  ;; Colorize
+  (comint-terminfo-terminal "dumb-emacs-ansi"))
+
+
 ;; required by core-hammerspoon
 (use-package dash
   :straight t)
