@@ -144,17 +144,17 @@ Configuration for addons, additional features provided by individual packages.
     :init
     (setq marginalia-command-categories
 	  '((imenu . imenu)
-	    (projectile-find-file . project-file)
+	    ;; (projectile-find-file . project-file)
 	    ;; (projectile-find-file . project)
-	    (projectile-find-dir . project-file)
+	    ;; (projectile-find-dir . project-file)
 	    ;; (projectile-find-dir . project)
 	    ;; (projectile-switch-project . project)
-	    (projectile-switch-project . file)
-	    (projectile-switch-open-project . file)
-	    (projectile-recentf . project-file)
-	    (projectile-display-buffer . project-buffer)
-	    (projectile-switch-to-buffer . project-buffer)
-	    (projectile-commander . project)
+	    ;; (projectile-switch-project . file)
+	    ;; (projectile-switch-open-project . file)
+	    ;; (projectile-recentf . project-file)
+	    ;; (projectile-display-buffer . project-buffer)
+	    ;; (projectile-switch-to-buffer . project-buffer)
+	    ;; (projectile-commander . project)
 	    ))
     :bind (:map minibuffer-local-map
 	   ("M-A" . marginalia-cycle))
@@ -175,21 +175,22 @@ Configuration for addons, additional features provided by individual packages.
   ;; completions properly, we keep track of when we're in the process of switching
   ;; projects and make sure to return the correct category
 
-  (defvar c/switching-project? nil)
-  (defun c/projectile-before-switch-project ()
-    (setq c/switching-project? t))
-  (defun c/projectile-after-switch-project ()
-    (setq c/switching-project? nil))
+  ;; (defvar c/switching-project? nil)
+  ;; (defun c/projectile-before-switch-project ()
+  ;;   (setq c/switching-project? t))
+  ;; (defun c/projectile-after-switch-project ()
+  ;;   (setq c/switching-project? nil))
 
-  (after-load (projectile marginalia)
-    (add-hook 'projectile-before-switch-project-hook #'c/projectile-before-switch-project)
-    (add-hook 'projectile-after-switch-project-hook #'c/projectile-after-switch-project)
+  ;; (after-load (projectile marginalia)
+  ;;   (add-hook 'projectile-before-switch-project-hook #'c/projectile-before-switch-project)
+  ;;   (add-hook 'projectile-after-switch-project-hook #'c/projectile-after-switch-project)
 
-    (advice-add 'marginalia-classify-by-prompt :around
-		(lambda (orig-fun &rest args)
-		  (if c/switching-project?
-		      'project
-		    (apply orig-fun args)))))
+  ;;   (advice-add 'marginalia-classify-by-prompt :around
+  ;; 		(lambda (orig-fun &rest args)
+  ;; 		  (if c/switching-project?
+  ;; 		      'project
+  ;; 		    (apply orig-fun args))))
+  ;;   )
 #+end_src
 
 ** Orderless
@@ -302,7 +303,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :defer 1
   :custom
   (consult-preview-key nil)
-  (consult-project-root-function #'projectile-project-root)
+  ;; (consult-project-root-function #'projectile-project-root)
   :hook
   (completion-list-mode . consult-preview-at-point-mode)
   :init (bind-key "TAB"

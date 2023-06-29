@@ -643,6 +643,7 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 (use-package treemacs-projectile
   :straight t
   :ensure t
+  :disabled
   :after (treemacs projectile)
   :config
   (setq treemacs-header-function #'treemacs-projectile-create-header))

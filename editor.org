@@ -287,9 +287,6 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
   ;; (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
   :config
   (persp-mode))
-
-(use-package persp-projectile
-  :straight t)
 #+end_src
 
 ** project.el
@@ -298,18 +295,37 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 #+begin_src emacs-lisp
 (use-package project
-  :straight nil
+  :straight (:type built-in)
   :custom
+  (project-switch-commands 'consult-project-extra-find)
+  (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod"))
   (project-vc-ignores
-   '("vendor/" "*.elc" "*.a"
+   '("vendor/" "*.elc" "*.a" ".DS_Store" "__pycache__"
      "tmp" "dist" "coverage"
      ".idea" ".vscode"
      ".ensime_cache" ".eunit"
-     ".git" ".hg" ".fslckout"
+     ".git" ".hg" ".fslckout" 
+     "tmp" "dist" "coverage"
      "_FOSSIL_" ".bzr" "_darcs"
      ".tox" ".svn"
-     ".stack-work" ".ccls-cache" ".cache" ".clangd")
+     ".stack-work" ".ccls-cache" ".cache" ".clangd"
+     "ido.last" "eln-cache/" ".cache/" ".saves/" "save-perspective"
+     "elpa/" "straight/" "auto-save-list/" "undo/" "var/" "tramp"
+     ".lsp-session-v1" "history" "org-roam.db" "multisession/"
+      "vimish-fold/" "transient/" "tree-sitter/" "Clementine/"
+      "Code - OSS/" "Element/" "Pulsar/" "Signal*/" "Chromium/"
+      "akonadi*" "balena-etcher/" "cef_user_data/" "chromium/"
+      "icedtea-web/" "libreoffice/" "whatsdesk/"
+     )
    '(".log" ".vs" "node_modules")))
+
+
+(use-package consult-project-extra
+  :defer t
+  :straight (consult-project-extra :type git :host github :repo "Qkessler/consult-project-extra")
+   :bind
+  ([remap project-find-file] . consult-project-extra-find)
+  ("C-x p 4 f" . consult-project-extra-find-other-window))
 
 (use-package ag
   :straight t
@@ -325,24 +341,6 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   ""
   :type 'list)
 
-
-(defun my/projectile-ignored-project-function(project-root)
-  (member t (mapcar
-	     #'(lambda (dir)
-		 (string-prefix-p dir project-root)
-		 )
-	     find-project-ignore-dir
-	     )))
-
-
-(defun projectile-selection-at-point ()
-  (when (use-region-p)
-    (buffer-substring-no-properties (region-beginning) (region-end))))
-
-(defun projectile-deadgrep (search-term)
-  (interactive (list (deadgrep--read-search-term)))
-  (let ((deadgrep-project-root-function #'projectile-project-root))
-    (deadgrep search-term)))
 
 ;; Buffer manager
 ;;
@@ -399,12 +397,35 @@ To find files/buffers and apply commands on project, use builtin package ~projec
       ("Dired" (mode . dired-mode))
       ("IRC" (or (mode . rcirc-mode)
                  (mode . erc-mode)))))))
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle no
+
+(defun my/projectile-ignored-project-function(project-root)
+  (member t (mapcar
+	     #'(lambda (dir)
+		 (string-prefix-p dir project-root)
+		 )
+	     find-project-ignore-dir
+	     )))
+
+
+(defun projectile-selection-at-point ()
+  (when (use-region-p)
+    (buffer-substring-no-properties (region-beginning) (region-end))))
+
+(defun projectile-deadgrep (search-term)
+  (interactive (list (deadgrep--read-search-term)))
+  (let ((deadgrep-project-root-function #'projectile-project-root))
+    (deadgrep search-term)))
 
 (use-package ibuffer-projectile
   :straight t)
 
 (use-package projectile
   :straight t
+  :disabled
   :commands projectile-global-mode
   :after rg
   :delight '(:eval (format " [prj: %s]" (projectile-project-name)))
@@ -559,6 +580,10 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 	(projectile-switch-to-buffer))
     (call-interactively #'switch-to-buffer)
     ))
+
+(use-package persp-projectile
+:disabled
+:straight t)
 #+end_src
 
 * Enanced completion commands
