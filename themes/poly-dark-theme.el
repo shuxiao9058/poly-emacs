@@ -892,6 +892,12 @@ The theme has to be reloaded after changing anything in this group."
                (Man-reverse :inherit highlight)
                (Man-underline :inherit font-lock-keyword-face :underline t)
 
+               (apropos-keybinding :inherit font-lock-keyword-face)
+	       (apropos-label  :inherit font-lock-type-face)
+	       (apropos-match  :inherit font-lock-function-name-face)
+	       (apropos-property :inherit font-lock-string-face)
+	       (apropos-symbol  :inherit font-lock-keyword-face)
+
                (lsp-face-highlight-read :underline t :background unspecified :foreground unspecified)
                (lsp-face-highlight-write :underline t :background unspecified :foreground unspecified)
                (lsp-face-highlight-textual :underline t :background unspecified :foreground unspecified)
