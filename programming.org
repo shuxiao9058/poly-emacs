@@ -369,6 +369,35 @@ Configuration for programming and languages support.
   :straight (:type built-in))
 #+end_src
 
+
+* ispell
+
+#+begin_src emacs-lisp :tangle  yes
+(use-package ispell
+  :straight (:type built-in)
+  :config
+  (setq ispell-really-aspell t
+	ispell-silently-savep t
+	ispell-quietly t)
+  ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
+  (cond
+   ;; if hunspell NOT installed, fallback to aspell
+   ((executable-find "hunspell")
+    ;; In addition to "brew install hunspell" download dicts to
+    ;; ~/Library/Spelling/
+    ;; https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_GB.aff
+    ;; https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_GB.dic
+    (setq ispell-program-name "hunspell")
+    (setq ispell-local-dictionary "en_US")
+    (setq ispell-local-dictionary-alist
+          '(("en_GB" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8))))
+   ((executable-find "aspell")
+    (setq ispell-program-name "aspell")
+    (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US")))
+   (t
+    (error "No speller installed"))))
+#+end_src
+
 * LSP
 
 ** eglot
@@ -712,8 +741,8 @@ Examples:
   (lsp-enable-links nil)
   (lsp-idle-delay 0.1)                 ;; lazy refresh
   (lsp-server-trace nil)
-  (lsp-log-io t)
-  ;; (lsp-log-max nil)
+  (lsp-log-io nil)
+  (lsp-log-max nil)
   (lsp-print-performance nil)
   (lsp-document-sync-method nil) ;; use default method recommended by server. 'incremental 'full
   (lsp-enable-xref t)

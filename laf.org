@@ -440,7 +440,7 @@ enable ligatures with emacs-mac, must install font first
   ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
   ;; (doom-modeline-buffer-file-name-style 'relative-to-project)
   (doom-modeline-buffer-file-name-style 'truncate-all)
-  (doom-modeline-project-detection 'projectile)
+  (doom-modeline-project-detection 'project)
   (doom-modeline-modal-icon nil)
   (doom-modeline-icon t)
   (doom-modeline-major-mode-icon t)
@@ -640,14 +640,6 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 	 :map treemacs-mode-map
          ([mouse-1]   . treemacs-single-click-expand-action)))
 
-(use-package treemacs-projectile
-  :straight t
-  :ensure t
-  :disabled
-  :after (treemacs projectile)
-  :config
-  (setq treemacs-header-function #'treemacs-projectile-create-header))
-
 (use-package treemacs-magit
   :straight t
   :after magit
@@ -658,6 +650,14 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
           magit-post-unstage)
          . treemacs-magit--schedule-update)
   :ensure t)
+
+(use-package treemacs-projectile
+  :straight t
+  :ensure t
+  :disabled
+  :after (treemacs projectile)
+  :config
+  (setq treemacs-header-function #'treemacs-projectile-create-header))
 
 ;; (use-package nerd-icons
 ;;   :defer 1

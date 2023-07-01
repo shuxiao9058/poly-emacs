@@ -888,6 +888,10 @@ The theme has to be reloaded after changing anything in this group."
  	       (meow-motion-cursor :foreground ,bg  :background ,blue)
 	       (meow-beacon-cursor :foreground ,bg :background ,purple)
 
+               (Man-overstrike :inherit font-lock-type-face :bold t)
+               (Man-reverse :inherit highlight)
+               (Man-underline :inherit font-lock-keyword-face :underline t)
+
                (lsp-face-highlight-read :underline t :background unspecified :foreground unspecified)
                (lsp-face-highlight-write :underline t :background unspecified :foreground unspecified)
                (lsp-face-highlight-textual :underline t :background unspecified :foreground unspecified)

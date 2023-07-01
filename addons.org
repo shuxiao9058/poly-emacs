@@ -293,9 +293,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ** Consult without consultation fees
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package consult
-  :disabled
   :straight t
   :ensure t
   :demand t
@@ -303,7 +302,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :defer 1
   :custom
   (consult-preview-key nil)
-  ;; (consult-project-root-function #'projectile-project-root)
   :hook
   (completion-list-mode . consult-preview-at-point-mode)
   :init (bind-key "TAB"
@@ -319,10 +317,22 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (require 'consult-org))
   (declare-function consult--customize-set "consult")
   (progn
-    (setq consult-project-root-function #'vc-root-dir)
+    (setq consult-project-root-function  (lambda ()
+					   (when-let (project (project-current))
+                                             (car (project-roots project))))
+          consult-narrow-key             "<"
+	  consult-line-numbers-widen     t
+	  consult-async-min-input        2
+	  consult-async-refresh-delay    0.15
+	  consult-async-input-throttle   0.2
+	  consult-async-input-debounce   0.1
+	  xref-show-xrefs-function       #'consult-xref
+	  xref-show-definitions-function #'consult-xref)
+    ;; (setq consult-project-root-function #'vc-root-dir)
+    ;; (with-eval-after-load 'consult
     (consult-customize
-     consult-ripgrep consult-grep
-     consult-buffer consult-recent-file
+     consult-ripgrep consult-git-grep consult-grep
+     consult-buffer consult-bookmark consult-recent-file consult-xref
      :preview-key (kbd "M-."))
     ;; Disable consult-buffer project-related capabilities as
     ;; they are very slow in TRAMP.
@@ -348,15 +358,16 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ([remap bookmark-jump] . consult-bookmark)
 	 ([remap goto-line]  . consult-goto-line)
 	 ([remap imenu]         . consult-imenu)
+	 ([remap locate] . consult-locate)
+	 ([remap man]      . consult-man)
 	 ([remap recentf-open-files] . consult-recent-file)
 	 ([remap yank-pop] . consult-yank-pop)
+	 ;; ([remap yank-pop] . consult-yank-from-kill-ring)
+	 ([remap project-find-regexp] . consult-ripgrep)
 	 ([remap switch-to-buffer]          . consult-buffer)
 	 ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
 	 ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
-	 ([remap man]      . consult-man)
-	 ;; ([remap yank-pop] . consult-yank-from-kill-ring)
-	 ([remap switch-to-buffer] . consult-buffer)
-	 ([remap goto-line] . consult-goto-line)))
+	 ([remap switch-to-buffer] . consult-buffer)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1711,7 +1722,12 @@ To manage the git repository, use builtin package ~vc~.
 ;; browse-at-remote - Browse target page on github/gitlab/bitbucket
 (use-package browse-at-remote
   :straight t
-  :bind ("C-c g b" . browse-at-remote/browse))
+  :config
+  (add-to-list 'browse-at-remote-remote-type-regexps '(:host "^git\\.17usoft\\.com$" :type "gitlab" :actual-host "git.17usoft.com"))
+  (transient-append-suffix 'magit-file-dispatch "m"
+    '("o" "Browse file" browse-at-remote))
+  (transient-replace-suffix 'magit-dispatch "o"
+    '("o" "Browse file" browse-at-remote)))
 
 ;; based on http://manuel-uberti.github.io/emacs/2018/02/17/magit-bury-buffer/
 (defun magit-kill-buffers ()
@@ -1867,7 +1883,7 @@ Enable diff-hl in based on major modes.
   :init (setq diff-hl-draw-borders nil)
   :config
   ;; Highlight on-the-fly
-  (diff-hl-flydiff-mode 1)
+  ;; (diff-hl-flydiff-mode 1)
 
   ;; Set fringe style
   (setq-default fringes-outside-margins t)
@@ -2207,7 +2223,6 @@ save minibuffer history
   :custom
   (desktop-auto-save-timeout 600)
   :config
-
   ;; https://github.com/purcell/emacs.d/blob/master/lisp/init-sessions.el
   ;; Save a bunch of variables to the desktop file.
   ;; For lists, specify the length of the maximal saved data too.
@@ -2269,10 +2284,6 @@ save minibuffer history
               (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))))
   :bind (("<S-f2>" . desktop-save-in-desktop-dir)
          ("<C-f2>" . rag/restore-last-saved-desktop)))
-
-;; Restore histories and registers after saving
-(setq-default history-length 100000)
-(add-hook 'after-init-hook 'savehist-mode)
 #+end_src
 
 session
@@ -2283,9 +2294,29 @@ session
   :custom
   (session-save-file (expand-file-name "session" poly-cache-dir))
   (session-name-disable-regexp "\\(?:\\`'/tmp\\|\\.git/[A-Z_]+\\'\\)")
-  (session-save-file-coding-system 'utf-8)
-  :hook (after-init . session-initialize))
+  :hook (after-init . session-initialize)
+  :config
+  (setq session-save-print-spec '(t nil 40000))
+  (setq session-save-file-coding-system 'utf-8)
+  session-globals-exclude '(consult--buffer-history
+                            vertico-repeat-history))
 #+end_src
+
+Auto cleanup older buffers
+
+#+begin_src emacs-lisp
+(use-package midnight
+  :init
+  (setq midnight-delay 0)
+  :config
+  (setq clean-buffer-list-delay-general 30)
+  (setq clean-buffer-list-kill-regexps
+        (nconc clean-buffer-list-kill-regexps
+               '("\\`\\*Customize .*\\*\\'"
+                 "\\`\\magit: .*\\*\\'"
+                 ))))
+#+end_src
+
 * embark
 
 #+begin_src emacs-lisp

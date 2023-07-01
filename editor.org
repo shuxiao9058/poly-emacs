@@ -38,8 +38,10 @@ This is consulted on every `require', `load' and various path/io functions.  You
               ;; There were errors.
               (message "Compilation errors, press C-x ` to visit.")
             ;; No errors; make the compilation window go away in 2 seconds.
-            (run-at-time 2 nil 'delete-windows-on buf)
-            (message "Build Succeeded."))))
+	    (unless (string-match (buffer-name buf) "*Go Test*")
+	      (run-at-time 2 nil 'delete-windows-on buf)
+	      (message "Build Succeeded."))
+            )))
   ;; Follow the compilation buffer scroll instead of remaining at the top line.
   (setq compilation-scroll-output t)
   ;; (setq compilation-scroll-output 'first-error)
@@ -93,20 +95,24 @@ This is consulted on every `require', `load' and various path/io functions.  You
       truncate-lines t
       truncate-partial-width-windows 50
       whitespace-style '(face trailing lines-tail)
-      xref-prompt-for-identifier nil
 
       ;; clipboard
-      kill-ring-max 2000
+      kill-ring-max 20000
       save-interprogram-paste-before-kill t
       x-select-enable-clipboard           t
       x-select-enable-primary             t
       history-length 100000
       history-delete-duplicates t
       xref-history-storage 'xref-window-local-history
+      xref-prompt-for-identifier nil
+      xref-search-program 'ripgrep
+      xref-show-xrefs-function #'xref-show-definitions-completing-read
+      xref-show-definitions-function #'xref-show-definitions-completing-read
+      ;; fix massed xref cross multiple project
+      xref-history-storage 'xref-window-local-history
       confirm-nonexistent-file-or-buffer nil
       large-file-warning-threshold 100000000
       resize-mini-windows t
-      sentence-end-double-space nil           ;; Use a single space after dots
       truncate-string-ellipsis "…"
       cursor-type '(hbar .  2)
       use-dialog-box nil
@@ -188,6 +194,12 @@ This is consulted on every `require', `load' and various path/io functions.  You
 (set-default-coding-systems 'utf-8)
 (prefer-coding-system 'utf-8)
 (setenv "LANG" "en_US.UTF-8")
+(setenv "LC_ALL" "en_US.UTF-8")
+(setq mm-coding-system-priorities '(utf-8))
+(setq buffer-file-coding-system 'utf-8)
+(setq erc-server-coding-system '(utf-8 . utf-8))
+;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -298,13 +310,19 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   :straight (:type built-in)
   :custom
   (project-switch-commands 'consult-project-extra-find)
-  (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod"))
+  (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod" "Cargo.toml"
+                                        "project.clj"
+                                        "pom.xml"
+                                        "package.json"
+                                        "Makefile"
+                                        "README.org"
+                                        "README.md"))
   (project-vc-ignores
    '("vendor/" "*.elc" "*.a" ".DS_Store" "__pycache__"
      "tmp" "dist" "coverage"
      ".idea" ".vscode"
      ".ensime_cache" ".eunit"
-     ".git" ".hg" ".fslckout" 
+     ".git" ".hg" ".fslckout"
      "tmp" "dist" "coverage"
      "_FOSSIL_" ".bzr" "_darcs"
      ".tox" ".svn"
@@ -401,7 +419,6 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 
 #+begin_src emacs-lisp :tangle no
-
 (defun my/projectile-ignored-project-function(project-root)
   (member t (mapcar
 	     #'(lambda (dir)
@@ -409,7 +426,6 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 		 )
 	     find-project-ignore-dir
 	     )))
-
 
 (defun projectile-selection-at-point ()
   (when (use-region-p)
@@ -718,7 +734,15 @@ No tab will created if the command is cancelled."
 (defun toy/set-tab-name-default ()
   (interactive)
   (if (buffer-file-name (current-buffer))
-      (let ((proj-name (projectile-project-name)))
+      (let ((proj-name
+             (ignore-errors
+               (cond
+                ((featurep 'projectile)
+                 (projectile-project-name))
+                (t
+                 (or (project-name (project-current))
+                  (file-name-nondirectory
+                   (string-trim-right (expand-file-name (vc-root-dir)) "/"))))))))
 	(unless (or (= (length proj-name) 0) (string= proj-name "-"))
 	  ;; (message proj-name)
 	  (tab-bar-rename-tab proj-name)))))

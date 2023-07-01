@@ -321,7 +321,7 @@ This configuration sticks with Meow for modal editing.
    '( "e" . recentf-open)
    '("r" . recentf-open)
    ;; '("." . find-file)
-   '("SPC" . execute-extended-command)
+   ;; '("SPC" . execute-extended-command)
    '("." . poly/find-file)
    `("p" . ,project-prefix-map)
    '("b" . switch-to-buffer)
