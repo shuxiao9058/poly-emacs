@@ -282,7 +282,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (ffap :foreground ,fg4)
 	       (fringe :background ,bg :foreground ,fg4)
 	       (highlight :foreground ,fg3 :background ,bg3)
-               (hl-line :background ,dogblue4 :extend t)
+               (hl-line :background ,current :extend t)
 	       (info-quoted-name :foreground ,orange)
 	       (info-string :foreground ,yellow)
 	       (lazy-highlight :foreground ,fg2 :background ,bg2)

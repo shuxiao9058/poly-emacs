@@ -446,6 +446,10 @@
   :config
   (global-undo-tree-mode))
 
+ (use-package vundo
+      :bind ("C-x u" . vundo)
+      :config (setq vundo-glyph-alist vundo-unicode-symbols))
+
 (use-package hide-mode-line
   :straight t
   :commands (hide-mode-line-mode))

@@ -767,7 +767,7 @@ Examples:
   (lsp-diagnostic-package :flycheck)
   (lsp-modeline-diagnostics-enable t)
   (lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode js-mode go-mode go-ts-mode protobuf-mode))
-  (lsp-flycheck-live-reporting nil)    ;; obey `flycheck-check-syntax-automatically'
+  (lsp-flycheck-live-reporting t)    ;; obey `flycheck-check-syntax-automatically'
   (lsp-completion-provider :none)
   (lsp-enable-file-watchers nil)       ;; turn off for better performance
   ;; (lsp-file-watch-threshold 10000)
@@ -1480,7 +1480,6 @@ Examples:
            (flycheck-golangci-lint-setup)
            (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
   :defines flycheck-disabled-checkers
-  :disabled
   :init
   (setenv "GO111MODULE" "on")
   :custom
