@@ -582,8 +582,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
           (variable ,(nerd-icons-codicon "nf-cod-symbol_variable") :face font-lock-variable-name-face)
 	  (tabnine ,(nerd-icons-codicon "nf-cod-hubot") :face font-lock-warning-face)
           (unknown ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face)
-          (t ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face)))
-  )
+          (t ,(nerd-icons-codicon "nf-cod-code") :face font-lock-warning-face))))
 
 ;;; Emacs bookmarks
 ;; C-x r m: create new bookmark
@@ -779,7 +778,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package tabnine
-  :after (on)
   :commands (tabnine-start-process)
   :hook ((prog-mode text-mode vterm-mode) . tabnine-mode)
   :straight (tabnine :package "tabnine"
@@ -797,9 +795,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
-  :hook ((on-first-input . tabnine-start-process)
-	 (kill-emacs . tabnine-kill-process))
+  :hook ((kill-emacs . tabnine-kill-process))
   :config
+  (tabnine-start-process)
   (defun +tabnine-disable-predicate()
     (or ;; (derived-mode-p 'vterm-mode)
      (meow-motion-mode-p)
@@ -1483,7 +1481,7 @@ _t_:      select tab 											_R_ : redo
 
 * on
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package on
   :straight (:host github :repo "ajgrf/on.el"))
 #+end_src
@@ -4620,4 +4618,10 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 	   (message "Open docset success")
 	 (message "Open docset failed")
 	 )))))
+#+end_src
+
+** package-lint
+#+begin_src emacs-lisp
+(use-package package-lint
+  :commands package-lint-current-buffer)
 #+end_src
