@@ -148,10 +148,7 @@ Core configuration of poly emacs, global variable declare.
 ** core lib
 
 #+begin_src emacs-lisp
-(require 'cl-lib)
 (require 'subr-x)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun load-expand(filename)
   (load(expand-file-name filename)))

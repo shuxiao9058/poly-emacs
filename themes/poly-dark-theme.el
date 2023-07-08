@@ -296,7 +296,7 @@ The theme has to be reloaded after changing anything in this group."
 		    (list :weight 'bold :foreground pink)))
 	       (read-multiple-choice-face :inherit completions-first-difference)
 	       (region :inherit match :extend t)
-	       (trailing-whitespace :foreground nil :background ,orange)
+	       (trailing-whitespace :foreground unspecified :background ,orange)
 	       (vertical-border :foreground ,bg2)
 	       (success :foreground ,green)
 	       (warning :foreground ,orange)
@@ -678,7 +678,7 @@ The theme has to be reloaded after changing anything in this group."
 			  :box ,current :inverse-video nil
 			  ,@(if poly-dark-alternate-mode-line-and-minibuffer
 				(list :foreground fg3)
-			      (list :foreground nil)))
+			      (list :foreground 'unspecified)))
 	       (mode-line-inactive
 		:inverse-video nil
 		,@(if poly-dark-alternate-mode-line-and-minibuffer
@@ -687,7 +687,7 @@ The theme has to be reloaded after changing anything in this group."
 		    (list :foreground fg :background bg2 :box bg2)))
                ;;;; mode-line / header-line
 	       (mode-line-active    :inherit mode-line)
-	       (mode-line-emphasis  ::inherit highlight :distant-foreground ,bg)
+	       (mode-line-emphasis  :inherit highlight :distant-foreground ,bg)
 	       (mode-line-highlight :inherit highlight :distant-foreground ,bg)
                (mode-line-buffer-id :foreground "Light Blue" :weight bold)
 	       ;; (mode-line-buffer-id :weight 'bold)

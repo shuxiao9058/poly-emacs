@@ -795,7 +795,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
-  :hook ((kill-emacs . tabnine-kill-process))
+  :hook (kill-emacs . tabnine-kill-process)
   :config
   (tabnine-start-process)
   (defun +tabnine-disable-predicate()
