@@ -3207,6 +3207,7 @@ there are no attachments."
 
   (require 'gnus-art)
   (require 'mm-util)
+
   (defun notmuch-view-html ()
     "Show current MSG in browser if it includes an HTML-part.
 The variables `browse-url-browser-function',
@@ -3322,8 +3323,7 @@ determine which browser function to use."
       (when (and parts header)
 	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
           (message "Message does not contain a \"text/html\" part"))
-	(mm-destroy-parts parts))
-      ))
+	(mm-destroy-parts parts))))
 
   (defun new-html-buffer(txt)
     (with-temp-buffer
@@ -3333,132 +3333,97 @@ determine which browser function to use."
       (insert (base64-encode-string (encode-coding-string  (text-to-html-string txt) 'utf-8)))
       (buffer-string)))
 
-  (defun mu4e-views--extract-text-and-html-coding-from-gnus (parts)
-    "Extract text parts from PARTS of message MSG."
-    ;; (plist-put msg :icals nil)
-    (dolist (part parts)
-      (cond
-       ;; a text part
-       ((and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
-	(let* ((type (mm-handle-type part))
-               (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
-               (encoding (mm-handle-encoding part))
-               (txt (mm-get-part part)))
-          (when encoding
-            (save-restriction
-	      (save-restriction
-	        (article-narrow-to-head)
-	        (goto-char (point-max)))
-	      (forward-line 1)
-	      (save-restriction
-	        (narrow-to-region (point) (point-max))
-                (setq txt (buffer-string))))) ;;)))
-	  ;; a calendar part
-	  ((and (listp part) (or (equal (car (mm-handle-type part)) "text/calendar")
-				 (equal (car (mm-handle-type part)) "html/calendar")))
-	   (let ((ical (gnus-icalendar-event-from-handle part (gnus-icalendar-identities))))))
-	  ;; an html part
-	  ((and (listp part) (equal (car (mm-handle-type part)) "text/html"))
-	   (let* ((type (mm-handle-type part))
-		  (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
-		  (encoding (mm-handle-encoding part)))))
-	  ;; recurse into multipart
-	  ((and (listp part) (equal (mm-handle-media-supertype part) "multipart"))
-	   (mu4e-views--extract-text-and-html-coding-from-gnus part))
-	  ;; marker for multipart mixed
-	  ((and (stringp part) (string= part "multipart/mixed"))))))
+  (defun mu4e-views--convert-charset (charset)
+    "Translate email coding system CHARSET into Emacs coding system."
+    (let* ((cs (or charset "utf-8"))
+	   (downc (downcase cs))
+	   (fixed (or (alist-get downc '(("utf8" . "utf-8")))
+		      downc)))
+      (unless (coding-system-p (intern fixed))
+	(warn "Unkown coding system %s in email" fixed)
+	(setq fixed  "utf-8"))
+      (message "translate coding system %s into %s" charset fixed)
+      fixed))
+  )
+;; )
 
-      (defun mu4e-views--convert-charset (charset)
-	"Translate email coding system CHARSET into Emacs coding system."
-	(let* ((cs (or charset "utf-8"))
-               (downc (downcase cs))
-               (fixed (or (alist-get downc '(("utf8" . "utf-8")))
-			  downc)))
-	  (unless (coding-system-p (intern fixed))
-	    (warn "Unkown coding system %s in email" fixed)
-	    (setq fixed  "utf-8"))
-	  (message "translate coding system %s into %s" charset fixed)
-	  fixed))
+(use-package notmuch-capf
+  :straight (notmuch-capf
+	     :host github
+	     :repo "tpeacock19/notmuch-capf"))
 
-      )
+;; (use-package notmuch-labeler
+;;   :straight t
+;;   :commands notmuch-labeler-rename
+;;   :defer t
+;;   :after notmuch
+;;   )
 
-    (use-package notmuch-capf
-      :straight (notmuch-capf
-		 :host github
-		 :repo "tpeacock19/notmuch-capf"))
+;; (use-package notmuch-bookmarks
+;;   :straight t
+;;   :after notmuch
+;;   :config
+;;   (notmuch-bookmarks-mode))
 
-    ;; (use-package notmuch-labeler
-    ;;   :straight t
-    ;;   :commands notmuch-labeler-rename
-    ;;   :defer t
-    ;;   :after notmuch
-    ;;   )
+;; (use-package notmuch-alert
+;;   :straight (notmuch-alert
+;;              :host github
+;;              :repo "publicimageltd/notmuch-alerts")
+;;   :after notmuch-bookmarks
+;;   :config
+;;   (notmuch-alert-mode)
+;;   (defun notmuch-alert-unread-attachment ()
+;;     "Create a new alert object for unread mails with attachment."
+;;     (make-notmuch-alert :filter "date:today"
+;; 			:description "Check for mails from today"
+;; 			:format-string "%d mails from today"))
+;;   (defun notmuch-alert-unread-attachment ()
+;;     "Create a new alert object for unread mails with attachment."
+;;     (make-notmuch-alert :filter "date:today"
+;; 			:description "Check for mails from today"
+;; 			:format-string "%d mails from today"))
+;;   :bind*
+;;   (:map global-map
+;; 	("<f3>" . notmuch-alert-visit))
+;;   )
 
-    ;; (use-package notmuch-bookmarks
-    ;;   :straight t
-    ;;   :after notmuch
-    ;;   :config
-    ;;   (notmuch-bookmarks-mode))
+(use-package notmuch-notify
+  :ensure t
+  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
+			    :files (:defaults "*.png" "*.wav"))
+  ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
+  :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
+  :custom
+  ;; (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
+  (notmuch-notify-refresh-interval 300)
+  (alert-default-style 'notifier)
+  (notmuch-notify-alert-profiles
+   `((:name "inbox"
+	    :search-term "tag:inbox"
+	    :severity urgent
+	    :title "Notmuch inbox:"
+	    :icon "/Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+	    ;; :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
+	    :audio ,(expand-file-name "straight/build/notmuch-notify/emailreceived.wav" straight-base-dir))
+     (:name "default")))
+  :config
+  ;; (Recommended) activate system-wise notification timer
+  (notmuch-notify-set-refresh-timer))
 
-    ;; (use-package notmuch-alert
-    ;;   :straight (notmuch-alert
-    ;;              :host github
-    ;;              :repo "publicimageltd/notmuch-alerts")
-    ;;   :after notmuch-bookmarks
-    ;;   :config
-    ;;   (notmuch-alert-mode)
-    ;;   (defun notmuch-alert-unread-attachment ()
-    ;;     "Create a new alert object for unread mails with attachment."
-    ;;     (make-notmuch-alert :filter "date:today"
-    ;; 			:description "Check for mails from today"
-    ;; 			:format-string "%d mails from today"))
-    ;;   (defun notmuch-alert-unread-attachment ()
-    ;;     "Create a new alert object for unread mails with attachment."
-    ;;     (make-notmuch-alert :filter "date:today"
-    ;; 			:description "Check for mails from today"
-    ;; 			:format-string "%d mails from today"))
-    ;;   :bind*
-    ;;   (:map global-map
-    ;; 	("<f3>" . notmuch-alert-visit))
-    ;;   )
-
-    (use-package notmuch-notify
-      :ensure t
-      :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
-				:files (:defaults "*.png" "*.wav"))
-      ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
-      :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
-      :custom
-      ;; (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
-      (notmuch-notify-refresh-interval 300)
-      (alert-default-style 'notifier)
-      (notmuch-notify-alert-profiles
-       `((:name "inbox"
-		:search-term "tag:inbox"
-		:severity urgent
-		:title "Notmuch inbox:"
-		:icon "/Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
-		;; :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
-		:audio ,(expand-file-name "straight/build/notmuch-notify/emailreceived.wav" straight-base-dir))
-	 (:name "default")))
-      :config
-      ;; (Recommended) activate system-wise notification timer
-      (notmuch-notify-set-refresh-timer))
-
-    (with-eval-after-load 'notmuch-update
-      (setq notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
-      (setq notmuch-update-interval (* 5 60))
-      (defun splinter-notmuch-refresh-non-show-buffers ()
-	"Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
+(with-eval-after-load 'notmuch-update
+  (setq notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
+  (setq notmuch-update-interval (* 5 60))
+  (defun splinter-notmuch-refresh-non-show-buffers ()
+    "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
 except for `notmuch-show-mode' buffers."
-	(interactive)
-	(dolist (buffer (buffer-list))
-	  (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
-            (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
-              (with-current-buffer buffer
-		(notmuch-refresh-this-buffer))))))
-      (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
-      (bind-key "u" #'notmuch-update notmuch-common-keymap))
+    (interactive)
+    (dolist (buffer (buffer-list))
+      (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
+        (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
+	  (with-current-buffer buffer
+	    (notmuch-refresh-this-buffer))))))
+  (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
+  (bind-key "u" #'notmuch-update notmuch-common-keymap))
 #+end_src
 
 ** GNUS
