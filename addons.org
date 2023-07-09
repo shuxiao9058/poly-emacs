@@ -3093,12 +3093,12 @@ there are no attachments."
   ;;; remote-notmuch should look like:
 
   (define-key notmuch-show-mode-map "d"
-    (lambda ()
-      "toggle deleted tag for message"
-      (interactive)
-      (if (member "deleted" (notmuch-show-get-tags))
-          (notmuch-show-tag (list "-deleted"))
-        (notmuch-show-tag (list "+deleted")))))
+	      (lambda ()
+		"toggle deleted tag for message"
+		(interactive)
+		(if (member "deleted" (notmuch-show-get-tags))
+		    (notmuch-show-tag (list "-deleted"))
+		  (notmuch-show-tag (list "+deleted")))))
 
   ;; (eval-after-load 'notmuch-show
   ;;   '(define-key notmuch-show-mode-map "`" 'notmuch-show-apply-tag-macro))
@@ -3229,16 +3229,22 @@ determine which browser function to use."
                     gnus-buttonized-mime-types))
            (gnus-newsgroup-charset
             (if (and charset (coding-system-p charset)) charset
-              (detect-coding-region (point-min) (point-max) t))))
+              (detect-coding-region (point-min) (point-max) t)))
+	   (parts)
+	   (header)
+	   (contain-html-parts)
+	   (text-part))
+
+      (unless (file-exists-p filename)
+	(notmuch-poll-and-refresh-this-buffer)
+	(setq filename (notmuch-show-get-filename)))
 
       ;; if article buffer exist, kill it then create a new one
       (when (bufferp gnus-article-buffer)
 	(kill-buffer gnus-article-buffer))
 
       (with-current-buffer (get-buffer-create gnus-article-buffer)
-	(let ((inhibit-read-only t)
-	      ;; (make-temp-file mm-make-temp-file)
-	      )
+	(let ((inhibit-read-only t))
 	  (erase-buffer)
 	  (insert-file-contents-literally
 	   filename nil nil nil t))
@@ -3249,100 +3255,210 @@ determine which browser function to use."
 	  (insert-file-contents-literally
 	   filename nil nil nil t)
 	  (run-hooks 'gnus-article-decode-hook)
-	  (let ((header (cl-loop for field in '("from" "to" "cc" "date" "subject")
-				 when (message-fetch-field field)
-				 concat (format "%s: %s\n" (capitalize field) it)))
-		(parts (mm-dissect-buffer t t)))
-	    ;; If singlepart, enforce a list.
-	    (when (and (bufferp (car parts))
-                       (stringp (car (mm-handle-type parts))))
-              (setq parts (list parts)))
-	    ;; Process the list
-	    (unless (gnus-article-browse-html-parts parts header)
-              (message "Message does not contain a \"text/html\" part"))
-	    (mm-destroy-parts parts))))
+	  (setq header (cl-loop for field in '("from" "to" "cc" "date" "subject")
+				when (message-fetch-field field)
+				concat (format "%s: %s\n" (capitalize field) it)))
+	  (setq parts (mm-dissect-buffer t t))))
+
       ;; kill temp article buffer
       (mm-destroy-parts gnus-article-mime-handles)
-      (kill-buffer gnus-article-buffer)))
-  )
+      (kill-buffer gnus-article-buffer)
 
-(use-package notmuch-capf
-  :straight (notmuch-capf
-             :host github
-             :repo "tpeacock19/notmuch-capf"))
+      (when (and (bufferp (car parts))
+                 (stringp (car (mm-handle-type parts))))
+        (setq parts (list parts)))
 
-;; (use-package notmuch-labeler
-;;   :straight t
-;;   :commands notmuch-labeler-rename
-;;   :defer t
-;;   :after notmuch
-;;   )
+      (dolist (part parts)
+	(when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	  (setq text-part t))
+	(when (and (listp part) (equal (car (mm-handle-type part)) "text/html"))
+	  (setq contain-html-parts t)))
 
-;; (use-package notmuch-bookmarks
-;;   :straight t
-;;   :after notmuch
-;;   :config
-;;   (notmuch-bookmarks-mode))
+      (when (and (not contain-html-parts) text-part)
+	(dolist (part parts)
+	  (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	    (let* ((type (mm-handle-type part))
+		   (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
+		   (encoding (mm-handle-encoding part))
+		   (txt (mm-get-part part)))
+              (when encoding
+		(save-restriction
+		  (save-restriction
+	            (article-narrow-to-head)
+	            (goto-char (point-max)))
+		  (forward-line 1)
+		  (save-restriction
+	            (narrow-to-region (point) (point-max))
+                    (setq txt (buffer-string)))))
+	      (with-current-buffer (get-buffer-create gnus-article-buffer)
+		(let ((inhibit-read-only t)
+		      (tmp-parts)
+		      (buffer-txt (new-html-buffer txt)))
+		  (insert buffer-txt)
+		  ;; (with-temp-buffer
+		  ;;   (insert buffer-txt)
+		  ;;   (delete-file "/tmp/html.txt")
+		  ;;   (write-region (point-min) (point-max) "/tmp/html.txt" t 'silent))
+		  )
+		(mm-enable-multibyte)
+		(run-hooks 'gnus-article-decode-hook)
+		(setq tmp-parts (mm-dissect-buffer t t))
+		(when tmp-parts
+		  ;; (message "success dissect buffer")
+		  (princ (type-of tmp-parts))
+		  (princ (mm-get-part tmp-parts))
+		  (setq parts tmp-parts)
+		  (when (and (bufferp (car parts))
+			     (stringp (car (mm-handle-type parts))))
+		    (setq parts (list parts)))))
 
-;; (use-package notmuch-alert
-;;   :straight (notmuch-alert
-;;              :host github
-;;              :repo "publicimageltd/notmuch-alerts")
-;;   :after notmuch-bookmarks
-;;   :config
-;;   (notmuch-alert-mode)
-;;   (defun notmuch-alert-unread-attachment ()
-;;     "Create a new alert object for unread mails with attachment."
-;;     (make-notmuch-alert :filter "date:today"
-;; 			:description "Check for mails from today"
-;; 			:format-string "%d mails from today"))
-;;   (defun notmuch-alert-unread-attachment ()
-;;     "Create a new alert object for unread mails with attachment."
-;;     (make-notmuch-alert :filter "date:today"
-;; 			:description "Check for mails from today"
-;; 			:format-string "%d mails from today"))
-;;   :bind*
-;;   (:map global-map
-;; 	("<f3>" . notmuch-alert-visit))
-;;   )
+	      (mm-destroy-parts gnus-article-mime-handles)
+	      (kill-buffer gnus-article-buffer)
+	      )
+	    )
+	  )
+	)
 
-(use-package notmuch-notify
-  :ensure t
-  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
-			    :files (:defaults "*.png" "*.wav"))
-  ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
-  :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
-  :custom
-  ;; (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
-  (notmuch-notify-refresh-interval 300)
-  (alert-default-style 'notifier)
-  (notmuch-notify-alert-profiles
-   `((:name "inbox"
-	    :search-term "tag:inbox"
-	    :severity urgent
-	    :title "Notmuch inbox:"
-	    :icon "/Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
-	    ;; :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
-	    :audio ,(expand-file-name "straight/build/notmuch-notify/emailreceived.wav" straight-base-dir))
-     (:name "default")))
-  :config
-  ;; (Recommended) activate system-wise notification timer
-  (notmuch-notify-set-refresh-timer))
+      (when (and parts header)
+	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
+          (message "Message does not contain a \"text/html\" part"))
+	(mm-destroy-parts parts))
+      ))
 
-(with-eval-after-load 'notmuch-update
-  (setq notmuch-update-command "/usr/local/bin/fdm fetch && notmuch new")
-  (setq notmuch-update-interval (* 5 60))
-  (defun splinter-notmuch-refresh-non-show-buffers ()
-    "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
+  (defun new-html-buffer(txt)
+    (with-temp-buffer
+      (erase-buffer)
+      (insert "Content-Type: text/html; charset=utf-8\n")
+      (insert "Content-Transfer-Encoding: base64\n\n")
+      (insert (base64-encode-string (encode-coding-string  (text-to-html-string txt) 'utf-8)))
+      (buffer-string)))
+
+  (defun mu4e-views--extract-text-and-html-coding-from-gnus (parts)
+    "Extract text parts from PARTS of message MSG."
+    ;; (plist-put msg :icals nil)
+    (dolist (part parts)
+      (cond
+       ;; a text part
+       ((and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	(let* ((type (mm-handle-type part))
+               (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
+               (encoding (mm-handle-encoding part))
+               (txt (mm-get-part part)))
+          (when encoding
+            (save-restriction
+	      (save-restriction
+	        (article-narrow-to-head)
+	        (goto-char (point-max)))
+	      (forward-line 1)
+	      (save-restriction
+	        (narrow-to-region (point) (point-max))
+                (setq txt (buffer-string))))) ;;)))
+	  ;; a calendar part
+	  ((and (listp part) (or (equal (car (mm-handle-type part)) "text/calendar")
+				 (equal (car (mm-handle-type part)) "html/calendar")))
+	   (let ((ical (gnus-icalendar-event-from-handle part (gnus-icalendar-identities))))))
+	  ;; an html part
+	  ((and (listp part) (equal (car (mm-handle-type part)) "text/html"))
+	   (let* ((type (mm-handle-type part))
+		  (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
+		  (encoding (mm-handle-encoding part)))))
+	  ;; recurse into multipart
+	  ((and (listp part) (equal (mm-handle-media-supertype part) "multipart"))
+	   (mu4e-views--extract-text-and-html-coding-from-gnus part))
+	  ;; marker for multipart mixed
+	  ((and (stringp part) (string= part "multipart/mixed"))))))
+
+      (defun mu4e-views--convert-charset (charset)
+	"Translate email coding system CHARSET into Emacs coding system."
+	(let* ((cs (or charset "utf-8"))
+               (downc (downcase cs))
+               (fixed (or (alist-get downc '(("utf8" . "utf-8")))
+			  downc)))
+	  (unless (coding-system-p (intern fixed))
+	    (warn "Unkown coding system %s in email" fixed)
+	    (setq fixed  "utf-8"))
+	  (message "translate coding system %s into %s" charset fixed)
+	  fixed))
+
+      )
+
+    (use-package notmuch-capf
+      :straight (notmuch-capf
+		 :host github
+		 :repo "tpeacock19/notmuch-capf"))
+
+    ;; (use-package notmuch-labeler
+    ;;   :straight t
+    ;;   :commands notmuch-labeler-rename
+    ;;   :defer t
+    ;;   :after notmuch
+    ;;   )
+
+    ;; (use-package notmuch-bookmarks
+    ;;   :straight t
+    ;;   :after notmuch
+    ;;   :config
+    ;;   (notmuch-bookmarks-mode))
+
+    ;; (use-package notmuch-alert
+    ;;   :straight (notmuch-alert
+    ;;              :host github
+    ;;              :repo "publicimageltd/notmuch-alerts")
+    ;;   :after notmuch-bookmarks
+    ;;   :config
+    ;;   (notmuch-alert-mode)
+    ;;   (defun notmuch-alert-unread-attachment ()
+    ;;     "Create a new alert object for unread mails with attachment."
+    ;;     (make-notmuch-alert :filter "date:today"
+    ;; 			:description "Check for mails from today"
+    ;; 			:format-string "%d mails from today"))
+    ;;   (defun notmuch-alert-unread-attachment ()
+    ;;     "Create a new alert object for unread mails with attachment."
+    ;;     (make-notmuch-alert :filter "date:today"
+    ;; 			:description "Check for mails from today"
+    ;; 			:format-string "%d mails from today"))
+    ;;   :bind*
+    ;;   (:map global-map
+    ;; 	("<f3>" . notmuch-alert-visit))
+    ;;   )
+
+    (use-package notmuch-notify
+      :ensure t
+      :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
+				:files (:defaults "*.png" "*.wav"))
+      ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
+      :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
+      :custom
+      ;; (notmuch-notify-excluded-tags '("Org-Mode" "FromMe"))
+      (notmuch-notify-refresh-interval 300)
+      (alert-default-style 'notifier)
+      (notmuch-notify-alert-profiles
+       `((:name "inbox"
+		:search-term "tag:inbox"
+		:severity urgent
+		:title "Notmuch inbox:"
+		:icon "/Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+		;; :icon ,(expand-file-name "straight/build/notmuch-notify/notmuch-logo.png" straight-base-dir)
+		:audio ,(expand-file-name "straight/build/notmuch-notify/emailreceived.wav" straight-base-dir))
+	 (:name "default")))
+      :config
+      ;; (Recommended) activate system-wise notification timer
+      (notmuch-notify-set-refresh-timer))
+
+    (with-eval-after-load 'notmuch-update
+      (setq notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
+      (setq notmuch-update-interval (* 5 60))
+      (defun splinter-notmuch-refresh-non-show-buffers ()
+	"Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
 except for `notmuch-show-mode' buffers."
-    (interactive)
-    (dolist (buffer (buffer-list))
-      (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
-        (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
-          (with-current-buffer buffer
-            (notmuch-refresh-this-buffer))))))
-  (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
-  (bind-key "u" #'notmuch-update notmuch-common-keymap))
+	(interactive)
+	(dolist (buffer (buffer-list))
+	  (let ((buffer-mode (buffer-local-value 'major-mode buffer)))
+            (when (memq buffer-mode '(notmuch-tree-mode notmuch-search-mode notmuch-hello-mode))
+              (with-current-buffer buffer
+		(notmuch-refresh-this-buffer))))))
+      (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
+      (bind-key "u" #'notmuch-update notmuch-common-keymap))
 #+end_src
 
 ** GNUS
@@ -4624,4 +4740,12 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 #+begin_src emacs-lisp
 (use-package package-lint
   :commands package-lint-current-buffer)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package replace-regexp-list
+  :straight (:host github :repo "emacsattic/replace-regexp-list"))
+
+(use-package text-to-html
+  :straight (:host github :repo "emacsattic/text-to-html"))
 #+end_src
