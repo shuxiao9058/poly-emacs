@@ -1507,7 +1507,7 @@ To manage the git repository, use builtin package ~vc~.
 	 (git-commit-setup . git-commit-turn-on-flyspell)
 	 (magit-mode . hack-dir-local-variables-non-file-buffer))
   :custom
-  (magit-section-initial-visibility-alist '((stashes . show)
+  (magit-section-initial-visibility-alist '((stashes . hide)
                                             (unpushed . show)
                                             (pullreqs . show)
                                             (issues . show)))
@@ -3313,12 +3313,10 @@ determine which browser function to use."
 			     (stringp (car (mm-handle-type parts))))
 		    (setq parts (list parts)))))
 
-	      (mm-destroy-parts gnus-article-mime-handles)
-	      (kill-buffer gnus-article-buffer)
-	      )
-	    )
-	  )
-	)
+	      (when (buffer-live-p gnus-article-buffer)
+		(mm-destroy-parts gnus-article-mime-handles)
+		(kill-buffer gnus-article-buffer))
+	      ))))
 
       (when (and parts header)
 	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
@@ -3343,9 +3341,7 @@ determine which browser function to use."
 	(warn "Unkown coding system %s in email" fixed)
 	(setq fixed  "utf-8"))
       (message "translate coding system %s into %s" charset fixed)
-      fixed))
-  )
-;; )
+      fixed)))
 
 (use-package notmuch-capf
   :straight (notmuch-capf
@@ -3410,9 +3406,13 @@ determine which browser function to use."
   ;; (Recommended) activate system-wise notification timer
   (notmuch-notify-set-refresh-timer))
 
-(with-eval-after-load 'notmuch-update
-  (setq notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
-  (setq notmuch-update-interval (* 5 60))
+(use-package notmuch-update
+  :straight (:host github :repo "shuxiao9058/notmuch-update")
+  :disabled
+  :custom
+  (notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
+  (notmuch-update-interval (* 5 60))
+  :config
   (defun splinter-notmuch-refresh-non-show-buffers ()
     "Invoke `notmuch-refresh-this-buffer' on all notmuch major-mode buffers
 except for `notmuch-show-mode' buffers."
@@ -3423,7 +3423,8 @@ except for `notmuch-show-mode' buffers."
 	  (with-current-buffer buffer
 	    (notmuch-refresh-this-buffer))))))
   (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
-  (bind-key "u" #'notmuch-update notmuch-common-keymap))
+  :bind
+  (:map notmuch-common-keymap (("u" . notmuch-update))))
 #+end_src
 
 ** GNUS
@@ -4713,4 +4714,59 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 (use-package text-to-html
   :straight (:host github :repo "emacsattic/text-to-html"))
+#+end_src
+
+
+** gif-screencast
+
+#+begin_src emacs-lisp
+;; sudo port install gifsicle
+(use-package gif-screencast
+  :straight t
+  :init
+  (when IS-MAC
+    (setq gif-screencast-args '("-x")
+          gif-screencast-cropping-program "mogrify"
+          gif-screencast-capture-format "ppm"
+          ;; gif-screencast-output-directory "~/Downloads"
+          )
+    (let ((tmp (expand-file-name "~/Documents/gif-screencast")))
+      (setq gif-screencast-screenshot-directory (concat tmp "/sceenshot")
+            gif-screencast-output-directory  tmp)))
+  :config
+  (advice-add
+   #'gif-screencast--cropping-region
+   :around
+   (lambda (oldfun &rest r)
+     (apply #'format "%dx%d+%d+%d"
+            (mapcar
+             (lambda (x) (* 2 (string-to-number x)))
+             (split-string (apply oldfun r) "[+x]")))))
+  :bind
+  ( :map gif-screencast-mode-map
+    ("<f8>". gif-screencast-toggle-pause)
+    ("<f9>". gif-screencast-stop)))
+#+end_src
+
+
+** keycast
+
+#+begin_src emacs-lisp
+(use-package keycast
+  ;; :bind ("C-c t k" . +toggle-keycast)
+:config
+  (setq keycast-mode-line-insert-after '(:eval (doom-modeline-format--main)))
+  (add-to-list 'global-mode-string '("" keycast-mode-line))
+:hook
+  (doom-modeline-mode . keycast-mode-line-mode)
+ ;; (defun +toggle-keycast()
+ ;;    (interactive)
+ ;;    (if (member '("" mode-line-keycast " ") global-mode-string)
+ ;;        (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
+ ;;               (remove-hook 'pre-command-hook 'keycast--update)
+ ;;               (message "Keycast disabled"))
+ ;;      (add-to-list 'global-mode-string '("" mode-line-keycast " "))
+ ;;      (add-hook 'pre-command-hook 'keycast--update t)
+ ;;      (message "Keycast enabled")))
+ )
 #+end_src
