@@ -1128,7 +1128,9 @@ Visualizing Color Codes with rainbow-mode.
 
 ** org-mode config
 #+begin_src emacs-lisp
-(with-eval-after-load "org"
+(use-package org
+  :straight (:type built-in)
+  :init
   ;; NOTE org-fold-core-style needs to be set before org is loaded
   (setq org-fold-core-style 'overlays)
 
@@ -1144,7 +1146,18 @@ Visualizing Color Codes with rainbow-mode.
   (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
   (setq +org-capture-work-meeting-file (expand-file-name "work-meeting.org" org-beorg-directory))
   (setq +org-capture-work-weekly-file (expand-file-name "work-weekly.org" org-beorg-directory))
+  (setq org-caldav-inbox "~/Dropbox/org/org-caldav/appointments.org")
+  (setq org-caldav-files '("~/Dropbox/org/org-caldav/org-caldav.org"))
 
+  (setq org-agenda-files (list
+			  +org-capture-gtd-file
+			  +org-capture-work-gtd-file
+			  +org-capture-work-team-gtd-file
+			  +org-capture-work-talk-file
+			  +org-capture-work-meeting-file
+			  +org-mu4e-icalendar-org-capture-file
+			  org-caldav-inbox))
+  :config
   (setq org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "WAITING(w)" ;; "HOLD(h!)" "NEXT(n!)" "WAIT(w!)"
 				      "DELAYED(y)" "|" "DONE(d!)" "DEFERRED(F)" "CANCELLED(c@/!)")
 			    (sequence "MEETING(m)" "DOING(i)" "WAITING(w)" "|" "DONE(d!)" "CANCELLED(c@/!)")
@@ -1256,14 +1269,6 @@ do not already have one."
               ;; (push '("[-]" . "❍") prettify-symbols-alist)
               (prettify-symbols-mode)))
 
-  (setq org-agenda-files (list
-			  +org-capture-gtd-file
-			  +org-capture-work-gtd-file
-			  +org-capture-work-team-gtd-file
-			  +org-capture-work-talk-file
-			  +org-capture-work-meeting-file
-			  +org-mu4e-icalendar-org-capture-file))
-
   ;; archived location
   (setq org-archive-location (expand-file-name "archive/%s_archive::" org-directory))
 
@@ -1314,6 +1319,7 @@ do not already have one."
 	  ("j" "Journal" entry
 	   (file+olp+datetree (expand-file-name "journal.org" org-beorg-directory))
 	   "* %T%?\nEntered on %U\n %i\n" :empty-lines 1)))
+
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.8))
 
   ;; minted required:
@@ -2822,7 +2828,11 @@ valign for org-mode & markdown table
         cfw:fchar-right-junction ?┫
         cfw:fchar-top-junction ?┯
         cfw:fchar-top-left-corner ?┏
-        cfw:fchar-top-right-corner ?┓))
+        cfw:fchar-top-right-corner ?┓)
+  (add-hook 'cfw:calendar-mode-hook
+            (lambda ()
+	      (global-hl-line-mode -1)))
+  )
 
 (use-package calfw-ical
   :straight t

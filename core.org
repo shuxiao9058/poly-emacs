@@ -313,7 +313,9 @@ Accepts the same arguments as `message'."
 					;; "-appIcon"
 					;; "file://Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
 					"-title" ,(shell-quote-argument g-title)
-					"-sender" ,(shell-quote-argument "org.gnu.Emacs")
+					;; "-sender" ,(shell-quote-argument "org.gnu.Emacs")
+					;; "-sender" ,(shell-quote-argument "com.apple.Reminders")
+					"-sender" ,(shell-quote-argument "org.hammerspoon.Hammerspoon")
 					"-message" ,(shell-quote-argument message))
 				      " ")))
     (shell-command notify-command)))

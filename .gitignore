@@ -24,3 +24,4 @@ elpa
 .cache
 .dap-breakpoints
 .mc-lists.el
+org-caldav-*.el

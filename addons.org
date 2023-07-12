@@ -66,6 +66,7 @@ Configuration for addons, additional features provided by individual packages.
 	calendar-mode
 	treemacs-mode
 	telega-chat-mode
+	cfw:calendar-mode
 	telega-root-mode))
 
 (cond
