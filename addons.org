@@ -3263,7 +3263,7 @@ determine which browser function to use."
 
       ;; kill temp article buffer
       (mm-destroy-parts gnus-article-mime-handles)
-      (kill-buffer gnus-article-buffer)
+      ;; (kill-buffer gnus-article-buffer)
 
       (when (and (bufferp (car parts))
                  (stringp (car (mm-handle-type parts))))
@@ -3314,14 +3314,14 @@ determine which browser function to use."
 		    (setq parts (list parts)))))
 
 	      (when (buffer-live-p gnus-article-buffer)
-		(mm-destroy-parts gnus-article-mime-handles)
-		(kill-buffer gnus-article-buffer))
-	      ))))
+		(mm-destroy-parts gnus-article-mime-handles))))))
 
       (when (and parts header)
 	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
           (message "Message does not contain a \"text/html\" part"))
-	(mm-destroy-parts parts))))
+	(mm-destroy-parts parts))
+      (when (buffer-live-p gnus-article-buffer)
+	(kill-buffer gnus-article-buffer))))
 
   (defun new-html-buffer(txt)
     (with-temp-buffer
@@ -3425,6 +3425,18 @@ except for `notmuch-show-mode' buffers."
   (add-hook 'notmuch-hello-mode-hook  #'notmuch-update-start)
   :bind
   (:map notmuch-common-keymap (("u" . notmuch-update))))
+
+(use-package notmuch-indicator
+  :straight t
+  :init
+  (setq notmuch-indicator-args
+        '((:terms "tag:unread and tag:inbox" :label "Ⓤ" :face (variable-pitch success))
+          (:terms "tag:unread and tag:package" :label "Ⓟ" :face (variable-pitch warning))
+          (:terms "tag:unread and tag:coach" :label "Ⓒ" :face (variable-pitch error)))
+        notmuch-indicator-refresh-count (* 60 3)
+        notmuch-indicator-hide-empty-counters t
+        notmuch-indicator-force-refresh-commands '(notmuch-refresh-this-buffer))
+  (notmuch-indicator-mode))
 #+end_src
 
 ** GNUS
@@ -4538,7 +4550,7 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
     (cond
      ((string-equal system-type "darwin")
       ;; VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
-      (setq shell-cmd-str (format "VSCODE_CWD=\"%s\" open -n -b \"com.microsoft.VSCodeInsiders\" %s"
+      (setq shell-cmd-str (format "VSCODE_CWD=\"%s\" open -n -b \"com.microsoft.VSCode\" %s"
 				  (shell-quote-argument project-root-directory)
 				  (if buffer-file-name
 				      (format "--args -g %s:%d:%d %s"

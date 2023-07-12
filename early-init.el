@@ -81,7 +81,8 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 	(require 'org)
 	(require 'ob)
 	(org-babel-tangle-file source target)
-	(message "generate file, source: %s, taget: %s" source target))
+	;; (message "generate file, source: %s, taget: %s" source target)
+	)
       (load-file target))))
 
 ;; Prepare private.org when not exist.
