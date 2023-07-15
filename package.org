@@ -186,7 +186,7 @@
 ** deal with org issue
 
 #+begin_src emacs-lisp
-(straight-use-package 'org)
+;; (straight-use-package 'org)
 (straight-use-package 'org-contrib)
 #+end_src
 

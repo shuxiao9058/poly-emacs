@@ -1129,7 +1129,7 @@ Visualizing Color Codes with rainbow-mode.
 ** org-mode config
 #+begin_src emacs-lisp
 (use-package org
-  :straight (:type built-in)
+  :straight t
   :init
   ;; NOTE org-fold-core-style needs to be set before org is loaded
   (setq org-fold-core-style 'overlays)
@@ -1146,8 +1146,8 @@ Visualizing Color Codes with rainbow-mode.
   (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
   (setq +org-capture-work-meeting-file (expand-file-name "work-meeting.org" org-beorg-directory))
   (setq +org-capture-work-weekly-file (expand-file-name "work-weekly.org" org-beorg-directory))
-  (setq org-caldav-inbox "~/Dropbox/org/org-caldav/appointments.org")
-  (setq org-caldav-files '("~/Dropbox/org/org-caldav/org-caldav.org"))
+  (setq org-caldav-inbox (expand-file-name "appointments.org" org-beorg-directory))
+  (setq org-caldav-files `(,(expand-file-name "org-caldav.org" org-beorg-directory)))
 
   (setq org-agenda-files (list
 			  +org-capture-gtd-file
@@ -1779,8 +1779,8 @@ do not already have one."
   (appt-display-format 'window)
   (appt-disp-window-function
    (lambda(min-to-app new-time msg)(terminal-notify "Reminder" (format "%s" msg))))
-  (appt-display-interval 1) ;; 每过1分钟提醒一次
-  (appt-message-warning-time 5) ;; set appt waring to 15 minutes prior to appointment
+  (appt-display-interval 5) ;; 每过5分钟提醒一次
+  (appt-message-warning-time 15) ;; set appt waring to 15 minutes prior to appointment
   ;; (appt-display-duration 20) ;; 这里已经被notify-send接管了，所以此处持续时间无效)
   (appt-display-mode-line t) ;; show in the modeline
   ;; (org-agenda-files `(,org-directory))

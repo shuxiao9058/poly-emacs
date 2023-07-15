@@ -23,17 +23,17 @@ Configuration for programming and languages support.
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
   :defer t
-  :hook ((prog-mode . apheleia-mode))
+  :hook (((go-ts-mode protobuf-ts-mode emacs-lisp-mode markdown-mode) . apheleia-mode))
   :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
   :config
   (push '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-"))
 	apheleia-formatters)
-  (push '(jsbeautify-css . (npx "js-beautify" "--type=css" "--quiet" "-"))
-	apheleia-formatters)
-  (push '(jsbeautify-html . (npx "js-beautify" "--type=html" "--quiet" "-"))
-	apheleia-formatters)
-  (push '(jsbeautify-js . (npx "js-beautify" "--type=js" "--quiet" "-"))
-	apheleia-formatters)
+  ;; (push '(jsbeautify-css . (npx "js-beautify" "--type=css" "--quiet" "-"))
+  ;; 	apheleia-formatters)
+  ;; (push '(jsbeautify-html . (npx "js-beautify" "--type=html" "--quiet" "-"))
+  ;; 	apheleia-formatters)
+  ;; (push '(jsbeautify-js . (npx "js-beautify" "--type=js" "--quiet" "-"))
+  ;; 	apheleia-formatters)
   (push '(erb-formatter . ("erb-format" "--stdin"))
 	apheleia-formatters)
   (push '(rufo . ("rufo" "--simple-exit"))
@@ -49,8 +49,7 @@ Configuration for programming and languages support.
 		   (emacs-lisp-mode . lisp-indent)
 		   (go-ts-mode . gofumpt)
 		   (sql-mode . sql-format)))
-    (add-to-list 'apheleia-mode-alist alist))
-  )
+    (add-to-list 'apheleia-mode-alist alist)))
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
@@ -725,6 +724,7 @@ Examples:
 		   scala-mode js-mode js-ts-mode
 		   js2-mode typescript-mode typescript-ts-mode
 		   typescript-tsx-mode tsx-ts-mode
+		   vue-mode
 		   ;; html-ts-mode
 		   c-mode c++-mode clojure-mode cperl-mode
 		   shell-mode bash-mode markdown-mode sql-mode
@@ -858,6 +858,8 @@ Examples:
   (setq lsp-enabled-clients '(lua-language-server
 			      pyright gopls
 			      protobuf-bufls
+			      vue-semantic-server
+			      ;; vls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
@@ -1299,6 +1301,7 @@ Examples:
 	    #'poly/lsp-format-buffer -10 t))
 
 (dolist (hook '(go-ts-mode-hook
+		js-ts-mode-hook
 		;; lua-mode-hook
 		typescript-ts-mode-hook javascript-ts-mode-hoo))
   (add-hook hook #'lsp-format-buffer-on-save))

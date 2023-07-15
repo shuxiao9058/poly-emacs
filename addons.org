@@ -3277,6 +3277,8 @@ determine which browser function to use."
 	  (setq contain-html-parts t)))
 
       (when (and (not contain-html-parts) text-part)
+	(when (get-buffer gnus-article-buffer)
+	  (kill-buffer gnus-article-buffer)) 	;; kill old buffer first
 	(dolist (part parts)
 	  (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
 	    (let* ((type (mm-handle-type part))
@@ -3292,6 +3294,7 @@ determine which browser function to use."
 		  (save-restriction
 	            (narrow-to-region (point) (point-max))
                     (setq txt (buffer-string)))))
+
 	      (with-current-buffer (get-buffer-create gnus-article-buffer)
 		(let ((inhibit-read-only t)
 		      (tmp-parts)
@@ -3307,21 +3310,21 @@ determine which browser function to use."
 		(setq tmp-parts (mm-dissect-buffer t t))
 		(when tmp-parts
 		  ;; (message "success dissect buffer")
-		  (princ (type-of tmp-parts))
-		  (princ (mm-get-part tmp-parts))
+		  ;; (princ (type-of tmp-parts))
+		  ;; (princ (mm-get-part tmp-parts))
 		  (setq parts tmp-parts)
 		  (when (and (bufferp (car parts))
 			     (stringp (car (mm-handle-type parts))))
 		    (setq parts (list parts)))))
 
-	      (when (buffer-live-p gnus-article-buffer)
+	      (when (get-buffer gnus-article-buffer)
 		(mm-destroy-parts gnus-article-mime-handles))))))
 
       (when (and parts header)
 	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
           (message "Message does not contain a \"text/html\" part"))
 	(mm-destroy-parts parts))
-      (when (buffer-live-p gnus-article-buffer)
+      (when (get-buffer gnus-article-buffer)
 	(kill-buffer gnus-article-buffer))))
 
   (defun new-html-buffer(txt)
