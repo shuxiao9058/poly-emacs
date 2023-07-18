@@ -792,8 +792,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :custom
   (tabnine-wait 0.5)
   (tabnine-minimum-prefix-length 0)
+  (tabnine-max-wait-count-while-nil 5)
+  (tabnine-wait-interval-while-nil 0.2)
   ;; (tabnine-network-proxy "http://127.0.0.1:7890")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
+  (tabnine-chat-default-mode 'org-mode)
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
   :hook (kill-emacs . tabnine-kill-process)
