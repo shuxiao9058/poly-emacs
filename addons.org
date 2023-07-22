@@ -797,6 +797,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (tabnine-network-proxy "http://127.0.0.1:7890")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
+  (tabnine-chat-prompt-alist '((explain-code . "解释这段代码含义")
+			       (generate-test-for-code . "为这段代码编写测试用例")
+			       (document-code . "为这段代码添加文档注释")
+			       (fix-code . "找到并修复这段代码的潜在问题")))
+  ;; (tabnine-chat-max-context-length 200)
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
   :hook (kill-emacs . tabnine-kill-process)

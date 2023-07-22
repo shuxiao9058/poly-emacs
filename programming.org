@@ -23,7 +23,9 @@ Configuration for programming and languages support.
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
   :defer t
-  :hook (((go-ts-mode protobuf-ts-mode emacs-lisp-mode markdown-mode) . apheleia-mode))
+  :hook (((go-ts-mode protobuf-ts-mode ;; emacs-lisp-mode
+		      protobuf-mode
+		      markdown-mode) . apheleia-mode))
   :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
   :config
   (push '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-"))
