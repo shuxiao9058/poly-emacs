@@ -373,8 +373,9 @@ Configuration for programming and languages support.
 
 * ispell
 
-#+begin_src emacs-lisp :tangle  yes
+#+begin_src emacs-lisp :tangle no
 (use-package ispell
+  :disabled
   :straight (:type built-in)
   :config
   (setq ispell-really-aspell t
@@ -1793,8 +1794,6 @@ Use clojure-mode for basic syntax support.
 ;;         "Invalid typescript-layer configuration, no such linter: %s" typescript-linter))))
 
 ;; (typescript/set-lsp-linter)
-
-
 
 (use-package web-mode
   :straight t

@@ -1877,6 +1877,7 @@ do not already have one."
                         ("cpp"    . c++-ts)
                         ("dot"    . graphviz-dot)
                         ("elisp"  . emacs-lisp)
+			("emacs lisp"  . emacs-lisp)
                         ("ocaml"  . tuareg)
                         ("shell"  . sh)
                         ("sqlite" . sql)))

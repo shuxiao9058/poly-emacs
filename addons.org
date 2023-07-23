@@ -1513,7 +1513,7 @@ To manage the git repository, use builtin package ~vc~.
   :straight t
   :commands (magit-file-delete magit-status magit-checkout)
   :hook ((magit-pop-mode . hide-mode-line-mode)
-	 (git-commit-setup . git-commit-turn-on-flyspell)
+	 ;; (git-commit-setup . git-commit-turn-on-flyspell)
 	 (magit-mode . hack-dir-local-variables-non-file-buffer))
   :custom
   (magit-section-initial-visibility-alist '((stashes . hide)
@@ -2179,6 +2179,54 @@ Save cursor position
   :config
   (save-place-mode 1))
 #+end_src
+
+* minibuffer
+
+#+begin_src emacs-lisp :tangle no
+
+;; Completion engine
+(use-package minibuffer
+  :straight (:type built-in)
+  :ensure nil
+  :bind (:map minibuffer-local-map
+              ([escape] . abort-recursive-edit)
+              :map minibuffer-local-ns-map
+              ([escape] . abort-recursive-edit)
+              :map minibuffer-local-completion-map
+              ([escape] . abort-recursive-edit)
+              :map minibuffer-local-must-match-map
+              ([escape] . abort-recursive-edit)
+              :map minibuffer-local-isearch-map
+              ([escape] . abort-recursive-edit))
+  :custom
+  ;; Default minibuffer is fine-tuned since Emacs 29
+  (completion-auto-help t)
+  (completion-show-help nil)
+  (completion-cycle-threshold nil)
+  (completion-auto-select 'second-tab)
+  (enable-recursive-minibuffers t)
+  (minibuffer-depth-indicate-mode t)
+  ;; shorten " (default %s)" => " [%s]"
+  (minibuffer-default-prompt-format " [%s]")
+  ;; (minibuffer-default-prompt-format " (default %s)")
+  (minibuffer-electric-default-mode t)
+  ;; Don't insert completion at point into minibuffer
+  (minibuffer-completion-auto-choose nil)
+  ;; One frame one minibuffer.
+  (minibuffer-follows-selected-frame nil)
+  ;; Ignore cases when complete
+  (completion-ignore-case t)
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  ;; `selectrum', `vertico' and `icomplete' will honoring
+  (completion-styles '(basic partial-completion substring flex))
+  (completion-category-overrides '((buffer (styles . (flex)))))
+  ;; vertical view
+  (completions-format 'one-column)
+  (completions-max-height 13)
+  (completions-detailed t))
+#+end_src
+
 * savehist
 
 save minibuffer history
@@ -4104,7 +4152,8 @@ org-download-paste for clipboard images
 			       ;; (set-fill-column 100)
 			       ;; (turn-on-auto-fill)
 			       (electric-indent-local-mode -1)
-			       (turn-on-flyspell)))
+			       ;; (turn-on-flyspell)
+             ))
   :config
   (org-msg-mode-notmuch)
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil num:t \\n:t"
