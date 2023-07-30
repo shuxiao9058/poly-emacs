@@ -811,23 +811,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (or ;; (derived-mode-p 'vterm-mode)
      (meow-motion-mode-p)
      (meow-normal-mode-p)))
-  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
-  ;; :bind
-  ;; (:map tabnine-mode-map
-  ;; 	;; ("C-TAB" . tabnine-accept-completion-by-word)
-  ;; 	;; ("C-<tab>" . tabnine-accept-completion-by-word)
-  ;; 	("TAB" . tabnine-accept-completion)
-  ;; 	("<tab>" . tabnine-accept-completion))
-  ;; (:map  tabnine-completion-map
-  ;; 	 ("M-f" . tabnine-accept-completion-by-word)
-  ;;        ("M-<return>" . tabnine-accept-completion-by-line)
-  ;; 	 ("C-g" . tabnine-clear-overlay)
-  ;; 	 ("M-[" . tabnine-previous-completion)
-  ;; 	 ("M-]" . tabnine-next-completion)
-  ;; 	 ;; ("C-n" . tabnine-next-completion)
-  ;; 	 ;; ("C-p" . tabnine-previous-completion)
-  ;; 	 )
-  )
+  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate))
 #+end_src
 
 
@@ -2548,20 +2532,19 @@ Auto cleanup older buffers
 
     Returns the vterm buffer."
     (interactive "P")
-    (let* ( (project-root  (if (fboundp 'project-root)
-			       (project-root (project-current))
-			     default-directory))
-	    ;; (project-root (or default-directory))
-	    (dir
-	     (if arg
-		 default-directory
-	       project-root))
-	    (result (poly/vterm-buffer dir))
-	    (cd-cmd (concat "cd " dir))
-	    (curr-buffer (current-buffer))
-	    (vterm-buffer)
-	    (vterm-win)
-	    (vterm-pwd))
+    (let* ((project-root  (if (fboundp 'project-root)
+			      (project-root (project-current))
+			    default-directory))
+	   (dir
+	    (if arg
+		default-directory
+	      project-root))
+	   (result (poly/vterm-buffer dir))
+	   (cd-cmd (concat "cd " dir))
+	   (curr-buffer (current-buffer))
+	   (vterm-buffer)
+	   (vterm-win)
+	   (vterm-pwd))
       (when result
 	(setq vterm-buffer (car result))
 	(setq vterm-pwd (car (cdr result))))
@@ -2587,7 +2570,16 @@ Auto cleanup older buffers
 	      (switch-to-buffer vterm-buffer)))
 	(if (equal (file-truename default-directory) (file-truename dir))
 	    (vterm-toggle-insert-cd)
-	  (vterm-toggle-cd dir)))
+	  (progn
+	    (vterm-toggle-cd dir)
+	    (setq result (poly/vterm-buffer dir))
+	    (when result
+	      (setq vterm-buffer (car result))
+	      (setq vterm-pwd (car (cdr result)))
+	      (unless (equal vterm-pwd (file-truename dir))
+		(with-current-buffer vterm-buffer
+		  (vterm-send-string cd-cmd t)
+		  (vterm-send-return)))))))
       ;; (vterm-toggle-show t)
       ))
 
