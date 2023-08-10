@@ -720,6 +720,7 @@ Examples:
   :diminish
   :commands (lsp lsp-deferred lsp-enable-which-key-integration lsp-format-buffer lsp-organize-imports)
   :hook (((go-mode go-ts-mode go-dot-mod-mode go-mod-ts-mode
+		   clojure-mode
 		   java-mode
 		   beancount-mode web-mode
 		   python-mode python-ts-mode
@@ -790,6 +791,7 @@ Examples:
   (lsp-lens-enable t)
   (lsp-imenu-container-name-separator "⦿")
   (lsp-imenu-show-container-name t)
+  (lsp-clojure-custom-server-command "/opt/local/bin/clojure-lsp")
   (lsp-clients-emmy-lua-java-path "/Library/Java/JavaVirtualMachines/openjdk8-zulu/Contents/Home/bin/java")
   (lsp-clients-emmy-lua-jar-path (f-join (poly/vscode-extension-install-path "tangzx.emmylua") "server/EmmyLua-LS-all.jar"))
   (lsp-clients-emmy-lua-args '("com.tang.vscode.MainKt" "-XX:+UseG1GC" "-XX:+UseStringDeduplication"))
@@ -862,6 +864,7 @@ Examples:
 			      pyright gopls
 			      protobuf-bufls
 			      vue-semantic-server
+			      clojure-lsp
 			      ;; vls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
@@ -1044,14 +1047,14 @@ Examples:
 			 ,(face-foreground 'font-lock-string-face)
 			 ,(face-foreground 'font-lock-constant-face)
 			 ,(face-foreground 'font-lock-variable-name-face)))
-  :config
+  ;; :config
   ;; ;; Use lsp-ui-doc-webkit only in GUI
   ;; (when IS-GUI
   ;;   (setq lsp-ui-doc-use-webkit t))
-  ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
-  ;; https://github.com/emacs-lsp/lsp-ui/issues/243
-  (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
-    (setq mode-line-format nil))
+  ;; ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
+  ;; ;; https://github.com/emacs-lsp/lsp-ui/issues/243
+  ;; (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
+  ;;   (setq mode-line-format nil))
   :bind (
 	 :map lsp-ui-mode-map
 	 (("M-<f6>" . lsp-ui-hydra/body)
@@ -1719,13 +1722,12 @@ Use clojure-mode for basic syntax support.
   :ensure t
   :after clojure-mode)
 
-;; (use-package flycheck-clojure
-;;     :straight t
-;;     :ensure t
-;;     :commands clojure-mode
-;;     ;; :config
-;;     ;; (flycheck-clojure-setup)
-;;     )
+(use-package flycheck-clojure
+    :straight t
+    :ensure t
+    :commands clojure-mode
+    :config
+    (flycheck-clojure-setup))
 #+end_src
 
 ** Cider for REPL connection
@@ -1958,10 +1960,7 @@ Use clojure-mode for basic syntax support.
   (add-hook 'protobuf-mode-hook (lambda () (c-add-style "my-style" my-protobuf-style t))))
 
 (use-package flycheck-buf-lint
-  :straight (flycheck-buf-lint :package "flycheck-buf-lint"
-			       :type git
-			       :host nil
-			       :repo "ssh://git@h.jiya.net:9922/shuxiao9058/flycheck-buf-lint.git")
+  :straight t
   :init
   (push 'buf-lint flycheck-checkers)
   :config

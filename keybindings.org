@@ -345,7 +345,7 @@ This configuration sticks with Meow for modal editing.
   ;; If you want relative line number in NORMAL s tate(for display-line-numbers-mode)
   (meow-setup-line-number)
   ;; If you need setup indicator, see `meow-indicator' for customizing by hand.
-  (meow-setup-indicator)
+  ;; (meow-setup-indicator)
 
   ;; custom indicator
   (when IS-GUI

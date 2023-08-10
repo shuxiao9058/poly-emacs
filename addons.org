@@ -9,7 +9,6 @@ Configuration for addons, additional features provided by individual packages.
 * Line numbers with display-line-numbers-mode
 
 #+begin_src emacs-lisp
-
 (defun should-use-minimum-resource ()
   (and buffer-file-name
        (string-match-p "\.\\(mock\\|min\\)\.js" buffer-file-name)))
@@ -495,6 +494,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
   (corfu-preselect 'first)
+  ;; (corfu-preselect 'prompt)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
   ;; (corfu-echo-documentation '(1.0 . 0.2))
@@ -509,9 +510,16 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-left-margin-width 1.0)
   :init
   (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)
   :config
   (unbind-key (kbd "TAB") corfu-map)
   (unbind-key (kbd "<tab>") corfu-map)
+  (add-hook 'eshell-mode-hook
+            (lambda () (setq-local corfu-quit-at-boundary t
+			      corfu-quit-no-match t
+			      corfu-auto nil)
+              (corfu-mode)))
   :bind (:map corfu-map
 	      ;; ("TAB" . corfu-next)
 	      ("C-n" . corfu-next)
@@ -780,21 +788,21 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 #+begin_src emacs-lisp
 (use-package tabnine
   :commands (tabnine-start-process)
-  :hook ((prog-mode text-mode vterm-mode) . tabnine-mode)
-  :straight (tabnine :package "tabnine"
-		     :type git
-		     :host nil
-		     :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git"
-		     ;; :host github :repo "shuxiao9058/tabnine"
-		     ;; :files ("*.el")
-		     )
+  :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . tabnine-mode)
+  :straight t ;; (tabnine :package "tabnine"
+  ;; 	     :type git
+  ;; 	     :host github :repo "shuxiao9058/tabnine")
+  ;; (tabnine :package "tabnine"
+  ;; 	   :type git
+  ;; 	   :host nil
+  ;; 	   :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git")
   :diminish "⌬"
   :custom
   (tabnine-wait 0.5)
   (tabnine-minimum-prefix-length 0)
   (tabnine-max-wait-count-while-nil 5)
   (tabnine-wait-interval-while-nil 0.2)
-  ;; (tabnine-network-proxy "http://127.0.0.1:7890")
+  ;; (tabnine-network-proxy "http://127.0.0.1:8888")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
   (tabnine-chat-prompt-alist '((explain-code . "解释这段代码含义")
@@ -862,14 +870,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     :after popon
     :config
     (unless IS-GUI
-      (corfu-popup-mode +1)))
-  ;; (use-package corfu-popup
-  ;; :straight (corfu-popup
-  ;; 	       :type git
-  ;; 	       :repo "https://codeberg.org/akib/emacs-corfu-popup.git")
-  ;; :init
-  ;; (corfu-popup-mode +1))
-  )
+      (corfu-terminal-mode +1))))
 #+end_src
 
 * hydra
@@ -1484,15 +1485,6 @@ _t_:      select tab 											_R_ : redo
 To manage the git repository, use builtin package ~vc~.
 
 #+begin_src emacs-lisp
-(use-package with-editor
-  :straight t
-  :ensure t)
-
-(use-package emacsql
-  :straight t
-  :disabled
-  :ensure t)
-
 (use-package magit
   :straight t
   :commands (magit-file-delete magit-status magit-checkout)
@@ -1509,20 +1501,20 @@ To manage the git repository, use builtin package ~vc~.
   (magit-revert-buffers 'silent)
   (git-commit-summary-max-length 50)
   (magit-log-section-commit-count 5)
-  (magit-diff-options (quote ("--minimal" "--patience" "-b")))
-  (magit-tag-arguments (quote ("--annotate" "--sign")))
-  (magit-merge-arguments (quote ("--no-ff")))
-  (magit-rebase-arguments (quote ("--autostash")))
+  (magit-diff-options '("--minimal" "--patience" "-b"))
+  (magit-tag-arguments '("--annotate" "--sign"))
+  (magit-merge-arguments '("--no-ff"))
+  (magit-rebase-arguments '("--autostash"))
   ;; use colored graph lines. Could be a performance issue.
-  (magit-log-arguments (quote ("-n64" "--graph" "--decorate" "--color" "--stat")))
-  (magit-diff-use-overlays nil)
-  (magit-use-overlays nil)
+  (magit-log-arguments '("-n64" "--graph" "--decorate" "--color" "--stat"))
+  ;; (magit-diff-use-overlays nil)
+  ;; (magit-use-overlays nil)
   (magit-auto-revert-mode nil)
   (git-rebase-auto-advance  nil)
   (magit-stage-all-confirm nil)
   (magit-commit-squash-commit 'marked-or-curren)
   (magit-push-always-verify ni) ;; cuz it says so
-  (magit-diff-refine-hunk nil)
+  ;; (magit-diff-refine-hunk nil)
   (git-commit-finish-query-functions nil)
   (magit-log-section-commit-count 10)
   (magit-log-section-arguments '("--graph" "--decorate" "--color"))
@@ -1569,6 +1561,7 @@ To manage the git repository, use builtin package ~vc~.
 	  ;; magit-insert-recent-commits
 	  magit-insert-unpulled-from-pushremote
 	  magit-insert-unpushed-to-upstream
+	  ;; gerrit-magit-insert-status
 	  ;; magit-insert-unpushed-to-pushremote
 	  ;; magit-insert-unpulled-from-upstream
 	  ))
@@ -1646,13 +1639,11 @@ To manage the git repository, use builtin package ~vc~.
   :straight t
   :after magit
   :commands magit-gitflow-popup
-  :hook (magit-mode . turn-on-magit-gitflow)
-  )
+  :hook (magit-mode . turn-on-magit-gitflow))
 
 ;; Show TODOs in magit
 (use-package magit-todos
   :straight t
-  :disabled
   :diminish
   :after magit
   :init
@@ -1707,8 +1698,8 @@ To manage the git repository, use builtin package ~vc~.
   :straight t
   :bind ("C-c g t" . git-timemachine-toggle))
 
-;; gitignore-mode - Major mode for various Git configuration files
-(use-package git-modes :straight t)
+;; ;; gitignore-mode - Major mode for various Git configuration files
+;; (use-package git-modes :straight t)
 
 ;; browse-at-remote - Browse target page on github/gitlab/bitbucket
 (use-package browse-at-remote
@@ -1720,25 +1711,26 @@ To manage the git repository, use builtin package ~vc~.
   (transient-replace-suffix 'magit-dispatch "o"
     '("o" "Browse file" browse-at-remote)))
 
-;; based on http://manuel-uberti.github.io/emacs/2018/02/17/magit-bury-buffer/
-(defun magit-kill-buffers ()
-  "Restore window configuration and kill all Magit buffers."
-  (interactive)
-  (let ((buffers (magit-mode-get-buffers)))
-    (magit-restore-window-configuration)
-    (mapc #'kill-buffer buffers)))
+;; ;; based on http://manuel-uberti.github.io/emacs/2018/02/17/magit-bury-buffer/
+;; (defun magit-kill-buffers ()
+;;   "Restore window configuration and kill all Magit buffers."
+;;   (interactive)
+;;   (let ((buffers (magit-mode-get-buffers)))
+;;     (magit-restore-window-configuration)
+;;     (mapc #'kill-buffer buffers)))
 
-;; required by forge
 (use-package yaml
-  :straight t)
+  :straight t
+  :disabled)
 
 (use-package forge
   :straight t
   :after (magit yaml)
+  :disabled
   :commands forge-create-pullreq forge-create-issue
   :custom
   (forge-database-file (expand-file-name "forge/forge-database.sqlite" poly-etc-dir))
-  (custom-set-variables '(forge-post-mode-hook '(visual-line-mode)))
+  ;; (custom-set-variables '(forge-post-mode-hook '(visual-line-mode)))
   (forge-bug-reference-hooks
    '(git-commit-setup-hook magit-mode-hook))
   :config
@@ -1755,12 +1747,12 @@ To manage the git repository, use builtin package ~vc~.
   ;; (remove-hook 'magit-status-sections-hook 'forge-insert-issues)
   )
 
-(use-package ghub
-  :straight t
-  :after (magit forge)
-  ;; :custom
-  ;; (ghub-insecure-hosts '("git.17usoft.com/api/v4"))
-  )
+;; (use-package ghub
+;;   :straight t
+;;   :after (magit forge)
+;;   ;; :custom
+;;   ;; (ghub-insecure-hosts '("git.17usoft.com/api/v4"))
+;;   )
 
 (use-package smerge-mode
   :straight t
@@ -1795,8 +1787,8 @@ To manage the git repository, use builtin package ~vc~.
 				     (when smerge-mode
 				       (hydra-smerge/body))))))
 
-(use-package vdiff
-  :straight t)
+;; (use-package vdiff
+;;   :straight t)
 
 (use-package code-review
   :disabled
@@ -2499,7 +2491,7 @@ Auto cleanup older buffers
 
 (use-package vterm-toggle
   :straight t
-  :when (memq window-system '(mac ns x))
+  ;; :when (memq window-system '(mac ns x))
   :bind (([f2] . mb/vterm-right-here)
 	 ("C-<return>" . mb/vterm-right-here)
 	 :map vterm-mode-map
@@ -4682,7 +4674,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 *** help emacs-devel collect gc stats
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package emacs-gc-stats
   :straight
   (emacs-gc-stats :package "emacs-gc-stats"

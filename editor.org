@@ -48,6 +48,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
   (setq auto-revert-check-vc-info t)
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 3)
+  (setq compilation-auto-jump-to-first-error t)
 
   ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
   ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
@@ -58,7 +59,12 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
 
-(setq auth-sources '("~/.authinfo.gpg")
+(setq auth-sources '("~/.authinfo")
+      ;; auth-sources '("~/.authinfo.gpg")
+      package-install-upgrade-built-in t
+      desktop-load-locked-desktop t
+      show-paren-delay 0
+      ;; shr-allowed-images t
       ;; auth-sources '("~/.authinfo")
       uniquify-buffer-name-style 'post-forward-angle-brackets ;; Show path if names are same
       adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*"
@@ -98,6 +104,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
       ;; clipboard
       kill-ring-max 20000
+      yank-menu-max-items 2000
       save-interprogram-paste-before-kill t
       x-select-enable-clipboard           t
       x-select-enable-primary             t
@@ -134,6 +141,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
       cursor-in-non-selected-windows 'hollow ; 在没有激活的 window 上显示一个空心正方形
       )
 
+(setq syntax-wholeline-max most-positive-fixnum)
 ;; @see https://github.com/emacs-lsp/lsp-mode#performance
 (setq read-process-output-max (* 3 1024 1024))
 
@@ -196,7 +204,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 (setenv "LANG" "en_US.UTF-8")
 (setenv "LC_ALL" "en_US.UTF-8")
 (setq mm-coding-system-priorities '(utf-8))
-(setq buffer-file-coding-system 'utf-8)
+;; (setq buffer-file-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-auto-unix)
 (setq erc-server-coding-system '(utf-8 . utf-8))
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
