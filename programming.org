@@ -834,7 +834,7 @@ Examples:
 			     "-tools"
 			     "-**/testdata"
 			     "-vendor"
-			     "-internal"
+			     ;; "-internal"
 			     "-.gocache"
 			     "-.git"
 			     "-!out"
@@ -870,7 +870,7 @@ Examples:
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\vendor$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\].git$")
-  (add-to-list 'lsp-file-watch-ignored "[/\\\\]internal$")
+  ;; (add-to-list 'lsp-file-watch-ignored "[/\\\\]internal$")
   (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.gocache$")
   (add-hook 'hack-local-variables-hook #'my/local-variables-hook)
   (add-hook 'html-ts-mode-hook (lambda()
@@ -888,7 +888,7 @@ Examples:
      ("gopls.deepCompletion" t t)
      ("gopls.completeUnimported" t t)
      ("gopls.staticcheck" nil nil)
-     ("gopls.completionBudget" "200ms" nil)
+     ("gopls.completionBudget" "100ms" nil)
      ("gopls.semanticTokens" t t)
      ("gopls.allExperiments" t t)
      ("gopls.matcher" "Fuzzy" t)
@@ -1437,9 +1437,10 @@ Examples:
   "Install or update go PKG/tools."
   (unless (executable-find "go")
     (user-error "Unable to find `go' in `exec-path'!"))
-  (message "Installing go tool [%s] ..." (symbol-name pkg))
+  ;; (message "Installing go tool [%s] ..." (symbol-name pkg))
   (let ((pkg-repo (alist-get pkg go--tools))
-	 (pkg-version))
+	(pkg-version)
+	(pkg-name (symbol-name pkg)))
     (pcase (type-of pkg-repo)
       ('cons
        (setq pkg-version (cadr pkg-repo))
@@ -1447,18 +1448,16 @@ Examples:
       (_
        (setq pkg-version "latest")))
     (when pkg-repo
-      (set-process-sentinel
-       (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg-repo  "@" pkg-version))
-       (lambda (proc _)
-	 (let ((status (process-exit-status proc)))
-	   (if (= 0 status)
-	       (message "Go tool installed successfully!")
-	     (message "Failed to install the go tool.")
-	     )
-	   ;; (if (= 0 status)
-	   ;; 	   (message "Installed %s" pkg)
-	   ;; 	 (message "Failed to install %s: %d" pkg status))
-	   ))))))
+      (let ((process (start-process "go-tool" "*Go Tool*" "go" "install" "-v" "-x" (concat pkg-repo  "@" pkg-version))))
+	(process-put process 'pkg-name pkg-name)
+	(set-process-sentinel
+	 process
+	 (lambda (proc _)
+	   (let ((status (process-exit-status proc))
+		 (pkg-name (process-get proc 'pkg-name)))
+	     (if (= 0 status)
+		 (message "%s installed successfully!" pkg-name)
+	       (message "Failed to install %s." pkg-name)))))))))
 
 (use-package go-mode
   :disabled
@@ -1501,8 +1500,7 @@ Examples:
    (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
   :config
   (unless (executable-find "golangci-lint")
-    (poly/install-go-tool 'golangci-lint))
-  )
+    (poly/install-go-tool 'golangci-lint)))
 
 (use-package go-eldoc
   :straight t

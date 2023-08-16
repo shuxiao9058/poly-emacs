@@ -798,7 +798,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; 	   :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git")
   :diminish "⌬"
   :custom
-  (tabnine-wait 0.5)
+  (tabnine-wait 0.1)
   (tabnine-minimum-prefix-length 0)
   (tabnine-max-wait-count-while-nil 5)
   (tabnine-wait-interval-while-nil 0.2)
