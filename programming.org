@@ -325,12 +325,16 @@ Configuration for programming and languages support.
 :config
 (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
 (flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
-(flycheck-add-mode 'typescript-tslint 'tsx-ts-mode))
+(flycheck-add-mode 'typescript-tslint 'tsx-ts-mode)
+
+;; (remove-hook 'post-command-hook 'flycheck-display-error-at-point-soon)
+;; (remove-hook 'focus-in-hook 'flycheck-display-error-at-point-soon)
+;; (advice-add #'flycheck-display-error-at-point-soon :override #'ignore)
+)
 
 (use-package flycheck-color-mode-line
   :straight t
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
-
 
 ;; (use-package flycheck-pos-tip
 ;;   :straight t
@@ -728,6 +732,7 @@ Examples:
 		   scala-mode js-mode js-ts-mode
 		   js2-mode typescript-mode typescript-ts-mode
 		   typescript-tsx-mode tsx-ts-mode
+		   java-ts-mode
 		   vue-mode
 		   ;; html-ts-mode
 		   c-mode c++-mode clojure-mode cperl-mode
@@ -746,7 +751,7 @@ Examples:
   (lsp-idle-delay 0.1)                 ;; lazy refresh
   (lsp-server-trace nil)
   (lsp-log-io nil)
-  (lsp-log-max nil)
+  ;; (lsp-log-max nil)
   (lsp-print-performance nil)
   (lsp-document-sync-method nil) ;; use default method recommended by server. 'incremental 'full
   (lsp-enable-xref t)
@@ -815,6 +820,7 @@ Examples:
   (lsp-lua-window-status-bar nil)
   (lsp-lua-completion-display-context nil)
   (lsp-go-gopls-server-path "/opt/local/bin/gopls")
+  ;; (lsp-go-gopls-server-path "/usr/local/gopath/bin/gopls")
   ;; (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
   ;; 			   ))
   (lsp-go-hover-kind "NoDocumentation")
@@ -865,6 +871,7 @@ Examples:
 			      protobuf-bufls
 			      vue-semantic-server
 			      clojure-lsp
+			      jdtls
 			      ;; vls
 			      json-ls beancount-ls css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
@@ -1072,6 +1079,14 @@ Examples:
 			  :repo "ssh://git@h.jiya.net:9922/shuxiao9058/lsp-protobuf.git")
   :custom
   (lsp-protobuf-bufls-server-path "/usr/local/gopath/bin/bufls"))
+
+(use-package lsp-java
+  ;; :custom
+  ;; (lsp-java-server-install-dir "")
+  :config
+  ;; (add-hook 'java-mode-hook 'lsp)
+  (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
+  (require 'dap-java))
 #+end_src
 
 ** yas parameter complete in place required
@@ -1408,7 +1423,7 @@ Examples:
     (gogetdoc . "github.com/zmb3/gogetdoc")
     (gotests . "github.com/cweill/gotests/...")
     (goimports . "golang.org/x/tools/cmd/goimports")
-    (staticcheck . "honnef.co/go/tools/cmd/staticcheck")
+    (staticcheck . ("honnef.co/go/tools/cmd/staticcheck" "master"))
     (fillstruct . "github.com/davidrjenni/reftools/cmd/fillstruct")
     (goconst . "github.com/jgautheron/goconst/cmd/goconst")
     (godoc . "golang.org/x/tools/cmd/godoc")
@@ -1420,7 +1435,7 @@ Examples:
     (unused . "honnef.co/go/tools/cmd/unused")
     (ineffassign . "github.com/gordonklaus/ineffassign")
     (pet . "github.com/knqyf263/pet")
-    (protovalidate-go . "github.com/bufbuild/protovalidate-go")
+    ;; (protovalidate-go . "github.com/bufbuild/protovalidate-go")
     (protobuf-go . "google.golang.org/protobuf/cmd/protoc-gen-go")
     (protoc-gen-go-grpc . "google.golang.org/grpc/cmd/protoc-gen-go-grpc")
     (protoc-gen-grpc-gateway . "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
@@ -1430,8 +1445,7 @@ Examples:
     (buf . ("github.com/bufbuild/buf/cmd/buf" "v1.21.0"))
     (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
     (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
-    (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")
-    ))
+    (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")))
 
 (defun poly/install-go-tool (pkg)
   "Install or update go PKG/tools."

@@ -686,6 +686,7 @@ lines are selected, or the NxM dimensions of a block selection."
         (csb/align-mode-line
          ;; left
          '((:eval (meow-indicator))
+	   mode-line-mule-info
 	   "%e" mode-line-front-space
            (:eval (csb/modeline-maybe-popper))
            " "
@@ -703,7 +704,6 @@ lines are selected, or the NxM dimensions of a block selection."
 	   minions-mode-line-modes
            (vc-mode vc-mode)
            " "
-           mode-line-mule-info
            mode-line-client
            (:eval (csb/lsp-state-icon))
            (:eval (csb/mode-line-buffer-file-state-icon))

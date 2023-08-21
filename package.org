@@ -607,3 +607,22 @@
 		  (apply 'tl/message-orig format-string args)))))
      ,@body))
 #+end_src
+
+
+
+#+begin_src emacs-lisp
+
+(use-package f
+  :straight t
+  :config
+  (let* ((site-dir (expand-file-name "site-lisp" user-emacs-directory))
+	 (files (directory-files site-dir))
+	 (tmp))
+    (dolist (f files)
+      (unless (or (equal f ".") (equal f ".."))
+	(setq tmp (expand-file-name f site-dir))
+	(when (f-directory-p tmp)
+	  (add-to-list 'load-path tmp)))
+      )))
+
+      #+end_src

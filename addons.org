@@ -803,7 +803,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (tabnine-max-wait-count-while-nil 5)
   (tabnine-wait-interval-while-nil 0.2)
   ;; (tabnine-network-proxy "http://127.0.0.1:8888")
-  ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
+  (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
   (tabnine-chat-prompt-alist '((explain-code . "解释这段代码含义")
 			       (generate-test-for-code . "为这段代码编写测试用例")
@@ -1643,6 +1643,7 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; Show TODOs in magit
 (use-package magit-todos
+  :disabled
   :straight t
   :diminish
   :after magit
@@ -1982,7 +1983,8 @@ Magit with cz
 
 (defun +rime-predicate-in-code-string ()
   (and (not (eq major-mode 'plantuml-mode))
-       (or (rime-predicate-prog-in-code-p) (eq (plist-get (text-properties-at (point)) 'face) 'font-lock-string-face))))
+       (or (rime-predicate-prog-in-code-p) ;; (eq (plist-get (text-properties-at (point)) 'face) 'font-lock-string-face)
+	   )))
 
 (defun +rime-predicate-org-syntax-punc-p ()
   (when (eq major-mode 'org-mode)
@@ -2354,21 +2356,24 @@ Auto cleanup older buffers
 (use-package embark
   :straight t
   :ensure t
+  :disabled
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
    ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-  :config
+  ;; :config
   ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-		 nil
-		 (window-parameters (mode-line-format . none)))))
+  ;; (add-to-list 'display-buffer-alist
+  ;; 	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+  ;; 		 nil
+  ;; 		 (window-parameters (mode-line-format . none))))
+  )
 
 (use-package embark-consult
   :straight t
+  :disabled
   :after (embark consult)
   :demand t ; only necessary if you have the hook below
   ;; if you want to have consult previews as you move around an
@@ -2407,10 +2412,11 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package vterm
-  :straight (vterm :type git :flavor melpa
-		   :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
-		   :host github :repo "akermu/emacs-libvterm"
-		   :no-native-compile t)
+  :straight t
+  ;; :straight (vterm :type git :flavor melpa
+  ;; 		   :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
+  ;; 		   :host github :repo "akermu/emacs-libvterm"
+  ;; 		   :no-native-compile t)
   :demand
   :commands (vterm ds/vterm)
   :custom
@@ -3064,16 +3070,37 @@ there are no attachments."
 ** notmuch
 #+begin_src emacs-lisp
 (use-package notmuch
-  :straight t
+  :straight (notmuch :url "https://git.notmuchmail.org/git/notmuch"
+		     :fetcher git
+		     :files ("emacs/*.el" "emacs/*.svg"))
   :commands notmuch
   :bind (("C-c m" . notmuch)
          :map notmuch-show-mode-map (("D" . apm-notmuch-toggle-deleted)
                                      ("J" . apm-notmuch-toggle-spam))
          :map notmuch-search-mode-map (("D" . apm-notmuch-toggle-deleted)
-                                       ("J" . apm-notmuch-toggle-spam))
+                                       ("J" . apm-notmuch-toggle-spam)
+				       ("z" . #'notmuch-search-tree-current-thread)
+				       ("A" . #'notmuch-search-show-all)
+				       ;; ("D" . #'notmuch-search-delete-all)
+				       ("f" . #'notmuch-search-filter-for-domain)
+				       ("F" . #'notmuch-search-filter-for-sender)
+				       ("d" . #'my/notmuch-search-delete-mail)
+				       ("<mouse-1>" . nil))
          :map notmuch-tree-mode-map (("D" . apm-notmuch-toggle-deleted)
-                                     ("J" . apm-notmuch-toggle-spam))
-	 :map notmuch-show-part-map (("V" . notmuch-view-html)))
+                                     ("J" . apm-notmuch-toggle-spam)
+				     ("<tab>" . #'notmuch-tree-explore-here)
+				     ("<down>" . #'notmuch-tree-next-message)
+				     ("<up>" . #'notmuch-tree-prev-message)
+				     ("U" . #'notmuch-tree-unfold-all)
+				     ("u" . #'notmuch-tree-up-thread)
+				     ("N" . #'notmuch-tree-next-sibling)
+				     ("P" . #'notmuch-tree-prev-sibling)
+				     ("t" . #'notmuch-tree-toggle-folding-thread)
+				     ("/" . #'notmuch-tree-undo-read)
+				     ("F" . #'notmuch-tree-focus)
+				     ("S-SPC" . #'notmuch-tree-scroll-message-window-back))
+	 :map notmuch-show-part-map (("V" . notmuch-view-html))
+	 )
   :init
   (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
@@ -3082,21 +3109,21 @@ there are no attachments."
   (notmuch-search-oldest-first nil)
   (mail-user-agent 'message-user-agent)
   ;; (notmuch-wash-wrap-lines-length 80)
-  (notmuch-tree-show-out t)
+  (notmuch-tree-show-out nil)
   (notmuch-hello-thousands-separator ",")
   ;; (notmuch-address-command "notmuch-addrlookup")
   ;; (notmuch-address-command nil)
   ;; (notmuch-address-use-company nil)
   (notmuch-address-internal-completion '(received nil))
-  (notmuch-mua-hidden-headers nil)
-  (notmuch-column-control t)
+  ;; (notmuch-mua-hidden-headers nil)
+  ;; (notmuch-column-control t)
   ;;; Email composition
-  (notmuch-mua-compose-in 'current-window)
-  (notmuch-mua-hidden-headers nil) ; TODO 2021-05-12: Review hidden headers
+  ;; (notmuch-mua-compose-in 'current-window)
+  ;; (notmuch-mua-hidden-headers nil) ; TODO 2021-05-12: Review hidden headers
   ;; (notmuch-address-command nil)    ; FIXME 2021-05-13: Make it work with EBDB
   ;; (notmuch-address-internal-completion '(received nil))
-  (notmuch-always-prompt-for-sender t)
-  (notmuch-mua-cite-function 'message-cite-original-without-signature)
+  ;; (notmuch-always-prompt-for-sender t)
+  ;; (notmuch-mua-cite-function 'message-cite-original-without-signature)
   (notmuch-mua-reply-insert-header-p-function 'notmuch-show-reply-insert-header-p-never)
   ;; (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-full)
   (notmuch-mua-user-agent-function #'notmuch-mua-user-agent-notmuch)
@@ -3105,7 +3132,7 @@ there are no attachments."
   (notmuch-crypto-get-keys-asynchronously t)
 ;;; Reading messages
   (notmuch-show-relative-dates t)
-  (notmuch-show-all-multipart/alternative-parts t)
+  (notmuch-show-all-multipart/alternative-parts nil)
   (notmuch-show-indent-messages-width 2)
   (notmuch-show-indent-multipart nil)
   (notmuch-show-part-button-default-action 'notmuch-show-save-part)
@@ -3115,10 +3142,10 @@ there are no attachments."
   (shr-use-colors nil)
   (notmuch-show-text/html-blocked-images nil)  ; enable images
   ;; (notmuch-show-text/html-blocked-images ".") ; block everything
-  (notmuch-unthreaded-show-out nil)
+  ;; (notmuch-unthreaded-show-out nil)
   (notmuch-message-headers '("Subject" "To" "Cc" "Bcc" "Date" "Reply-To" "User-Agent"))
   ;; (notmuch-message-headers '("To" "Cc" "Subject" "Date"))
-  (notmuch-message-headers-visible t)
+  ;; (notmuch-message-headers-visible t)
   (notmuch-hello-sections '(notmuch-hello-insert-header
                             notmuch-hello-insert-saved-searches
                             notmuch-hello-insert-search
@@ -3186,7 +3213,6 @@ there are no attachments."
 
   (define-key notmuch-search-mode-map "r" 'notmuch-search-reply-to-thread)
   (define-key notmuch-search-mode-map "R" 'notmuch-search-reply-to-thread-sender)
-
 
   (defun apm-notmuch-toggle-tag (tag)
     "Toggle TAG for the current message returning t if we set it."
@@ -3278,7 +3304,7 @@ determine which browser function to use."
 	   (text-part))
 
       (unless (file-exists-p filename)
-	(notmuch-poll-and-refresh-this-buffer)
+	(notmuch-refresh-this-buffer)
 	(setq filename (notmuch-show-get-filename)))
 
       ;; if article buffer exist, kill it then create a new one
@@ -3385,7 +3411,9 @@ determine which browser function to use."
 	(warn "Unkown coding system %s in email" fixed)
 	(setq fixed  "utf-8"))
       (message "translate coding system %s into %s" charset fixed)
-      fixed)))
+      fixed))
+
+  )
 
 (use-package notmuch-capf
   :straight (notmuch-capf
@@ -3429,6 +3457,7 @@ determine which browser function to use."
 
 (use-package notmuch-notify
   :ensure t
+  :disabled
   :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
 			    :files (:defaults "*.png" "*.wav"))
   ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
@@ -3472,6 +3501,7 @@ except for `notmuch-show-mode' buffers."
 
 (use-package notmuch-indicator
   :straight t
+  :disabled
   :init
   (setq notmuch-indicator-args
         '((:terms "tag:unread and tag:inbox" :label "Ⓤ" :face (variable-pitch success))
@@ -3505,7 +3535,7 @@ except for `notmuch-show-mode' buffers."
   ((gnus-browse-mode gnus-server-mode gnus-group-mode gnus-summary-mode) . hl-line-mode)
   (gnus-started-hook . gnus-group-list-all-groups)
   :custom
-  (gnus-use-cache t)
+  (gnus-use-cache nil)
   (gnus-use-scoring nil)
   (gnus-keep-backlog 10)
   (gnus-suppress-duplicates t)
@@ -3529,7 +3559,7 @@ except for `notmuch-show-mode' buffers."
   ;;  '(nnmaildir "MyMail"
   ;;              (directory "~/Mail/")))
   ;; (gnus-secondary-select-methods nil)
-  ;; (gnus-select-method '(nnnil))
+
   ;; (gnus-secondary-select-methods
   ;;  '((nnmaildir "MyMail"
   ;;               (directory "~/Mail/"))))
@@ -3550,21 +3580,24 @@ except for `notmuch-show-mode' buffers."
   ;;  ;; '((maildir :path "~/Mail/Inbox/")
   ;;  ;;   (maildir :path "~/Mail/archive/"))
   ;;  )
-  (setq gnus-select-method
-	'(nnmaildir "" (directory "~/Mail")))
+  ;; (setq gnus-select-method '(nnnil ""))
+  ;; (setq gnus-select-method
+  ;; 	'(nnmaildir "" (directory "~/Mail")))
   ;; (setq gnus-secondary-select-methods nil)
 
-  (setq mail-sources
-	'((maildir :path "~/Mail/Inbox"  :subdirs ("cur" "new" "tmp"))))
+  ;; (setq mail-sources
+  ;; 	'((maildir :path "~/Mail/work/"  :subdirs ("cur" "new" "tmp"))))
   ;; (setq mail-sources nil)
-  ;; (setq poly/mail-root-dir (expand-file-name "Mail" "~"))
-  ;; (let ((gmail (expand-file-name "Inbox"  poly/mail-root-dir))
-  ;; 	(work (expand-file-name "work"  poly/mail-root-dir)))
+  (setq poly/mail-root-dir (expand-file-name "Mail" "~"))
+  ;; (let ((gmail (expand-file-name "Gmail"  poly/mail-root-dir))
+  ;; 	(work (expand-file-name "Work"  poly/mail-root-dir)))
   ;;   (setq mail-sources nil)
-  ;;   (if (file-directory-p gmail)
-  ;; 	(add-to-list 'mail-sources `(maildir :path ,gmail  :subdirs ("cur" "new" "tmp"))))
-  ;;   ;; (if (file-directory-p work)
-  ;;   ;; 	(add-to-list 'mail-sources `(maildir :path ,work  :subdirs ("cur" "new"))))
+  ;;   ;; (message "work is: %s" work)
+  ;;   (when (file-directory-p gmail)
+  ;;     (add-to-list 'mail-sources `(maildir :path ,gmail  :subdirs ("cur" "new" "tmp"))))
+  ;;   (when (file-directory-p work)
+  ;;     (message "directory is exist")
+  ;;     (add-to-list 'mail-sources `(maildir :path ,work  :subdirs ("cur" "new" "tmp"))))
 
   ;;   ;; (setq gnus-secondary-select-methods
   ;;   ;;   `((nnmaildir "gmail" (directory ,gmail))
@@ -3582,12 +3615,32 @@ except for `notmuch-show-mode' buffers."
   ;;   ;; 	  ;; `((nnmaildir "gmail" (directory ,gmail))
   ;;   ;; 	  ;;   (nnmaildir "work" (directory ,work)))
   ;;   ;; 	  )
-  ;;     (setq gnus-secondary-select-methods
-  ;; 	    `((nnmaildir  "" (directory ,gmail))))
 
-  ;;   )
+  ;;   (setq gnus-secondary-select-methods
+  ;; 	  `((nnmaildir  "gmail" (directory ,gmail)
+  ;; 			(directory-files nnheader-directory-files-safe)
+  ;; 			(expire-age never)
+  ;; 			(get-new-mail nil))
+  ;; 	    (nnmaildir  "work" (directory ,poly/mail-root-dir)
+  ;; 			(directory-files nnheader-directory-files-safe)
+  ;; 			(expire-age never)
+  ;; 			(get-new-mail nil)))))
 
+  (setq gnus-secondary-select-methods
+	  `(;; (nnmaildir  "gmail" (directory ,gmail)
+	    ;; 		(directory-files nnheader-directory-files-safe)
+	    ;; 		(expire-age never)
+	    ;; 		(get-new-mail nil))
+	    (nnmaildir  "Mail" (directory "/Users/jiya/Mail/")
+			(directory-files nnheader-directory-files-safe)
+			(expire-age never)
+			(get-new-mail nil))))
+
+  (setq mail-source-delete-incoming nil)
+  ;; (setq gnus-message-archive-group "nnmaildir+Work:archive")
+  ;; (setq gnus-secondary-select-methods nil)
   ;; (setq gnus-select-method nil)
+  (setq gnus-select-method '(nnnil))
   ;; (setq gnus-select-method '(nnml ""))
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
   (setq gnus-use-trees nil)
@@ -3602,19 +3655,19 @@ except for `notmuch-show-mode' buffers."
 
   (setq gnu-fetch-old-headers t)
   (setq  mail-source-delete-incoming nil)
-  (setq gnus-thread-sort-functions
-	'(gnus-thread-sort-by-number
-          gnus-thread-sort-by-most-recent-date))
+  ;; (setq gnus-thread-sort-functions
+  ;; 	'(gnus-thread-sort-by-number
+  ;;         gnus-thread-sort-by-most-recent-date))
 
   ;; (setq gnus-secondary-select-methods nil)
-  (setq gnus-secondary-select-methods
-	'((nnmaildir "Gmail"
-		     (directory "~/Mail/Inbox"))
-	  (nnmaildir "QQMail"
-		     (directory "~/Mail/QQMail"))
-	  (nnmaildir "Work"
-		     (directory "~/Mail/work"))
-	  ))
+  ;; (setq gnus-secondary-select-methods
+  ;; 	'((nnmaildir "Gmail"
+  ;; 		     (directory "~/Mail/Inbox"))
+  ;; 	  (nnmaildir "QQMail"
+  ;; 		     (directory "~/Mail/QQMail"))
+  ;; 	  (nnmaildir "Work"
+  ;; 		     (directory "~/Mail/work"))
+  ;; 	  ))
 
   ;; (setq mh-mime-save-parts-directory (expand-file-name "Mail/attachments" "~"))
 
@@ -3644,27 +3697,27 @@ except for `notmuch-show-mode' buffers."
 
   ;; (setq group-name-map '(
   ;; 			 ;; 	 ("nnmaildir+OldEmail:INBOX" . "Gmail-Inbox")
+  ;; 			 ("nnmaildir+Work:inbox" . "Work-Inbox")
+  ;; 			 ;; ("nnmaildir+Work:Archive" . "Work-Archive")
+  ;; 			 ;; ("nnmaildir+Work:Backlog" . "Work-Backlog")
+  ;; 			 ;; ("nnmaildir+Work:Sent Mail" . "Work-Sent")
+  ;; 			 ;; ("nnmaildir+Work:org-archive" . "Work-Org-Archive")
+  ;; 			 ;; ("nnmaildir+Gmail:INBOX" . "Gmail: Inbox")
+  ;; 			 ;; ("Inbox" . "Gmail: Inbox")
+  ;; 			 ;; ("QQMail" . "Gmail: QQMail")
+  ;; 			 ))
+
+  ;; (setq group-name-map '(
+  ;; 			 ;; 	 ("nnmaildir+OldEmail:INBOX" . "Gmail-Inbox")
   ;; 			 ;; ("nnmaildir+Work:INBOX" . "Work-Inbox")
   ;; 			 ;; ("nnmaildir+Work:Archive" . "Work-Archive")
   ;; 			 ;; ("nnmaildir+Work:Backlog" . "Work-Backlog")
   ;; 			 ;; ("nnmaildir+Work:Sent Mail" . "Work-Sent")
   ;; 			 ;; ("nnmaildir+Work:org-archive" . "Work-Org-Archive")
   ;; 			 ;; ("nnmaildir+Gmail:INBOX" . "Gmail: Inbox")
-  ;; 			 ("Inbox" . "Gmail: Inbox")
+  ;; 			 ("Inbox" . "nnmaildir+Gmail:Inbox")
   ;; 			 ("QQMail" . "Gmail: QQMail")
   ;; 			 ))
-
-  (setq group-name-map '(
-			 ;; 	 ("nnmaildir+OldEmail:INBOX" . "Gmail-Inbox")
-			 ;; ("nnmaildir+Work:INBOX" . "Work-Inbox")
-			 ;; ("nnmaildir+Work:Archive" . "Work-Archive")
-			 ;; ("nnmaildir+Work:Backlog" . "Work-Backlog")
-			 ;; ("nnmaildir+Work:Sent Mail" . "Work-Sent")
-			 ;; ("nnmaildir+Work:org-archive" . "Work-Org-Archive")
-			 ;; ("nnmaildir+Gmail:INBOX" . "Gmail: Inbox")
-			 ("Inbox" . "nnmaildir+Gmail:Inbox")
-			 ("QQMail" . "Gmail: QQMail")
-			 ))
   (setq gnus-group-line-format "%ue%uM %S%p[%5t][%L]\t%P%5y:%B%(%uG%)%O\n")
 
 
@@ -3715,7 +3768,6 @@ except for `notmuch-show-mode' buffers."
 
 (use-package gnus-group
   :straight (:type built-in)
-  ;; :straight nil
   :after gnus
   :ensure t
   :custom
@@ -3738,8 +3790,8 @@ except for `notmuch-show-mode' buffers."
     (gnus-group-list-all-groups 5))
 
   (define-key gnus-group-mode-map
-    ;; list all the subscribed groups even they contain zero un-read messages
-    (kbd "o") 'my-gnus-group-list-subscribed-groups)
+	      ;; list all the subscribed groups even they contain zero un-read messages
+	      (kbd "o") 'my-gnus-group-list-subscribed-groups)
   :hook ((gnus-group-mode-hook . hl-line-mode)
          (gnus-select-group-hook . gnus-group-set-timestamp))
   :bind (:map gnus-group-mode-map
@@ -3751,6 +3803,20 @@ except for `notmuch-show-mode' buffers."
   :after (gnus gnus-group)
   :ensure nil
   :config
+  (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
+  (setq gnus-topic-topology '(("Gnus" visible)
+                              (("misc" visible))
+                              (("Work" visible nil nil))
+                              (("Gmail" visible nil nil))))
+  ;; key of topic is specified in my sample ".gnus.el"
+  (setq gnus-topic-alist '(("Gmail" ; the key of topic
+                            "nnmaildir+Mail:Gmail")
+			   ("Work" ; the key of topic
+                            "nnmaildir+Mail:Work")
+                           ("misc" ; the key of topic
+                            "nndraft:drafts")
+                           ("Gnus")))
+
   (setq gnus-topic-display-empty-topics t)
   (add-hook 'gnus-group-mode-hook #'gnus-topic-mode)
   )
@@ -3779,11 +3845,12 @@ except for `notmuch-show-mode' buffers."
   (setq gnus-summary-thread-gathering-function
         'gnus-gather-threads-by-subject)
   (setq gnus-summary-gather-subject-limit 'fuzzy)
-  (setq gnus-thread-sort-functions
-        '( ;; gnus-thread-sort-by-date
-          (not gnus-thread-sort-by-number)
-	  (not gnus-thread-sort-by-most-recent-date)
-	  ))
+  (setq gnus-thread-sort-functions '(gnus-thread-sort-by-most-recent-date (not gnus-thread-sort-by-number)))
+  ;; (setq gnus-thread-sort-functions
+  ;;       '(gnus-thread-sort-by-most-recent-date
+  ;; 	  gnus-thread-sort-by-date
+  ;;         (not gnus-thread-sort-by-number)
+  ;; 	  (not gnus-thread-sort-by-most-recent-date)))
   (setq gnus-subthread-sort-functions
         'gnus-thread-sort-by-date)
   (setq gnus-thread-hide-subtree nil)
@@ -4132,6 +4199,7 @@ org-download-paste for clipboard images
 (use-package org-msg
   :straight t
   :hook (org-msg-edit-mode . (lambda ()
+			       (wakatime-mode -1)
 			       (poly/set-mail-capf)
 			       ;; (set-fill-column 100)
 			       ;; (turn-on-auto-fill)
