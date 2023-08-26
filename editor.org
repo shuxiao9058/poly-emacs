@@ -324,8 +324,9 @@ To find files/buffers and apply commands on project, use builtin package ~projec
                                         "pom.xml"
                                         "package.json"
                                         "Makefile"
-                                        "README.org"
-                                        "README.md"))
+                                        ;; "README.org"
+                                        ;; "README.md"
+					))
   (project-vc-ignores
    '("vendor/" "*.elc" "*.a" ".DS_Store" "__pycache__"
      "tmp" "dist" "coverage"

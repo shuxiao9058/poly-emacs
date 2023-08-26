@@ -18,13 +18,15 @@ Configuration for programming and languages support.
 
 * Format
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package apheleia
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
+  :disabled
   :defer t
   :hook (((go-ts-mode protobuf-ts-mode ;; emacs-lisp-mode
 		      protobuf-mode
+		      java-ts-mode
 		      markdown-mode) . apheleia-mode))
   :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
   :config
@@ -40,6 +42,8 @@ Configuration for programming and languages support.
 	apheleia-formatters)
   (push '(rufo . ("rufo" "--simple-exit"))
 	apheleia-formatters)
+  (push '(google-java-format2 . ("java" "-jar" "/usr/local/bin/google-java-format-1.17.0-all-deps.jar" "-"))
+	apheleia-formatters)
   (setf (alist-get 'ruby-mode apheleia-mode-alist)
 	'(rufo))
 
@@ -50,11 +54,13 @@ Configuration for programming and languages support.
 		   (protobuf-mode . clang-format)
 		   (emacs-lisp-mode . lisp-indent)
 		   (go-ts-mode . gofumpt)
+		   (java-ts-mode . google-java-format2)
+		   (java-mode . google-java-format2)
 		   (sql-mode . sql-format)))
     (add-to-list 'apheleia-mode-alist alist)))
 #+end_src
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package format-all
   :straight t
   :ensure t
@@ -69,6 +75,7 @@ Configuration for programming and languages support.
 	  python-mode
 	  python-ts-mode
 	  java-mode
+	  java-ts-mode
 	  cc-mode
 	  c-mode
 	  c++-mode
@@ -115,148 +122,148 @@ Configuration for programming and languages support.
 	     (cl-return (cadr choice))))))
   :config
   (define-format-all-formatter cpp-lua-format
-			       (:executable)
-			       (:install (macos ""))
-			       (:languages "Lua")
-			       (:features)
-			       (:format (format-all--buffer-easy (expand-file-name "bin/darwin/lua-format" (poly/vscode-extension-install-path "koihik.vscode-lua-format"))
-								 "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
+    (:executable)
+    (:install (macos ""))
+    (:languages "Lua")
+    (:features)
+    (:format (format-all--buffer-easy (expand-file-name "bin/darwin/lua-format" (poly/vscode-extension-install-path "koihik.vscode-lua-format"))
+				      "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
 
   (define-format-all-formatter my-stylua
-			       (:executable "stylua")
-			       (:install "cargo install stylua")
-			       (:languages "Lua")
-			       (:features)
-			       (:format (format-all--buffer-easy executable
-								 "--config-path"
-								 (expand-file-name "~/.config/stylua/stylua.toml") "-")))
+    (:executable "stylua")
+    (:install "cargo install stylua")
+    (:languages "Lua")
+    (:features)
+    (:format (format-all--buffer-easy executable
+				      "--config-path"
+				      (expand-file-name "~/.config/stylua/stylua.toml") "-")))
 
   (defvar-local dot-clang-format nil)
   (define-format-all-formatter my-clang-format
-			       (:executable "clang-format")
-			       (:install
-				(macos "brew install clang-format")
-				(windows "scoop install llvm"))
-			       (:languages "C" "C++" "Java" "Objective-C" "Protocol Buffer")
-			       (:features)
-			       (:format
-				(format-all--buffer-easy
-				 executable
-				 (when dot-clang-format
-				   (concat "--style=file:" dot-clang-format))
-				 (concat "--assume-filename="
-					 (or (buffer-file-name)
-					     (cdr (assoc language
-							 '(("C"               . ".c")
-							   ("C++"             . ".cpp")
-							   ("Java"            . ".java")
-							   ("Objective-C"     . ".m")
-							   ("Objective-C" . ".x")
-							   ("Objective-C" . ".xm")
-							   ("Objective-C" . ".m")
-							   ("Objective-C" . ".mm")
-							   ("Protocol Buffer" . ".proto")))))))))
+    (:executable "clang-format")
+    (:install
+     (macos "brew install clang-format")
+     (windows "scoop install llvm"))
+    (:languages "C" "C++" "Java" "Objective-C" "Protocol Buffer")
+    (:features)
+    (:format
+     (format-all--buffer-easy
+      executable
+      (when dot-clang-format
+	(concat "--style=file:" dot-clang-format))
+      (concat "--assume-filename="
+	      (or (buffer-file-name)
+		  (cdr (assoc language
+			      '(("C"               . ".c")
+				("C++"             . ".cpp")
+				("Java"            . ".java")
+				("Objective-C"     . ".m")
+				("Objective-C" . ".x")
+				("Objective-C" . ".xm")
+				("Objective-C" . ".m")
+				("Objective-C" . ".mm")
+				("Protocol Buffer" . ".proto")))))))))
 
 
   (define-format-all-formatter buf-format
-			       (:executable "buf")
-			       (:install
-				(macos ""))
-			       (:languages "Protocol Buffer")
-			       (:features)
-			       (:format
-				(format-all--buffer-easy
-				 executable
-				 "format"
-				 (when (buffer-file-name)
-				   (buffer-file-name)))))
+    (:executable "buf")
+    (:install
+     (macos ""))
+    (:languages "Protocol Buffer")
+    (:features)
+    (:format
+     (format-all--buffer-easy
+      executable
+      "format"
+      (when (buffer-file-name)
+	(buffer-file-name)))))
 
   (define-format-all-formatter goimports-gofmt
-			       (:executable "/bin/sh")
-			       (:install
-				(macos "brew install go")
-				(windows "scoop install go")
-				"go get golang.org/x/tools/cmd/goimports")
-			       (:languages "Go")
-			       (:features)
-			       (:format (format-all--buffer-easy executable "-c" "goimports | gofmt -s")))
+    (:executable "/bin/sh")
+    (:install
+     (macos "brew install go")
+     (windows "scoop install go")
+     "go get golang.org/x/tools/cmd/goimports")
+    (:languages "Go")
+    (:features)
+    (:format (format-all--buffer-easy executable "-c" "goimports | gofmt -s")))
 
 
   (define-format-all-formatter goimports
-			       (:executable "goimports")
-			       (:install (macos ""))
-			       (:languages "Go")
-			       (:features)
-			       (:format (format-all--buffer-easy executable)))
+    (:executable "goimports")
+    (:install (macos ""))
+    (:languages "Go")
+    (:features)
+    (:format (format-all--buffer-easy executable)))
 
   (define-format-all-formatter gofumpt
-			       (:executable "gofumpt")
-			       ;; (:executable "/bin/sh")
-			       (:install (macos ""))
-			       (:languages "Go")
-			       (:features)
-			       (:format (format-all--buffer-easy executable)))
+    (:executable "gofumpt")
+    ;; (:executable "/bin/sh")
+    (:install (macos ""))
+    (:languages "Go")
+    (:features)
+    (:format (format-all--buffer-easy executable)))
 
   (define-format-all-formatter py-autopep8
-			       (:executable "autopep8")
-			       (:install (macos ""))
-			       (:languages "Python")
-			       (:features)
-			       (:format (format-all--buffer-easy executable "-")))
+    (:executable "autopep8")
+    (:install (macos ""))
+    (:languages "Python")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
 
   (define-format-all-formatter py-black
-			       (:executable "black")
-			       (:install (macos ""))
-			       (:languages "Python")
-			       (:features)
-			       (:format (format-all--buffer-easy executable "-")))
+    (:executable "black")
+    (:install (macos ""))
+    (:languages "Python")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
 
   (define-format-all-formatter my-shfmt
-			       (:executable "shfmt")
-			       (:install
-				(macos "brew install shfmt")
-				(windows "scoop install shfmt"))
-			       (:languages "Shell")
-			       (:features)
-			       (:format
-				(format-all--buffer-easy executable "-i" "4" "-ci"
-							 (if (buffer-file-name)
-							     (list "-filename" (buffer-file-name))
-							   (list "-ln"
-								 (cl-case (and (eql major-mode 'sh-mode)
-									       (boundp 'sh-shell)
-									       (symbol-value 'sh-shell))
-								   (bash "bash")
-								   (mksh "mksh")
-								   (t "posix")))))))
+    (:executable "shfmt")
+    (:install
+     (macos "brew install shfmt")
+     (windows "scoop install shfmt"))
+    (:languages "Shell")
+    (:features)
+    (:format
+     (format-all--buffer-easy executable "-i" "4" "-ci"
+			      (if (buffer-file-name)
+				  (list "-filename" (buffer-file-name))
+				(list "-ln"
+				      (cl-case (and (eql major-mode 'sh-mode)
+						    (boundp 'sh-shell)
+						    (symbol-value 'sh-shell))
+					(bash "bash")
+					(mksh "mksh")
+					(t "posix")))))))
 
   (define-format-all-formatter my-beautysh
-			       (:executable "beautysh")
-			       (:install
-				(macos "pip install beautysh"))
-			       (:languages "Shell")
-			       (:features)
-			       (:format (format-all--buffer-easy executable "-")))
+    (:executable "beautysh")
+    (:install
+     (macos "pip install beautysh"))
+    (:languages "Shell")
+    (:features)
+    (:format (format-all--buffer-easy executable "-")))
 
 
   (define-format-all-formatter nginxfmt
-			       (:executable "nginxfmt")
-			       (:install (macos "pip install nginxfmt"))
-			       ;; (:install
-			       ;;  (macos "brew install shfmt")
-			       ;;  (windows "scoop install shfmt"))
-			       (:languages "_Nginx")
-			       ;; (:modes nginx-mode)
-			       (:features)
-			       (:format
-				(format-all--buffer-easy executable "-i" "4" "-")))
+    (:executable "nginxfmt")
+    (:install (macos "pip install nginxfmt"))
+    ;; (:install
+    ;;  (macos "brew install shfmt")
+    ;;  (windows "scoop install shfmt"))
+    (:languages "_Nginx")
+    ;; (:modes nginx-mode)
+    (:features)
+    (:format
+     (format-all--buffer-easy executable "-i" "4" "-")))
 
   (define-format-all-formatter crossplane
-			       (:executable "/usr/local/bin/nginx_format.sh")
-			       (:install (macos "pip install crossplane"))
-			       (:languages "Nginx")
-			       (:features)
-			       (:format (format-all--buffer-easy executable)))
+    (:executable "/usr/local/bin/nginx_format.sh")
+    (:install (macos "pip install crossplane"))
+    (:languages "Nginx")
+    (:features)
+    (:format (format-all--buffer-easy executable)))
 
   ;; lsp-format-buffer
   (eval-after-load 'format-all
@@ -725,7 +732,7 @@ Examples:
   :commands (lsp lsp-deferred lsp-enable-which-key-integration lsp-format-buffer lsp-organize-imports)
   :hook (((go-mode go-ts-mode go-dot-mod-mode go-mod-ts-mode
 		   clojure-mode
-		   java-mode
+		   ;; java-mode
 		   beancount-mode web-mode
 		   python-mode python-ts-mode
 		   lua-mode lua-ts-mode
@@ -751,7 +758,7 @@ Examples:
   (lsp-idle-delay 0.1)                 ;; lazy refresh
   (lsp-server-trace nil)
   (lsp-log-io nil)
-  ;; (lsp-log-max nil)
+  (lsp-log-max nil)
   (lsp-print-performance nil)
   (lsp-document-sync-method nil) ;; use default method recommended by server. 'incremental 'full
   (lsp-enable-xref t)
@@ -1081,12 +1088,104 @@ Examples:
   (lsp-protobuf-bufls-server-path "/usr/local/gopath/bin/bufls"))
 
 (use-package lsp-java
+  :hook (java-ts-mode . java-lsp-init)
+  :custom
+  (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/"))
+  (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/workspace/"))
+  ;; (lsp-java-vmargs '())
   ;; :custom
   ;; (lsp-java-server-install-dir "")
   :config
-  ;; (add-hook 'java-mode-hook 'lsp)
+  (defun java-lsp-init ()
+    "We need to require java-lsp before loading lsp in a Java buffer.
+use-package will load java-lsp for us simply by calling this function."
+    (setq lsp-java-vmargs
+          `("-noverify"
+            "-Xmx1G"
+            "-XX:+UseG1GC"
+            "-XX:+UseStringDeduplication"
+	    "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
+	    ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
+	    "-Xbootclasspath/a:~/.config/emacs/.local/jar/lombok.jar"
+	    ;;             ,(concat "-javaagent:" (expand-file-name "~") "/.emacs.d/.local/jar/lombok.jar")
+	    ;; ,(concat "-Xbootclasspath/a:" (expand-file-name "~") "/.emacs.d/.local/jar/lombok.jar")
+	    ;; "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
+	    ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
+	    ;; "-Xbootclasspath/a:~/.config/emacs/.local/jar/lombok.jar"
+	    "--add-modules=ALL-SYSTEM"
+	    "--add-opens"
+	    "java.base/java.util=ALL-UNNAMED"
+	    "--add-opens"
+	    "java.base/java.lang=ALL-UNNAMED"
+	    ))
+     (setq c-basic-offset 2
+                             tab-width 2
+                             indent-tabs-mode t
+                             imenu-list-auto-resize t)
+    (setq electric-indent-inhibit nil)  ; Auto-indent code after e.g. {}
+    (setq company-lsp-cache-candidates nil)  ; Company cache should be disabled for lsp-java
+    (lsp-deferred))
+  ;; (add-hook 'java-ts-mode-hook 'lsp)
   (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
-  (require 'dap-java))
+  ;; (require 'dap-java)
+  )
+
+(use-package dap-java
+  :straight nil
+  :after lsp-java
+  :bind (:map dap-mode-map
+         ([f9] . dap-continue)
+         ([S-f9] . dap-disconnect)
+         ([f10] . dap-next)
+         ([f11] . dap-step-in)
+         ([S-f11] . dap-step-out)
+         ([f12] . dap-hide/show-ui))
+  :config
+  ;; FIXME: Create nice soltion instead of a hack
+  (defvar dap-hide/show-ui-hidden? t)
+  (defun dap-hide/show-ui ()
+    "Hide/show dap ui. FIXME"
+    (interactive)
+    (if dap-hide/show-ui-hidden?
+        (progn
+          (setq dap-hide/show-ui-hidden? nil)
+          (dap-ui-locals)
+          (dap-ui-repl))
+      (kill-buffer "*dap-ui-inspect*")
+      (kill-buffer "*dap-ui-locals*")
+      (kill-buffer "*dap-ui-repl*")
+      (kill-buffer "*dap-ui-sessions*")
+      (setq dap-hide/show-ui-hidden? t)))
+
+  (dap-register-debug-template "VulpxLauncher"
+                               (list :type "java"
+                                     :request "launch"
+                                     :args ""
+                                     :cwd nil
+                                     :stopOnEntry :json-false
+                                     :host "localhost"
+                                     :request "launch"
+                                     :modulePaths []
+                                     :classPaths nil
+                                     :name "VulpxLauncher"
+                                     :projectName "forme-backend"
+                                     :mainClass "io.vulpx.VulpxLauncher")))
+
+;; For groovy and gradle support
+(use-package groovy-mode :defer t)
+
+(use-package gradle-mode
+  :hook (java-ts-mode . gradle-mode)
+  :preface
+  (defun my/switch-to-compilation-window ()
+    "Switch to the *compilation* buffer after compilation."
+    (other-window 1))
+  :bind (:map gradle-mode-map
+              ("C-c C-c" . gradle-build)
+              ("C-c C-t" . gradle-test))
+  :config
+  (advice-add 'gradle-build :after #'my/switch-to-compilation-window)
+  (advice-add 'gradle-test :after #'my/switch-to-compilation-window))
 #+end_src
 
 ** yas parameter complete in place required

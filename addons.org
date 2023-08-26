@@ -1498,6 +1498,7 @@ To manage the git repository, use builtin package ~vc~.
                                             (issues . show)))
   ;; (magit-refresh-verbose t) ;; debug only
   ;; (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+  (magit-display-buffer-function #'magit-display-buffer-fullcolumn-most-v1)
   (magit-revert-buffers 'silent)
   (git-commit-summary-max-length 50)
   (magit-log-section-commit-count 5)
@@ -1507,8 +1508,8 @@ To manage the git repository, use builtin package ~vc~.
   (magit-rebase-arguments '("--autostash"))
   ;; use colored graph lines. Could be a performance issue.
   (magit-log-arguments '("-n64" "--graph" "--decorate" "--color" "--stat"))
-  ;; (magit-diff-use-overlays nil)
-  ;; (magit-use-overlays nil)
+  (magit-diff-use-overlays nil)
+  (magit-use-overlays nil)
   (magit-auto-revert-mode nil)
   (git-rebase-auto-advance  nil)
   (magit-stage-all-confirm nil)
