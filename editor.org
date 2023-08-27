@@ -75,12 +75,14 @@ This is consulted on every `require', `load' and various path/io functions.  You
       enable-local-eval t
       enable-local-variables :all
       bidi-display-reordering 'left-to-right
-      fast-but-imprecise-scrolling t
+      fast-but-imprecise-scrolling t ;; Make cursor movement an order of magnitude faster
       redisplay-skip-fontification-on-input t
       ffap-machine-p-known 'reject
       highlight-nonselected-windows nil
       idle-update-delay 1.0
       frame-title-format nil
+      ;; 指针宽度与字符一致
+      x-stretch-cursor t
       ns-use-proxy-icon nil
       ;; mode-line-compact t
       mode-line-compact 'long
@@ -2864,17 +2866,17 @@ valign for org-mode & markdown table
   :config
   (require 'calfw-org)
   (require 'calfw-ical)
-  (defun my-open-calendar ()
-    (interactive)
-    (cfw:open-calendar-buffer
-     :contents-sources
-     (list
-      (cfw:org-create-source "Green")  ; orgmode source
-      ;; (cfw:howm-create-source "Blue")  ; howm source
-      ;; (cfw:cal-create-source "Orange") ; diary source
-      (cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
-      ;; (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
-      )))
+  ;; (defun my-open-calendar ()
+  ;;   (interactive)
+  ;;   (cfw:open-calendar-buffer
+  ;;    :contents-sources
+  ;;    (list
+  ;;     (cfw:org-create-source "Green")  ; orgmode source
+  ;;     ;; (cfw:howm-create-source "Blue")  ; howm source
+  ;;     ;; (cfw:cal-create-source "Orange") ; diary source
+  ;;     (cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
+  ;;     ;; (cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
+  ;;     )))
   (defun cfw:org-capture-day ()
     (with-current-buffer  (get-buffer-create cfw:calendar-buffer-name)
       (let ((pos (cfw:cursor-to-nearest-date)))

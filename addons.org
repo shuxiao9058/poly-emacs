@@ -1,4 +1,4 @@
-#+title: Addons
+﻿#+title: Addons
 
 Configuration for addons, additional features provided by individual packages.
 
@@ -3106,6 +3106,8 @@ there are no attachments."
   (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notmuch-show-logo nil)
+  (notmuch-show-indent-messages-width 0)
+  (notmuch-show-single-message t)
   ;; (notmuch-wash-wrap-lines-length 150)
   (notmuch-search-oldest-first nil)
   (mail-user-agent 'message-user-agent)
@@ -3134,7 +3136,6 @@ there are no attachments."
 ;;; Reading messages
   (notmuch-show-relative-dates t)
   (notmuch-show-all-multipart/alternative-parts nil)
-  (notmuch-show-indent-messages-width 2)
   (notmuch-show-indent-multipart nil)
   (notmuch-show-part-button-default-action 'notmuch-show-save-part)
   (notmuch-wash-citation-lines-prefix 6)
@@ -4794,7 +4795,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :init
   (add-hook 'emacs-lisp-mode-hook (lambda () (setq-local counsel-dash-docsets '("Emacs_Lisp"))))
   (add-hook 'scala-mode-hook (lambda () (setq-local counsel-dash-docsets '("Scala" "Akka" "Play_Scala" "Java"))))
-  (add-hook 'java-mode-hook (lambda () (setq-local counsel-dash-docsets '("Java" "Play_Java"))))
+  (add-hook 'java-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("Java_SE17" "Play_Java"))))
   (add-hook 'rust-mode-hook (lambda () (setq-local counsel-dash-docsets '("Rust"))))
   (add-hook 'rustic-mode-hook (lambda () (setq-local counsel-dash-docsets '("Rust"))))
   (add-hook 'rustic-ts-mode-hook (lambda () (setq-local counsel-dash-docsets '("Rust"))))
@@ -4819,7 +4820,8 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 (defun poly/docs-browse-url (url &optional _new-window)
   (set-process-sentinel
-   (start-process "docs-brower" "*docs brower*" "osascript" "-e"  (format "tell application \"Firefox\"\n activate\n open location \"%s\"\n end tell" url))
+   (start-process "docs-brower" "*docs brower*" "osascript" "-e"  (format "tell application \"Safari\"\n activate\n open location \"%s\"\n end tell" url) ;; (format "tell application \"Firefox\"\n activate\n open location \"%s\"\n end tell" url)
+		  )
    (lambda (proc _)
      (let ((status (process-exit-status proc)))
        (if (= 0 status)
