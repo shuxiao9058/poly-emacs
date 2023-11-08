@@ -25,3 +25,7 @@ elpa
 .dap-breakpoints
 .mc-lists.el
 org-caldav-*.el
+url
+eclipse.jdt.ls
+multisession
+workspace

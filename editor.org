@@ -1285,9 +1285,9 @@ do not already have one."
   (setq org-archive-location (expand-file-name "archive/%s_archive::" org-directory))
 
   (setq org-refile-targets
-	`((org-agenda-files :maxlevel . 2)
-	  (,(list +org-capture-notes-file
-		  +org-capture-work-notes-file
+	`(;; (org-agenda-files :maxlevel . 2)
+	  (,(list ;; +org-capture-notes-file
+		  ;; +org-capture-work-notes-file
 		  +org-capture-work-team-gtd-file
 		  +org-capture-work-weekly-file) :maxlevel . 2)))
 
@@ -2317,7 +2317,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 ** org-roam
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; https://github.com/iecaser/Configurations/blob/a7e61c25c49556b33d7888599a853da9d4c9cb95/.doom.d/note.el
 ;; https://www.orgroam.com/manual/Installation-_00281_0029.html#Installation-_00281_0029
 (use-package org-roam
@@ -2676,10 +2676,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-<script src='https://unpkg.com/mermaid@8.4.8/dist/mermaid.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
 <script>
 mermaid.initialize({
-  theme: 'neutral',  // default, forest, dark, neutral
+  theme: 'default',  // default, forest, dark, neutral
   startOnLoad: true
 });
 </script>

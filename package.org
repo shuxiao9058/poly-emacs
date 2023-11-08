@@ -11,7 +11,7 @@
 ;; Emacs wants to load `package.el' before the init file,
 ;; so we do the same with `straight.el'
 (setq straight-base-dir poly-local-dir
-      straight-repository-branch "master"
+      straight-repository-branch "develop"
       straight-use-package-by-default t
       straight-cache-autoloads t ;; we already do this, and better.
       ;; Doom doesn't encourage you to modify packages in place. Disabling this
@@ -30,7 +30,7 @@
       ;; Prefix declarations are unneeded bulk added to our autoloads file. Best
       ;; we just don't have to deal with them at all.
       autoload-compute-prefixes nil
-      straight-fix-flycheck t
+      straight-fix-flycheck nil
       straight-enable-use-package-integration t
       straight-disable-native-compile t
 
@@ -53,7 +53,7 @@
   (defvar bootstrap-version)
   (let ((bootstrap-file
 	 (expand-file-name "straight/repos/straight.el/bootstrap.el" poly-local-dir))
-	(bootstrap-version 5))
+	(bootstrap-version 6))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
 	  (url-retrieve-synchronously
@@ -79,8 +79,7 @@
   (straight-use-package 'use-package))
 
 ;; Straight configs
-(setq straight-check-for-modifications '(check-on-save find-when-checking))
-(setq straight-vc-git-default-clone-depth 1)
+;; (setq straight-check-for-modifications '(check-on-save find-when-checking))
 (setq use-package-expand-minimally t)
 
 (add-to-list 'straight-built-in-pseudo-packages 'dired)

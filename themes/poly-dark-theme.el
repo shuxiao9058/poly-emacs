@@ -264,8 +264,7 @@ The theme has to be reloaded after changing anything in this group."
                (notmuch-search-non-matching-authors     :foreground ,fg)
                (notmuch-search-subject                  :foreground ,fg)
                (notmuch-search-unread-face              :weight bold)
-               (notmuch-tag-added                       :foreground ,green :background ,green;; :foreground ,green :weight normal
-                                                        )
+               (notmuch-tag-added                       :foreground ,green :weight normal)
                (notmuch-tag-deleted                     :foreground ,red :weight normal)
                (notmuch-tag-face                        :foreground ,orange :weight normal)
                (notmuch-tag-flagged                     :foreground ,dogblue4 :weight normal)
@@ -948,7 +947,6 @@ The theme has to be reloaded after changing anything in this group."
                (lsp-face-highlight-write :underline t :background unspecified :foreground unspecified)
                (lsp-face-highlight-textual :underline t :background unspecified :foreground unspecified)
                (lsp-ui-peek-highlight :inherit nil :background unspecified :foreground unspecified :weight semi-bold :box (:line-width -1))
-
 
                (cfw:face-title               :inherit font-lock-type-face :height 2.0 :weight bold :inherit variable-pitch)
                ;; (cfw:face-header              :foreground ,base :weight bold)

@@ -772,7 +772,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 *** ldap-mode
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package ldap-mode
   :straight (ldap-mode :package "ldap-mode"
 		       :type git
@@ -789,16 +789,13 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 (use-package tabnine
   :commands (tabnine-start-process)
   :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . tabnine-mode)
-  :straight t ;; (tabnine :package "tabnine"
-  ;; 	     :type git
-  ;; 	     :host github :repo "shuxiao9058/tabnine")
-  ;; (tabnine :package "tabnine"
-  ;; 	   :type git
-  ;; 	   :host nil
-  ;; 	   :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git")
+  ;; :straight (tabnine :package "tabnine"
+  ;; 		     :type git
+  ;; 		     :host nil
+  ;; 		     :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git")
   :diminish "⌬"
   :custom
-  (tabnine-wait 0.1)
+  (tabnine-wait 1.0)
   (tabnine-minimum-prefix-length 0)
   (tabnine-max-wait-count-while-nil 5)
   (tabnine-wait-interval-while-nil 0.2)
@@ -811,7 +808,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 			       (fix-code . "找到并修复这段代码的潜在问题")))
   ;; (tabnine-chat-max-context-length 200)
   :init
-  (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "false"))
+  (setq tabnine-executable-args (list "--log-level" "Debug" "--no-lsp" "true"))
   :hook (kill-emacs . tabnine-kill-process)
   :config
   (tabnine-start-process)
@@ -821,7 +818,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
      (meow-normal-mode-p)))
   (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate))
 #+end_src
-
 
 **** copilot
 
@@ -1485,6 +1481,13 @@ _t_:      select tab 											_R_ : redo
 To manage the git repository, use builtin package ~vc~.
 
 #+begin_src emacs-lisp
+
+;; Define handy function to insert Gerrit-style Change-Id trailers at the cursor
+(defun poly/insert-change-id ()
+  "Insert a Gerrit-style Change-Id at the cursor."
+  (interactive)
+  (insert (concat "Change-Id: I" (substring (secure-hash 'sha256 (number-to-string (random t))) 0 40))))
+
 (use-package magit
   :straight t
   :commands (magit-file-delete magit-status magit-checkout)
@@ -1543,6 +1546,7 @@ To manage the git repository, use builtin package ~vc~.
   ;; ;; Use flyspell in the commit buffer
   ;; (add-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   :config
+
   (setq magit-define-global-key-bindings t)
   (setq magit-status-sections-hook
 	'(
@@ -1817,6 +1821,7 @@ To manage the git repository, use builtin package ~vc~.
   (setq code-review-gitlab-graphql-host nil)
   ;; (setq code-review-gitlab-graphql-host "git.17usoft.com/api")
   )
+
 #+end_src
 
 ****  Git sign-off line
@@ -3158,6 +3163,20 @@ there are no attachments."
   ;;   '(notmuch-draft-folder "top/Drafts")
   ;; '(notmuch-fcc-dirs "top/Sent")
   :config
+  ;; (require 'notmuch-mode-line)
+  ;; (require 'notmuch-nav)
+  ;; (require 'notmuch-tree-hide)
+  ;; (require 'notmuch-tree)
+  ;; (require 'notmuch-fold)
+
+  ;; (custom-set-faces
+  ;;  '(notmuch-tree-match-tree-face ((t (:family "Source Code Pro"))) t)
+  ;;  '(notmuch-tree-no-match-tree-face ((t (:family "Source Code Pro"))) t))
+  ;; (set-face-attribute 'notmuch-search-unread-face nil :foreground "white")
+  ;; (set-face-attribute 'notmuch-message-summary-face nil :background "steel blue" :foreground "snow")
+  (add-to-list 'notmuch-search-line-faces
+               '("deleted" . font-lock-comment-face))
+
   ;; (unless (string= (system-name) "spicy")
   ;;   (setq notmuch-command "remote-notmuch.sh"))
   ;;; remote-notmuch should look like:
@@ -3257,8 +3276,10 @@ there are no attachments."
   ;;; printf -v ARGS "%q " "$@"
   ;;; exec ssh notmuch notmuch ${ARGS}
 
-  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-  (setq read-extended-command-predicate #'command-completion-default-include-p)
+  ;; ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  (when (boundp 'read-extended-command-predicate)
+    (setq read-extended-command-predicate
+          #'command-completion-default-include-p))
 
   ;; In non-programming-buffers, we don't want `pcomplete-completions-at-point'
   ;; or 't' which seems to complete everything.

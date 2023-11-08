@@ -272,6 +272,7 @@ This configuration sticks with Meow for modal editing.
 		  ;; notmuch-tree-mode
 		  ;; notmuch-hello-mode
 		  ;; notmuch-search-mode
+		  ;; special-mode
 		  vterm-mode
 		  eww-mode
 		  notmuch-message-mode))
