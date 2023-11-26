@@ -95,6 +95,10 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
     (operator . ("#ab5959"))
     (bracket . ("#586069"))
     (function-name . ("#998418"))
+    (linum . ("light grey"))
+    (column-indicator . ("light grey"))
+    (diff-added-bg . ("#1e754f"))
+    (match . ("#e6cc77"))
     )
 
   "Colors used for vitesse-light-soft."
@@ -119,16 +123,16 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
 	       (default :background ,bg :foreground ,fg)
 	       (default-italic :slant italic)
 	       ;; (ffap :foreground ,fg4)
-	       ;; (fringe :background ,bg :foreground ,fg4)
-	       ;; (highlight :foreground ,fg3 :background ,bg3)
+	       (fringe :background "light grey" :foreground ,fg)
+	       (highlight :foreground ,fg :background ,orange)
                (hl-line :background ,current :extend t)
 	       (info-quoted-name :foreground ,orange)
 	       (info-string :foreground ,yellow)
-	       ;; (lazy-highlight :foreground ,fg2 :background ,bg2)
+	       (lazy-highlight :inherit highlight)
 	       (link :foreground ,cyan :underline t)
-	       ;; (linum :slant italic :foreground ,bg4 :background ,bg)
-	       ;; (line-number :slant italic :foreground ,bg4 :background ,bg)
-	       (match :background ,yellow :foreground ,bg)
+	       ;; (linum :slant italic :foreground ,fg :background ,bg)
+	       (line-number :slant italic :foreground ,linum :background ,bg)
+	       (match :background ,match :foreground ,fg)
 	       (minibuffer-prompt
 		,@(if vitesse-alternate-mode-line-and-minibuffer
 		      (list :weight 'normal :foreground fg)
@@ -141,8 +145,8 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
 	       (warning :foreground ,orange)
 	       (error :foreground ,red)
 
-               ;; (flymake-errline :underline ,red :foreground ,red :background nil :inherit nil)
-               ;; (flymake-warnline :underline ,orange :foreground ,orange :background nil :inherit nil)
+               (flymake-errline :underline ,red :foreground ,red :background nil :inherit nil)
+               (flymake-warnline :underline ,orange :foreground ,orange :background nil :inherit nil)
 
 	       (header-line :background ,bg)
 	       ;; syntax
@@ -181,7 +185,7 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
                ;; (window-divider                 :background ,bg+3)
                ;; (window-divider-first-pixel     :foreground ,bg+1)
                ;; (window-divider-last-pixel      :foreground ,bg+1)
-               (line-number-current-line       :foreground ,yellow)
+               (line-number-current-line       :foreground ,brown)
 
                ;; (parenthesis                    :foreground ,fg-1)
                ;; ;; (completions-common-part        )
@@ -358,7 +362,7 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
 	       ;; Treemacs
 	       (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
 
-	       ;; (fill-column-indicator          :foreground ,bg+2 :height 0.10)
+	       (fill-column-indicator          :foreground ,column-indicator :height 0.6)
 
 	       ;; (scroll-bar                     :foreground ,fg-1)
 
@@ -645,7 +649,7 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
 	       ;; 					      :extend t)
 	       ;; the four following lines are just a patch of the
 	       ;; upstream color to add the extend keyword.
-	       (magit-diff-added :background "#335533"
+	       (magit-diff-added :background ,diff-added-bg
 				 :foreground "#ddffdd"
 				 :extend t)
 	       (magit-diff-added-highlight :background "#336633"
@@ -724,18 +728,18 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
 	       ;; message
 	       (message-mml :foreground ,green :weight normal)
 	       (message-header-xheader :foreground ,cyan :weight normal)
-	       ;; ;; mode-line
-	       ;; (mode-line :background ,current
-	       ;; 		  :box ,current :inverse-video nil
-	       ;; 		  ,@(if vitesse-alternate-mode-line-and-minibuffer
-	       ;; 			(list :foreground fg3)
-	       ;; 		      (list :foreground 'unspecified)))
-	       ;; (mode-line-inactive
-	       ;; 	:inverse-video nil
-	       ;; 	,@(if vitesse-alternate-mode-line-and-minibuffer
-	       ;; 	      (list :foreground comment :background bg
-	       ;; 		    :box bg)
-	       ;; 	    (list :foreground fg :background bg2 :box bg2)))
+	       ;; mode-line
+	       (mode-line :background ,current
+			  :box ,current :inverse-video nil
+			  ,@(if vitesse-alternate-mode-line-and-minibuffer
+				(list :foreground fg)
+			      (list :foreground 'unspecified)))
+	       (mode-line-inactive
+		:inverse-video nil
+		,@(if vitesse-alternate-mode-line-and-minibuffer
+		      (list :foreground comment :background bg
+			    :box bg)
+		    (list :foreground fg :background bg :box bg)))
                ;;;; mode-line / header-line
 	       (mode-line-active    :inherit mode-line)
 	       (mode-line-emphasis  :inherit highlight :distant-foreground ,bg)
@@ -974,10 +978,7 @@ Must be one of `light`, `light-soft`, `dark`, `dark-soft`, or `black`."
                (cfw:face-toolbar-button-on   :foreground ,purple :weight bold)
 
                (variable-pitch-text :inherit variable-pitch)
-
 	       )
-	     ;; (princ colors)
-	     ;; (alist-get 'bg colors)
 	     )
       )
 
