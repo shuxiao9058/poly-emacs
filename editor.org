@@ -194,6 +194,12 @@ This is consulted on every `require', `load' and various path/io functions.  You
 (put 'set-goal-column 'disabled nil)
 #+end_src
 
+** nginx-mode
+
+#+begin_src emacs-lisp
+(use-package nginx-mode)
+#+end_src
+
 ** Encoding
 #+begin_src emacs-lisp
 ;; handle emacs utf-8 input

@@ -4837,7 +4837,11 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   (setq counsel-dash-docsets-path (expand-file-name "Library/Application Support/Zeal/Zeal/docsets" "~"))
   (setq counsel-dash-enable-debugging nil)
   :bind
-  (("C-c d" . counsel-dash-at-point)))
+  ( ("M-s-l" . counsel-dash)
+   ("C-c C-d d" . counsel-dash-at-point)
+   ("M-s-." . counsel-dash-at-point)
+   ("M-g d" . counsel-dash-at-point)
+   ("M-g D" . counsel-dash)))
 
 (defun poly/docs-browse-url (url &optional _new-window)
   (set-process-sentinel
