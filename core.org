@@ -370,6 +370,10 @@ Accepts the same arguments as `message'."
   (interactive)
   (require 'poly-dark-theme)
   (load-theme 'poly-dark t)
+
+  ;; (require 'vitesse-theme)
+  ;; (load-theme 'vitesse t)
+  ;; (load-theme 'phoebe t)
   ;; (require 'catppuccin-theme)
   ;; (setq catppuccin-flavor 'latte)
   ;; (setq catppuccin-flavor 'macchiato)

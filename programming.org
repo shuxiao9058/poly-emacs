@@ -888,8 +888,8 @@ Examples:
 
   (setq lsp-disabled-clients '(emmy-lua beancount-ls))
   (setq lsp-enabled-clients '(lua-language-server
-			      ;; pyright
-			      pylsp
+			      pyright
+			      ;; pylsp
 			      gopls
 			      protobuf-bufls
 			      vue-semantic-server
@@ -1386,7 +1386,7 @@ use-package will load java-lsp for us simply by calling this function."
 	      (javascript-mode . js-ts-mode)
               (js-mode         . js-ts-mode)
               (json-mode       . json-ts-mode)
-              (lua-mode        . lua-ts-mode)
+              ;; (lua-mode        . lua-ts-mode)
               (python-mode     . python-ts-mode)
               (rjsx-mode       . tsx-ts-mode)
               (ruby-mode       . ruby-ts-mode)

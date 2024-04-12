@@ -1159,6 +1159,7 @@ Visualizing Color Codes with rainbow-mode.
   (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
   (setq +org-capture-notes-file (expand-file-name  "personal-note.org" org-beorg-directory))
   (setq +org-capture-work-gtd-file (expand-file-name "work-gtd.org" org-beorg-directory))
+  (setq +org-capture-work-kpi-file (expand-file-name "work-kpi.org" org-beorg-directory))
   (setq +org-capture-work-team-gtd-file (expand-file-name "work-team-gtd.org" org-beorg-directory))
   (setq +org-capture-work-notes-file (expand-file-name "work-note.org" org-beorg-directory))
   (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
@@ -1171,6 +1172,7 @@ Visualizing Color Codes with rainbow-mode.
 			  +org-capture-gtd-file
 			  +org-capture-work-gtd-file
 			  +org-capture-work-team-gtd-file
+			  ;; +org-capture-work-kpi-file
 			  +org-capture-work-talk-file
 			  +org-capture-work-meeting-file
 			  +org-mu4e-icalendar-org-capture-file
@@ -1293,9 +1295,10 @@ do not already have one."
   (setq org-refile-targets
 	`(;; (org-agenda-files :maxlevel . 2)
 	  (,(list ;; +org-capture-notes-file
-		  ;; +org-capture-work-notes-file
-		  +org-capture-work-team-gtd-file
-		  +org-capture-work-weekly-file) :maxlevel . 2)))
+	     ;; +org-capture-work-notes-file
+	     +org-capture-work-kpi-file
+	     +org-capture-work-team-gtd-file
+	     +org-capture-work-weekly-file) :maxlevel . 2)))
 
   (setq org-tag-alist
 	'(("ignore" . ?i)
@@ -2836,7 +2839,7 @@ valign for org-mode & markdown table
 
 *** calfw: graphical calendar
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package calfw
   :straight t
   :config
