@@ -83,6 +83,7 @@
 (bind-key "<f11>" #'toggle-frame-maximized)
 ;; (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
+(bind-key (kbd "C-c T") #'poly/open-with-tower)
 (bind-key (kbd "C-c f r" ) #'rename-visited-file)
 (bind-key (kbd "C-x C-b") #'ibuffer)
 (bind-key (kbd "C-c q r") #'restart-emacs)

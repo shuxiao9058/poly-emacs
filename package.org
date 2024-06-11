@@ -210,6 +210,8 @@
   (setq exec-path-from-shell-variables
 	'("PATH"
 	  "PWD"
+	  "PYTHONPATH"
+	  "CONDA_PYTHON_EXE"
 	  "PYENV_ROOT"
 	  "JAVA_HOME"
 	  "GOPATH"

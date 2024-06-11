@@ -4704,6 +4704,43 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
       (shell-command (format "code %s" (shell-quote-argument xpath)))))))
 #+end_src
 
+
+*** open with tower
+
+#+begin_src emacs-lisp
+(defun poly/open-with-tower (&optional arg)
+  "Open current file or dir in vscode.
+
+URL `http://xahlee.info/emacs/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version: 2020-02-13 2021-01-18 2022-08-04"
+  ;; (interactive)
+  (interactive "P")
+  (let* ((file-directory (expand-file-name default-directory))
+	 (project-root-directory
+	  (if (fboundp 'project-root)
+	      (project-root (project-current t)) file-directory))
+	 (file-path (if buffer-file-name buffer-file-name file-directory))
+	 (xpath (if arg file-path project-root-directory))
+	 (line (line-number-at-pos))
+	 (character (max 0 (- (point) (line-beginning-position))))
+	 (shell-cmd-str))
+    (message "path is %s" xpath)
+    (cond
+     ((string-equal system-type "darwin")
+      ;; VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
+      ;; PWD=\"%s\"
+      (setq shell-cmd-str (format "open \"%s\" -b \"com.fournova.Tower3\""
+				  (shell-quote-argument (expand-file-name project-root-directory))))
+      (message shell-cmd-str)
+      (shell-command shell-cmd-str))
+     (t (message "Unsupport system type %s" system-type))
+     ;; ((string-equal system-type "windows-nt")
+     ;;  (shell-command (format "code.cmd %s" (shell-quote-argument xpath))))
+     ;; ((string-equal system-type "gnu/linux")
+     ;;  (shell-command (format "code %s" (shell-quote-argument xpath))))
+     )))
+#+end_src
+
 *** pair
 
 https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7/.emacs.d/inits/programming.el#L68

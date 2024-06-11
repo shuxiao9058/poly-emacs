@@ -437,7 +437,7 @@ Use eglot as LSP client.
 (defconst jdt-extra-jvm-args '("-noverify"
 			       "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
 			       ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
-			       "-Xbootclasspath/a:~/.config/emacs/.local/jar/lombok.jar"
+			       "-Xbootclasspath/a:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
 			       "--add-modules=ALL-SYSTEM"
 			       "--add-opens"
 			       "java.base/java.util=ALL-UNNAMED"
@@ -932,7 +932,7 @@ Examples:
 			   (upgrade_dependency . t)
 			   (vendor . t)) nil)
      ;;disables -mod=readonly, allowing imports from out-of-scope module
-     ("gopls.allowModfileModifications" t t)
+     ;; ("gopls.allowModfileModifications" t t)
      ("gopls.vulncheck" "Imports" nil)
      ;;disables GOPROXY=off, allowing implicit module downloads rather than requiring user action
      ("gopls.allowImplicitNetworkAccess" t t)
@@ -1615,7 +1615,7 @@ use-package will load java-lsp for us simply by calling this function."
     (protoc-gen-openapiv2 . ("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2" "v2.16.0"))
     (protoc-gen-doc . "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc")
     (bufls . "github.com/bufbuild/buf-language-server/cmd/bufls")
-    (buf . ("github.com/bufbuild/buf/cmd/buf" "v1.21.0"))
+    (buf . ("github.com/bufbuild/buf/cmd/buf"))
     (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
     (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
     (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")))
@@ -2171,6 +2171,21 @@ Use clojure-mode for basic syntax support.
 #+begin_src emacs-lisp
 (setq python-python-command "/opt/local/bin/python")
 (setq py-force-py-shell-name-p t)
+(setq python-indent-guess-indent-offset t)
+(setq python-indent-guess-indent-offset-verbose nil)
+
+
+(use-package ein
+  :if (executable-find "jupyter")
+  ;; :bind
+  ;; (("C-c e" . ein:worksheet-execute-cell)
+  ;;  ("C-c C-e" . ein:worksheet-execute-all-cells))
+  :commands (ein:login ein:jupyter-server-start)
+  :custom-face
+  (ein:basecell-input-area-face ((t (:extend t :background "#303640"))))
+  :defer t
+  :custom
+  (ein:worksheet-enable-undo t))
 #+end_src
 
 ** rust
