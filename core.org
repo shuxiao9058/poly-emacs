@@ -439,6 +439,17 @@ Accepts the same arguments as `message'."
   (with-temp-buffer
     (insert-file-contents filename)
     (buffer-string)))
+
+;; https://github.com/ahmadseleem/ViMacs/blob/1967b49676c70a2de9937278b8fa9e2c737c6a00/git.el#L82
+(defun poly/git-repo? (directory)
+  "Return true if there is a git repo in DIRECTORY, false otherwise."
+  (or
+   (f-dir? (f-expand ".git" directory))
+   (and
+    (f-dir? (f-expand "info" directory))
+    (f-dir? (f-expand "objects" directory))
+    (f-dir? (f-expand "refs" directory))
+    (f-file? (f-expand "HEAD" directory)))))
 #+end_src
 
 
