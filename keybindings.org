@@ -102,6 +102,42 @@
 ;; (unbind-key "C-x C-q")
 #+end_src
 
+
+*** transform text before paste
+
+ #+begin_src emacs-lisp
+(defun my-text-transform (start end)
+  "Transform the text between START and END in some custom way."
+  (let* ((text (buffer-substring start end))
+	 (is-vterm-mode (eq major-mode 'vterm-mode))
+	 (replace-list (list "\.HEIC\.jpg" "\.MOV\.jpg" "\.MP4\.jpg" ".DNG.jpg" "\.PNG" "\.JPG" "\.jpg"))
+	 (matched)
+	 (tmp-text)
+	 (new-text (if is-vterm-mode
+		       (progn
+			 (dolist (suffix replace-list)
+			 (unless matched
+			   (when (s-ends-with? suffix text)
+			     (setq matched t)
+			     (setq tmp-text (concat "rm -rf " (s-replace suffix "\.*" text))))))
+			 (if tmp-text tmp-text text))
+		     text)))
+    (delete-region start end)
+    (if is-vterm-mode
+	(vterm-insert new-text))
+    (insert new-text)))
+
+(defun yank-pop-custom-transform (arg)
+  "Call `yank-pop' and perform a custom text transformation."
+  (interactive "p")
+  (let ((start (point)))
+    (yank-pop arg)
+    (let ((end (point)))
+      (my-text-transform start end))))
+
+(global-set-key (kbd "M-y") 'yank-pop-custom-transform)
+ #+end_src
+
 * Meow
 
 This configuration sticks with Meow for modal editing.
