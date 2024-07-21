@@ -57,7 +57,13 @@
 (setq user-emacs-directory
       (file-name-directory (or load-file-name buffer-file-name)))
 
+(setq url-proxy-services
+      '(("no_proxy" . "^\\(127.0.0.1\\|localhost\\|10.*\\)")
+        ("http" . "127.0.0.1:6152")
+        ("https" . "127.0.0.1:6152")))
+
 (defun poly/file-mod-time(file)
+  "Get FILE mod time."
   (when (file-exists-p file)
     (nth 5 (file-attributes file))))
 
@@ -99,8 +105,7 @@ If FORCE-TANGLE is non-nil, always tangle before load."
   (progn
     (setq warning-minimum-level :emergency)
     (setq debug-on-error nil)
-    (setq stack-trace-on-error nil)
-    ))
+    (setq stack-trace-on-error nil)))
 
 ;; Native compilation settings
 (when (featurep 'native-compile)
@@ -108,10 +113,8 @@ If FORCE-TANGLE is non-nil, always tangle before load."
     ;; Silence compiler warnings as they can be pretty disruptive
     (setq native-comp-async-report-warnings-errors nil
 	  native-comp-warning-on-missing-source nil)
-
     (setq native-comp-jit-compilation nil
           native-comp-enable-subr-trampolines nil)
-
     ;; ;; Make native compilation happens asynchronously
     ;; (setq native-comp-deferred-compilation t)
 
@@ -121,5 +124,4 @@ If FORCE-TANGLE is non-nil, always tangle before load."
       (if (version< emacs-version "29")
           (add-to-list 'native-comp-eln-load-path (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))
 	(startup-redirect-eln-cache (convert-standard-filename (expand-file-name "var/eln-cache/" poly-local-dir)))))
-
     (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" poly-local-dir))))
