@@ -1618,6 +1618,7 @@ use-package will load java-lsp for us simply by calling this function."
     (buf . "github.com/bufbuild/buf/cmd/buf")
     (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
     (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
+    (godoctor . "github.com/godoctor/godoctor")
     (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")))
 
 (defun poly/install-go-tool (pkg)
@@ -1693,7 +1694,7 @@ use-package will load java-lsp for us simply by calling this function."
   :straight t
   :after go-mode
   :ensure t
-  :disabled
+  ;; :disabled
   :commands go-eldoc-setup
   :init
   (add-hook 'go-mode-hook #'go-eldoc-setup))
@@ -1785,9 +1786,20 @@ use-package will load java-lsp for us simply by calling this function."
   :straight t
   :diminish
   :commands (go-playground-mode)
+  :after go-mode
   :config
   (unless (executable-find "goplay")
     (poly/install-go-tool 'goplay)))
+
+(use-package godoctor
+  :straight t
+  :ensure t
+  :after go-mode
+  :bind (:map go-mode-map
+              ("C-c d d" . godoctor-godoc)
+              ("C-c d e" . godoctor-extract)
+              ("C-c d r" . godoctor-rename)
+              ("C-c d t" . godoctor-toggle)))
 
 (defun go-install-tools ()
   "Install or update go PKG/tools."
