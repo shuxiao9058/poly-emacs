@@ -1615,7 +1615,7 @@ use-package will load java-lsp for us simply by calling this function."
     (protoc-gen-openapiv2 . ("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2" "v2.16.0"))
     (protoc-gen-doc . "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc")
     (bufls . "github.com/bufbuild/buf-language-server/cmd/bufls")
-    (buf . ("github.com/bufbuild/buf/cmd/buf"))
+    (buf . "github.com/bufbuild/buf/cmd/buf")
     (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
     (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
     (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")))
