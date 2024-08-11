@@ -330,21 +330,22 @@ Configuration for programming and languages support.
 #+begin_src emacs-lisp
 (use-package flycheck
   :straight t
+  ;; :straight (:type built-in)
   :ensure t
   :init (global-flycheck-mode)
   :custom
   (flycheck-check-syntax-automatically
    '(save idle-change mode-enabled))
   (flycheck-checker-error-threshold nil)
-:config
-(flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
-(flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
-(flycheck-add-mode 'typescript-tslint 'tsx-ts-mode)
+  :config
+  (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
+  (flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
+  (flycheck-add-mode 'typescript-tslint 'tsx-ts-mode)
 
-;; (remove-hook 'post-command-hook 'flycheck-display-error-at-point-soon)
-;; (remove-hook 'focus-in-hook 'flycheck-display-error-at-point-soon)
-;; (advice-add #'flycheck-display-error-at-point-soon :override #'ignore)
-)
+  ;; (remove-hook 'post-command-hook 'flycheck-display-error-at-point-soon)
+  ;; (remove-hook 'focus-in-hook 'flycheck-display-error-at-point-soon)
+  ;; (advice-add #'flycheck-display-error-at-point-soon :override #'ignore)
+  )
 
 (use-package flycheck-color-mode-line
   :straight t
@@ -559,7 +560,8 @@ Examples:
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
 
-  (+eglot-register '(go-mode go-ts-mode) `("gopls"))
+  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
+  (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
   (add-to-list 'eglot-server-programs
@@ -888,7 +890,8 @@ Examples:
 
   (setq lsp-disabled-clients '(emmy-lua beancount-ls))
   (setq lsp-enabled-clients '(lua-language-server
-			      pyright
+			      ;; pyright
+			      pylsp
 			      ;; pylsp
 			      gopls
 			      protobuf-bufls
@@ -1032,6 +1035,7 @@ Examples:
 (use-package dap-mode
   :straight t
   :when poly-use-lsp-mode
+  :disabled
   :ensure t
   :after lsp-mode
   :config
@@ -1236,6 +1240,130 @@ use-package will load java-lsp for us simply by calling this function."
   :config
   (advice-add 'gradle-build :after #'my/switch-to-compilation-window)
   (advice-add 'gradle-test :after #'my/switch-to-compilation-window))
+#+end_src
+
+** debug
+
+#+begin_src emacs-lisp
+(use-package dape
+  :straight t
+  ;; :straight (dape :type git :host github :repo "svaante/dape")
+  :bind (("<f5>" . dape)
+         ("M-<f5>" . dape-hydra/body))
+  :custom (dape-buffer-window-arrangment 'right)
+  :after (pretty-hydra)
+  :ensure t
+  :hook
+  ((kill-emacs . dape-breakpoint-save) ; Save breakpoints on quit
+   (dape-compile . kill-buffer) ; Kill compile buffer on build success
+   (dape-display-source . pulse-momentary-highlight-one-line) ; Pulse source line (performance hit)
+   (dape-stopped . dape-info) ; To display info and/or repl buffers on stopped
+   (dape-stopped . dape-repl)
+   (dape-start . (lambda () (save-some-buffers t t)))) ; Save buffers on startup, useful for interpreted languages
+  ;; :init
+  ;; :defines (dape-buffer-window-arrangment dape-cwd-fn)
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Debug" 'codicon "nf-cod-debug")
+	   :color pink :quit-key ("q" "C-g"))
+   ("Stepping"
+    (("n" dape-next "next")
+     ("s" dape-step-in "step in")
+     ("o" dape-step-out "step out")
+     ("c" dape-continue "continue")
+     ("p" dape-pause "pause")
+     ("k" dape-kill "kill")
+     ("r" dape-restart "restart")
+     ("D" dape-disconnect-quit "disconnect"))
+    "Switch"
+    (("m" dape-read-memory "memory")
+     ("t" dape-select-thread "thread")
+     ("w" dape-watch-dwim "watch")
+     ("S" dape-select-stack "stack")
+     ("i" dape-info "info")
+     ("R" dape-repl "repl"))
+    "Breakpoints"
+    (("b" dape-breakpoint-toggle "toggle")
+     ("l" dape-breakpoint-log "log")
+     ("e" dape-breakpoint-expression "expression")
+     ("B" dape-breakpoint-remove-all "clear"))
+    "Debug"
+    (("d" dape "dape")
+     ("Q" dape-quit "quit" :exit t))))
+  :config
+  (dape-breakpoint-load) ; Load breakpoints on startup, with laziness
+  (setq dape-inline-variables t)
+  (setq dape-buffer-window-arrangement 'gud)
+  ;; Global bindings for setting breakpoints with mouse
+  (dape-breakpoint-global-mode)
+  ;; To not display info and/or buffers on startup
+  ;; (remove-hook 'dape-on-start-hooks 'dape-info)
+  ;; (remove-hook 'dape-on-start-hooks 'dape-repl)
+
+  ;; To display info and/or repl buffers on stopped
+  ;; (add-hook 'dape-on-stopped-hooks 'dape-info)
+  ;; (add-hook 'dape-on-stopped-hooks 'dape-repl)
+
+  ;; Kill compile buffer on build success
+  (add-hook 'dape-compile-compile-hooks 'kill-buffer)
+
+  ;; Save buffers on startup, useful for interpreted languages
+  ;; (add-hook 'dape-on-start-hooks (lambda () (save-some-buffers t t)))
+  ;; (add-hook 'dape-on-start-hooks
+  ;;           (defun dape--save-on-start ()
+  ;;             (save-some-buffers t t)))
+  ;; Display hydra on startup
+  (add-hook 'dape-on-start-hooks #'dape-hydra/body)
+
+  ;; (transient-define-prefix +dape-transient ()
+  ;;   "Transient for dape."
+  ;;   [["Stepping"
+  ;;     ("n"  "Next"         dape-next                       :transient t)
+  ;;     ("s"  "Step in"      dape-step-in                    :transient t)
+  ;;     ("o"  "Step out"     dape-step-out                   :transient t)
+  ;;     ("c"  "Continue"     dape-continue                   :transient t)
+  ;;     ("p"  "Pause"        dape-pause                      :transient t)
+  ;;     ("r"  "Restart"      dape-restart                    :transient t)]
+  ;;    ["Breakpoints"
+  ;;     ("bb" "Toggle"       dape-breakpoint-toggle          :transient t)
+  ;;     ("be" "Expression"   dape-breakpoint-expression      :transient t)
+  ;;     ("bd" "Remove at pt" dape-breakpoint-remove-at-point :transient t)
+  ;;     ("bD" "Remove all"   dape-breakpoint-remove-all      :transient t)
+  ;;     ("bh" "Hits"         dape-breakpoint-hits            :transient t)
+  ;;     ("bl" "Log"          dape-breakpoint-log             :transient t)]
+  ;;    ["Info"
+  ;;     ("ii" "Info"         dape-info                       :transient t)
+  ;;     ("im" "Memory"       dape-read-memory                :transient t)
+  ;;     ("is" "Select Stack" dape-select-stack               :transient t)
+  ;;     ("iw" "Watch DWIM"   dape-evaluate-expression        :transient t)
+  ;;     ("ie" "Eval expr."   dape-watch-dwim                 :transient t)
+  ;;     ("R"  "Repl"         dape-repl                       :transient t)]
+  ;;    ["Quit"
+  ;;     ("qq" "Quit"         dape-quit                       :transient nil)
+  ;;     ("qk" "Kill"         dape-kill                       :transient nil)
+  ;;     ("qd" "Disconnect"   dape-disconnect-quit            :transient nil)]])
+
+  ;; (transient-define-prefix dape-transient ()
+  ;;      "Transient for dape."
+  ;;       [["Stepping"
+  ;;        ("n" "Next" dape-next :transient t)
+  ;;        ("i" "Step in" dape-step-in :transient t)
+  ;;        ("o" "Step out" dape-step-out :transient t)
+  ;;        ("c" "Continue" dape-continue :transient t)
+  ;;        ("r" "Restart" dape-restart :transient t)]
+  ;;        ["Breakpoints"
+  ;;        ("bb" "Toggle" dape-breakpoint-toggle :transient t)
+  ;;        ("bd" "Delete" dape-breakpoint-remove-at-point :transient t)
+  ;;        ("bD" "Delete all" dape-breakpoint-remove-all :transient t)
+  ;;        ("bl" "Log" dape-breakpoint-log :transient t)]
+  ;;        ["Info"
+  ;;        ("si" "Info" dape-info :transient t)
+  ;;        ("sm" "Memory" dape-read-memory :transient t)
+  ;;        ("ss" "Select Stack" dape-select-stack :transient t)
+  ;;        ("R" "Repl" dape-repl :transient t)]
+  ;;        ["Quit"
+  ;;        ("qq" "Quit" dape-quit :transient nil)
+  ;;        ("qk" "Kill" dape-kill :transient nil)]])
+  )
 #+end_src
 
 ** yas parameter complete in place required
@@ -1800,6 +1928,10 @@ use-package will load java-lsp for us simply by calling this function."
               ("C-c d e" . godoctor-extract)
               ("C-c d r" . godoctor-rename)
               ("C-c d t" . godoctor-toggle)))
+
+(use-package go-projectile
+  :straight t
+  :after (projectile go-mode))
 
 (defun go-install-tools ()
   "Install or update go PKG/tools."

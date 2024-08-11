@@ -72,7 +72,7 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-package-always-pdump t
   "always set :pdump to use-package")
 
-(defvar poly-use-lsp-mode t
+(defvar poly-use-lsp-mode nil
   "use lsp-mode for completion")
 
 (defvar poly-vscode-extensions-json-file
@@ -450,6 +450,11 @@ Accepts the same arguments as `message'."
     (f-dir? (f-expand "objects" directory))
     (f-dir? (f-expand "refs" directory))
     (f-file? (f-expand "HEAD" directory)))))
+
+(defun icons-displayable-p ()
+  "Return non-nil if icons are displayable."
+  (or (featurep 'nerd-icons)
+      (require 'nerd-icons nil t)))
 #+end_src
 
 

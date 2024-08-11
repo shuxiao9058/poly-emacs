@@ -1165,8 +1165,8 @@ Visualizing Color Codes with rainbow-mode.
   (setq +org-capture-work-talk-file (expand-file-name "work-talk.org" org-beorg-directory))
   (setq +org-capture-work-meeting-file (expand-file-name "work-meeting.org" org-beorg-directory))
   (setq +org-capture-work-weekly-file (expand-file-name "work-weekly.org" org-beorg-directory))
-  ;; (setq org-caldav-inbox (expand-file-name "appointments.org" org-beorg-directory))
-  ;; (setq org-caldav-files `(,(expand-file-name "org-caldav.org" org-beorg-directory)))
+  (setq org-caldav-inbox (expand-file-name "appointments.org" org-beorg-directory))
+  (setq org-caldav-files `(,(expand-file-name "org-caldav.org" org-beorg-directory)))
 
   (setq org-agenda-files (list
 			  +org-capture-gtd-file
@@ -1176,7 +1176,7 @@ Visualizing Color Codes with rainbow-mode.
 			  +org-capture-work-talk-file
 			  +org-capture-work-meeting-file
 			  +org-mu4e-icalendar-org-capture-file
-			  ;; org-caldav-inbox
+			  org-caldav-inbox
 			  ))
   :config
   (setq org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "WAITING(w)" ;; "HOLD(h!)" "NEXT(n!)" "WAIT(w!)"

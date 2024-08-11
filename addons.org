@@ -767,6 +767,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; ;; (global-tempel-abbrev-mode)
   )
 
+(use-package tempel-collection
+  :straight t
+  :after tempel)
+
 (use-package editorconfig
   :straight t)
 #+end_src
@@ -875,13 +879,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 Quick action with hydra
 
 #+begin_src emacs-lisp
-(use-package hydra
-  :straight t
-  :ensure t
-  :custom
-  (hydra-if-helpful t)
-  :commands (defhydra)
-  :bind ("M-o" . hydra-base/body))
+
+
 
 (defhydra hydra-base ()
   "
@@ -1468,6 +1467,7 @@ _t_:      select tab 											_R_ : redo
   ("ll" lsp-save-logs)
   ("q" nil :color blue)
 )
+
 #+end_src
 
 * on
@@ -1554,6 +1554,7 @@ To manage the git repository, use builtin package ~vc~.
 	  magit-insert-status-headers
 	  magit-insert-merge-log
 	  magit-insert-rebase-sequence
+	  gerrit-magit-insert-status
 	  ;; magit-insert-am-sequence
 	  ;; magit-insert-sequencer-sequence
 	  ;; magit-insert-bisect-output
@@ -1796,6 +1797,15 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; (use-package vdiff
 ;;   :straight t)
+(use-package gerrit
+  :ensure t
+  :custom
+  (gerrit-host "10.177.9.244:11832")  ;; is needed for REST API calls
+  :config
+  (progn
+    ;; (add-hook 'magit-status-sections-hook #'gerrit-magit-insert-status t)
+    (global-set-key (kbd "C-x i") 'gerrit-upload-transient)
+    (global-set-key (kbd "C-x o") 'gerrit-download)))
 
 (use-package code-review
   :disabled

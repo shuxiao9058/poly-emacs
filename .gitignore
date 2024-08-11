@@ -29,3 +29,10 @@ url
 eclipse.jdt.ls
 multisession
 workspace
+/cliclhouse.sql
+/emacs-gc-stats.eld.gz
+/org-caldav-backup.org
+/private_template.org
+/projectile-bookmarks.eld
+/snippets/web-mode/
+/themes/phoebe-theme.el
