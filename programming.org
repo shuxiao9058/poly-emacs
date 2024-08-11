@@ -497,16 +497,20 @@ If INTERACTIVE, prompt user for details."
   :custom
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
+  (eglot-report-progress t)
+  (eglot-extend-to-xref t)
   (eglot-connect-timeout 40)
   (eglot-send-changes-idle-time 0.5)
   (eglot-confirm-server-initiated-edits nil)
   (eglot-events-buffer-size 500000)
   ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
-  ;; (eglot-ignored-server-capabilites
-  ;;  '(:documentHighlightProvider
-  ;;    :signatureHelpProvider
-  ;;    :hoverProvider))
+  (eglot-ignored-server-capabilites
+   '(:hoverProvider
+     :signatureHelpProvider
+     :documentHighlightProvider
+     :codeLensProivder
+     :inlayHintProvier))
   ;; NOTE We disable eglot-auto-display-help-buffer because :select t in
   ;; its popup rule causes eglot to steal focus too often.
   (eglot-auto-display-help-buffer nil)
@@ -514,6 +518,8 @@ If INTERACTIVE, prompt user for details."
   :config
   (setq eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
   (setq eldoc-echo-area-use-multiline-p nil)
+   ;; speedup eglot
+  (fset #'jsonrpc--log-event #'ignore)
   ;; https://github.com/abougouffa/minemacs/blob/693efa0788fbe60e2f836d27aa12c7c055a2c387/elisp/%2Beglot.el#L27
   (defun +eglot-register (modes &rest servers)
     "Register MODES with LSP SERVERS.
@@ -559,8 +565,7 @@ Examples:
 
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
-
-  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
+  ;; (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
@@ -625,6 +630,7 @@ Examples:
 		   (hint . ((arrayIndex . "Auto") (enable . t)))))
 	  ))
   :bind (:map eglot-mode-map
+	      ([remap display-local-help] . nil)
 	      ("C-c C-r" . poly/eglot-rename)
 	      ("C-c o" . eglot-code-action-organize-imports)
 	      ("C-c h" . eldoc)
@@ -1245,9 +1251,13 @@ use-package will load java-lsp for us simply by calling this function."
 ** debug
 
 #+begin_src emacs-lisp
-(use-package dape
+(use-package jsonrpc
+  :defer t
   :straight t
-  ;; :straight (dape :type git :host github :repo "svaante/dape")
+  :ensure t)
+
+(use-package dape
+  :straight (dape :type git :host github :repo "svaante/dape")
   :bind (("<f5>" . dape)
          ("M-<f5>" . dape-hydra/body))
   :custom (dape-buffer-window-arrangment 'right)
