@@ -1642,6 +1642,12 @@ To manage the git repository, use builtin package ~vc~.
 	("q" . transient-quit-one)
 	("<escape>" . transient-quit-one)))
 
+;; (use-package magit-delta
+;;   :straight t
+;;   :ensure t
+;;   :if (executable-find "delta")
+;;   :hook (magit-mode . magit-delta-mode))
+
 (use-package magit-gitflow
   :straight t
   :after magit

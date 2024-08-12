@@ -1084,8 +1084,15 @@ Examples:
 (use-package lsp-treemacs
   :when poly-use-lsp-mode
   :straight t
-  :after lsp-mode
-  :commands lsp-treemacs-errors-list)
+  :after (treemacs lsp-mode)
+  :commands (lsp-treemacs-errors-list lsp-treemacs-implementations lsp-treemacs-references)
+  :config
+  ;; (setq lsp-treemacs-error-list-current-project-only t)
+  (lsp-treemacs-sync-mode t)
+  ;; (gsetq lsp-metals-treeview-show-when-views-received t)
+  :bind (:map lsp-mode-map
+              ("<f6>" . lsp-treemacs-symbols)
+              ("<f7>" . lsp-treemacs-symbols)))
 
 (use-package lsp-ui
   :straight t
@@ -1727,6 +1734,7 @@ use-package will load java-lsp for us simply by calling this function."
 (defconst go--tools
   '((goplay . "github.com/haya14busa/goplay/cmd/goplay")
     (gopls . "golang.org/x/tools/gopls")
+    (pkgsite . "golang.org/x/pkgsite/cmd/pkgsite")
     (dlv . "github.com/go-delve/delve/cmd/dlv")
     (impl . "github.com/josharian/impl")
     (errcheck . "github.com/kisielk/errcheck")
