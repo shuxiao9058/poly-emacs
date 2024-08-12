@@ -565,7 +565,7 @@ Examples:
 
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
-  ;; (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
+  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
@@ -1803,9 +1803,40 @@ use-package will load java-lsp for us simply by calling this function."
   ;; Optional: install eglot-format-buffer as a save hook.
   ;; The depth of -10 places this before eglot's willSave notification,
   ;; so that that notification reports the actual contents that will be saved.
-  (defun eglot-format-buffer-on-save ()
-    (add-hook 'before-save-hook #'eglot-format-buffer -10 t))
-  (add-hook 'go-mode-hook #'eglot-format-buffer-on-save))
+  )
+
+
+(use-package go-ts-mode
+  :straight (:type built-in)
+  :mode (("\\.go$"  . go-ts-mode)
+	 ("^go.mod$" . go-ts-mode))
+  :config
+
+(defun poly/go-set-compile-command()
+  "Detect compile command."
+  (if (or (file-exists-p "makefile")
+	  (file-exists-p "Makefile"))
+      (setq-local compile-command "make build")
+    (setq-local compile-command "go build")))
+(add-hook 'go-mode-hook #'poly/go-set-compile-command)
+(add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
+(defun eglot-format-buffer-on-save ()
+  (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
+  (add-hook 'before-save-hook (lambda () (call-interactively #'eglot-code-action-organize-imports)) -9 t)
+  ;; (add-hook 'before-save-hook (lambda () ;; #'eglot-format-buffer -10 t
+  ;; 				(call-interactively #'eglot-format-buffer)
+  ;; 				;; (call-interactively #'eglot-code-action-organize-imports)
+  ;; 				))
+  ;; (add-hook 'before-save-hook #'eglot-code-action-organize-imports)
+  )
+
+(add-hook 'go-mode-hook #'eglot-format-buffer-on-save)
+(add-hook 'go-ts-mode-hook #'eglot-format-buffer-on-save)
+
+(setq gofmt-command "goimports")
+
+  ;; Sets the fill column (where to break paragraphs on M-q)
+  (add-hook 'go-ts-mode-hook (lambda () (setq fill-column 100))))
 
 (unless (executable-find "gopls")
   (poly/install-go-tool 'gopls))
