@@ -72,7 +72,7 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-package-always-pdump t
   "always set :pdump to use-package")
 
-(defvar poly-use-lsp-mode nil
+(defvar poly-use-lsp-mode t
   "use lsp-mode for completion")
 
 (defvar poly-vscode-extensions-json-file

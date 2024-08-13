@@ -2090,10 +2090,16 @@ Use clojure-mode for basic syntax support.
 #+begin_src emacs-lisp
 (use-package clojure-mode
   :straight t
+  :disabled
   :commands (clojurescript-mode)
   ;; :config
   ;; (add-hook 'clojure-mode-hook 'paredit-mode)
   )
+
+(use-package clojure-ts-mode
+  :straight t
+  :custom
+  (clojure-ts-toplevel-inside-comment-form t))
 
 (use-package clojure-mode-extra-font-locking
   :straight t
@@ -2101,11 +2107,11 @@ Use clojure-mode for basic syntax support.
   :after clojure-mode)
 
 (use-package flycheck-clojure
-    :straight t
-    :ensure t
-    :commands clojure-mode
-    :config
-    (flycheck-clojure-setup))
+  :straight t
+  :ensure t
+  :commands clojure-mode
+  :config
+  (flycheck-clojure-setup))
 #+end_src
 
 ** Cider for REPL connection
@@ -2133,7 +2139,7 @@ Use clojure-mode for basic syntax support.
   :straight t
   :ensure t
   :commands clojure-mode
-  :hook (clojure-mode . flycheck-mode)
+  :hook ((clojure-mode clojure-ts-mode) . flycheck-mode)
   ;; :config
   ;; (flycheck-clojure-setup)
   )
@@ -2153,7 +2159,6 @@ Use clojure-mode for basic syntax support.
 #+end_src
 ** web-mode
 #+begin_src emacs-lisp
-;; 设置缩进级别空格数
 (defvar-local my/web-mode-offset 2)
 
 (defun my/current-buffer-suffix()
