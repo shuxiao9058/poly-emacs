@@ -750,6 +750,7 @@ Examples:
 		   rust-ts-mode
 		   rustic-mode
 		   clojure-mode
+		   clojure-ts-mode
 		   ;; java-mode
 		   beancount-mode web-mode
 		   python-mode python-ts-mode
@@ -1111,7 +1112,7 @@ Examples:
   (lsp-ui-doc-alignment 'frame)
   ;; (lsp-ui-doc-position 'at-point)
   (lsp-ui-doc-border (face-foreground 'default))
-  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-enable nil)
   (lsp-ui-sideline-ignore-duplicate t)
   (lsp-ui-sideline-show-code-actions t)
   (lsp-ui-sideline-show-diagnostics t)
@@ -1152,10 +1153,11 @@ Examples:
 	 (java-ts-mode . dap-mode)
 	 (java-ts-mode . dap-ui-mode))
   :custom
-  (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/" ;; "/opt/jdtls"
-						 ;; "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/"
-						 ))
-  (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/workspace/"))
+  (lsp-java-server-install-dir "/opt/jdtls-1.38.0")
+  ;; (lsp-java-server-install-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/" ;; "/opt/jdtls"
+  ;; 						 ;; "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/"
+  ;; 						 ))
+  ;; (lsp-java-workspace-dir (expand-file-name "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/workspace/"))
   (lsp-java-implementations-code-lens-enabled t)
   (lsp-java-references-code-lens-enabled t)
   (lsp-java-save-actions-organize-imports t)
@@ -1179,6 +1181,10 @@ Examples:
           ;; (:name "Java SE 20.0.2" :path "/opt/local/Library/Java/JavaVirtualMachines/jdk-21-oracle-openjdk.jdk/Contents/Home")
 	  ])
   :config
+  (defun lsp-java--ls-command ()
+      (list (expand-file-name "bin/jdtls" lsp-java-server-install-dir)
+          "-configuration" (concat (getenv "HOME") "/.cache/jdtls/")
+          "-data" (concat (getenv "HOME") "/.jdtls")))
   (defun java-lsp-init ()
     "We need to require java-lsp before loading lsp in a Java buffer.
 use-package will load java-lsp for us simply by calling this function."
@@ -1216,7 +1222,7 @@ use-package will load java-lsp for us simply by calling this function."
     (setq company-lsp-cache-candidates nil)  ; Company cache should be disabled for lsp-java
     (lsp-deferred))
   ;; (add-hook 'java-ts-mode-hook 'lsp)
-  (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
+  ;; (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
   ;; (require 'dap-java)
   )
 
@@ -1521,6 +1527,9 @@ use-package will load java-lsp for us simply by calling this function."
               (cmake-mode      . cmake-ts-mode)
               (csharp-mode     . csharp-ts-mode)
               (css-mode        . css-ts-mode)
+	      (clojure-mode . clojure-ts-mode)
+	      (clojurescript-mode . clojure-ts-clojurescript-mode)
+	      (clojurec-mode . clojure-ts-clojurec-mode)
 	      (conf-toml-mode . toml-ts-mode)
               (dockerfile-mode . dockerfile-ts-mode)
               (elixir-mode     . elixir-ts-mode)
@@ -1633,7 +1642,8 @@ use-package will load java-lsp for us simply by calling this function."
   (if (bound-and-true-p lsp-mode)
       (lsp-format-buffer)
     (when (bound-and-true-p eglot--managed-mode)
-      (eglot-format-buffer))))
+      (call-interactively #'eglot-format-buffer)
+      (call-interactively #'eglot-code-action-organize-imports))))
 
 (defun lsp-format-buffer-on-save ()
   (add-hook 'before-save-hook
@@ -1805,36 +1815,32 @@ use-package will load java-lsp for us simply by calling this function."
   ;; so that that notification reports the actual contents that will be saved.
   )
 
-
 (use-package go-ts-mode
   :straight (:type built-in)
   :mode (("\\.go$"  . go-ts-mode)
 	 ("^go.mod$" . go-ts-mode))
   :config
+  (defun go-mod-tidy()
+    "Run go mod tidy"
+    (interactive)
+    (let ((default-directory  (if (fboundp 'project-root)
+				  (project-root (project-current))
+				default-directory)))
+      (tl/with-suppress-message "Shell command succeeded with"
+	(shell-command "go mod tidy"))
+      (when (file-directory-p (expand-file-name "vendor" default-directory))
+	(tl/with-suppress-message "Shell command succeeded with"
+	  (shell-command "go mod vendor")))))
 
-(defun poly/go-set-compile-command()
-  "Detect compile command."
-  (if (or (file-exists-p "makefile")
-	  (file-exists-p "Makefile"))
-      (setq-local compile-command "make build")
-    (setq-local compile-command "go build")))
-(add-hook 'go-mode-hook #'poly/go-set-compile-command)
-(add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
-(defun eglot-format-buffer-on-save ()
-  (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
-  (add-hook 'before-save-hook (lambda () (call-interactively #'eglot-code-action-organize-imports)) -9 t)
-  ;; (add-hook 'before-save-hook (lambda () ;; #'eglot-format-buffer -10 t
-  ;; 				(call-interactively #'eglot-format-buffer)
-  ;; 				;; (call-interactively #'eglot-code-action-organize-imports)
-  ;; 				))
-  ;; (add-hook 'before-save-hook #'eglot-code-action-organize-imports)
-  )
-
-(add-hook 'go-mode-hook #'eglot-format-buffer-on-save)
-(add-hook 'go-ts-mode-hook #'eglot-format-buffer-on-save)
-
-(setq gofmt-command "goimports")
-
+  (defun poly/go-set-compile-command()
+    "Detect compile command."
+    (if (or (file-exists-p "makefile")
+	    (file-exists-p "Makefile"))
+	(setq-local compile-command "make build")
+      (setq-local compile-command "go build")))
+  (add-hook 'go-mode-hook #'poly/go-set-compile-command)
+  (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
+  (setq gofmt-command "goimports")
   ;; Sets the fill column (where to break paragraphs on M-q)
   (add-hook 'go-ts-mode-hook (lambda () (setq fill-column 100))))
 
@@ -2088,30 +2094,38 @@ use-package will load java-lsp for us simply by calling this function."
 Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
-(use-package clojure-mode
-  :straight t
-  :disabled
-  :commands (clojurescript-mode)
-  ;; :config
-  ;; (add-hook 'clojure-mode-hook 'paredit-mode)
-  )
+;; (use-package clojure-mode
+;;     :straight t
+;;     :disabled t
+;;     :commands (clojurescript-mode)
+;;     ;; :config
+;;     ;; (add-hook 'clojure-mode-hook 'paredit-mode)
+;;     )
 
 (use-package clojure-ts-mode
-  :straight t
-  :custom
-  (clojure-ts-toplevel-inside-comment-form t))
+    :straight t
+    :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
+	   ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
+	   ("\\.cljc\\'" . clojure-ts-clojurec-mode)
+	   ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-ts-mode)
+	   ("bb" . clojure-ts-mode)
+	   ("nbb" . clojure-ts-clojurescript-mode))
+    :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
+						    lsp-ui-sideline-enable nil)))
+    :custom
+    (clojure-ts-toplevel-inside-comment-form t))
 
-(use-package clojure-mode-extra-font-locking
-  :straight t
-  :ensure t
-  :after clojure-mode)
+;; (use-package clojure-mode-extra-font-locking
+;;     :straight t
+;;     :disabled
+;;     :ensure t
+;;     :after clojure-mode)
 
-(use-package flycheck-clojure
-  :straight t
-  :ensure t
-  :commands clojure-mode
-  :config
-  (flycheck-clojure-setup))
+;; (use-package flycheck-clojure
+;;     :straight t
+;;     :ensure t
+;;     :config
+;;     (flycheck-clojure-setup))
 #+end_src
 
 ** Cider for REPL connection
@@ -2138,8 +2152,7 @@ Use clojure-mode for basic syntax support.
 (use-package flycheck-clj-kondo
   :straight t
   :ensure t
-  :commands clojure-mode
-  :hook ((clojure-mode clojure-ts-mode) . flycheck-mode)
+  :hook ((clojure-mode clojure-ts-mode clojure-ts-clojurec-mode clojure-ts-clojurescript-mode) . flycheck-mode)
   ;; :config
   ;; (flycheck-clojure-setup)
   )
