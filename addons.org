@@ -1981,7 +1981,7 @@ pulse
 
 Magit with cz
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package magit-cz
   :straight (magit-cz :host github :repo "yqrashawn/magit-cz")
   :after magit)

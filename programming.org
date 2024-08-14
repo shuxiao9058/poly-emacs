@@ -847,8 +847,8 @@ Examples:
   (lsp-lua-completion-display-context nil)
   (lsp-go-gopls-server-path "/opt/local/bin/gopls")
   ;; (lsp-go-gopls-server-path "/usr/local/gopath/bin/gopls")
-  ;; (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
-  ;; 			   ))
+  (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
+			   ))
   (lsp-go-hover-kind "NoDocumentation")
   (lsp-go-links-in-hover nil)
   (lsp-go-use-gofumpt t)
@@ -1825,12 +1825,26 @@ use-package will load java-lsp for us simply by calling this function."
     (interactive)
     (let ((default-directory  (if (fboundp 'project-root)
 				  (project-root (project-current))
-				default-directory)))
-      (tl/with-suppress-message "Shell command succeeded with"
-	(shell-command "go mod tidy"))
+				default-directory))
+	  (cmd-list (list (list "go" "mod" "tidy"))))
       (when (file-directory-p (expand-file-name "vendor" default-directory))
-	(tl/with-suppress-message "Shell command succeeded with"
-	  (shell-command "go mod vendor")))))
+	(add-to-list 'cmd-list (list "go" "mod" "vendor")))
+
+      (dolist (cmd cmd-list)
+	(let ((start-time (current-time))
+	      (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
+	  (process-put process 'cmd-name (mapconcat 'identity cmd " "))
+	  (process-put process 'start-time start-time)
+	  (set-process-sentinel
+	   process
+	   (lambda (proc _)
+	     (let ((status (process-exit-status proc))
+		   (cmd-name (process-get proc 'cmd-name))
+		   (start-time (process-get proc 'start-time))
+		   (end-time (current-time)))
+	       (if (= 0 status)
+		   (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
+		 (message "Do \"%s\" Failed." cmd-name)))))))))
 
   (defun poly/go-set-compile-command()
     "Detect compile command."
