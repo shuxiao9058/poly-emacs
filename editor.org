@@ -2859,10 +2859,12 @@ valign for org-mode & markdown table
 
 (use-package calfw-ical
   :straight t
+  :disabled
   :after calfw)
 
 (use-package calfw-org
   :straight t
+  :disabled
   :custom
   (cfw:org-agenda-schedule-args '(:timestamp))
   (cfw:org-overwrite-default-keybinding t)

@@ -14,6 +14,9 @@ Configuration for addons, additional features provided by individual packages.
        (string-match-p "\.\\(mock\\|min\\)\.js" buffer-file-name)))
 
 ;; http://stackoverflow.com/questions/3875213/turning-on-linum-mode-when-in-python-c-mode
+(setq linum-mode-inhibit-minor-modes-list
+      '(ein:notebook-mode))
+
 (setq linum-mode-inhibit-modes-list
       '(eshell-mode
 	shell-mode
@@ -35,6 +38,8 @@ Configuration for addons, additional features provided by individual packages.
 	compilation-mode
 	weibo-timeline-mode
 	woman-mode
+	;; ein:notebook-mode
+	python-mode
 	Info-mode
 	calc-mode
 	calc-trail-mode
@@ -74,6 +79,10 @@ Configuration for addons, additional features provided by individual packages.
   (fboundp 'global-display-line-numbers-mode)
   (defun display-line-numbers-mode-hook-setup ()
     (setq display-line-numbers (if (or (memq major-mode linum-mode-inhibit-modes-list)
+				       (let ((is-inhibit-linum))
+					 (dolist (mode local-minor-modes)
+					   (when (member mode linum-mode-inhibit-minor-modes-list)
+					     (setq is-inhibit-linum t))) is-inhibit-linum)
 				       ;; don't show line number for certain file extensions
 				       (should-use-minimum-resource))
 				   nil
@@ -85,7 +94,11 @@ Configuration for addons, additional features provided by individual packages.
 
   (defadvice linum-on (around linum-on-inhibit-for-modes)
     "Stop the load of linum-mode for some major modes."
-    (unless (member major-mode linum-mode-inhibit-modes-list)
+    (unless (or (member major-mode linum-mode-inhibit-modes-list)
+		(let ((is-inhabit-linum))
+		  (dolist (mode local-minor-modes)
+		    (when (member mode linum-mode-inhibit-minor-modes-list)
+		      (setq is-inhabit-linum t))) is-inhabit-linum))
       ad-do-it))
   (ad-activate 'linum-on)
 
@@ -764,8 +777,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; ;; Optionally make the Tempel templates available to Abbrev,
   ;; ;; either locally or globally. `expand-abbrev' is bound to C-x '.
   ;; ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; ;; (global-tempel-abbrev-mode)
-  )
+  :config
+  (global-tempel-abbrev-mode))
 
 (use-package tempel-collection
   :straight t

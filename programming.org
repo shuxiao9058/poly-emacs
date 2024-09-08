@@ -902,11 +902,11 @@ Examples:
 			      ;; pylsp
 			      gopls
 			      protobuf-bufls
-			      vue-semantic-server
+			      ;; vue-semantic-server
 			      clojure-lsp
 			      jdtls
 			      rust-analyzer
-			      ;; vls
+			      vls
 			      json-ls ;; beancount-ls
 			      css-ls dockerfile-ls ts-ls jsts-ls
 			      html-ls emmet-ls nginx-ls bash-ls unified remark marksman sqls yamlls xmlls taplo))
@@ -1315,7 +1315,7 @@ use-package will load java-lsp for us simply by calling this function."
   :config
   (dape-breakpoint-load) ; Load breakpoints on startup, with laziness
   (setq dape-inline-variables t)
-  (setq dape-buffer-window-arrangement 'gud)
+  (setq dape-buffer-window-arrangement 'right)
   ;; Global bindings for setting breakpoints with mouse
   (dape-breakpoint-global-mode)
   ;; To not display info and/or buffers on startup
@@ -1851,9 +1851,11 @@ use-package will load java-lsp for us simply by calling this function."
     (if (or (file-exists-p "makefile")
 	    (file-exists-p "Makefile"))
 	(setq-local compile-command "make build")
-      (setq-local compile-command "go build")))
+      (when (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
+	  (setq-local compile-command "go build"))))
   (add-hook 'go-mode-hook #'poly/go-set-compile-command)
   (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
+  (add-hook 'magit-mode-hook #'poly/go-set-compile-command)
   (setq gofmt-command "goimports")
   ;; Sets the fill column (where to break paragraphs on M-q)
   (add-hook 'go-ts-mode-hook (lambda () (setq fill-column 100))))
@@ -2091,6 +2093,7 @@ use-package will load java-lsp for us simply by calling this function."
 
 (use-package tramp-gvfs
   :straight (:type built-in)
+  :disabled
   :ensure nil
   :if (not IS-MAC)
   ;; :after tramp-ftp
