@@ -595,8 +595,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   (interactive)
   (if (and (bound-and-true-p projectile-mode) (not (eq (projectile-project-vcs) 'none)))
       (projectile-find-file)
-    (call-interactively #'find-file)
-    ))
+    (call-interactively #'find-file)))
 
 (defun my-filter-buffer(buffers)
   (cl-remove-if

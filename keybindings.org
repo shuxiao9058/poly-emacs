@@ -357,11 +357,12 @@ This configuration sticks with Meow for modal editing.
 	      'meow-keypad-self-insert)
 
   (meow-leader-define-key
-   '( "e" . recentf-open)
-   '("r" . recentf-open)
+   ;; '( "e" . recentf-open)
+   '("e" . consult-recent-file)
+   ;; '("r" . recentf-open)
    ;; '("." . find-file)
    ;; '("SPC" . execute-extended-command)
-   '("." . poly/find-file)
+   ;; '("." . poly/find-file)
    `("p" . ,project-prefix-map)
    '("b" . switch-to-buffer)
    ;; '("b" . poly/switch-to-buffer)
@@ -376,8 +377,8 @@ This configuration sticks with Meow for modal editing.
    '("/" . swiper)
    '("\\" . split-window-right)
    '("w" . ace-swap-window)
-   '("k" . kill-buffer)
-   )
+   '("k" . kill-buffer))
+
   ;; meow-setup is your custom function, see below
   (meow-setup)
   ;; If you want relative line number in NORMAL s tate(for display-line-numbers-mode)
