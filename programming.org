@@ -1848,11 +1848,15 @@ use-package will load java-lsp for us simply by calling this function."
 
   (defun poly/go-set-compile-command()
     "Detect compile command."
-    (if (or (file-exists-p "makefile")
-	    (file-exists-p "Makefile"))
-	(setq-local compile-command "make build")
-      (when (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
-	  (setq-local compile-command "go build"))))
+    (let ((default-directory  (if (fboundp 'project-root)
+				  (project-root (project-current))
+				default-directory)))
+      (if (or (file-exists-p "makefile")
+	      (file-exists-p "Makefile"))
+	  (setq-local compile-command "make build")
+	(when (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
+	  (setq-local compile-command "go build")))))
+
   (add-hook 'go-mode-hook #'poly/go-set-compile-command)
   (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
   (add-hook 'magit-mode-hook #'poly/go-set-compile-command)
