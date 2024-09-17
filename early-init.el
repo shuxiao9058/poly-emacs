@@ -1,5 +1,10 @@
 ;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
 
+;; fix (void-function cl-defmacro)
+(eval-when-compile
+  (require 'cl-lib)
+  (require 'cl))
+
 (defvar poly/debug nil
   "Debug flag.")
 
