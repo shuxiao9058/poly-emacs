@@ -3523,22 +3523,27 @@ determine which browser function to use."
       (when (get-buffer gnus-article-buffer)
 	(kill-buffer gnus-article-buffer))))
 
-  (defun text-newline-to-br (text)
-  "Convert plain TEXT newline to <br/>."
-  (with-temp-buffer
-    (insert text)
-    (goto-char (point-min))
-    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
-    (buffer-string)))
+ ;; (defun text-newline-to-br (text)
+ ;;  "Convert plain TEXT newline to <br/>."
+ ;;  (with-temp-buffer
+ ;;    (insert text)
+ ;;    (goto-char (point-min))
+ ;;    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
+ ;;    (buffer-string)))
 
   (defun new-html-buffer(txt)
     (with-temp-buffer
       (erase-buffer)
       (insert "Content-Type: text/html; charset=utf-8\n")
       (insert "Content-Transfer-Encoding: base64\n\n")
-      (insert (base64-encode-string (encode-coding-string
-				     (text-to-html-string (text-newline-to-br txt))
-				     'utf-8)))
+      (insert (base64-encode-string
+	       (encode-coding-string
+		(let* ((new-tmp (copy-sequence htmlize-basic-character-table))
+		       (htmlize-basic-character-table))
+		  (aset new-tmp ?\n "<br/>")
+		  (setq htmlize-basic-character-table new-tmp)
+		  (htmlize-string-to-html txt))
+		'utf-8)))
       (buffer-string)))
 
   (defun mu4e-views--convert-charset (charset)
