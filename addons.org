@@ -3523,12 +3523,22 @@ determine which browser function to use."
       (when (get-buffer gnus-article-buffer)
 	(kill-buffer gnus-article-buffer))))
 
+  (defun text-newline-to-br (text)
+  "Convert plain TEXT newline to <br/>."
+  (with-temp-buffer
+    (insert text)
+    (goto-char (point-min))
+    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
+    (buffer-string)))
+
   (defun new-html-buffer(txt)
     (with-temp-buffer
       (erase-buffer)
       (insert "Content-Type: text/html; charset=utf-8\n")
       (insert "Content-Transfer-Encoding: base64\n\n")
-      (insert (base64-encode-string (encode-coding-string  (text-to-html-string txt) 'utf-8)))
+      (insert (base64-encode-string (encode-coding-string
+				     (text-to-html-string (text-newline-to-br txt))
+				     'utf-8)))
       (buffer-string)))
 
   (defun mu4e-views--convert-charset (charset)
@@ -3542,7 +3552,6 @@ determine which browser function to use."
 	(setq fixed  "utf-8"))
       (message "translate coding system %s into %s" charset fixed)
       fixed))
-
   )
 
 (use-package notmuch-capf
