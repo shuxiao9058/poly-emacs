@@ -5036,7 +5036,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** keycast
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package keycast
   ;; :bind ("C-c t k" . +toggle-keycast)
 :config

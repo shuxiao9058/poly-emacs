@@ -2399,14 +2399,36 @@ Use clojure-mode for basic syntax support.
   :hook (protobuf-mode . poly/flycheck-buf-lint-setup))
 #+end_src
 
-** python
+** Python
 
 #+begin_src emacs-lisp
-(setq python-python-command "/opt/local/bin/python")
-(setq py-force-py-shell-name-p t)
-(setq python-indent-guess-indent-offset t)
-(setq python-indent-guess-indent-offset-verbose nil)
-
+(use-package python
+  :straight (:type built-in)
+  :mode ("\\.py" . python-mode)
+  :interpreter ("python" . python-mode)
+  :delight "π "
+  :hook ((python-mode python-ts-mode) . turn-on-prettify-symbols-mode)
+  :custom
+  (python-python-command "/opt/local/bin/python")
+  (python-indent-offset 4)
+  (python-indent-guess-indent-offset nil)
+  (python-indent-guess-indent-offset-verbose nil)
+  :preface
+  (defun python-remove-unused-imports()
+    "Removes unused imports and unused variables with autoflake."
+    (interactive)
+    (if (executable-find "autoflake")
+        (progn
+          (shell-command (format "autoflake --remove-all-unused-imports -i %s"
+                                 (shell-quote-argument (buffer-file-name))))
+          (revert-buffer t t t))
+      (warn "python-mode: Cannot find autoflake executable.")))
+  :config
+  (setq py-force-py-shell-name-p t)
+  :bind (:map python-ts-mode-map
+	      ("<backtab>" . python-back-indent)
+	      ("M-[" . python-nav-backward-block)
+              ("M-]" . python-nav-forward-block)))
 
 (use-package ein
   :if (executable-find "jupyter")

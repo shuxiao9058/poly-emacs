@@ -85,14 +85,14 @@
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (bind-key (kbd "C-c T") #'poly/open-with-tower)
 (bind-key (kbd "C-c f r" ) #'rename-visited-file)
-(bind-key (kbd "C-x C-b") #'ibuffer)
+;; (bind-key (kbd "C-x C-b") #'ibuffer)
 (bind-key (kbd "C-c q r") #'restart-emacs)
 (bind-key "<f9>"  #'hide-mode-line-mode)
 (bind-key (kbd "s-j")  #'rime-force-enable)
 (bind-key [remap dabbrev-expand] #'hippie-expand)
 ;; Change C-x C-b behavior so it uses bs; shows only interesting buffers.  The
 ;; `a' key will toggle visibility of all.
-(bind-key (kbd "C-x C-b") #'bs-show)
+;; (bind-key (kbd "C-x C-b") #'bs-show)
 (bind-key (kbd "M-/") #'completion-at-point)
 (bind-key (kbd "C-x C-b")  #'ibuffer)         ; or use a nicer switcher, see below
 (bind-key (kbd "C-c C-<return>") #'tabnine-chat-menu)
@@ -105,7 +105,7 @@
 
 *** transform text before paste
 
- #+begin_src emacs-lisp
+ #+begin_src emacs-lisp :tangle no
 (defun my-text-transform (start end)
   "Transform the text between START and END in some custom way."
   (let* ((text (buffer-substring start end))
