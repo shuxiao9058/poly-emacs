@@ -5081,6 +5081,19 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 ;;     (occur regex)))
 #+end_src
 
+** kdl-mode
+
+#+begin_src emacs-lisp :tangle no
+;; (use-package kdl-ts-mode
+;;   :straight (:type git :host github
+;; 		   :repo "dataphract/kdl-ts-mode")
+;;   :mode (("\\.kdl\\'" . kdl-ts-mode)))
+(use-package kdl-mode
+  :straight (:type git :host github
+		   :repo "bobuk/kdl-mode")
+  :mode (("\\.kdl\\'" . kdl-mode)))
+#+end_src
+
 * Network settings
 
 #+begin_src emacs-lisp
