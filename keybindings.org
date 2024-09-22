@@ -389,16 +389,41 @@ This configuration sticks with Meow for modal editing.
   ;; custom indicator
   (when IS-GUI
     (setq meow-replace-state-name-list
-	  '((normal . "🅝")
-	    (beacon . "🅑")
-	    (insert . "🅘")
-	    (motion . "🅜")
-	    (keypad . "🅚"))))
+	  '((normal . "[N]")
+	    (motion . "[M]")
+	    (keypad . "[K]")
+	    (insert . "[I]")
+	    (beacon . "[B]"))
+	  ;; '((normal . "<N>")
+	  ;;   (motion . "<M>")
+	  ;;   (keypad . "<K>")
+	  ;;   (insert . "<I>")
+	  ;;   (beacon . "<B>"))
+	  ;; '((normal . "🅽")
+	  ;;   (beacon . "🅱")
+	  ;;   (insert . "🅸")
+	  ;;   (keypad . "🅺")
+	  ;;   (motion . "🅼"))
+	  ;; '((normal . "Ꮚ•ꈊ•Ꮚ")
+	  ;;   (insert . "Ꮚ`ꈊ´Ꮚ")
+	  ;;   (keypad . "Ꮚ'ꈊ'Ꮚ")
+	  ;;   (motion . "Ꮚ-ꈊ-Ꮚ"))
+	  ;; '((normal . "󰰓")
+	  ;; (motion . "󰰐")
+	  ;; (keypad . "󰰊")
+	  ;; (insert . "󰰄")
+	  ;; (beacon . "󰯯")
+	  ;; (simple-motion . "󰰢"))
+	  ;; '((normal . "🅝")
+	  ;;   (beacon . "🅑")
+	  ;;   (insert . "🅘")
+	  ;;   (motion . "🅜")
+	  ;;   (keypad . "🅚"))
+	  ))
 
   ;; meow-thing-register THING INNER BOUNDS
   (meow-thing-register 'arrow '(pair ("<") (">")) '(pair ("<") (">")))
-  (add-to-list 'meow-char-thing-table '(?a . arrow))
-  )
+  (add-to-list 'meow-char-thing-table '(?a . arrow)))
 #+end_src
 
 * toggle map

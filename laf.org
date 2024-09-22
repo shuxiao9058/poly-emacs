@@ -35,6 +35,8 @@ Configuration for look and feels, make UI looks better.
       (kill-buffer "*scratch*")))
 (add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
 
+;; Silences the warning when running a snippet with backticks (runs a command in the snippet)
+(require 'warnings)
 (add-to-list 'warning-suppress-types '(undo discard-info))
 
 ;; auto maximized frame

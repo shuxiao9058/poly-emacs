@@ -92,15 +92,20 @@ Configuration for addons, additional features provided by individual packages.
  (t
   ;; (global-linum-mode t)
 
-  (defadvice linum-on (around linum-on-inhibit-for-modes)
-    "Stop the load of linum-mode for some major modes."
+  (defun my/magit-status-around (orig-fn &rest args)
+    (window-configuration-to-register :magit-fullscreen)
+    (apply orig-fn args)
+    (delete-other-windows))
+  (advice-add #'magit-status :around 'my/magit-status-around)
+
+  (defun my/linum-on-around(orig-fn &rest args)
     (unless (or (member major-mode linum-mode-inhibit-modes-list)
 		(let ((is-inhabit-linum))
 		  (dolist (mode local-minor-modes)
 		    (when (member mode linum-mode-inhibit-minor-modes-list)
 		      (setq is-inhabit-linum t))) is-inhabit-linum))
-      ad-do-it))
-  (ad-activate 'linum-on)
+      (apply orig-fn args)))
+  (advice-add #'linum-on :around 'my/linum-on-around)
 
   ;; update line number every second so `linum-mode' won't slow down Emacs
   ;; @see https://lists.gnu.org/archive/html/bug-gnu-emacs/2013-04/msg00577.html
@@ -108,8 +113,11 @@ Configuration for addons, additional features provided by individual packages.
   ;; on `linum-mode'.
   ;; So we have to use `linum-mode'.
   (setq linum-delay t)
-  (defadvice linum-schedule (around my-linum-schedule () activate)
-    (run-with-idle-timer 2 nil #'linum-update-current))))
+  (defun my/linum-schedule-around(orig-fn &rest args)
+    (run-with-idle-timer 2 nil #'linum-update-current))
+  (advice-add #'linum-schedule :around 'my/linum-schedule-around)))
+
+
 #+end_src
 
 
@@ -1550,12 +1558,24 @@ To manage the git repository, use builtin package ~vc~.
   ;; configuration.  Taken from
   ;; http://whattheemacsd.com/setup-magit.el-01.html#comment-748135498
   ;; and http://irreal.org/blog/?p=2253
-  (defadvice magit-status (around magit-fullscreen activate)
+  (defun my/magit-status-around (orig-fn &rest args)
     (window-configuration-to-register :magit-fullscreen)
-    ad-do-it
+    (apply orig-fn args)
     (delete-other-windows))
-  (defadvice magit-quit-window (after magit-restore-screen activate)
-    (jump-to-register :magit-fullscreen))
+  (advice-add #'magit-status :around 'my/magit-status-around ;; (around magit-fullscreen activate)
+    ;; (window-configuration-to-register :magit-fullscreen)
+    ;; ad-do-it
+    ;; (delete-other-windows)
+	      )
+
+  (defun my/magit-quit-window-after (orig-fn &rest args)
+    (jump-to-register :magit-fullscreen)
+    (apply orig-fn args))
+    (advice-add #'magit-quit-window :after
+		'my/magit-quit-window-after)
+
+  ;; (defadvice magit-quit-window (after magit-restore-screen activate)
+  ;;   (jump-to-register :magit-fullscreen))
   ;; (setq
   ;; ;; Use flyspell in the commit buffer
   ;; (add-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
@@ -2092,6 +2112,27 @@ Magit with cz
 	:map rime-mode-map
 	("C-$" . rime-send-keybinding)
 	("M-j" . rime-force-enable)))
+
+;; change the cursor color with the input-method changing
+(defvar cursor-default-color (face-background 'cursor))
+(defvar cursor-activate-color (face-foreground 'error nil t))
+
+(defun set-cursor-color-red ()
+  "Set the cursor color to red."
+  (set-cursor-color cursor-activate-color))
+(defun set-cursor-color-default ()
+  "Set the cursor color to green."
+  (set-cursor-color cursor-default-color))
+(defun set-cursor-color-according-to-input-method ()
+  "Set cursor color based on the current input method."
+  (interactive)
+  (if (string= current-input-method "rime")
+      (set-cursor-color cursor-activate-color)
+    (set-cursor-color cursor-default-color)))
+
+(add-hook 'input-method-activate-hook 'set-cursor-color-red)
+(add-hook 'input-method-deactivate-hook 'set-cursor-color-default)
+(add-hook 'window-state-change-hook 'set-cursor-color-according-to-input-method)
 #+end_src
 
 ** isearch-mb
@@ -2631,6 +2672,9 @@ Auto cleanup older buffers
   :straight (meow-vterm
 	     :host github
 	     :repo "accelbread/meow-vterm")
+  :after vterm
+  :init
+  (setq vterm-keymap-exceptions '("C-c"))
   :config
   (meow-vterm-enable))
 #+end_src

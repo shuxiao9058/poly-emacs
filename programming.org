@@ -620,7 +620,7 @@ Examples:
 				    (upgrade_dependency . t)
 				    (vendor . t)))
 		     ;; (buildFlags . ["-mod=vendor"])
-		     (allowImplicitNetworkAccess . t)
+		     ;; (allowImplicitNetworkAccess . t)
 		     (allowModfileModifications . t)
 		     (experimentalPostfixCompletions . t)
 		     (analyses . ,(mapcar (lambda (a) (cons a :json-false))
@@ -845,10 +845,11 @@ Examples:
   (lsp-lua-window-progress-bar nil)
   (lsp-lua-window-status-bar nil)
   (lsp-lua-completion-display-context nil)
-  (lsp-go-gopls-server-path "/opt/local/bin/gopls")
+  ;; (lsp-go-gopls-server-path "/opt/local/bin/gopls")
+  (lsp-go-gopls-server-path "/usr/local/gopath/bin/gopls")
   ;; (lsp-go-gopls-server-path "/usr/local/gopath/bin/gopls")
-  (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
-			   ))
+  ;; (lsp-gopls-server-args '("-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
+  ;; 			   ))
   (lsp-go-hover-kind "NoDocumentation")
   (lsp-go-links-in-hover nil)
   (lsp-go-use-gofumpt t)
@@ -945,7 +946,7 @@ Examples:
      ;; ("gopls.allowModfileModifications" t t)
      ("gopls.vulncheck" "Imports" nil)
      ;;disables GOPROXY=off, allowing implicit module downloads rather than requiring user action
-     ("gopls.allowImplicitNetworkAccess" t t)
+     ;; ("gopls.allowImplicitNetworkAccess" t t)
      ;; ST1003 CamelCase
      ;; ST1021 comment on exported type
      ;; ST1016 methods on the same type should have the same receiver name
@@ -1761,7 +1762,7 @@ use-package will load java-lsp for us simply by calling this function."
     (revive . "github.com/mgechev/revive")
     (gocritic . "github.com/go-critic/go-critic/cmd/gocritic")
     (unparam . "mvdan.cc/unparam")
-    (unused . "honnef.co/go/tools/cmd/unused")
+    ;; (unused . "honnef.co/go/tools/cmd/unused")
     (ineffassign . "github.com/gordonklaus/ineffassign")
     (pet . "github.com/knqyf263/pet")
     ;; (protovalidate-go . "github.com/bufbuild/protovalidate-go")
