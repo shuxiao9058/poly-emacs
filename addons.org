@@ -116,8 +116,6 @@ Configuration for addons, additional features provided by individual packages.
   (defun my/linum-schedule-around(orig-fn &rest args)
     (run-with-idle-timer 2 nil #'linum-update-current))
   (advice-add #'linum-schedule :around 'my/linum-schedule-around)))
-
-
 #+end_src
 
 
@@ -187,8 +185,7 @@ Configuration for addons, additional features provided by individual packages.
 
     ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
     (advice-add #'marginalia-cycle :after
-	       (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
-    )
+	       (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit)))))
 
   ;; -----------------------------------------------------------------------------
   ;; Marginalia doesn't remember the this-command when switching projects using
@@ -4996,7 +4993,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :commands package-lint-current-buffer)
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package replace-regexp-list
   :straight (:host github :repo "emacsattic/replace-regexp-list"))
 
