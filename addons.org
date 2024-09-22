@@ -628,27 +628,31 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :init (corfu-history-mode))
 
 (defun poly/convert-super-capf (arg-capf)
-  (list
-   ;; #'cape-dabbrev
-   ;; #'cape-keyword
-   ;; #'cape-ispell
-   (cape-capf-buster
-    (cape-capf-super
-     #'tabnine-completion-at-point
-     arg-capf
-     #'tempel-expand)
-    'equal)
-   ;; #'cape-symbol
-   #'cape-file
-   ;; #'cape-dabbrev
-   ))
+  (if (and (symbolp arg-capf) (not (memq arg-capf '(t nil))))
+      (list
+       (cape-capf-buster
+	(cape-capf-super
+	 #'tabnine-completion-at-point
+	 arg-capf
+	 ;; #'cape-dabbrev
+	 #'tempel-complete)
+	'equal)
+       #'cape-file)
+      (list
+       (cape-capf-buster
+	(cape-capf-super
+	 #'tabnine-completion-at-point
+	 #'cape-dabbrev
+	 ;; arg-capf
+	 #'tempel-complete)
+	'equal)
+       #'cape-file)))
 
 (defun poly/set-basic-capf ()
   (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-	      (poly/convert-super-capf
-	       (car completion-at-point-functions))))
+	      (poly/convert-super-capf nil)))
 
 (defun poly/set-mail-capf ()
   (interactive)
@@ -662,9 +666,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		 ;; #'ebdb-mail-dwim-completion-at-point-function
 		 ;; #'ebdb-complete-mail
 		 #'tabnine-completion-at-point
-		 ;; #'tabnine-capf
 		 ;; arg-capf
-		 #'tempel-expand)
+		 #'tempel-complete)
 		))))
 
 (defun poly/set-lsp-capf ()
@@ -1562,17 +1565,12 @@ To manage the git repository, use builtin package ~vc~.
     (window-configuration-to-register :magit-fullscreen)
     (apply orig-fn args)
     (delete-other-windows))
-  (advice-add #'magit-status :around 'my/magit-status-around ;; (around magit-fullscreen activate)
-    ;; (window-configuration-to-register :magit-fullscreen)
-    ;; ad-do-it
-    ;; (delete-other-windows)
-	      )
+  (advice-add #'magit-status :around 'my/magit-status-around)
 
   (defun my/magit-quit-window-after (orig-fn &rest args)
     (jump-to-register :magit-fullscreen)
     (apply orig-fn args))
-    (advice-add #'magit-quit-window :after
-		'my/magit-quit-window-after)
+    (advice-add #'magit-quit-window :after 'my/magit-quit-window-after)
 
   ;; (defadvice magit-quit-window (after magit-restore-screen activate)
   ;;   (jump-to-register :magit-fullscreen))

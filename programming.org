@@ -797,7 +797,7 @@ Examples:
   (lsp-completion-enable t)
   (lsp-completion-enable-additional-text-edit nil)
   (lsp-response-timeout 5)
-  (lsp-tcp-connection-timeout 2)
+  (lsp-tcp-connection-timeout 5)
   (lsp-enable-folding t)
   (lsp-diagnostic-package :flycheck)
   (lsp-modeline-diagnostics-enable t)
