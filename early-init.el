@@ -21,6 +21,10 @@
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
 
+
+;; fix macOS 15 lose focus
+(select-frame-set-input-focus (selected-frame))
+
 ;; Resizing the Emacs frame can be a terribly expensive part of changing the
 ;; font. By inhibiting this, we easily halve startup times with fonts that are
 ;; larger than the system default.

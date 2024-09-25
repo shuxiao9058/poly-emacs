@@ -878,6 +878,11 @@ Examples:
   (lsp-beancount-langserver-executable (expand-file-name "workspace/beancount-language-server/target/release/beancount-language-server" "~"))
   (lsp-beancount-journal-file (expand-file-name ".emacs.d/.local/beancount/beancount.beancount" "~"))
   (lsp-clients-pylsp-library-directories '("/opt/local"))
+  (lsp-pylsp-plugins-flake8-max-line-length 120)
+  (lsp-pylsp-plugins-flake8-enabled nil)
+  (lsp-pylsp-plugins-autopep8-enabled nil)
+  (lsp-pylsp-plugins-yapf-enabled t)
+  (lsp-pylsp-plugins-pylint-enabled nil)
   :config
   ;; cancel warning
   (advice-add 'lsp-warn
@@ -924,8 +929,22 @@ Examples:
 				   (require 'lsp-html nil t)
 				   ;; auto emerge css-ls
 				   (require 'css-ls nil t)
-				   (lsp-deferred))
-				 ))
+				   (lsp-deferred))))
+
+(with-eval-after-load 'lsp-pylsp
+  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D101")
+  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D102")
+  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D213")
+  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D400")
+  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D401")
+  (add-to-list 'lsp-pylsp-plugins-pycodestyle-ignore "W503")
+  (add-to-list 'lsp-pylsp-plugins-pycodestyle-exclude "W503")
+  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "W503")
+  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "F401")
+  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E231")
+  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E226")
+  (add-to-list 'lsp-pylsp-plugins-flake8-exclude "W503"))
+
   (lsp-register-custom-settings
    `(("gopls.usePlaceholders" t t)
      ("gopls.deepCompletion" t t)
@@ -1016,6 +1035,15 @@ Examples:
      ("html.validate.styles" t)
      ("html.format.wrapLineLength" 120)
      ("html.format.enable" t)
+
+     ("pylsp.plugins.mypy_ls.enabled" nil t)
+     ("pylsp.plugins.mypy_ls.live_mode" nil t)
+     ("pylsp.plugins.pyls_isort.enabled" t t)
+     ("pylsp.plugins.pyls_black.enabled" t t)
+     ("pylsp.plugins.pyflakes.enabled" nil t)
+     ("pylsp.plugins.pycodestyle.enabled"  t t)
+     ;; Disable these as they're duplicated by flake8
+     ("pylsp.plugins.mccabe.enabled"       nil t)
      ))
   :init
   (let* ((yaml-language-server-dir (poly/vscode-extension-install-path "redhat.vscode-yaml"))
@@ -2441,6 +2469,19 @@ Use clojure-mode for basic syntax support.
   :defer t
   :custom
   (ein:worksheet-enable-undo t))
+
+(use-package poetry
+  :straight t
+  :ensure t
+  :hook ((python-mode python-ts-mode) . poetry-tracking-mode)
+  :commands (poetry-venv-toggle
+	     poetry-venv-workon
+	     poetry-venv-deactivate
+             poetry-tracking-mode)
+  :custom
+  (poetry-tracking-strategy 'switch-buffer)
+  :config
+  (poetry-tracking-mode))
 #+end_src
 
 ** rust
