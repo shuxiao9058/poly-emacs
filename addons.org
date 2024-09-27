@@ -2580,7 +2580,7 @@ Auto cleanup older buffers
 
     Returns the vterm buffer."
     (interactive "P")
-    (let* ((project-root  (if (fboundp 'project-root)
+    (let* ((project-root  (if (and (fboundp 'project-root) (project-current))
 			      (project-root (project-current))
 			    default-directory))
 	   (dir
@@ -3191,6 +3191,7 @@ there are no attachments."
   (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notmuch-show-logo nil)
+  (notmuch-command "/usr/local/bin/notmuch")
   (notmuch-show-indent-messages-width 0)
   (notmuch-show-single-message t)
   ;; (notmuch-wash-wrap-lines-length 150)
