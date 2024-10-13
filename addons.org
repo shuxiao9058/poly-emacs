@@ -52,6 +52,7 @@ Configuration for addons, additional features provided by individual packages.
 	log-edit-mode
 	vterm-mode
 	term-mode
+	eat-mode
 	w3m-mode
 	speedbar-mode
 	mu4e-main-mode
@@ -1811,14 +1812,25 @@ To manage the git repository, use builtin package ~vc~.
 ;;   :straight t)
 (use-package gerrit
   :ensure t
-  :disabled
+  ;; :disabled
   :custom
+  (gerrit-use-ssl nil)
   (gerrit-host "10.177.9.244:11832")  ;; is needed for REST API calls
   :config
-  (progn
-    ;; (add-hook 'magit-status-sections-hook #'gerrit-magit-insert-status t)
-    (global-set-key (kbd "C-x i") 'gerrit-upload-transient)
-    (global-set-key (kbd "C-x o") 'gerrit-download)))
+  (setq gerrit-dashboard-query-alist
+        '(("Has draft comments" . "has:draft")
+          ("Work in progress" . "is:open AND owner:self is:wip")
+          ("Outgoing reviews" . "is:open AND owner:self -is:wip ")
+          ("Incoming reviews" . "is:open AND -owner:self -is:wip (reviewer:self)")
+          ("CCed on" . "is:open AND cc:self")
+	  ("Recently closed" . "is:closed  (-is:wip OR owner:self) (owner:self OR reviewer:self OR cc:self) limit:15")))
+
+
+  ;; (progn
+  ;;   ;; (add-hook 'magit-status-sections-hook #'gerrit-magit-insert-status t)
+  ;;   (global-set-key (kbd "C-x i") 'gerrit-upload-transient)
+  ;;   (global-set-key (kbd "C-x o") 'gerrit-download))
+  )
 
 (use-package code-review
   :disabled
@@ -2460,7 +2472,7 @@ Auto cleanup older buffers
 
 * vterm
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package vterm
   :straight t
   ;; :straight (vterm :type git :flavor melpa
@@ -2548,7 +2560,7 @@ Auto cleanup older buffers
 (use-package vterm-toggle
   :straight t
   ;; :when (memq window-system '(mac ns x))
-  :bind (([f2] . mb/vterm-right-here)
+  :bind (;; ([f2] . mb/vterm-right-here)
 	 ("C-<return>" . mb/vterm-right-here)
 	 :map vterm-mode-map
 	 ([f2] . mb/vterm-right-here))
@@ -2661,7 +2673,195 @@ Auto cleanup older buffers
 			   "*.ti" ("terminfo/e" "terminfo/e/*")
 			   ("terminfo/65" "terminfo/65/*")
 			   ("integration" "integration/*")
-			   (:exclude ".dir-locals.el" "*-tests.el"))))
+			   (:exclude ".dir-locals.el" "*-tests.el")))
+  :custom
+  (eat-kill-buffer-on-exit t)
+  (eat-enable-shell-prompt-annotation nil)
+  (eat-term-terminfo-directory (expand-file-name ".terminfo" "~"))
+  :hook (eshell-load . eat-eshell-mode)
+  :bind  ([f2] . poly/eat-right-here)
+  :config
+  (eat-eshell-mode)
+  (eat-eshell-visual-command-mode)
+  (setq eshell-visual-commands '())
+  (advice-add 'eat--eshell-local-mode :after
+              (lambda (&rest _)
+		"Remove eat-eshell's terminfo path override."
+		(setq eshell-variable-aliases-list
+                      (delete '("TERMINFO" eat-term-terminfo-directory t)
+                              eshell-variable-aliases-list)))
+              '((name . eat-eshell-remove-terminfo-override)))
+
+  (advice-add 'eat-eshell-emacs-mode :around
+              (lambda (orig-fun &rest args)
+		"Only run if eat terminal is active."
+		(when eat-terminal
+                  (apply orig-fun args)))
+              '((name . eat-eshell-only-when-active)))
+  (with-eval-after-load 'eat
+    (setq eat-eshell-emacs-mode-map
+          (let ((map (make-sparse-keymap)))
+            (define-key map [remap eshell-toggle-direct-send]
+			#'eat-eshell-char-mode)
+            (define-key map [remap undo] #'undefined)
+            (define-key map [remap insert-char] #'eat-input-char)
+            (define-key map [remap mouse-yank-primary] #'eat-mouse-yank-primary)
+            (define-key map [remap mouse-yank-secondary]
+			#'eat-mouse-yank-secondary)
+            (define-key map [remap quoted-insert] #'eat-quoted-input)
+            (define-key map [remap yank] #'eat-yank)
+            (define-key map [remap yank-pop] #'eat-yank-from-kill-ring)
+            (define-key map [xterm-paste] #'eat-xterm-paste)
+            map)
+          eat-eshell-char-mode-map
+          (let ((map (eat-term-make-keymap
+                      #'eat-self-input
+                      '(:ascii :arrow :navigation :function)
+                      '([?\C-c]))))
+            (define-key map [?\C-c ?\C-c] #'eat-self-input)
+            (define-key map [?\C-c ?\e] #'eat-self-input)
+            (define-key map [remap mouse-yank-primary] #'eat-mouse-yank-primary)
+            (define-key map [remap mouse-yank-secondary]
+			#'eat-mouse-yank-secondary)
+            (define-key map [xterm-paste] #'eat-xterm-paste)
+            map))
+    (setcdr (assoc 'eat--eshell-process-running-mode minor-mode-map-alist)
+            eat-eshell-emacs-mode-map)
+    (setcdr (assoc 'eat--eshell-char-mode minor-mode-map-alist)
+            eat-eshell-char-mode-map))
+
+
+  (defun meow-eat-eshell-setup-hooks ()
+    "Ensure non-char-mode keybindings outside of insert mode."
+    (add-hook 'meow-insert-enter-hook #'eat-eshell-char-mode nil t)
+    (add-hook 'meow-insert-exit-hook #'eat-eshell-emacs-mode nil t))
+
+  (add-hook 'eat-eshell-mode-hook #'meow-eat-eshell-setup-hooks)
+  )
+
+;; (set-face-attribute 'eshell-prompt nil :foreground "cyan" :weight 'bold)
+;; (set-face-attribute 'eshell-ls-directory nil :foreground "deep sky blue")
+;; (set-face-attribute 'eshell-ls-executable nil :foreground "green")
+;; (set-face-attribute 'eshell-ls-symlink nil :foreground "magenta")
+
+(use-package term-toggle
+  :straight (term-toggle :host github :repo "amno1/emacs-term-toggle")
+  :config
+  (setq term-toggle-no-confirm-exit t))
+
+(defun term-toggle-eat ()
+  "Toggle `term'."
+  (interactive) (term-toggle 'eat))
+
+(defun poly/eat-buffer-list()
+  "Return all eat buffer list."
+  (let ((eat-buffer-list))
+    (dolist (buf (buffer-list))
+      (when (buffer-live-p buf)
+	(with-current-buffer buf
+	  (when (or (eq major-mode 'eat-mode)
+		    (and (boundp 'local-minor-modes)
+			 (memq 'eat--eshell-local-mode local-minor-modes)))
+	    (add-to-list 'eat-buffer-list buf)))))
+    eat-buffer-list))
+
+(defun poly/eat-buffer(path)
+  "Get eat buffer by PATH."
+  (when-let ((eat-buffer-list (poly/eat-buffer-list)))
+    (when eat-buffer-list
+      (let* ((pwd)
+	     (buf (cl-find-if
+		   (lambda (b)
+		     (setq pwd (with-current-buffer b default-directory))
+		     (equal pwd path)) eat-buffer-list)))
+	(if buf (list buf pwd)
+	  (let ((buf (car eat-buffer-list)))
+	    (list buf (with-current-buffer buf default-directory))))))))
+
+(defun poly/buffer-frame-same-p(buf1 buf2)
+  (when-let* ((win1 (get-buffer-window buf1))
+	      (frame1 (window-frame win1))
+	      (win2 (get-buffer-window buf2))
+	      (frame2 (window-frame win2)))
+    (equal frame1 frame2)))
+
+(defun poly/eat-toggle ()
+  "Minimal hack to toggle eat."
+  (interactive)
+  (cond
+   ((derived-mode-p 'eat-mode) (if (one-window-p) (switch-to-prev-buffer) (delete-window)))
+   ((one-window-p) (progn (split-window-below) (other-window 1) ;; (eat-project)
+                          (shrink-window 7)))
+   (t (progn (other-window 1)
+             (if (derived-mode-p 'eat-mode) (delete-window)
+               (progn (other-window -1) (split-window-below) (other-window 1) ;; (eat-project)
+		      (shrink-window 7)))))))
+
+
+(defun +eat/here (arg)
+  "Open a terminal buffer in the current window at project root.
+
+    If prefix ARG is non-nil, cd into `default-directory' instead of project root.
+
+    Returns the vterm buffer."
+  (interactive "P")
+  (let* ((project-root  (if (and (fboundp 'project-root) (project-current))
+			    (project-root (project-current))
+			  default-directory))
+	 (dir
+	  (if arg
+	      default-directory
+	    project-root))
+	 (result (poly/eat-buffer dir))
+	 (cd-cmd (concat "cd " dir))
+	 (curr-buffer (current-buffer))
+	 (eat-buffer-list (poly/eat-buffer-list))
+	 (eat-buffer)
+	 (eat-win)
+	 (eat-pwd))
+    (when result
+      (setq eat-buffer (car result))
+      (setq eat-pwd (car (cdr result))))
+
+    (if eat-buffer
+	(progn
+	  ;; (with-current-buffer eat-buffer
+	  ;;   (when (bound-and-true-p read-only-mode)
+	  ;; 	(message "is readonly")
+	  ;; 	(read-only-mode -1)))
+	  (setq eat-win (get-buffer-window eat-buffer))
+	  (if (equal eat-pwd (file-truename dir))
+	      (if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
+		  (select-window eat-win nil)
+		(if (equal (length eat-buffer-list) 1)
+		    (poly/eat-toggle)
+		  (switch-to-buffer eat-buffer)))
+	    (with-current-buffer eat-buffer
+	      (eat-term-send-string eat-terminal cd-cmd)
+	      (eat-term-send-string eat-terminal "\n")))
+	  (if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
+	      (select-window eat-win nil)
+	    (switch-to-buffer eat-buffer)))
+      (if (equal (file-truename default-directory) (file-truename dir))
+	  (call-interactively 'eat)
+	(progn
+	  ;; (eat-project)
+	  (setq result (poly/eat-buffer dir))
+	  (when result
+	    (setq eat-buffer (car result))
+	    (setq eat-pwd (car (cdr result)))
+	    (unless (equal eat-pwd (file-truename dir))
+	      (with-current-buffer eat-buffer
+		(eat-term-send-string eat-terminal cd-cmd)
+		(eat-term-send-string eat-terminal "\n")
+		))))))
+    ))
+
+(defun poly/eat-right-here ()
+  (interactive)
+  (if (derived-mode-p 'eat-mode)
+      (term-toggle-eat)
+    (call-interactively #'+eat/here)))
 #+end_src
 
 ** Integration with Meow
@@ -2669,20 +2869,30 @@ Use ~char~ mode in ~INSERT~ state, and ~emacs~ mode in ~NORMAL~ state.  When
 switching to ~INSERT~ state, move the cursor to the end of buffer.
 
 #+begin_src emacs-lisp
+;; (defun meomacs-eat-meow-setup ()
+;;   (add-hook 'meow-normal-mode-hook 'eat-emacs-mode nil t)
+;;   (add-hook 'meow-insert-mode-hook
+;;             (lambda ()
+;;               (goto-char (point-max))
+;;               (eat-char-mode))
+;;             nil
+;;             t))
+
+;; (with-eval-after-load "eat"
+;;   ;; Replace semi-char mode with emacs mode
+;;   (advice-add 'eat-semi-char-mode :after 'eat-emacs-mode)
+;;   (add-hook 'eat-mode-hook 'eat-emacs-mode)
+;;   (add-hook 'eat-mode-hook 'meomacs-eat-meow-setup))
+
 (defun meomacs-eat-meow-setup ()
   (add-hook 'meow-normal-mode-hook 'eat-emacs-mode nil t)
-  (add-hook 'meow-insert-mode-hook
-            (lambda ()
-              (goto-char (point-max))
-              (eat-char-mode))
-            nil
-            t))
+  (add-hook 'meow-insert-mode-hook 'eat-char-mode nil t))
 
-(with-eval-after-load "eat"
-  ;; Replace semi-char mode with emacs mode
-  (advice-add 'eat-semi-char-mode :after 'eat-emacs-mode)
-  (add-hook 'eat-mode-hook 'eat-emacs-mode)
-  (add-hook 'eat-mode-hook 'meomacs-eat-meow-setup))
+;; (with-eval-after-load "eat"
+;;   (define-key eat-char-mode-map (kbd "C-y") 'eat-yank)
+;;   ;; Replace semi-char mode with emacs mode
+;;   (advice-add 'eat-semi-char-mode :after 'eat-emacs-mode)
+;;   (add-hook 'eat-mode-hook 'meomacs-eat-meow-setup))
 #+end_src
 
 * Hideshow
@@ -5103,8 +5313,18 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 ;; (defvar poly-socks5-proxy-host "localhost")
 ;; (defvar poly-socks5-proxy-port 7891)
 
-(setq url-proxy-services
-      `(("http" . ,(format "%s:%s" poly-http-proxy-host  poly-http-proxy-port))
-        ("https" . ,(format "%s:%s" poly-http-proxy-host poly-http-proxy-port))
-        ("no_proxy" . "\\(localhost\\)")))
+;; (setq url-proxy-services
+;;       `(("http" . ,(format "%s:%s" poly-http-proxy-host  poly-http-proxy-port))
+;;         ("https" . ,(format "%s:%s" poly-http-proxy-host poly-http-proxy-port))
+;;        ("no_proxy" . "\\(localhost\\)")))
+#+end_src
+
+
+** spell check
+
+#+begin_src emacs-lisp
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
 #+end_src

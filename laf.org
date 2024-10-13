@@ -395,7 +395,7 @@ enable ligatures with emacs-mac, must install font first
   :init (defvar composition-ligature-table (make-char-table nil))
   :hook (((prog-mode
            conf-mode nxml-mode markdown-mode help-mode
-           shell-mode eshell-mode term-mode vterm-mode)
+           shell-mode eshell-mode term-mode vterm-mode eat-mode)
           . (lambda () (setq-local composition-function-table composition-ligature-table))))
   :config
   ;; support ligatures, some toned down to prevent hang
@@ -737,7 +737,6 @@ lines are selected, or the NxM dimensions of a block selection."
 #+begin_src emacs-lisp
 (use-package treemacs
   :straight t
-  ;; :after hl-line-mode
   :custom
   (treemacs-collapse-dirs                 (if (executable-find "python") 3 0))
   (treemacs-deferred-git-apply-delay      0.5)

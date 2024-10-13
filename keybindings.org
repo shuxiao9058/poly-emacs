@@ -96,6 +96,8 @@
 (bind-key (kbd "M-/") #'completion-at-point)
 (bind-key (kbd "C-x C-b")  #'ibuffer)         ; or use a nicer switcher, see below
 (bind-key (kbd "C-c C-<return>") #'tabnine-chat-menu)
+(bind-key (kbd "C-c t e") #'eat-project)
+(bind-key (kbd "C-c t E") #'eat)
 
 (unbind-key "C-z")
 (unbind-key "s-o")
@@ -310,6 +312,7 @@ This configuration sticks with Meow for modal editing.
 		  ;; notmuch-hello-mode
 		  ;; notmuch-search-mode
 		  ;; special-mode
+		  eat-mode
 		  vterm-mode
 		  eww-mode
 		  notmuch-message-mode))
