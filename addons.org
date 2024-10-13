@@ -2678,15 +2678,37 @@ Auto cleanup older buffers
   (eat-kill-buffer-on-exit t)
   (eat-enable-shell-prompt-annotation nil)
   (eat-term-terminfo-directory (expand-file-name ".terminfo" "~"))
-  :hook (eshell-load . eat-eshell-mode)
-  :bind  (([f2] . poly/eat-right-here)
+  (explicit-shell-file-name "/opt/local/bin/zsh")
+  ;; (eat-shell '("/opt/local/bin/zsh" "-l"))
+  ;; (eat-tramp-shells '("bash"))
+  ;; (eat-ssh-shells '("bash"))
+  ;; (eat-term-name "xterm-256color") ;; fix top command: Error opening terminal: eat-truecolor. edit issue
+  (eat-enable-mouse t)
+  (eat-enable-directory-tracking t)
+  (eat-enable-auto-line-mode nil)
+  :hook ((eshell-load . eat-eshell-mode)
+         (eshell-load . eat-eshell-visual-command-mode)
+	 (eat-eshell-exec . eat-eshell-emacs-mode))
+  :bind (([f2] . poly/eat-right-here)
 	  ("C-<return>" . poly/eat-right-here)
 	  :map eat-mode-map
-	  ([f2] . poly/eat-right-here))
+	  ([f2] . poly/eat-right-here)
+	  ("C-c C-d" . eat-self-input)
+	  ("C-c C-c" . eat-self-input)
+	  ("C-d" . eat-self-input))
   :config
   (eat-eshell-mode)
   (eat-eshell-visual-command-mode)
   (setq eshell-visual-commands '())
+  (setq eat-minimum-latency 0)
+  (setopt eat-shell-prompt-annotation-delay 0)
+  (setopt eat-very-visible-cursor-type '(t nil nil))
+  (setopt eat-term-scrollback-size nil)
+  (setopt eat-default-cursor-type '(t nil nil))
+  (add-hook 'eat-mode-hook (lambda () (setq-local scroll-conservatively 10000)))
+  (when (eq system-type 'darwin)
+    (define-key eat-semi-char-mode-map (kbd "C-h") #'eat-self-input)
+    (define-key eat-semi-char-mode-map (kbd "<backspace>") #'eat-self-input))
   (advice-add 'eat--eshell-local-mode :after
               (lambda (&rest _)
 		"Remove eat-eshell's terminfo path override."
@@ -2701,6 +2723,27 @@ Auto cleanup older buffers
 		(when eat-terminal
                   (apply orig-fun args)))
               '((name . eat-eshell-only-when-active)))
+  (defun eat-tab-change (original-fun &rest args)
+  (interactive)
+  (message "eat-tab-change triggered")  ; Output to *Messages* buffer
+  (apply original-fun args)
+  (walk-windows (lambda (window)
+                  (with-current-buffer (window-buffer window)
+                    (when (eq major-mode 'eat-mode)
+                      (end-of-buffer)
+                      (evil-insert-state))))
+               nil 'visible))
+
+  (advice-add 'tab-bar-select-tab :around #'eat-tab-change)
+  (defun kill-eat-processes ()
+  "Kill processes associated with eat terminal buffers."
+  (interactive)
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (eq major-mode 'eat-mode)
+        (eat-kill-process)))))
+
+(add-hook 'kill-emacs-hook #'kill-eat-processes)
   (with-eval-after-load 'eat
     (setq eat-eshell-emacs-mode-map
           (let ((map (make-sparse-keymap)))
@@ -2757,8 +2800,9 @@ Auto cleanup older buffers
       (when (buffer-live-p buf)
 	(with-current-buffer buf
 	  (when (or (eq major-mode 'eat-mode)
-		    (and (boundp 'local-minor-modes)
-			 (memq 'eat--eshell-local-mode local-minor-modes)))
+		    ;; (and (boundp 'local-minor-modes)
+		    ;; 	 (memq 'eat--eshell-local-mode local-minor-modes))
+		    )
 	    (add-to-list 'eat-buffer-list buf)))))
     eat-buffer-list))
 
@@ -2825,7 +2869,7 @@ Auto cleanup older buffers
 	      default-directory
 	    project-root))
 	 (result (poly/eat-buffer dir))
-	 (cd-cmd (concat "cd " (shell-quote-argument dir)))
+	 (cd-cmd (concat "cd " (shell-quote-argument (expand-file-name dir)) "\n"))
 	 (curr-buffer (current-buffer))
 	 (eat-buffer-list (poly/eat-buffer-list))
 	 (eat-buffer)
@@ -2833,39 +2877,39 @@ Auto cleanup older buffers
 	 (eat-pwd))
     (when result
       (setq eat-buffer (car result))
-      (setq eat-pwd (car (cdr result))))
+      (setq eat-pwd (expand-file-name (car (cdr result)))))
 
     (if eat-buffer
 	(progn
-	  ;; (with-current-buffer eat-buffer
-	  ;;   (when (bound-and-true-p read-only-mode)
-	  ;; 	(message "is readonly")
-	  ;; 	(read-only-mode -1)))
 	  (setq eat-win (get-buffer-window eat-buffer))
-	  (if (equal eat-pwd (file-truename dir))
-	      (if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
+	  (if (equal eat-pwd (expand-file-name (file-truename dir)))
+	      (progn
+		;; (message "path is equal")
+		(if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
 		  (select-window eat-win nil)
 		(if (equal (length eat-buffer-list) 1)
 		    (poly/eat-toggle)
 		  (switch-to-buffer eat-buffer)))
+		)
 	    (with-current-buffer eat-buffer
 	      (eat-term-send-string eat-terminal cd-cmd)
-	      (eat-term-send-string eat-terminal "\n")))
+	      ;; (eat-term-send-string eat-terminal "\n")
+	      ))
 	  (if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
 	      (select-window eat-win nil)
-	    (switch-to-buffer eat-buffer)))
+	    (switch-to-buffer eat-buffer)
+	    (goto-char (point-max))))
       (if (equal (file-truename default-directory) (file-truename dir))
 	  (call-interactively 'eat)
 	(progn
-	  ;; (eat-project)
 	  (setq result (poly/eat-buffer dir))
 	  (when result
 	    (setq eat-buffer (car result))
-	    (setq eat-pwd (car (cdr result)))
-	    (unless (equal eat-pwd (file-truename dir))
+	    (setq eat-pwd (expand-file-name (car (cdr result))))
+	    (unless (equal eat-pwd (expand-file-name (file-truename dir)))
 	      (with-current-buffer eat-buffer
 		(eat-term-send-string eat-terminal cd-cmd)
-		(eat-term-send-string eat-terminal "\n")
+		;; (eat-term-send-string eat-terminal "\n")
 		))))))))
 
 (defun poly/eat-right-here ()
