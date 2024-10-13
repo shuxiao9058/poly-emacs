@@ -2560,7 +2560,7 @@ Auto cleanup older buffers
 (use-package vterm-toggle
   :straight t
   ;; :when (memq window-system '(mac ns x))
-  :bind (;; ([f2] . mb/vterm-right-here)
+  :bind (([f2] . mb/vterm-right-here)
 	 ("C-<return>" . mb/vterm-right-here)
 	 :map vterm-mode-map
 	 ([f2] . mb/vterm-right-here))
@@ -2679,7 +2679,10 @@ Auto cleanup older buffers
   (eat-enable-shell-prompt-annotation nil)
   (eat-term-terminfo-directory (expand-file-name ".terminfo" "~"))
   :hook (eshell-load . eat-eshell-mode)
-  :bind  ([f2] . poly/eat-right-here)
+  :bind  (([f2] . poly/eat-right-here)
+	  ("C-<return>" . poly/eat-right-here)
+	  :map eat-mode-map
+	  ([f2] . poly/eat-right-here))
   :config
   (eat-eshell-mode)
   (eat-eshell-visual-command-mode)
@@ -2739,19 +2742,14 @@ Auto cleanup older buffers
   (add-hook 'eat-eshell-mode-hook #'meow-eat-eshell-setup-hooks)
   )
 
-;; (set-face-attribute 'eshell-prompt nil :foreground "cyan" :weight 'bold)
-;; (set-face-attribute 'eshell-ls-directory nil :foreground "deep sky blue")
-;; (set-face-attribute 'eshell-ls-executable nil :foreground "green")
-;; (set-face-attribute 'eshell-ls-symlink nil :foreground "magenta")
+;; (use-package term-toggle
+;;   :straight (term-toggle :host github :repo "amno1/emacs-term-toggle")
+;;   :config
+;;   (setq term-toggle-no-confirm-exit t))
 
-(use-package term-toggle
-  :straight (term-toggle :host github :repo "amno1/emacs-term-toggle")
-  :config
-  (setq term-toggle-no-confirm-exit t))
-
-(defun term-toggle-eat ()
-  "Toggle `term'."
-  (interactive) (term-toggle 'eat))
+;; (defun term-toggle-eat ()
+;;   "Toggle `term'."
+;;   (interactive) (term-toggle 'eat))
 
 (defun poly/eat-buffer-list()
   "Return all eat buffer list."
@@ -2789,13 +2787,28 @@ Auto cleanup older buffers
   "Minimal hack to toggle eat."
   (interactive)
   (cond
-   ((derived-mode-p 'eat-mode) (if (one-window-p) (switch-to-prev-buffer) (delete-window)))
-   ((one-window-p) (progn (split-window-below) (other-window 1) ;; (eat-project)
-                          (shrink-window 7)))
-   (t (progn (other-window 1)
-             (if (derived-mode-p 'eat-mode) (delete-window)
-               (progn (other-window -1) (split-window-below) (other-window 1) ;; (eat-project)
-		      (shrink-window 7)))))))
+   ((derived-mode-p 'eat-mode)
+    (if (one-window-p)
+	(switch-to-prev-buffer)
+      (delete-window)))
+   (t;; (one-window-p)
+    (progn
+      (let ((eat-buffer-list (poly/eat-buffer-list)))
+	(if (equal (length eat-buffer-list) 1)
+	    (switch-to-buffer (car eat-buffer-list))))
+      ;; (split-window-below)
+      ;; (other-window 1) ;; (eat-project)
+      ;; (shrink-window 7)
+      ))
+   ;; (t (progn (other-window 1)
+   ;;           (if (derived-mode-p 'eat-mode)
+   ;; 		 (delete-window)
+   ;;             (progn
+   ;; 		 (other-window -1)
+   ;; 		 (split-window-below)
+   ;; 		 (other-window 1) ;; (eat-project)
+   ;; 		 (shrink-window 7)))))
+   ))
 
 
 (defun +eat/here (arg)
@@ -2860,7 +2873,7 @@ Auto cleanup older buffers
 (defun poly/eat-right-here ()
   (interactive)
   (if (derived-mode-p 'eat-mode)
-      (term-toggle-eat)
+      (call-interactively #'poly/eat-toggle)
     (call-interactively #'+eat/here)))
 #+end_src
 
