@@ -885,6 +885,16 @@ The theme has to be reloaded after changing anything in this group."
 	       (term-color-white :foreground ,fg :background ,fg)
 	       (term-color-yellow :foreground ,yellow :background ,yellow)
 
+               (ansi-color-bright-blue :inherit ansi-color-blue)
+	       (ansi-color-bright-red :inherit ansi-color-red)
+	       (ansi-color-bright-red :inherit ansi-color-red)
+	       (ansi-color-bright-cyan :inherit ansi-color-cyan)
+	       (ansi-color-bright-black :inherit ansi-color-black)
+	       (ansi-color-bright-green :inherit ansi-color-green)
+	       (ansi-color-bright-white :inherit ansi-color-white)
+	       (ansi-color-bright-yellow :inherit ansi-color-yellow)
+	       (ansi-color-bright-magenta :inherit ansi-color-magenta)
+
                ;; Eat (Emulate a Terminal)
                (eat-term-bold                             :weight bold)
 	       (eat-term-color-0                          :foreground ,fg4)

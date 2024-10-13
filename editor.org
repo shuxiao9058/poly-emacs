@@ -411,6 +411,8 @@ To find files/buffers and apply commands on project, use builtin package ~projec
                   (mode . inferior-python-mode)))
       ("Term" (or (mode . term-mode)
                   (mode . shell-mode)
+		  (mode . vterm-mode)
+		  (mode . eat-mode)
                   (mode . eshell-mode)))
       ("Mail" (or (mode . mail-mode)
                   (mode . message-mode)

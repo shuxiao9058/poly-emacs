@@ -2739,8 +2739,7 @@ Auto cleanup older buffers
     (add-hook 'meow-insert-enter-hook #'eat-eshell-char-mode nil t)
     (add-hook 'meow-insert-exit-hook #'eat-eshell-emacs-mode nil t))
 
-  (add-hook 'eat-eshell-mode-hook #'meow-eat-eshell-setup-hooks)
-  )
+  (add-hook 'eat-eshell-mode-hook #'meow-eat-eshell-setup-hooks))
 
 ;; (use-package term-toggle
 ;;   :straight (term-toggle :host github :repo "amno1/emacs-term-toggle")
@@ -2826,7 +2825,7 @@ Auto cleanup older buffers
 	      default-directory
 	    project-root))
 	 (result (poly/eat-buffer dir))
-	 (cd-cmd (concat "cd " dir))
+	 (cd-cmd (concat "cd " (shell-quote-argument dir)))
 	 (curr-buffer (current-buffer))
 	 (eat-buffer-list (poly/eat-buffer-list))
 	 (eat-buffer)
@@ -2867,8 +2866,7 @@ Auto cleanup older buffers
 	      (with-current-buffer eat-buffer
 		(eat-term-send-string eat-terminal cd-cmd)
 		(eat-term-send-string eat-terminal "\n")
-		))))))
-    ))
+		))))))))
 
 (defun poly/eat-right-here ()
   (interactive)
