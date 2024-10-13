@@ -76,10 +76,12 @@ The theme has to be reloaded after changing anything in this group."
 		(comment "#7970A9" "#756AAF" "blue")        ; Comment
 		(cyan "#80FFEA" "#86F9E6" "brightcyan")     ; Cyan
 		(green "#8AFF80" "#8FF986" "green")         ; Green
+                (bright-green "#87bc5f" "#87bc5f" "brightgreen") ;; bright green
 		(orange "#FFCA80" "#F9C986" "brightred")    ; Orange
 		(pink "#FF80BF" "#F986BF" "magenta")        ; Pink
 		(purple "#9580FF" "#9986F9" "brightmagenta") ; Purple
 		(red "#FF9580" "#F99986" "red")              ; Red
+                (bright-red "#ed83a9" "#ed83a9" "brightred")
 		(yellow "#FFFF80" "#F9F986" "yellow")        ; Yellow
                 (dogblue4 "#104e8b" "#104e8b" "DodgerBlue4") ;; DodgerBlue4
 
@@ -103,7 +105,8 @@ The theme has to be reloaded after changing anything in this group."
 		(bgdarker "#0B0B0F" "#3F3D5C" "brightblack")
 		(black "#17161D" "#35334D" "brightblack")
 		(white "#E0E0E0" "#B3B3B3" "white")
-		(blue "#009F9F" "#846EF7" "brightblue")
+		(blue "#009F9F" "#846EF7" "blue")
+                (bright-blue "#11bbe7" "#11bbe7" "brightblue")
 		(light-purple "#B28CE2" "brightblue")
 		(brown "#CFA300" "#F9C986" "brightred")
 		(region "#454158" "#3F3D5C" "brightblack")
@@ -884,19 +887,17 @@ The theme has to be reloaded after changing anything in this group."
                ;; Eat (Emulate a Terminal)
 	       (eat-term-color-0                          :foreground ,fg4)
 	       (eat-term-color-1                          :foreground ,red)
-	       (eat-term-color-2                          :foreground "#55ee77";; ,green
-                                                          )
+	       (eat-term-color-2                          :foreground "#55ee77")
 	       (eat-term-color-3                          :foreground ,yellow)
-	       (eat-term-color-4                          :foreground "#5588ff";; ,blue
-                                                          )
+	       (eat-term-color-4                          :foreground "#5588ff")
 	       (eat-term-color-5                          :foreground ,purple)
 	       (eat-term-color-6                          :foreground ,cyan)
 	       (eat-term-color-7                          :foreground ,white)
 	       (eat-term-color-8                          :foreground ,black :bold t)
-	       ;; (eat-term-color-9                          :foreground ,urgent)
-	       ;; (eat-term-color-10                         ((,class (:foreground ,lambda-crucial))))
-	       (eat-term-color-11                         :foreground ,orange)
-	       ;; (eat-term-color-12                         :foreground ,lambda-focus))))
+	       (eat-term-color-9                          :foreground ,bright-red)
+	      (eat-term-color-10                        :foreground ,bright-green)
+	      (eat-term-color-11                         :foreground ,orange)
+	      (eat-term-color-12                         :foreground ,bright-blue)
 	       (eat-term-color-13                         :foreground ,purple)
 	       (eat-term-color-14                         :foreground ,cyan) ;; cyan
 	       (eat-term-color-15                         :foreground ,white :bold t) ;; white
@@ -966,7 +967,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (meow-keypad-cursor              :foreground ,bg :background ,red)
 	       (meow-insert-cursor             :foreground ,bg :background ,green)
 	       (meow-normal-cursor :foreground ,bg  :background ,yellow)
- 	       (meow-motion-cursor :foreground ,bg  :background ,blue)
+	       (meow-motion-cursor :foreground ,bg  :background ,blue)
 	       (meow-beacon-cursor :foreground ,bg :background ,purple)
 
 	       (Man-overstrike :inherit font-lock-type-face :bold t)
