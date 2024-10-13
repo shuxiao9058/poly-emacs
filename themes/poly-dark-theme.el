@@ -83,6 +83,7 @@ The theme has to be reloaded after changing anything in this group."
 		(red "#FF9580" "#F99986" "red")              ; Red
                 (bright-red "#ed83a9" "#ed83a9" "brightred")
 		(yellow "#FFFF80" "#F9F986" "yellow")        ; Yellow
+                (bright-yellow "#cda430" "#cda430" "brightyellow")
                 (dogblue4 "#104e8b" "#104e8b" "DodgerBlue4") ;; DodgerBlue4
 
 		;; Other colors
@@ -885,6 +886,7 @@ The theme has to be reloaded after changing anything in this group."
 	       (term-color-yellow :foreground ,yellow :background ,yellow)
 
                ;; Eat (Emulate a Terminal)
+               (eat-term-bold                             :weight bold)
 	       (eat-term-color-0                          :foreground ,fg4)
 	       (eat-term-color-1                          :foreground ,red)
 	       (eat-term-color-2                          :foreground "#55ee77")
@@ -901,9 +903,10 @@ The theme has to be reloaded after changing anything in this group."
 	       (eat-term-color-13                         :foreground ,purple)
 	       (eat-term-color-14                         :foreground ,cyan) ;; cyan
 	       (eat-term-color-15                         :foreground ,white :bold t) ;; white
-	       ;; (eat-shell-prompt-annotation-success :foreground color-background)
-	       ;; (eat-shell-prompt-annotation-running (:foreground color-background))
-	       ;; (eat-shell-prompt-annotation-failure :foreground ,red)
+               (eat-term-italic                           :slant italic)
+	       (eat-shell-prompt-annotation-success :foreground ,bright-green)
+	       (eat-shell-prompt-annotation-running :foreground ,bright-yellow)
+	       (eat-shell-prompt-annotation-failure :foreground ,bright-red)
 
 	       ;; eshell
 	       (eshell-prompt :foreground ,yellow :weight bold)
