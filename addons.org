@@ -2665,6 +2665,16 @@ Auto cleanup older buffers
 #+end_src
 
 * EAT
+
+| Key Sequence   | Note                            |
+|----------------+---------------------------------|
+| C-c M-d        | char mode                       |
+| C-M-m or M-RET | "char mode" to "semi-char mode" |
+| C-c C-e        | Emacs Mode                      |
+| C-c C-j        | semi-char mode                  |
+| C-c C-l        | line mode                       |
+
+
 #+begin_src emacs-lisp
 (use-package eat
   :straight (:type git :host codeberg
@@ -2808,6 +2818,9 @@ Auto cleanup older buffers
 
 (defun poly/eat-buffer(path)
   "Get eat buffer by PATH."
+  (unless (poly/eat-buffer-list) ;; create eat while not exist
+    (let ((default-directory path))
+      (call-interactively 'eat)))
   (when-let ((eat-buffer-list (poly/eat-buffer-list)))
     (when eat-buffer-list
       (let* ((pwd)
@@ -2853,7 +2866,6 @@ Auto cleanup older buffers
    ;; 		 (shrink-window 7)))))
    ))
 
-
 (defun +eat/here (arg)
   "Open a terminal buffer in the current window at project root.
 
@@ -2889,8 +2901,7 @@ Auto cleanup older buffers
 		  (select-window eat-win nil)
 		(if (equal (length eat-buffer-list) 1)
 		    (poly/eat-toggle)
-		  (switch-to-buffer eat-buffer)))
-		)
+		  (switch-to-buffer eat-buffer))))
 	    (with-current-buffer eat-buffer
 	      (eat-term-send-string eat-terminal cd-cmd)
 	      ;; (eat-term-send-string eat-terminal "\n")
