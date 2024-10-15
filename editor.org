@@ -100,9 +100,14 @@ This is consulted on every `require', `load' and various path/io functions.  You
       vagrant-vagrantfile (expand-file-name "vagrant/Vagrantfile" default-directory)
       max-lisp-eval-depth 10000
       ;; Wrapping
-      truncate-lines t
-      truncate-partial-width-windows 50
+      truncate-lines nil
+      truncate-partial-width-windows nil
+      find-file-visit-truename t ;; Resolve symlinks
       whitespace-style '(face trailing lines-tail)
+
+      ;; Automatically focus help and man windows when displayed.
+      help-window-select t
+      Man-notify-method 'aggressive
 
       ;; clipboard
       kill-ring-max 20000
@@ -112,6 +117,10 @@ This is consulted on every `require', `load' and various path/io functions.  You
       x-select-enable-primary             t
       history-length 100000
       history-delete-duplicates t
+      set-mark-command-repeat-pop t ;; C-u SPC pops the last mark, afterwords no C-u is needed for further pops.
+      show-paren-context-when-offscreen 'overlay      ;; Show the paired paren at the top-right corner when it's off screen.
+      backup-inhibited t
+      kill-whole-line t
       xref-history-storage 'xref-window-local-history
       xref-prompt-for-identifier nil
       xref-search-program 'ripgrep
@@ -127,7 +136,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
       use-dialog-box nil
       global-auto-revert-non-file-buffers t
       apropos-do-all                      t
-      require-final-newline               t
+      require-final-newline               nil
       mouse-yank-at-point                 t
       mouse-drag-mode-line-buffer t
       mouse-drag-and-drop-region-cross-program t
@@ -143,6 +152,10 @@ This is consulted on every `require', `load' and various path/io functions.  You
       cursor-in-non-selected-windows 'hollow ; 在没有激活的 window 上显示一个空心正方形
       )
 
+;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
+;; expected for non English text.
+(add-hook 'visual-line-mode-hook #'word-wrap-whitespace-mode)
+
 (setq syntax-wholeline-max most-positive-fixnum)
 ;; @see https://github.com/emacs-lsp/lsp-mode#performance
 (setq read-process-output-max (* 3 1024 1024))
@@ -152,6 +165,12 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq ring-bell-function 'ignore)
 
+;; Change the format of buffer name to <unique dir suffix>/<filename>.
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+(setq uniquify-separator "/")
+(setq uniquify-after-kill-buffer-p t)
+(setq uniquify-ignore-buffers-re "^\\*")
 
 ;; Use normal tabs in makefiles
 (add-hook 'makefile-mode-hook 'indent-tabs-mode)
