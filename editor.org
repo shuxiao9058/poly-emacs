@@ -3040,3 +3040,26 @@ valign for org-mode & markdown table
          ("C-c %"   . vr/query-replace)
          ("<C-m> /" . vr/mc-mark)))
 #+end_src
+
+** Uniline
+
+#+begin_src emacs-lisp
+(use-package uniline
+  :straight(uniline :type git :host github :repo "tbanel/uniline")
+  :bind (:map uniline-mode-map
+	      ("C-c /" . uniline-hydra-choose-body)
+	      ("C-c u" . uniline--set-brush-0)
+	      ("C-c -" . uniline--set-brush-1)
+	      ("C-c +" . uniline--set-brush-2)
+	      ("C-c =" . uniline--set-brush-3)
+	      ("C-c #" . uniline--set-brush-block)
+	      ("-" . nil)
+	      ("+" . nil)
+	      ("#" . nil)
+	      ("=" . nil))
+  :config
+  (setq meow--kbd-forward-char "<right>"
+	meow--kbd-backward-char "<left>"
+	meow--kbd-forward-line "<down>"
+	meow--kbd-backward-line "<up>"))
+#+end_src

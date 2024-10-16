@@ -1811,8 +1811,8 @@ To manage the git repository, use builtin package ~vc~.
 ;; (use-package vdiff
 ;;   :straight t)
 (use-package gerrit
+  :straight t
   :ensure t
-  ;; :disabled
   :custom
   (gerrit-use-ssl nil)
   (gerrit-host "10.177.9.244:11832")  ;; is needed for REST API calls
@@ -5393,4 +5393,13 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle no
+(use-package buffer-name-relative
+  :straight (:host codeberg :repo "ideasman42/emacs-buffer-name-relative")
+  :hook (after-init . buffer-name-relative-mode)
+  :config
+  (setq buffer-name-relative-prefix '("" . "/")))
 #+end_src

@@ -2472,6 +2472,7 @@ Use clojure-mode for basic syntax support.
 
 (use-package poetry
   :straight t
+  :disabled
   :ensure t
   :hook ((python-mode python-ts-mode) . poetry-tracking-mode)
   :commands (poetry-venv-toggle
@@ -2482,6 +2483,23 @@ Use clojure-mode for basic syntax support.
   (poetry-tracking-strategy 'switch-buffer)
   :config
   (poetry-tracking-mode))
+
+
+(use-package conda
+  :ensure t
+  :straight t
+  :init (conda-env-initialize-interactive-shells)
+  :config
+  ;; Enable auto-activation
+  (conda-env-autoactivate-mode 1)
+
+  ;; Automatically activate a Conda environment on the opening of a file
+  (add-hook 'find-file-hook (lambda ()
+                              (when (bound-and-true-p conda-project-env-path)
+                                (conda-env-activate-for-buffer))))
+
+  ;; Displaying the currently active environment on the `mode-line'
+  (add-hook 'python-base-mode-hook #'conda-mode-line-setup))
 #+end_src
 
 ** rust

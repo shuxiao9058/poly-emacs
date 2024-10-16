@@ -437,4 +437,5 @@ This configuration sticks with Meow for modal editing.
 (bind-key "t" #'my-toggle-transparency 'toggle-map)
 (bind-key "i" #'imenu-list 'toggle-map)
 (bind-key "m" #'smerge-mode 'toggle-map)
+(bind-key "u" #'uniline-mode 'toggle-map)
 #+end_src
