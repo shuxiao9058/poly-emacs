@@ -432,7 +432,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	("C-j"  .  vertico-next)
 	("<up>" .  vertico-previous)
 	("C-k"  .  vertico-previous)
-	("<backtab>" . vertico-previous)))
+	("<backtab>" . vertico-previous)
+	("?" . minibuffer-completion-help)
+	("M-RET" . minibuffer-force-complete-and-exit)
+	("M-TAB" . minibuffer-complete)))
 
 ;; Configure directory extension.
 (use-package vertico-directory
@@ -489,9 +492,17 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; Enable recursive minibuffers
   (setq enable-recursive-minibuffers t))
 
-(define-key vertico-map "?" #'minibuffer-completion-help)
-(define-key vertico-map (kbd "M-RET") #'minibuffer-force-complete-and-exit)
-(define-key vertico-map (kbd "M-TAB") #'minibuffer-complete)
+
+;; Sorting and filtering
+(use-package prescient
+  :straight t
+  :config
+  (prescient-persist-mode 1))
+
+(use-package vertico-prescient
+  :straight t
+  :config
+  (vertico-prescient-mode 1))
 #+END_SRC
 
 ** corfu
