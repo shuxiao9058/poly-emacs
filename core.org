@@ -455,6 +455,19 @@ Accepts the same arguments as `message'."
   "Return non-nil if icons are displayable."
   (or (featurep 'nerd-icons)
       (require 'nerd-icons nil t)))
+
+(defun poly/dir-local-variable (dir var)
+  "Get DIR local variable VAR with symbol (e.g. `compile-command)."
+  (let* ((dir-locals (dir-locals-read-from-dir dir))
+	 (class-variables (dir-locals-get-class-variables dir-locals))
+	 (local-vars)
+	 (var-value))
+    (dolist (class-var class-variables)
+      (setq local-vars (cdr class-var))
+      (when-let ((cons-value (assoc var local-vars)))
+	(setq var-value (cdr cons-value))))
+    var-value))
+
 #+end_src
 
 

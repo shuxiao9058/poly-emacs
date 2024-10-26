@@ -26,8 +26,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
   :custom
   ;; Resize the compilation window so that it doesn't take up half the frame
   (compilation-window-height 16)
-  ;;  Always scroll the compilation window
-  (compilation-scroll-output t)
+  ;; ;;  Always scroll the compilation window
+  ;; (compilation-scroll-output t)
   :init
   ;; If there were no errors, there's not much to look at in a compilation
   ;; buffer, so make it go away in 2 seconds.
@@ -43,8 +43,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 	      (message "Build Succeeded."))
             )))
   ;; Follow the compilation buffer scroll instead of remaining at the top line.
-  (setq compilation-scroll-output t)
-  ;; (setq compilation-scroll-output 'first-error)
+  ;; (setq compilation-scroll-output t)
+  (setq compilation-scroll-output 'first-error)
   (setq auto-revert-check-vc-info t)
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 3)
@@ -58,6 +58,17 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; Enable indentation+completion using the TAB key.
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
+
+
+(use-package autorevert
+  :straight nil
+  :diminish auto-revert-mode
+  :custom
+  (auto-revert-use-notify nil)
+  (auto-revert-verbose nil)
+  (global-auto-revert-non-file-buffers t)
+  :config
+  (global-auto-revert-mode +1))
 
 (setq auth-sources '("~/.authinfo")
       ;; auth-sources '("~/.authinfo.gpg")
@@ -134,7 +145,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       truncate-string-ellipsis "…"
       cursor-type '(hbar .  2)
       use-dialog-box nil
-      global-auto-revert-non-file-buffers t
       apropos-do-all                      t
       require-final-newline               nil
       mouse-yank-at-point                 t
@@ -148,13 +158,24 @@ This is consulted on every `require', `load' and various path/io functions.  You
       left-fringe-width 1
       right-fringe-width 0
       indicate-empty-lines t    ;在左侧边缘显示行尾空行标志
+      ;; Flatten imenu for easy searching
+      imenu-flatten t
       imenu-auto-rescan t
       cursor-in-non-selected-windows 'hollow ; 在没有激活的 window 上显示一个空心正方形
-      )
 
-;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
-;; expected for non English text.
-(add-hook 'visual-line-mode-hook #'word-wrap-whitespace-mode)
+      isearch-lazy-count t
+      isearch-lazy-highlight t
+
+      ;; For scrolling performance
+      fast-but-imprecise-scrolling t
+      inhibit-compacting-font-caches t
+      scroll-step 1
+      scroll-conservatively 10000
+      auto-window-vscroll nil)
+
+;; ;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
+;; ;; expected for non English text.
+;; (add-hook 'visual-line-mode-hook #'word-wrap-whitespace-mode)
 
 (setq syntax-wholeline-max most-positive-fixnum)
 ;; @see https://github.com/emacs-lsp/lsp-mode#performance
@@ -3043,7 +3064,7 @@ valign for org-mode & markdown table
 
 ** Uniline
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package uniline
   :straight(uniline :type git :host github :repo "tbanel/uniline")
   :bind (:map uniline-mode-map

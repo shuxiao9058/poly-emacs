@@ -4491,7 +4491,7 @@ except for `notmuch-show-mode' buffers."
 
 ** outline
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package outline
   :straight (:type built-in)
   :diminish outline-minor-mode
@@ -4986,10 +4986,12 @@ org-download-paste for clipboard images
 
 Configuration for writing with Emacs, specifically for Markdown and Org mode.
 
-#+begin_src emacs-lisp
-;; pdf-tools - Emacs support library for PDF files.
-;; https://github.com/politza/pdf-tools
-;; http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
+ pdf-tools - Emacs support library for PDF files.
+
+ https://github.com/politza/pdf-tools
+http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
+
+#+begin_src emacs-lisp :tangle no
 (use-package pdf-tools
   :defer t
   :straight t

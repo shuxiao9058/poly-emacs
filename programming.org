@@ -1880,11 +1880,12 @@ use-package will load java-lsp for us simply by calling this function."
     (let ((default-directory  (if (fboundp 'project-root)
 				  (project-root (project-current))
 				default-directory)))
-      (if (or (file-exists-p "makefile")
+      (unless (poly/dir-local-variable default-directory 'compile-command)
+	  (if (or (file-exists-p "makefile")
 	      (file-exists-p "Makefile"))
 	  (setq-local compile-command "make build")
-	(when (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
-	  (setq-local compile-command "go build")))))
+	(when (derived-mode-p 'go-mode);; (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
+	  (setq-local compile-command "go build"))))))
 
   (add-hook 'go-mode-hook #'poly/go-set-compile-command)
   (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
@@ -2488,7 +2489,13 @@ Use clojure-mode for basic syntax support.
 (use-package conda
   :ensure t
   :straight t
-  :init (conda-env-initialize-interactive-shells)
+  :commands (conda-env-list
+             conda-env-activate
+             conda-env-deactivate
+             conda-env-autoactivate-mode
+             conda-env-activate-for-buffer)
+  ;; :init (conda-env-initialize-interactive-shells)
+  :hook (eshell-first-time-mode . conda-env-initialize-eshell)
   :config
   ;; Enable auto-activation
   (conda-env-autoactivate-mode 1)
@@ -2498,8 +2505,22 @@ Use clojure-mode for basic syntax support.
                               (when (bound-and-true-p conda-project-env-path)
                                 (conda-env-activate-for-buffer))))
 
-  ;; Displaying the currently active environment on the `mode-line'
-  (add-hook 'python-base-mode-hook #'conda-mode-line-setup))
+  ;; ;; Displaying the currently active environment on the `mode-line'
+  ;; (add-hook 'python-base-mode-hook #'conda-mode-line-setup)
+  (add-to-list
+   'global-mode-string
+   '(:eval
+     (list
+      (if conda-env-current-name
+          (propertize (concat "(py: " conda-env-current-name ") ")
+                      'face 'font-lock-builtin-face
+                      'help-echo "Conda environment"
+                      'mouse-face '(:box 1)
+                      'local-map (make-mode-line-mouse-map
+                                  'mouse-1
+                                  (lambda () (interactive)
+                                    (conda-env-activate))))
+        "")))))
 #+end_src
 
 ** rust
