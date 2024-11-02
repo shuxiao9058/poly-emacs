@@ -5373,11 +5373,12 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** kdl-mode
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 ;; (use-package kdl-ts-mode
 ;;   :straight (:type git :host github
 ;; 		   :repo "dataphract/kdl-ts-mode")
 ;;   :mode (("\\.kdl\\'" . kdl-ts-mode)))
+
 (use-package kdl-mode
   :straight (:type git :host github
 		   :repo "bobuk/kdl-mode")

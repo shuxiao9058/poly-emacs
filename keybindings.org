@@ -434,6 +434,7 @@ This configuration sticks with Meow for modal editing.
 #+begin_src emacs-lisp
 (define-prefix-command 'toggle-map)
 (global-set-key (kbd "\C-c t") 'toggle-map)
+(global-set-key (kbd "\C-x p w") 'poly/kill-path)
 (bind-key "t" #'my-toggle-transparency 'toggle-map)
 (bind-key "i" #'imenu-list 'toggle-map)
 (bind-key "m" #'smerge-mode 'toggle-map)

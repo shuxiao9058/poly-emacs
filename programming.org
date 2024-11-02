@@ -91,7 +91,7 @@ Configuration for programming and languages support.
 	  clojure-mode
 	  web-mode
 	  web-mode-prog-mode
-	  ;;  objc-mode
+	  objc-mode
 	  ;;  swift-mode
 	  ;;  typescript-mode
 	  ;;  web-mode
@@ -285,8 +285,8 @@ Configuration for programming and languages support.
 		    ;; cc-mode-hook
 		    ;; c-mode-hook
 		    ;; c++-mode-hook
-		    ;; clang-mode-hook
-		    ;; objc-mode-hook
+		    clang-mode-hook
+		    objc-mode-hook
 		    web-mode-hook
 		    web-mode-prog-mode
 		    nginx-mode-hook
@@ -306,7 +306,7 @@ Configuration for programming and languages support.
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
 		  ("C++" my-clang-format)
-		  ;; ("Objective-C" my-clang-format)
+		  ("Objective-C" my-clang-format)
 		  ("Protocol Buffer" my-clang-format)
 		  ;; ("Protocol Buffer" buf-format)
 		  ("SQL" pgformatter)
@@ -334,8 +334,9 @@ Configuration for programming and languages support.
   :ensure t
   :init (global-flycheck-mode)
   :custom
-  (flycheck-check-syntax-automatically
-   '(save idle-change mode-enabled))
+  ;; (flycheck-check-syntax-automatically
+  ;;  '(save idle-change mode-enabled))
+  (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
   (flycheck-checker-error-threshold nil)
   :config
   (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
@@ -503,6 +504,8 @@ If INTERACTIVE, prompt user for details."
   (eglot-send-changes-idle-time 0.5)
   (eglot-confirm-server-initiated-edits nil)
   (eglot-events-buffer-size 500000)
+  (eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
+  (eldoc-echo-area-use-multiline-p nil)
   ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
   (eglot-ignored-server-capabilites
@@ -516,8 +519,6 @@ If INTERACTIVE, prompt user for details."
   (eglot-auto-display-help-buffer nil)
   :functions eglot--eclipse-jdt-contact
   :config
-  (setq eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
-  (setq eldoc-echo-area-use-multiline-p nil)
    ;; speedup eglot
   (fset #'jsonrpc--log-event #'ignore)
   ;; https://github.com/abougouffa/minemacs/blob/693efa0788fbe60e2f836d27aa12c7c055a2c387/elisp/%2Beglot.el#L27
@@ -761,7 +762,8 @@ Examples:
 		   java-ts-mode
 		   vue-mode
 		   ;; html-ts-mode
-		   c-mode c++-mode clojure-mode cperl-mode
+		   c-mode c++-mode objc-mode swift-mode
+		   clojure-mode cperl-mode
 		   shell-mode bash-mode markdown-mode sql-mode
 		   yaml-mode yaml-ts-mode xml-mode nxml-mode
 		   protobuf-mode
@@ -912,6 +914,8 @@ Examples:
 			      clojure-lsp
 			      jdtls
 			      rust-analyzer
+			      clangd
+			      sourcekit-ls
 			      vls
 			      json-ls ;; beancount-ls
 			      css-ls dockerfile-ls ts-ls jsts-ls
@@ -1288,6 +1292,11 @@ use-package will load java-lsp for us simply by calling this function."
   :config
   (advice-add 'gradle-build :after #'my/switch-to-compilation-window)
   (advice-add 'gradle-test :after #'my/switch-to-compilation-window))
+
+(use-package lsp-sourcekit
+  :after lsp-mode
+  :config
+  (setq lsp-sourcekit-executable "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/sourcekit-lsp"))
 #+end_src
 
 ** debug

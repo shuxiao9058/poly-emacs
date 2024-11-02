@@ -528,3 +528,23 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 
 ;; (add-hook 'kill-emacs-hook #'tl/notify-hammerspoon-did-kill t)
 #+end_src
+
+
+** copy path to clipboard
+#+begin_src emacs-lisp
+(defun poly/kill-path (arg)
+  "kill current path to kill-ring.
+
+    If prefix ARG is non-nil, copy current file's `default-directory' instead of project root."
+  (interactive "P")
+  (let* ((project-root  (if (and (fboundp 'project-root) (project-current))
+			    (project-root (project-current))
+			  default-directory))
+	 (dir
+	  (if arg
+	      default-directory
+	    project-root)))
+    (when dir
+      (kill-new (expand-file-name dir)))
+    (message "This directory path is on the clipboard!")))
+#+end_src
