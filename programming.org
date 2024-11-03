@@ -1966,20 +1966,22 @@ use-package will load java-lsp for us simply by calling this function."
 	(add-to-list 'cmd-list (list "go" "mod" "vendor")))
 
       (dolist (cmd cmd-list)
-	(let ((start-time (current-time))
-	      (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
-	  (process-put process 'cmd-name (mapconcat 'identity cmd " "))
-	  (process-put process 'start-time start-time)
-	  (set-process-sentinel
-	   process
-	   (lambda (proc _)
-	     (let ((status (process-exit-status proc))
-		   (cmd-name (process-get proc 'cmd-name))
-		   (start-time (process-get proc 'start-time))
-		   (end-time (current-time)))
-	       (if (= 0 status)
-		   (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
-		 (message "Do \"%s\" Failed." cmd-name)))))))))
+	(poly/run-shell-command-in-dir default-directory cmd)
+	;; (let ((start-time (current-time))
+	;;       (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
+	;;   (process-put process 'cmd-name (mapconcat 'identity cmd " "))
+	;;   (process-put process 'start-time start-time)
+	;;   (set-process-sentinel
+	;;    process
+	;;    (lambda (proc _)
+	;;      (let ((status (process-exit-status proc))
+	;; 	   (cmd-name (process-get proc 'cmd-name))
+	;; 	   (start-time (process-get proc 'start-time))
+	;; 	   (end-time (current-time)))
+	;;        (if (= 0 status)
+	;; 	   (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
+	;; 	 (message "Do \"%s\" Failed." cmd-name))))))
+	)))
 
   (defun poly/go-set-compile-command()
     "Detect compile command."
