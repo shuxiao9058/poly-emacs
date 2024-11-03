@@ -26,8 +26,8 @@ Configuration for programming and languages support.
   :hook (((;; protobuf-ts-mode ;; emacs-lisp-mode
 	   ;; protobuf-mode
 	   java-ts-mode
-	   go-mode
-	   go-ts-mode
+	   ;; go-mode
+	   ;; go-ts-mode
 	   lua-mode
 	   lua-ts-mode
 	   objc-mode
@@ -1093,7 +1093,8 @@ Examples:
      ;; ("gopls.buildFlags" ["-mod=readonly"])
      ("gopls.env" lsp-go-env)
      ("gopls.linkTarget" lsp-go-link-target)
-     ("gopls.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
+     ;; ("gopls.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
+     ("gopls.formatting.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
      ("gopls.experimentalPostfixCompletions" t t)
      ("gopls.semanticTokens" t t)
      ("gopls.directoryFilters" lsp-go-directory-filters)
@@ -1784,11 +1785,11 @@ use-package will load java-lsp for us simply by calling this function."
   (add-hook 'before-save-hook
 	    #'poly/lsp-format-buffer -10 t))
 
-;; (dolist (hook '(go-ts-mode-hook
-;; 		js-ts-mode-hook
-;; 		;; lua-mode-hook
-;; 		typescript-ts-mode-hook javascript-ts-mode-hoo))
-;;   (add-hook hook #'lsp-format-buffer-on-save))
+(dolist (hook '(go-ts-mode-hook
+		js-ts-mode-hook
+		;; lua-mode-hook
+		typescript-ts-mode-hook javascript-ts-mode-hoo))
+  (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
 
 * Languages
