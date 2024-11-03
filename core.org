@@ -548,3 +548,12 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
       (kill-new (expand-file-name dir)))
     (message "This directory path is on the clipboard!")))
 #+end_src
+
+
+** get project-root directory
+
+#+begin_src emacs-lisp
+(defun poly/project-root()
+  (when (and (fboundp 'project-root) (project-current))
+		     (project-root (project-current))))
+#+end_src

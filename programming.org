@@ -18,34 +18,95 @@ Configuration for programming and languages support.
 
 * Format
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package apheleia
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
-  :disabled
-  :defer t
+  :ensure t
   :hook (((go-ts-mode protobuf-ts-mode ;; emacs-lisp-mode
 		      protobuf-mode
 		      java-ts-mode
+		      lua-mode
+		      lua-ts-mode
+		      ;; objc-mode
 		      markdown-mode) . apheleia-mode))
   :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
   :config
-  (push '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-"))
-	apheleia-formatters)
+  (dolist (var '((objc-mode . ".x")
+		 (objc-mode . ".xm")
+		 (objc-mode . ".m")
+		 (objc-mode . ".mm")
+		 (go-mode . ".go")
+		 (go-ts-mode . ".go")
+		 (lua-mode . ".lua")
+		 (lua-ts-mode . ".lua")
+		 (protobuf-mode . ".proto")))
+    (add-to-list 'apheleia-formatters-mode-extension-assoc var))
+
+  ;; (add-to-list 'apheleia-formatters-mode-extension-assoc '(objc-mode . ".x"))
+  ;; (add-to-list 'apheleia-formatters-mode-extension-assoc '(objc-mode . ".xm"))
+  ;; (add-to-list 'apheleia-formatters-mode-extension-assoc '(objc-mode . ".m"))
+  ;; (add-to-list 'apheleia-formatters-mode-extension-assoc '(objc-mode . ".mm"))
+  ;; (add-to-list 'apheleia-formatters-mode-extension-assoc '(protobuf-mode . ".proto"))
+
+  ;; (add-to-list 'apheleia-formatters
+  ;; 	       '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-")))
+  ;; (add-to-list 'apheleia-formatters '(erb-formatter . ("erb-format" "--stdin")))
+  ;; (add-to-list 'apheleia-formatters '(rufo . ("rufo" "--simple-exit")))
+  ;; (add-to-list 'apheleia-formatters '(google-java-format2 . ("java" "-jar" "/usr/local/bin/google-java-format-1.17.0-all-deps.jar" "-")))
+  (add-to-list 'apheleia-formatters '(cpp-lua-format . ((expand-file-name "bin/darwin/lua-format" (poly/vscode-extension-install-path "koihik.vscode-lua-format"))
+				      "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
+  (defvar-local dot-clang-format nil)
+  (add-to-list 'apheleia-formatters '(my-clang-format . ("/opt/local/bin/clang-format" (when-let* ((project-root  (poly/project-root))
+												   (clang-format-style-file (expand-file-name ".clang-format" project-root)))
+											 (when (file-exists-p clang-format-style-file)
+											   (concat "--style=file:" clang-format-style-file)))
+							 ;; (if dot-clang-format (concat "--style=file:" dot-clang-format)
+							 ;;   (let* ((project-root  (if (and (fboundp 'project-root) (project-current))
+							 ;; 				(project-root (project-current))
+							 ;; 			  default-directory))
+							 ;; 	 (clang-format-style-file (expand-file-name ".clang-format" project-root)))
+							 ;;     (when (file-exists-p clang-format-style-file)
+							 ;;       (concat "--style=file:" clang-format-style-file))))
+							 (concat "--assume-filename="
+								 (or (apheleia-formatters-local-buffer-file-name)
+								     (apheleia-formatters-mode-extension))))))
+
+  (add-to-list 'apheleia-formatters '(clang-format-objc . ("/opt/local/bin/clang-format"
+								   ;; "--style=google"
+								   (concat "--style=file:" (expand-file-name ".clang-format" "~/workspace/objective-c-style-guide"))
+								   (concat "--assume-filename="
+									   (or (apheleia-formatters-local-buffer-file-name)
+									       (apheleia-formatters-mode-extension))))))
+
+  (add-to-list 'apheleia-formatters '(clang-format-google-style . ("/opt/local/bin/clang-format"
+								   "--style=google"
+								   ;; (when-let* ((project-root  (poly/project-root))
+								   ;; 	   (clang-format-style-file (expand-file-name ".clang-format" project-root)))
+								   ;; (when (file-exists-p clang-format-style-file)
+								   ;;   (concat "--style=file:" clang-format-style-file)))
+								   ;; (if dot-clang-format (concat "--style=file:" dot-clang-format)
+								   ;;   (let* ((project-root  (if (and (fboundp 'project-root) (project-current))
+								   ;; 				(project-root (project-current))
+								   ;; 			  default-directory))
+								   ;; 	 (clang-format-style-file (expand-file-name ".clang-format" project-root)))
+								   ;;     (when (file-exists-p clang-format-style-file)
+								   ;;       (concat "--style=file:" clang-format-style-file))))
+								   (concat "--assume-filename="
+									   (or (apheleia-formatters-local-buffer-file-name)
+									       (apheleia-formatters-mode-extension))))))
+
+  ;; (setf (alist-get 'ruby-mode apheleia-mode-alist)
+  ;; 	'(rufo))
+
+  ;; (push '(mix-filename-format . ("mix" "format" "--stdin-filename" filepath "-"))
+  ;; 	apheleia-formatters)
   ;; (push '(jsbeautify-css . (npx "js-beautify" "--type=css" "--quiet" "-"))
   ;; 	apheleia-formatters)
   ;; (push '(jsbeautify-html . (npx "js-beautify" "--type=html" "--quiet" "-"))
   ;; 	apheleia-formatters)
   ;; (push '(jsbeautify-js . (npx "js-beautify" "--type=js" "--quiet" "-"))
   ;; 	apheleia-formatters)
-  (push '(erb-formatter . ("erb-format" "--stdin"))
-	apheleia-formatters)
-  (push '(rufo . ("rufo" "--simple-exit"))
-	apheleia-formatters)
-  (push '(google-java-format2 . ("java" "-jar" "/usr/local/bin/google-java-format-1.17.0-all-deps.jar" "-"))
-	apheleia-formatters)
-  (setf (alist-get 'ruby-mode apheleia-mode-alist)
-	'(rufo))
 
   (dolist (alist '((markdown-mode . prettier-markdown)
 		   (gfm-mode . prettier-markdown)
@@ -54,13 +115,18 @@ Configuration for programming and languages support.
 		   (protobuf-mode . clang-format)
 		   (emacs-lisp-mode . lisp-indent)
 		   (go-ts-mode . gofumpt)
+		   (go-mode . gofumpt)
+		   (lua-mode . cpp-lua-format)
+		   (lua-ts-mode . cpp-lua-format)
+		   (objc-mode . clang-format-objc)
 		   (java-ts-mode . google-java-format2)
 		   (java-mode . google-java-format2)
 		   (sql-mode . sql-format)))
-    (add-to-list 'apheleia-mode-alist alist)))
+    (add-to-list 'apheleia-mode-alist alist))
+  )
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package format-all
   :straight t
   :ensure t
@@ -151,6 +217,32 @@ Configuration for programming and languages support.
       executable
       (when dot-clang-format
 	(concat "--style=file:" dot-clang-format))
+      (concat "--assume-filename="
+	      (or (buffer-file-name)
+		  (cdr (assoc language
+			      '(("C"               . ".c")
+				("C++"             . ".cpp")
+				("Java"            . ".java")
+				("Objective-C"     . ".m")
+				("Objective-C" . ".x")
+				("Objective-C" . ".xm")
+				("Objective-C" . ".m")
+				("Objective-C" . ".mm")
+				("Protocol Buffer" . ".proto")))))))))
+
+  (define-format-all-formatter clang-format-google-style
+    (:executable "clang-format")
+    (:install
+     (macos "brew install clang-format")
+     (windows "scoop install llvm"))
+    (:languages "C" "C++" "Java" "Objective-C" "Protocol Buffer")
+    (:features)
+    (:format
+     (format-all--buffer-easy
+      executable
+      ;; (when dot-clang-format
+      ;; 	(concat "--style=file:" dot-clang-format))
+      "--style=google"
       (concat "--assume-filename="
 	      (or (buffer-file-name)
 		  (cdr (assoc language
@@ -306,7 +398,7 @@ Configuration for programming and languages support.
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
 		  ("C++" my-clang-format)
-		  ("Objective-C" my-clang-format)
+		  ("Objective-C" clang-format-google-style)
 		  ("Protocol Buffer" my-clang-format)
 		  ;; ("Protocol Buffer" buf-format)
 		  ("SQL" pgformatter)
@@ -321,8 +413,7 @@ Configuration for programming and languages support.
 		  ;; ("Nix" nixpkgs-fmt)
 		  ;; ("Emacs Lisp" emacs-lisp)
 		  ;; ("YAML" prettier)
-		  ("Nginx" nginx-fmt)
-		  )))
+		  ("Nginx" nginx-fmt))))
 #+end_src
 
 * Flycheck
@@ -1687,11 +1778,11 @@ use-package will load java-lsp for us simply by calling this function."
   (add-hook 'before-save-hook
 	    #'poly/lsp-format-buffer -10 t))
 
-(dolist (hook '(go-ts-mode-hook
-		js-ts-mode-hook
-		;; lua-mode-hook
-		typescript-ts-mode-hook javascript-ts-mode-hoo))
-  (add-hook hook #'lsp-format-buffer-on-save))
+;; (dolist (hook '(go-ts-mode-hook
+;; 		js-ts-mode-hook
+;; 		;; lua-mode-hook
+;; 		typescript-ts-mode-hook javascript-ts-mode-hoo))
+;;   (add-hook hook #'lsp-format-buffer-on-save))
 #+end_src
 
 * Languages
