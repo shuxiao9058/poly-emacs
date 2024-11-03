@@ -5360,21 +5360,21 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 #+begin_src emacs-lisp :tangle no
 (use-package keycast
   ;; :bind ("C-c t k" . +toggle-keycast)
-:config
+  :config
   (setq keycast-mode-line-insert-after '(:eval (doom-modeline-format--main)))
   (add-to-list 'global-mode-string '("" keycast-mode-line))
-:hook
+  :hook
   (doom-modeline-mode . keycast-mode-line-mode)
- ;; (defun +toggle-keycast()
- ;;    (interactive)
- ;;    (if (member '("" mode-line-keycast " ") global-mode-string)
- ;;        (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
- ;;               (remove-hook 'pre-command-hook 'keycast--update)
- ;;               (message "Keycast disabled"))
- ;;      (add-to-list 'global-mode-string '("" mode-line-keycast " "))
- ;;      (add-hook 'pre-command-hook 'keycast--update t)
- ;;      (message "Keycast enabled")))
- )
+  ;; (defun +toggle-keycast()
+  ;;    (interactive)
+  ;;    (if (member '("" mode-line-keycast " ") global-mode-string)
+  ;;        (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
+  ;;               (remove-hook 'pre-command-hook 'keycast--update)
+  ;;               (message "Keycast disabled"))
+  ;;      (add-to-list 'global-mode-string '("" mode-line-keycast " "))
+  ;;      (add-hook 'pre-command-hook 'keycast--update t)
+  ;;      (message "Keycast enabled")))
+  )
 #+end_src
 
 ** beancount

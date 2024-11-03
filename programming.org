@@ -23,13 +23,15 @@ Configuration for programming and languages support.
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
   :ensure t
-  :hook (((go-ts-mode protobuf-ts-mode ;; emacs-lisp-mode
-		      protobuf-mode
-		      java-ts-mode
-		      lua-mode
-		      lua-ts-mode
-		      ;; objc-mode
-		      markdown-mode) . apheleia-mode))
+  :hook (((protobuf-ts-mode ;; emacs-lisp-mode
+	   protobuf-mode
+	   java-ts-mode
+	   go-mode
+	   go-ts-mode
+	   lua-mode
+	   lua-ts-mode
+	   objc-mode
+	   markdown-mode) . apheleia-mode))
   :commands (apheleia-mode apheleia-global-mode apheleia-format-buffer)
   :config
   (dolist (var '((objc-mode . ".x")
@@ -55,7 +57,7 @@ Configuration for programming and languages support.
   ;; (add-to-list 'apheleia-formatters '(rufo . ("rufo" "--simple-exit")))
   ;; (add-to-list 'apheleia-formatters '(google-java-format2 . ("java" "-jar" "/usr/local/bin/google-java-format-1.17.0-all-deps.jar" "-")))
   (add-to-list 'apheleia-formatters '(cpp-lua-format . ((expand-file-name "bin/darwin/lua-format" (poly/vscode-extension-install-path "koihik.vscode-lua-format"))
-				      "-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
+							"-i" "-c" (expand-file-name "~/.config/lua-format/config.yaml") "--")))
   (defvar-local dot-clang-format nil)
   (add-to-list 'apheleia-formatters '(my-clang-format . ("/opt/local/bin/clang-format" (when-let* ((project-root  (poly/project-root))
 												   (clang-format-style-file (expand-file-name ".clang-format" project-root)))
@@ -73,11 +75,11 @@ Configuration for programming and languages support.
 								     (apheleia-formatters-mode-extension))))))
 
   (add-to-list 'apheleia-formatters '(clang-format-objc . ("/opt/local/bin/clang-format"
-								   ;; "--style=google"
-								   (concat "--style=file:" (expand-file-name ".clang-format" "~/workspace/objective-c-style-guide"))
-								   (concat "--assume-filename="
-									   (or (apheleia-formatters-local-buffer-file-name)
-									       (apheleia-formatters-mode-extension))))))
+							   ;; "--style=google"
+							   (concat "--style=file:" (expand-file-name ".clang-format" "~/workspace/objective-c-style-guide"))
+							   (concat "--assume-filename="
+								   (or (apheleia-formatters-local-buffer-file-name)
+								       (apheleia-formatters-mode-extension))))))
 
   (add-to-list 'apheleia-formatters '(clang-format-google-style . ("/opt/local/bin/clang-format"
 								   "--style=google"
@@ -122,8 +124,7 @@ Configuration for programming and languages support.
 		   (java-ts-mode . google-java-format2)
 		   (java-mode . google-java-format2)
 		   (sql-mode . sql-format)))
-    (add-to-list 'apheleia-mode-alist alist))
-  )
+    (add-to-list 'apheleia-mode-alist alist)))
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
