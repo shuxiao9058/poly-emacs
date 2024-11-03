@@ -376,9 +376,9 @@ This configuration sticks with Meow for modal editing.
    '("{" . sp-wrap-curly)
    '("o" . ace-window)
    '("a" . delete-other-windows)
-   '("-" . split-window-below)
+   ;; '("-" . split-window-below)
    '("/" . swiper)
-   '("\\" . split-window-right)
+   ;; '("\\" . split-window-right)
    '("w" . ace-swap-window)
    '("k" . kill-buffer))
 

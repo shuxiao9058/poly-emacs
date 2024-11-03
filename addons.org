@@ -2735,7 +2735,7 @@ Auto cleanup older buffers
 				 (meow-mode -1)
 			       (unless meow-mode
 				 (meow-mode +1)))))
-	 (eat-exec . (lambda (&rest _) (eat-line-mode)))
+	 ;; (eat-exec . (lambda (&rest _) (eat-line-mode)))
 	 (eat-mode . (lambda (&rest _)
 		       (setq-local corfu-auto nil)
 		       (setq-local corfu-quit-at-boundary nil)
