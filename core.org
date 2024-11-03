@@ -557,3 +557,40 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
   (when (and (fboundp 'project-root) (project-current))
 		     (project-root (project-current))))
 #+end_src
+
+** run shell command in directory
+
+#+begin_src emacs-lisp
+(defun poly/run-shell-command-in-dir (dir cmd)
+  "Run CMD(in list, e.g. `(\"buf\" \"generate\") ) in DIR with process NAME and BUFFER."
+  (if (and dir (file-directory-p dir))
+      (let* ((default-directory dir)
+	     (start-time (current-time))
+	     (cmd-name (car cmd))
+	     (buf-name (make-temp-name (concat "run-shell-" cmd-name "-")))
+	     (buf (get-buffer-create buf-name))
+	     (process))
+	(with-current-buffer buf
+	  (erase-buffer))
+	(setq process (apply #'start-process (append (list buf-name buf) cmd)))
+	(process-put process 'cmd-name (mapconcat 'identity cmd " "))
+	(process-put process 'start-time start-time)
+	(process-put process 'buffer buf)
+	(set-process-sentinel
+	 process
+	 (lambda (proc _)
+	   (let* ((status (process-exit-status proc))
+		  (cmd-name (process-get proc 'cmd-name))
+		  (start-time (process-get proc 'start-time))
+		  (buf (process-get proc 'buffer))
+		  (buf-str (with-current-buffer buf
+			     (buffer-string)))
+		  (end-time (current-time)))
+	     (when buf
+	       (kill-buffer buf))
+	     (if (= 0 status)
+		 (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
+	       (message "Do \"%s\" Failed: %s."  cmd-name
+			(replace-regexp-in-string "\n$" "" (or buf-str ""))))))))
+    (message "Directory is nil or not exist.")))
+#+end_src
