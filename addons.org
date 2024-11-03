@@ -2709,14 +2709,45 @@ Auto cleanup older buffers
   (eat-enable-auto-line-mode nil)
   :hook ((eshell-load . eat-eshell-mode)
          (eshell-load . eat-eshell-visual-command-mode)
-	 (eat-eshell-exec . eat-eshell-emacs-mode))
+	 ;; (eat-eshell-exec . eat-eshell-emacs-mode)
+	 (eat-eshell-exec . (lambda (&rest _) (eat-eshell-emacs-mode)))
+	 ;; (eat--eshell-semi-char-mode . )
+	 ;; https://github.com/ircurry/cfg/blob/bb599a50f62ecd9f5205320601cc8a660eeb05cc/home/programs/emacs/emacs.org#L338
+	 (eat--eshell-semi-char-mode . (lambda (&rest _)
+					 (progn
+					   (when (and meow-global-mode (not meow-mode))
+					     (meow-mode +1)))))
+	 ;; TODO: in the future I would like for there to be a hook that operates when
+	 ;; switching between the eat modes. This would make integrating meow and eat
+	 ;; soooooo much easier and cleaner. It would also generally make eat more
+	 ;; felixible. I would also like for `eat-emacs-mode' and the like to have
+	 ;; hooks that I can use.
+	 (eat--eshell-char-mode . (lambda (&rest _)
+				    (if eat--eshell-char-mode
+					(meow-mode -1)
+				      (unless meow-mode
+					(meow-mode +1)))))
+	 (eat-eshell-exit . (lambda (&rest _)
+			      (when (and meow-global-mode (not meow-mode))
+				(meow-mode +1))))
+	 (eat--char-mode . (lambda (&rest _)
+			     (if eat--char-mode
+				 (meow-mode -1)
+			       (unless meow-mode
+				 (meow-mode +1)))))
+	 (eat-exec . (lambda (&rest _) (eat-line-mode)))
+	 (eat-mode . (lambda (&rest _)
+		       (setq-local corfu-auto nil)
+		       (setq-local corfu-quit-at-boundary nil)
+		       (corfu-mode +1)))
+	 )
   :bind (([f2] . poly/eat-right-here)
-	  ("C-<return>" . poly/eat-right-here)
-	  :map eat-mode-map
-	  ([f2] . poly/eat-right-here)
-	  ("C-c C-d" . eat-self-input)
-	  ("C-c C-c" . eat-self-input)
-	  ("C-d" . eat-self-input))
+	 ("C-<return>" . poly/eat-right-here)
+	 :map eat-mode-map
+	 ([f2] . poly/eat-right-here)
+	 ("C-c C-d" . eat-self-input)
+	 ("C-c C-c" . eat-self-input)
+	 ("C-d" . eat-self-input))
   :config
   (eat-eshell-mode)
   (eat-eshell-visual-command-mode)
@@ -2745,26 +2776,26 @@ Auto cleanup older buffers
                   (apply orig-fun args)))
               '((name . eat-eshell-only-when-active)))
   (defun eat-tab-change (original-fun &rest args)
-  (interactive)
-  (message "eat-tab-change triggered")  ; Output to *Messages* buffer
-  (apply original-fun args)
-  (walk-windows (lambda (window)
-                  (with-current-buffer (window-buffer window)
-                    (when (eq major-mode 'eat-mode)
-                      (end-of-buffer)
-                      (evil-insert-state))))
-               nil 'visible))
+    (interactive)
+    (message "eat-tab-change triggered")  ; Output to *Messages* buffer
+    (apply original-fun args)
+    (walk-windows (lambda (window)
+                    (with-current-buffer (window-buffer window)
+                      (when (eq major-mode 'eat-mode)
+			(end-of-buffer)
+			(evil-insert-state))))
+		  nil 'visible))
 
   (advice-add 'tab-bar-select-tab :around #'eat-tab-change)
   (defun kill-eat-processes ()
-  "Kill processes associated with eat terminal buffers."
-  (interactive)
-  (dolist (buffer (buffer-list))
-    (with-current-buffer buffer
-      (when (eq major-mode 'eat-mode)
-        (eat-kill-process)))))
+    "Kill processes associated with eat terminal buffers."
+    (interactive)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+	(when (eq major-mode 'eat-mode)
+          (eat-kill-process)))))
 
-(add-hook 'kill-emacs-hook #'kill-eat-processes)
+  (add-hook 'kill-emacs-hook #'kill-eat-processes)
   (with-eval-after-load 'eat
     (setq eat-eshell-emacs-mode-map
           (let ((map (make-sparse-keymap)))
@@ -2909,10 +2940,10 @@ Auto cleanup older buffers
 	      (progn
 		;; (message "path is equal")
 		(if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
-		  (select-window eat-win nil)
-		(if (equal (length eat-buffer-list) 1)
-		    (poly/eat-toggle)
-		  (switch-to-buffer eat-buffer))))
+		    (select-window eat-win nil)
+		  (if (equal (length eat-buffer-list) 1)
+		      (poly/eat-toggle)
+		    (switch-to-buffer eat-buffer))))
 	    (with-current-buffer eat-buffer
 	      (eat-term-send-string eat-terminal cd-cmd)
 	      ;; (eat-term-send-string eat-terminal "\n")
