@@ -1966,7 +1966,7 @@ use-package will load java-lsp for us simply by calling this function."
 	(add-to-list 'cmd-list (list "go" "mod" "vendor")))
 
       (dolist (cmd cmd-list)
-	(poly/run-shell-command-in-dir default-directory cmd)
+	(poly/run-shell-command-in-dir nil cmd)
 	;; (let ((start-time (current-time))
 	;;       (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
 	;;   (process-put process 'cmd-name (mapconcat 'identity cmd " "))

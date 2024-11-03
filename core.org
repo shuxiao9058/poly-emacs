@@ -562,7 +562,11 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 
 #+begin_src emacs-lisp
 (defun poly/run-shell-command-in-dir (dir cmd)
-  "Run CMD(in list, e.g. `(\"buf\" \"generate\") ) in DIR with process NAME and BUFFER."
+  "Run CMD(in list, e.g. `(\"buf\" \"generate\") ) in DIR with process NAME and BUFFER.
+
+Run command in project-root directory while dir is nil."
+  (unless dir
+    (setq dir (poly/project-root)))
   (if (and dir (file-directory-p dir))
       (let* ((default-directory dir)
 	     (start-time (current-time))
