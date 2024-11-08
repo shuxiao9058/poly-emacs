@@ -843,11 +843,13 @@ Examples:
   :when poly-use-lsp-mode
   :diminish
   :commands (lsp lsp-deferred lsp-enable-which-key-integration lsp-format-buffer lsp-organize-imports)
+  :mode (("[\w\W\_]+Dockerfile$" . dockerfile-ts-mode))
   :hook (((go-mode go-ts-mode go-dot-mod-mode go-mod-ts-mode
 		   rust-ts-mode
 		   rustic-mode
 		   clojure-mode
 		   clojure-ts-mode
+		   dockerfile-ts-mode
 		   ;; java-mode
 		   beancount-mode web-mode
 		   python-mode python-ts-mode
@@ -1010,6 +1012,7 @@ Examples:
 			      clojure-lsp
 			      jdtls
 			      rust-analyzer
+			      dockerfile-ls
 			      clangd
 			      sourcekit-ls
 			      vls
@@ -1064,6 +1067,7 @@ Examples:
      ;;disables -mod=readonly, allowing imports from out-of-scope module
      ;; ("gopls.allowModfileModifications" t t)
      ("gopls.vulncheck" "Imports" nil)
+     ("gopls.analysisProgressReporting" t t)
      ;;disables GOPROXY=off, allowing implicit module downloads rather than requiring user action
      ;; ("gopls.allowImplicitNetworkAccess" t t)
      ;; ST1003 CamelCase
@@ -1094,8 +1098,9 @@ Examples:
      ("gopls.env" lsp-go-env)
      ("gopls.linkTarget" lsp-go-link-target)
      ;; ("gopls.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
-     ("gopls.formatting.gofumpt" ,(if (executable-find "gofumpt") t nil) t)
+     ("gopls.formatting.gofumpt" t t)
      ("gopls.experimentalPostfixCompletions" t t)
+     ("gopls.completeFunctionCalls" t t)
      ("gopls.semanticTokens" t t)
      ("gopls.directoryFilters" lsp-go-directory-filters)
      ("Lua.runtime.version" "LuaJIT" t)
