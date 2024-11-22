@@ -142,9 +142,6 @@ Configuration for look and feels, make UI looks better.
 ;;                  "%b"))))
 
 
-;; (setq frame-title-format '(multiple-frames "%b"
-;;             ("" invocation-name "@" system-name)))
-
 ;; ;; Activate winner mode for quickly changing window sizes, etc
 ;; (when (fboundp 'winner-mode)
 ;;   (winner-mode 1))

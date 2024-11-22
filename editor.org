@@ -91,7 +91,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       ffap-machine-p-known 'reject
       highlight-nonselected-windows nil
       idle-update-delay 1.0
-      frame-title-format nil
       ;; 指针宽度与字符一致
       x-stretch-cursor t
       ns-use-proxy-icon nil
@@ -172,6 +171,18 @@ This is consulted on every `require', `load' and various path/io functions.  You
       scroll-step 1
       scroll-conservatively 10000
       auto-window-vscroll nil)
+
+(setq frame-title-format
+      '(:eval
+	(let ((project-root (poly/project-root))
+	      (buffer-name))
+	  (if project-root
+	      (progn
+		(setq buffer-name (replace-regexp-in-string
+				   (regexp-quote (expand-file-name (file-name-directory (directory-file-name project-root)))) ""
+				   (convert-standard-filename buffer-file-name)))
+		(format "%s [%%m] - Emacs" buffer-name))
+	    "%b [%m] - Emacs"))))
 
 ;; ;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
 ;; ;; expected for non English text.

@@ -32,8 +32,7 @@
 (setq inhibit-splash-screen t)
 
 ;; Disable most GUI widgets early on
-(setq default-frame-alist '((horizontal-scroll-bars . nil)
-			    ;; (alpha . (0.90 0.90))
+(setq default-frame-alist '(;; (alpha . (0.90 0.90))
 			    (top . 1)
 			    (left . 0)
 			    (ns-appearance . dark)
@@ -44,10 +43,12 @@
 			    ;; (internal-border-width . 0)
 			    (internal-border-width . 5)
 			    (vertical-scroll-bars . nil)
+			    (horizontal-scroll-bars . nil)
 			    (menu-bar-lines . 0)
 			    (tool-bar-lines . 0)
+			    (no-special-glyphs . t)
 			    ;; (fullscreen . maximized)
-			    (undecorated . t) ;; remove title bar
+			    ;; (undecorated . t) ;; remove title bar
 			    (undecorated-round . t)
 			    ;; (font . "JetBrains Mono-14")
 			    (line-spacing . 0.2)))
