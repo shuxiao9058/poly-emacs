@@ -179,7 +179,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
 	  (if project-root
 	      (progn
 		(setq buffer-name (replace-regexp-in-string
-				   (regexp-quote (expand-file-name (file-name-directory (directory-file-name project-root)))) ""
+				   (concat "^" (regexp-quote (expand-file-name (file-name-directory (directory-file-name project-root))))) ""
 				   (convert-standard-filename buffer-file-name)))
 		(format "%s [%%m] - Emacs" buffer-name))
 	    "%b [%m] - Emacs"))))
