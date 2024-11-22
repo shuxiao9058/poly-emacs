@@ -885,7 +885,7 @@ WIN-ID : Window index."
 
 ;; (frame-text-width nil)
 
-(defun poly/max-frame()
+(defun poly/toggle-frame-maximized()
   "Toggle Max-frame."
   (interactive)
   (let* ((frame (selected-frame))
@@ -911,7 +911,7 @@ WIN-ID : Window index."
 	     `(width . ,frame-width)
 	     `(height . ,frame-height))))))
 
-(add-hook 'emacs-startup-hook #'poly/max-frame)
+(add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
 
 ;; (frame-parameter nil 'width)
 
