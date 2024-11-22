@@ -757,18 +757,19 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;;        ("C-M-/" . dabbrev-expand))
   )
 
-(use-package corfu-doc
-  :ensure t
-  :straight t
-  :config
-  :hook
-  (corfu-mode-hook . corfu-doc-mode)
-  ;; :bind
-  ;; (:map corfu-map
-  ;; ("M-p" . corfu-doc-scroll-down)
-  ;; ("M-n" . corfu-doc-scroll-up)
-  ;; ( "M-d" . corfu-doc-toggle))
-  )
+;; (use-package corfu-doc
+;;   :disabled
+;;   :ensure t
+;;   :straight t
+;;   :config
+;;   :hook
+;;   (corfu-mode-hook . corfu-doc-mode)
+;;   ;; :bind
+;;   ;; (:map corfu-map
+;;   ;; ("M-p" . corfu-doc-scroll-down)
+;;   ;; ("M-n" . corfu-doc-scroll-up)
+;;   ;; ( "M-d" . corfu-doc-toggle))
+;;   )
 
 ;; Configure Tempel
 (use-package tempel
@@ -828,6 +829,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :hook (kill-emacs . tabnine-kill-process)
   :config
   (tabnine-start-process)
+  ;; (setq tabnine-network-proxy "http://127.0.0.1:8888")
   (defun +tabnine-disable-predicate()
     (or ;; (derived-mode-p 'vterm-mode)
      (meow-motion-mode-p)
@@ -1672,17 +1674,38 @@ To manage the git repository, use builtin package ~vc~.
   :commands magit-gitflow-popup
   :hook (magit-mode . turn-on-magit-gitflow))
 
-;; Show TODOs in magit
 (use-package magit-todos
-  :disabled
   :straight t
+  :disabled
   :diminish
   :after magit
   :init
   (setq magit-todos-ignored-keywords '("NOTE" "DONE" "FAIL" "PROG")
 	magit-todos-exclude-globs '("legacies/*" "vendor/"))
   :config
-  (magit-todos-mode))
+  (setq magit-todos-keyword-suffix "\\(?:([^)]+)\\)?:?") ; make colon optional
+  (magit-todos-mode 1))
+
+
+(use-package comment-tags
+  :disabled
+  :config
+  (setq comment-tags-keyword-faces
+        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
+          ("FIXME" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("HACK" . ,(list :weight 'bold :foreground "#E8B71A"))
+          ("KLUDGE" . ,(list :weight 'bold :foreground "#E8B71A"))
+          ("XXX" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
+  (setq comment-tags-comment-start-only t
+        comment-tags-require-colon nil
+        comment-tags-case-sensitive t
+        comment-tags-show-faces nil)
+  :hook
+  (prog-mode . comment-tags-mode))
+
 
 ;; git-gutter-plus - View, stage and revert Git changes from the buffer (inspired by package of same name from vim)
 ;; diff-hl is better
@@ -5447,7 +5470,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** spell check
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package jinx
   :hook ((emacs-startup . global-jinx-mode)
 	 (markdown-ts-mode . jinx-mode))

@@ -21,7 +21,6 @@
 ;; Disable GC during initialization(for the case, early-init.el is not used)
 (setq gc-cons-threshold most-positive-fixnum)
 
-
 ;; fix macOS 15 lose focus
 (select-frame-set-input-focus (selected-frame))
 
@@ -30,35 +29,43 @@
 ;; larger than the system default.
 (setq frame-inhibit-implied-resize t)
 
+(setq inhibit-splash-screen t)
+
 ;; Disable most GUI widgets early on
 (setq default-frame-alist '((horizontal-scroll-bars . nil)
 			    ;; (alpha . (0.90 0.90))
+			    (top . 1)
+			    (left . 0)
 			    (ns-appearance . dark)
 			    (ns-transparent-titlebar . t)
 			    (drag-internal-border . 1)
-			    (drag-internal-border . 0)
+			    ;; (drag-internal-border . 0)
 			    (drag-with-tab-line . t)
-			    (internal-border-width . 0)
+			    ;; (internal-border-width . 0)
 			    (internal-border-width . 5)
 			    (vertical-scroll-bars . nil)
 			    (menu-bar-lines . 0)
 			    (tool-bar-lines . 0)
-			    (fullscreen . maximized)
-			    ;; (height . 50)
-			    ;; (width . 95)
-			    ;; (undecorated . t) ;; remove title bar
+			    ;; (fullscreen . maximized)
+			    (undecorated . t) ;; remove title bar
 			    (undecorated-round . t)
 			    ;; (font . "JetBrains Mono-14")
 			    (line-spacing . 0.2)))
 
+;; (frame-parameter nil 'width)
+;; (frame-parameter nil 'height)
+
 ;; Set the initial screen location to be top-left
-(setq initial-frame-alist
-      (append
-       (list
-        '(top . 0) '(left . 0)
-        '(cursor-type . bar))
-       ;; default-frame-alist
-       ))
+;; (setq initial-frame-alist
+;;       (append
+;;        (list
+;;         '(top . 0) '(left . 0)
+;; 	'(width . 206)
+;; 	'(height . 60)
+;;         '(cursor-type . bar))
+;;        ;; default-frame-alist
+;;        ))
+(setq initial-frame-alist (copy-alist default-frame-alist))
 
 ;; Ensure we have correct user-emacs-directory
 ;; The folder of meomacs can be placed anywhere, and started with
@@ -70,6 +77,11 @@
       '(("no_proxy" . "^\\(127.0.0.1\\|localhost\\|10.*|192\\.168\\..*\\)")
         ("http" . "127.0.0.1:6152")
         ("https" . "127.0.0.1:6152")))
+
+ ;; (setq url-proxy-services
+ ;;      '(("no_proxy" . "^\\(127.0.0.1\\|localhost\\|10.*|192\\.168\\..*\\)")
+ ;;        ("http" . "127.0.0.1:8888")
+ ;;        ("https" . "127.0.0.1:8888")))
 
 (defun poly/file-mod-time(file)
   "Get FILE mod time."

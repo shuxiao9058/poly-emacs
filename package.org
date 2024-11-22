@@ -538,6 +538,23 @@
   ;; Colorize
   (comint-terminfo-terminal "dumb-emacs-ansi"))
 
+(use-package emacsql
+   :straight (:host github
+             :repo "magit/emacsql"
+             :commit "491105a01f58bf0b346cbc0254766c6800b229a2")
+  :ensure t
+  ;; :pin "491105a"
+  )
+;; (use-package emacsql-sqlite-builtin :ensure t)
+;; (use-package emacsql-sqlite
+;;    :after emacsql
+;;    :defer nil)
+
+;;(use-package emacsql-sqlite
+;; :straight (:type built-in))
+
+(use-package emacsql-sqlite3 ; for org-roam
+  :straight (:host github :repo "cireu/emacsql-sqlite3"))
 
 ;; required by core-hammerspoon
 (use-package dash

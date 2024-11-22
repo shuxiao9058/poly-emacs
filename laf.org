@@ -185,8 +185,8 @@ Configuration for look and feels, make UI looks better.
 	;; Give focus to emacs window at startup
 	(x-focus-frame nil))))
 
-  ;; (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame)
-  )
+ ;; (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame)
+ )
 
 ;; Call this function to increase/decrease font size.
 (defun bcm/zoom (n)

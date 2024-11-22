@@ -873,11 +873,47 @@ WIN-ID : Window index."
 (defun current-monitor-pixel-dimensions ()
   "Get current monitor pixel dimensions."
   (let* ((current-frame (selected-frame))
-	  (monitor-attributes (display-monitor-attributes-list
+	 (monitor-attributes (display-monitor-attributes-list
 			      ;; (frame-parameter nil 'display)
 			      current-frame)))
     (list (nth 3 (assq 'geometry (nth 0 monitor-attributes)))
 	  (nth 4 (assq 'geometry (nth 0 monitor-attributes))))))
+
+;; (poly/max-frame)
+(defvar poly/old-frame-parameter nil)
+;; (defvar poly/old-frame-height nil)
+
+;; (frame-text-width nil)
+
+(defun poly/max-frame()
+  "Toggle Max-frame."
+  (interactive)
+  (let* ((frame (selected-frame))
+	 (monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
+	 (monitor-width (car monitor-width-height-in-pixel))
+	 (monitor-height (nth 1 monitor-width-height-in-pixel))
+	 (max-frame-width (- monitor-width 92))
+	 (max-frame-height (- monitor-height 55))
+	 (frame-width (frame-text-width frame))
+	 (frame-height (frame-text-height frame)))
+    (if poly/old-frame-parameter
+	(let* ((width (alist-get 'width poly/old-frame-parameter))
+	       (height (alist-get 'height poly/old-frame-parameter)))
+	  (when (and width height)
+	    (set-frame-width frame width nil t)
+	    (set-frame-height frame height nil t))
+	  (setq poly/old-frame-parameter nil))
+      (set-frame-width frame max-frame-width nil t)
+      (set-frame-height frame max-frame-height nil t)
+      ;; (setq poly/old-frame-parameter nil)
+      (setq poly/old-frame-parameter
+	    (list
+	     `(width . ,frame-width)
+	     `(height . ,frame-height))))))
+
+(add-hook 'emacs-startup-hook #'poly/max-frame)
+
+;; (frame-parameter nil 'width)
 
 ;; (defun current-monitor-pixel-width ()
 ;;   (car (current-monitor-pixel-dimensions)))
@@ -999,21 +1035,22 @@ don't pop windows everywhere!
 #+begin_src emacs-lisp
 
 (use-package paredit
-    :straight t
-    ;; :straight (:type git
-    ;;		   :host github
-    ;;		   :repo "emacsmirror/paredit")
-    :ensure t
-    :defer t
-    :hook ((;; scheme-mode
-	    ;; emacs-lisp-mode lisp-mode ielm-mode
-	    clojure-mode cider-repl-mode
-	    ;; cask-mode
-	    ) . paredit-mode)
-    :commands paredit-mode enable-paredit-mode
-    ;; :config
-    ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-    )
+  :straight t
+  :disabled
+  ;; :straight (:type git
+  ;;		   :host github
+  ;;		   :repo "emacsmirror/paredit")
+  :ensure t
+  :defer t
+  :hook ((;; scheme-mode
+	  ;; emacs-lisp-mode lisp-mode ielm-mode
+	  clojure-mode cider-repl-mode
+	  ;; cask-mode
+	  ) . paredit-mode)
+  :commands paredit-mode enable-paredit-mode
+  ;; :config
+  ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+  )
 
 ;; electric-pair-mode or smartparens-mode
 
@@ -1021,6 +1058,7 @@ don't pop windows everywhere!
 (use-package smartparens
     :straight t
     :ensure t
+    :disabled
     :diminish smartparens-mode
     :commands
     smartparens-strict-mode
@@ -1072,6 +1110,21 @@ don't pop windows everywhere!
     ;; (unbind-key "C-M-<left>" smartparens-mode-map)
     ;; (unbind-key "C-M-<right>" smartparens-mode-map)
     )
+
+(use-package paren
+  :config
+  (show-paren-mode +1))
+
+(use-package elec-pair
+  :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
+  :hook
+  ((prog-mode . electric-pair-local-mode)
+   (eval-expression-minibuffer-setup . electric-pair-local-mode)
+   (smartparens-mode . (lambda ()
+                         (electric-pair-local-mode -1))))
+  ;; :config
+  ;; (electric-pair-mode +1)
+  )
 #+end_src
 
 * rainbow-mode
@@ -2368,7 +2421,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 ** org-roam
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 ;; https://github.com/iecaser/Configurations/blob/a7e61c25c49556b33d7888599a853da9d4c9cb95/.doom.d/note.el
 ;; https://www.orgroam.com/manual/Installation-_00281_0029.html#Installation-_00281_0029
 (use-package org-roam
@@ -2398,9 +2451,12 @@ Prefix arguments are interpreted by `org-refile'."
   ;; org-roam-graph-viewer "google-chrome-stable"
   (org-roam-completion-system 'default)
   (org-roam-completion-everywhere t)
+  (org-return-follows-link t)
+  (org-roam-dailies-directory "daily/")
+  (org-roam-directory (expand-file-name "org-roam" "~/Dropbox/org"))
   (org-roam-db-location (expand-file-name "org-roam.db" poly-cache-dir))
   :config
-  (setq org-roam-directory (expand-file-name "Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/" "~"))
+  ;; (setq org-roam-directory (expand-file-name "Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/" "~"))
   ;; For org-roam to update LAST_MODIFIED field
   (require 'time-stamp)
   (add-hook 'write-file-functions 'time-stamp) ; update when saving
@@ -2412,7 +2468,7 @@ Prefix arguments are interpreted by `org-refile'."
                  (direction . right)
                  (window-width . 0.33)
                  (window-height . fit-window-to-buffer)))
-
+  (org-roam-db-autosync-mode)
   ;; #+LATEX_HEADER: \\addbibresource{~/Cloud/Documents/bib/zotLib.bib}
   ;;     (setq org-roam-capture-templates
   ;; 	  (quote
@@ -2432,30 +2488,23 @@ Prefix arguments are interpreted by `org-refile'."
 	   "d" "default" plain
 	   "%?"
 	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
-	   :unnarrowed t
-	   )
-          (
-	   "l" "programming language" plain
+	   :unnarrowed t)
+          ("l" "programming language" plain
 	   "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
 	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-	   :unnarrowed t
-	   )
+	   :unnarrowed t)
           ("b" "book notes" plain
 	   "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
 	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-	   :unnarrowed t
-	   )
+	   :unnarrowed t)
           ("p" "project" plain
 	   "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n*Dates\n\n"
 	   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:Project")
-	   :unnarrowed t
-	   ))
-	org-roam-dailies-capture-templates '(
-                                             (
-					      "d" "default" entry
-					      "* %<%I:%M %p>: %?"
-					      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")
-					      ))
+	   :unnarrowed t))
+	org-roam-dailies-capture-templates
+	'(("d" "default" entry
+	   "* %<%I:%M %p>: %?"
+	   :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))
 	;; ;; optimise local variable evaluate and babel
 	;; enable-local-variables :all
 	;; ;; remote zsh related
@@ -2478,18 +2527,29 @@ Prefix arguments are interpreted by `org-refile'."
   (require 'org-roam-protocol)
   (require 'org-roam-dailies)
   (org-roam-setup) ;; can cause failure of dump
-  ;; :bind (("C-c z l" . org-roam-buffer-toggle)
-  ;;        ("C-c z f" . org-roam-node-find)
-  ;;        ("C-c z i" . org-roam-node-insert)
-  ;;        ("C-c z r" . org-roam-node-random)
-  ;;        :map org-mode-map
-  ;;        (("C-M-i" . completion-at-point)
-  ;;         ("C-c z t" . org-roam-tag-add)
-  ;;         ("C-c z a" . org-roam-alias-add)
-  ;;         ("C-c z I" . org-roam-node-insert-immediate))
-  ;;        :map org-roam-dailies-map
-  ;;        ("Y" . org-roam-dailies-capture-yesterday)
-  ;;        ("T" . org-roam-dailies-capture-tomorrow))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+	 ("C-c n g" . org-roam-graph)
+	 ("C-c n c" . org-roam-capture)
+         ("C-c n r" . org-roam-node-random)
+	 ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today)
+	 :map org-mode-map
+         (("C-c n i" . org-roam-insert)
+          ("C-c n I" . org-roam-insert-immediate))
+         :map org-roam-mode-map
+         (("C-M-i" . completion-at-point)
+          ("C-c n t" . org-roam-tag-add)
+          ("C-c n a" . org-roam-alias-add)
+          ("C-c n I" . org-roam-node-insert-immediate)
+	  ("C-<left>" . org-roam-dailies-goto-previous-note)
+	  ("C-<right>" . org-roam-dailies-goto-next-note)
+	  ("C-`" . org-roam-buffer-toggle)
+	  )
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("T" . org-roam-dailies-capture-tomorrow))
   ;; :bind-keymap
   ;; ("C-c z d" . org-roam-dailies-map)
   )
@@ -2504,9 +2564,9 @@ Prefix arguments are interpreted by `org-refile'."
   (org-roam-ui-update-on-save t)
   (org-roam-ui-open-on-start t))
 
-;; required by org-roam-ui
-(use-package websocket
-  :straight t)
+;; ;; required by org-roam-ui
+;; (use-package websocket
+;;   :straight t)
 
 ;; (unless (server-running-p)
 ;;   (org-roam-server-mode))
