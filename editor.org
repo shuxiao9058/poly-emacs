@@ -174,15 +174,20 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq frame-title-format
       '(:eval
-	(let ((project-root (poly/project-root))
-	      (buffer-name))
-	  (if project-root
-	      (progn
-		(setq buffer-name (replace-regexp-in-string
-				   (concat "^" (regexp-quote (expand-file-name (poly/parent-directory project-root)))) ""
-				   (convert-standard-filename buffer-file-name)))
-		(format "%s [%%m] - Emacs" buffer-name))
-	    "%b [%m] - Emacs"))))
+	(if buffer-file-name
+	    (let* ((project-root (poly/project-root))
+		   (parent-root (poly/parent-directory project-root))
+		   (buffer-name))
+	      (if parent-root
+		  (progn
+		    (setq buffer-name (replace-regexp-in-string
+				       (regexp-quote (expand-file-name parent-root))
+				       ;; (concat "^" )
+				       ""
+				       (convert-standard-filename buffer-file-name)))
+		    (format "%s [%%m] - Emacs" buffer-name))
+		"%b [%m] - Emacs"))
+	  "Emacs")))
 
 ;; ;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
 ;; ;; expected for non English text.

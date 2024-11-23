@@ -597,7 +597,8 @@ If INTERACTIVE, prompt user for details."
 	  clojurescript-mode
 	  js-mode typescript-mode
 	  c-mode c++-mode objc-mode swift-mode
-	  java-mode ) . eglot-ensure)
+	  ;; java-mode
+	  ) . eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
@@ -615,7 +616,7 @@ If INTERACTIVE, prompt user for details."
   (eglot-ignored-server-capabilites
    '(:hoverProvider
      :signatureHelpProvider
-     :documentHighlightProvider
+     ;; :documentHighlightProvider
      ;; :documentFormattingProvider
      ;; :documentRangeFormattingProvider
      :documentOnTypeFormattingProvider
@@ -689,8 +690,8 @@ Examples:
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
-  (add-to-list 'eglot-server-programs
-	       '(java-mode .  my-eclipse-jdt-contact))
+  ;; (add-to-list 'eglot-server-programs
+  ;; 	       '(java-mode .  my-eclipse-jdt-contact))
 
   (add-to-list 'eglot-server-programs
 	       `(beancount-mode .  ("beancount-language-server")))
@@ -855,6 +856,23 @@ Examples:
 			     :experimentalPostfixCompletions  t
 			     )
 
+			    :java
+			    (:autobuild (:enabled :json-false)
+					:import  (
+						  :maven (:enabled t :downloadSources t)
+						  :exlusions ["**/node_modules/**"
+							      "**/.metadata/**"
+							      "**/archetype-resources/**"
+							      "**/META-INF/maven/**"]
+						  ;; end of import
+						  )
+					:configuration (
+							:updateBuildConfiguration "automatic"
+							:checkProjectSettingsExclusions t
+							:project (:importHint t
+									      :importOnFirstTimeStartup "automatic")
+							:server (:launchMode "LightWeight")))
+
 			    ;; :Lua  ((format . ((defaultConfig . ((indent_style . "space") (indent_size . "2")))))
 			    ;; 	   (completion . ((callSnippet . "Both")))
 			    ;; 	   (hint . ((arrayIndex . "Auto") (enable . t))))
@@ -922,6 +940,67 @@ Examples:
 ;;     :straight (:host github :repo "jdtsmith/eglot-booster")
 ;;     :after eglot
 ;;     :config (eglot-booster-mode)))
+
+
+(use-package java-imports
+  :disabled
+  :hook ((java-mode kotlin-mode) . java-imports-scan-file)
+  :custom
+  (java-imports-find-block-function 'java-imports-find-place-sorted-block))
+
+(use-package eglot-java
+  :hook ((java-mode
+          java-ts-mode
+          kotlin-mode
+          kotlins-ts-mode) . eglot-java-mode)
+  :custom
+  (eglot-java-eclipse-jdt-args '("-Xmx4G"
+                                 "--add-modules=ALL-SYSTEM"
+                                 "--add-opens"
+                                 "java.base/java.util=ALL-UNNAMED"
+                                 "--add-opens"
+                                 "java.base/java.lang=ALL-UNNAMED"))
+  ;; (eglot-java-eclipse-jdt-args
+  ;;  '("-XX:+UseAdaptiveSizePolicy"
+  ;;    "-XX:GCTimeRatio=4"
+  ;;    "-XX:AdaptiveSizePolicyWeight=90"
+  ;;    "-Xmx8G"
+  ;;    "-Xms2G"
+  ;;    ))
+  ;; (eglot-java-eglot-server-programs-manual-updates t)
+  (eglot-java-eclipse-jdt-cache-directory (file-name-concat poly-cache-dir "jdt/"))
+  ;; (eglot-java-junit-platform-console-standalone-jar (concat poly-etc-dir "junit-platform-console-standalone.jar"))
+  ;; Prevent auto install java lsp server
+  (eglot-java-server-install-dir (file-name-concat poly-local-dir "lsp/eclipse.jdt.ls"))
+  ;; :preface
+  ;; (defun poly--eglot-java-init-opts (server eglot-java-eclipse-jdt)
+  ;;   "Custom options that will be merged with any default settings."
+  ;;   ;; download from https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/
+  ;;   `(:bundles
+  ;;     [,(expand-file-name "~/.emacs.d/share/dape/com.microsoft.java.debug.plugin.jar")]))
+  ;; :config
+  ;; (with-eval-after-load 'eglot
+  ;;   (setq completion-category-overrides '((eglot (styles orderless))))
+  ;;   ;; (setq-local completion-category-overrides nil)
+  ;;   (setq completion-category-defaults nil)
+  ;;   ;; (when eglot-java-mode
+  ;;   ;;   (setq-local completion-category-defaults nil))
+  ;;   )
+  ;; (setq eglot-java-user-init-opts-fn 'poly--eglot-java-init-opts)
+  ;; (defun eglot-java-run-main-fork ()
+  ;;   "Run a main class."
+  ;;   (interactive)
+  ;;   (let* ((fqcn (eglot-java--class-fqcn))
+  ;;          (cp   (eglot-java--project-classpath (buffer-file-name) "runtime")))
+  ;;     (if fqcn
+  ;;         (compile
+  ;;          (concat "java -cp "
+  ;;                  (mapconcat #'identity cp path-separator)
+  ;;                  " "
+  ;;                  fqcn)
+  ;;          t)
+  ;;       (user-error "No main method found in this file! Is the file saved?!"))))
+  )
 #+end_src
 
 *** eglot-rename with symbol in place
@@ -946,7 +1025,7 @@ Examples:
 
 ** lsp-mode
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defvar my-disable-lsp-completion nil
   "If non-nil, disable lsp-completion-enable, can work with .dir-locals
        ((nil . ((eval . (setq-local my-disable-lsp-completion t)))))
@@ -1929,7 +2008,8 @@ use-package will load java-lsp for us simply by calling this function."
 	(call-interactively #'lsp-format-buffer))
     (when (bound-and-true-p eglot--managed-mode)
       (call-interactively #'eglot-format-buffer)
-      (call-interactively #'eglot-code-action-organize-imports))))
+      ;; (call-interactively #'eglot-code-action-organize-imports)
+      )))
 
 (defun lsp-format-buffer-on-save ()
   (add-hook 'before-save-hook
@@ -2759,12 +2839,13 @@ Use clojure-mode for basic syntax support.
   ;; :init (conda-env-initialize-interactive-shells)
   :hook (eshell-first-time-mode . conda-env-initialize-eshell)
   :config
-  ;; Enable auto-activation
-  (conda-env-autoactivate-mode 1)
+  ;; ;; Enable auto-activation
+  ;; (conda-env-autoactivate-mode 1)
 
   ;; Automatically activate a Conda environment on the opening of a file
   (add-hook 'find-file-hook (lambda ()
-                              (when (bound-and-true-p conda-project-env-path)
+			      (when (and buffer-file-name (string-match "\\.py$" buffer-file-name)
+					 (bound-and-true-p conda-project-env-path) )
                                 (conda-env-activate-for-buffer))))
 
   ;; ;; Displaying the currently active environment on the `mode-line'
@@ -2773,7 +2854,7 @@ Use clojure-mode for basic syntax support.
    'global-mode-string
    '(:eval
      (list
-      (if conda-env-current-name
+      (if (and conda-env-current-name (derived-mode-p 'python-mode))
           (propertize (concat "(py: " conda-env-current-name ") ")
                       'face 'font-lock-builtin-face
                       'help-echo "Conda environment"
