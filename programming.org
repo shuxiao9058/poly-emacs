@@ -602,12 +602,13 @@ If INTERACTIVE, prompt user for details."
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
   (eglot-report-progress t)
-  (eglot-extend-to-xref t)
+  (eglot-extend-to-xref nil)
   (eglot-connect-timeout 40)
   (eglot-send-changes-idle-time 0.5)
   (eglot-confirm-server-initiated-edits nil)
-  (eglot-events-buffer-size 500000)
-  (eglot-stay-out-of '(imenu eldoc))  ;; eglot reinits backends
+  ;; (eglot-events-buffer-size 500000)
+  (eglot-events-buffer-size 0)
+  (eglot-stay-out-of '(imenu eldoc yasnippet))  ;; eglot reinits backends
   (eldoc-echo-area-use-multiline-p nil)
   ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
@@ -615,7 +616,12 @@ If INTERACTIVE, prompt user for details."
    '(:hoverProvider
      :signatureHelpProvider
      :documentHighlightProvider
-     :codeLensProivder
+     ;; :documentFormattingProvider
+     ;; :documentRangeFormattingProvider
+     :documentOnTypeFormattingProvider
+     :colorProvider
+     :foldingRangeProvider
+     ;; :codeLensProivder
      :inlayHintProvier))
   ;; NOTE We disable eglot-auto-display-help-buffer because :select t in
   ;; its popup rule causes eglot to steal focus too often.
@@ -714,35 +720,148 @@ Examples:
 		(poly/set-lsp-capf)
 		)))
 
-  (setq eglot-workspace-configuration
-	`((:gopls . ((staticcheck . :json-false)
-		     (matcher . "CaseSensitive")
-		     (gofumpt . t)
-		     (usePlaceholders . t)
-		     (completeUnimported . t)
-		     (deepCompletion . t)
-		     (completionBudget . "150ms")
-		     (diagnosticsDelay  .  "800ms")
-		     (vulncheck . "Imports")
-		     (semanticTokens . t)
-		     ;; (directoryFilters . ["-vendor"])
-		     (annotations . ((bounds . t) (escape . t) (inline . t) (nil . t)))
-		     (codelenses . ((gc_details . :json-false)
-				    (generate . t)
-				    (regenerate_cgo . t)
-				    (tidy . t)
-				    (upgrade_dependency . t)
-				    (vendor . t)))
-		     ;; (buildFlags . ["-mod=vendor"])
-		     ;; (allowImplicitNetworkAccess . t)
-		     (allowModfileModifications . t)
-		     (experimentalPostfixCompletions . t)
-		     (analyses . ,(mapcar (lambda (a) (cons a :json-false))
-					  '(unusedparams unusedwrite composites ST1003  ST1021 ST1016 SA5011 ST1020 ST1005 SA9003 SA4006 ST1022 S1023 SA4011 SA4010 ST1018)))))
-	  (:Lua . ((format . ((defaultConfig . ((indent_style . "space") (indent_size . "2")))))
-		   (completion . ((callSnippet . "Both")))
-		   (hint . ((arrayIndex . "Auto") (enable . t)))))
-	  ))
+  (with-eval-after-load 'eglot
+    ;; See https://github.com/golang/tools/blob/master/gopls/doc/emacs.md
+    ;;     https://github.com/golang/tools/blob/master/gopls/doc/settings.md
+    (setq-default eglot-workspace-configuration
+		  `(:gopls  (
+			     :usePlaceholders  t
+			     :staticcheck  :json-false
+			     ;; :matcher  "CaseSensitive"
+			     :matcher  "Fuzzy"
+			     :gofumpt  t
+			     :completeUnimported  t
+			     :deepCompletion  t
+			     :completionBudget  "150ms"
+			     :completeFunctionCalls t
+			     :diagnosticsDelay    "800ms"
+			     ;; :diagnosticsTrigger        ;; "Edit"|"Save"   "Edit"
+			     ;; :analysisProgressReporting ;; bool            true
+			     :vulncheck  "Imports"
+			     :semanticTokens  t
+			     :directoryFilters  ["-vendor"]
+			     :annotations  (:bounds  t :escape  t :inline  t :nil  t)
+			     :hoverKind "NoDocumentation"   ;; "FullDocumentation"|"NoDocumentation"|"SingleLine"|"Structured"|"SynopsisDocumentation" "FullDocumentation"
+			     :linkTarget   "godoc.org" ;; "godoc.org"|"pkg.go.dev"|string                                                         "pkg.go.dev"
+			     :linksInHover :json-false ;; bool
+			     ;; :codelenses (
+			     ;; :gc_details         ;; bool false
+			     ;; :generate           ;; bool true
+			     ;; :regenerate_cgo     ;; bool true
+			     ;; :run_govulncheck    ;; bool undocumented
+			     ;; :test               ;; bool undocumented
+			     ;; :tidy               ;; bool true
+			     ;; :upgrade_dependency ;; bool true
+			     ;; :vendor             ;; bool true
+			     ;; )
+			     :codelenses  (:gc_details  :json-false
+							:generate  t
+							:regenerate_cgo  t
+							::run_govulncheck t
+							:test t
+							:tidy  t
+							:upgrade_dependency  t
+							:vendor  t)
+			     :hints (
+				     :assignVariableTypes    t           ;; bool false
+				     :compositeLiteralFields t           ;; bool false
+				     :compositeLiteralTypes  t           ;; bool false
+				     :constantValues         t           ;; bool false
+				     :functionTypeParameters t           ;; bool false
+				     :parameterNames         :json-false ;; bool false
+				     :rangeVariableTypes     t           ;; bool false
+				     )
+			     ;; DIAGNOSTIC
+
+			     :analyses
+			     (
+			      ;; :appends              ;; bool true
+			      ;; :asmdecl              ;; bool true
+			      ;; :assign               ;; bool true
+			      ;; :atomic               ;; bool true
+			      ;; :atomicalign          ;; bool true
+			      ;; :bools                ;; bool true
+			      ;; :buildtag             ;; bool true
+			      ;; :cgocall              ;; bool true
+			      :composites :json-false           ;; bool true
+			      ;; :copylocks            ;; bool true
+			      ;; :deepequalerrors      ;; bool true
+			      ;; :defers               ;; bool true
+			      ;; :deprecated           ;; bool true
+			      ;; :directive            ;; bool true
+			      ;; :embed                ;; bool true
+			      ;; :errorsas             ;; bool true
+			      ;; :fieldalignment       ;; bool false
+			      ;; :fillreturns          ;; bool true
+			      ;; :fillstruct           ;; bool true
+			      ;; :httpresponse         ;; bool true
+			      ;; :ifaceassert          ;; bool true
+			      ;; :infertypeargs        ;; bool true
+			      ;; :loopclosure          ;; bool true
+			      ;; :lostcancel           ;; bool true
+			      ;; :nilfunc              ;; bool true
+			      ;; :nilness              ;; bool true
+			      ;; :nonewvars            ;; bool true
+			      ;; :noresultvalues       ;; bool true
+			      ;; :printf               ;; bool true
+			      :shadow t                ;; bool false
+			      ;; :shift                ;; bool true
+			      ;; :simplifycompositelit ;; bool true
+			      ;; :simplifyrange        ;; bool true
+			      ;; :simplifyslice        ;; bool true
+			      ;; :slog                 ;; bool true
+			      ;; :sortslice            ;; bool true
+			      ;; :stdmethods           ;; bool true
+			      ;; :stringintconv        ;; bool true
+			      ;; :structtag            ;; bool true
+			      ;; :stubmethods          ;; bool true
+			      ;; :testinggoroutine     ;; bool true
+			      ;; :tests                ;; bool true
+			      ;; :timeformat           ;; bool true
+			      ;; :undeclaredname       ;; bool true
+			      ;; :unmarshal            ;; bool true
+			      ;; :unreachable          ;; bool true
+			      ;; :unsafeptr            ;; bool true
+			      :unusedparams :json-false          ;; bool false
+			      ;; :unusedresult         ;; bool true
+			      :unusedvariable t        ;; bool false
+			      :unusedwrite :json-false           ;; bool false
+			      :useany t                ;; bool false
+			      :ST1003 :json-false
+			      :ST1021 :json-false
+			      :ST1016 :json-false
+			      :SA5011 :json-false
+			      :ST1020 :json-false
+			      :ST1005 :json-false
+			      :SA9003 :json-false
+			      :SA4006 :json-false
+			      :ST1022 :json-false
+			      :S1023 :json-false
+			      :SA4011 :json-false
+			      :SA4010 :json-false
+			      :ST1018 :json-false)
+
+			     ;; NAVIGATION
+
+			     ;; :importShortcut ;; "Both"|"Definition"|"Link"                            "Both"
+			     ;; :symbolMatcher  ;; "CaseInsensitive"|"CaseSensitive"|"FastFuzzy"|"Fuzzy" "FastFuzzy"
+			     ;; :symbolStyle    ;; "Dynamic"|"Full"|"Package"                            "Dynamic"
+			     ;; :symbolScope    ;; "all"|"workspace"                                     "all"
+			     ;; :verboseOutput  ;; bool                                                  false
+			     ;; :newDiff        ;; "both"|"old"|"new"                                    "both"
+			     :buildFlags  ["-mod=vendor"]
+			     ;; :allowImplicitNetworkAccess  t
+			     ;; :allowModfileModifications  t
+			     :experimentalPostfixCompletions  t
+			     )
+
+			    ;; :Lua  ((format . ((defaultConfig . ((indent_style . "space") (indent_size . "2")))))
+			    ;; 	   (completion . ((callSnippet . "Both")))
+			    ;; 	   (hint . ((arrayIndex . "Auto") (enable . t))))
+			    )
+		  )
+    )
+
   :bind (:map eglot-mode-map
 	      ([remap display-local-help] . nil)
 	      ("C-c C-r" . poly/eglot-rename)
@@ -798,11 +917,11 @@ Examples:
     (unless (null (symbol-function tmp-symbol))
       (funcall (symbol-function tmp-symbol)))))
 
-(when (executable-find "emacs-lsp-booster")
-  (use-package eglot-booster
-    :straight (:host github :repo "jdtsmith/eglot-booster")
-    :after eglot
-    :config (eglot-booster-mode)))
+;; (when (executable-find "emacs-lsp-booster")
+;;   (use-package eglot-booster
+;;     :straight (:host github :repo "jdtsmith/eglot-booster")
+;;     :after eglot
+;;     :config (eglot-booster-mode)))
 #+end_src
 
 *** eglot-rename with symbol in place

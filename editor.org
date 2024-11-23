@@ -179,7 +179,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
 	  (if project-root
 	      (progn
 		(setq buffer-name (replace-regexp-in-string
-				   (concat "^" (regexp-quote (expand-file-name (file-name-directory (directory-file-name project-root))))) ""
+				   (concat "^" (regexp-quote (expand-file-name (poly/parent-directory project-root)))) ""
 				   (convert-standard-filename buffer-file-name)))
 		(format "%s [%%m] - Emacs" buffer-name))
 	    "%b [%m] - Emacs"))))
@@ -190,7 +190,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq syntax-wholeline-max most-positive-fixnum)
 ;; @see https://github.com/emacs-lsp/lsp-mode#performance
-(setq read-process-output-max (* 3 1024 1024))
+(setq read-process-output-max (* 5 1024 1024))
 
 ;; Suppress warning when opening large files
 (setq large-file-warning-threshold nil)

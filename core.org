@@ -556,6 +556,10 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 (defun poly/project-root()
   (when (and (fboundp 'project-root) (project-current))
 		     (project-root (project-current))))
+
+(defun poly/parent-directory (dir)
+  (unless (equal "/" dir)
+    (file-name-directory (directory-file-name dir))))
 #+end_src
 
 ** run shell command in directory
