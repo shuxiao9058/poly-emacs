@@ -946,17 +946,17 @@ Examples:
 				       :preload
 				       (:enabled t ; boolean: true (default) or false
 						 :modules []) ; string array: [] (default)
-				       :autopep8 (:enabled t) ;; !!! may cause overy indent issue
-				       :pyflakes (:enabled :json-false)
+				       :autopep8 (:enabled t) ;; !!! may cause overy indent issue if disable autopep8
+				       :pyflakes (:enabled t)
 				       :rope_autoimport
-				       (:code_actions (:enabled nil) ; boolean: true (default) or false
+				       (:code_actions (:enabled t) ; boolean: true (default) or false
 						      :completions (:enabled t) ; boolean: true (default) or false
 						      :enabled :json-false ; boolean: true or false (default)
 						      :memory :json-false) ; boolean: true or false (default)
 				       :rope_completion
 				       (:eager :json-false ; boolean: true or false (default)
 					       :enabled :json-false) ; boolean: true or false (default)
-				       :rope_rename (:enabled :json-false)
+				       :rope_rename (:enabled t)
 				       :yapf (:enabled t)
 				       :black (
 					       :enabled t
