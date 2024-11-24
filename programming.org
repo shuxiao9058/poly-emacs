@@ -729,14 +729,13 @@ Examples:
 			     :usePlaceholders  t
 			     :staticcheck  :json-false
 			     ;; :matcher  "CaseSensitive"
-			     :matcher  "Fuzzy"
 			     :gofumpt  t
 			     :completeUnimported  t
 			     :deepCompletion  t
 			     :completionBudget  "150ms"
 			     :completeFunctionCalls t
 			     :diagnosticsDelay    "800ms"
-			     ;; :diagnosticsTrigger        ;; "Edit"|"Save"   "Edit"
+			     :diagnosticsTrigger  "Save"       ;; "Edit"|"Save"   "Edit"
 			     ;; :analysisProgressReporting ;; bool            true
 			     :vulncheck  "Imports"
 			     :semanticTokens  t
@@ -872,6 +871,109 @@ Examples:
 							:project (:importHint t
 									      :importOnFirstTimeStartup "automatic")
 							:server (:launchMode "LightWeight")))
+			    :pylsp ;; https://github.com/manugv/emacs/blob/d54d20efc9f3c9da48635ad1f8a92f3740db6df0/python.org#L108
+			    (
+			     :configurationSources ["flake8"]
+			     :rope
+                             (:extensionModules nil ; string: null (default)
+                                                :ropeFolder nil)
+			     :plugins (
+				       :jedi_completion (
+							 :cache_for ["pandas" "numpy" "tensorflow" "matplotlib"] ; string array: ["pandas", "numpy", "tensorflow", "matplotlib"] (default)
+							 :eager :json-false ; boolean: true or false (default)
+							 :enabled t ; boolean: true (default) or false
+							 :fuzzy :json-false ; boolean: true or false (default)
+							 :include_class_objects :json-false ; boolean: true or false (default)
+							 :include_function_objects :json-false ; boolean: true or false (default)
+							 :include_params t ; boolean: true (default) or false
+							 :resolve_at_most 25 ; integer: 25 (default)
+							 )
+				       :jedi_definition
+				       (:enabled t ; boolean: true (default) or false
+						 :follow_builtin_definitions t ; boolean: true (default) or false
+						 :follow_builtin_imports t ; boolean: true (default) or false
+						 :follow_imports t) ; boolean: true (default) or false
+				       :jedit_hover
+				       (:enabled :json-false) ; boolean: true (default) or false
+				       :jedi_references
+				       (:enabled :json-false) ; boolean: true (default) or false
+				       :jedi_signature_help
+				       (:enabled :json-false) ; boolean: true (default) or false
+				       :jedi_symbols
+				       (:all_scopes t ; boolean: true (default) or false
+						    :enabled :json-false ; boolean: true (default) or false
+						    :include_import_symbols t) ; boolean: true (default) or false
+				       :mypy_ls (:enabled t)
+				       :pyls_isort (:enabled t)
+				       :pylint
+				       (:args [] ; string array: [] (default)
+					      :enabled :json-false ; boolean: true or false (default)
+					      :executable nil) ; string: null (default)
+				       :flake8 (
+						:enabled t ; boolean: true or false (default)
+						:config nil ; string: null (default)
+						:exclude [] ; string array: [] (default)
+						:executable "flake8" ; string: "flake8" (default)
+						:extendIgnore [] ; string array: [] (default)
+						:filename nil ; string: null (default)
+						:hangClosing nil ; boolean: true or false; null (default)
+						:ignore [] ; string array: [] (default)
+						:indentSize 2 ; integer: null (default)
+						:maxComplexity nil ; integer: null (default)
+						:maxLineLength nil ; integer: null (default)
+						:perFileIgnores [] ; string array: [] (default) e.g. ["file_path.py:W305,W304"]
+						:select nil ; string array: null (default)
+						)
+				       :pycodestyle
+				       (:enabled t ; boolean: true (default) or false
+						 :exclude [] ; string array: [] (default)
+						 :filename [] ; string array: [] (default)
+						 :hangClosing nil ; boolean: true or false; null (default)
+						 :ignore [] ; string array: [] (default)
+						 :indentSize 2 ; integer: null (default)
+						 :maxLineLength 120 ; integer: null (default)
+						 :select nil) ; string array: null (default)
+				       :pydocstyle
+				       (:addIgnore [] ; string array: [] (default)
+						   :addSelect [] ; string array: [] (default)
+						   :convention nil ; string: "google", "numpy" or "pep257"; null (default)
+						   :enabled :json-false ; boolean: true or false (default)
+						   :ignore [] ; string array: [] (default)
+						   :match "(?!test_).*\\.py" ; string: "(?!test_).*\\.py" (default)
+						   :matchDir "[^\\.].*" ; string: "[^\\.].*" (default)
+						   :select nil) ; string array: null (default)
+				       :mccabe (:enabled :json-false :threshold 15)
+				       :preload
+				       (:enabled t ; boolean: true (default) or false
+						 :modules []) ; string array: [] (default)
+				       :autopep8 (:enabled t) ;; !!! may cause overy indent issue
+				       :pyflakes (:enabled :json-false)
+				       :rope_autoimport
+				       (:code_actions (:enabled nil) ; boolean: true (default) or false
+						      :completions (:enabled t) ; boolean: true (default) or false
+						      :enabled :json-false ; boolean: true or false (default)
+						      :memory :json-false) ; boolean: true or false (default)
+				       :rope_completion
+				       (:eager :json-false ; boolean: true or false (default)
+					       :enabled :json-false) ; boolean: true or false (default)
+				       :rope_rename (:enabled :json-false)
+				       :yapf (:enabled t)
+				       :black (
+					       :enabled t
+					       :skip_string_normalization t
+					       :line_length 120
+					       :cache_config t)
+				       :jedi (
+					      :auto_import_modules ["numpy"] ; string array: ["numpy"] (default)
+					      :env_vars nil ; object: null (default)
+					      :environment nil ; string: null (default)
+					      :extra_paths []) ; string array: [] (default)
+				       )
+			     :pylsp_mypy (:enabled t
+						   :live_mode :json-false
+						   :report_progress t
+						   :dmypy :json-false)
+			     )
 
 			    ;; :Lua  ((format . ((defaultConfig . ((indent_style . "space") (indent_size . "2")))))
 			    ;; 	   (completion . ((callSnippet . "Both")))

@@ -187,8 +187,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 					    ;; (concat "^" )
 					    ""
 					    (convert-standard-filename buffer-file-name)))
-			 (format "%s [%%m] - Emacs" buffer-name))
-		     "%b [%m] - Emacs")
+			 (format "%s - Emacs" buffer-name))
+		     "%b - Emacs")
 		 "Emacs"))))
 
 ;; ;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
@@ -910,7 +910,7 @@ WIN-ID : Window index."
 	 (monitor-width-height-in-pixel (current-monitor-pixel-dimensions))
 	 (monitor-width (car monitor-width-height-in-pixel))
 	 (monitor-height (nth 1 monitor-width-height-in-pixel))
-	 (max-frame-width (- monitor-width 92))
+	 (max-frame-width (- monitor-width 70))
 	 (max-frame-height (- monitor-height 55))
 	 (frame-width (frame-text-width frame))
 	 (frame-height (frame-text-height frame))
