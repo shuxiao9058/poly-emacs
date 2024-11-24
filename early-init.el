@@ -33,15 +33,15 @@
 
 ;; Disable most GUI widgets early on
 (setq default-frame-alist '(;; (alpha . (0.90 0.90))
-			    (top . 1)
-			    (left . 0)
+			    ;; (top . 1)
+			    ;; (left . 0)
 			    (ns-appearance . dark)
 			    (ns-transparent-titlebar . t)
 			    (drag-internal-border . 1)
 			    ;; (drag-internal-border . 0)
 			    (drag-with-tab-line . t)
-			    ;; (internal-border-width . 0)
-			    (internal-border-width . 5)
+			    (internal-border-width . 0)
+			    ;; (internal-border-width . 5)
 			    (vertical-scroll-bars . nil)
 			    (horizontal-scroll-bars . nil)
 			    (menu-bar-lines . 0)
@@ -60,13 +60,13 @@
 ;; (setq initial-frame-alist
 ;;       (append
 ;;        (list
-;;         '(top . 0) '(left . 0)
-;; 	'(width . 206)
-;; 	'(height . 60)
+;;         ;; '(top . 0) '(left . 0)
+;; 	;; '(width . 206)
+;; 	;; '(height . 60)
 ;;         '(cursor-type . bar))
 ;;        ;; default-frame-alist
 ;;        ))
-(setq initial-frame-alist (copy-alist default-frame-alist))
+;; (setq initial-frame-alist (copy-alist default-frame-alist))
 
 ;; Ensure we have correct user-emacs-directory
 ;; The folder of meomacs can be placed anywhere, and started with

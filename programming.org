@@ -619,7 +619,7 @@ If INTERACTIVE, prompt user for details."
      ;; :documentHighlightProvider
      ;; :documentFormattingProvider
      ;; :documentRangeFormattingProvider
-     :documentOnTypeFormattingProvider
+     ;; :documentOnTypeFormattingProvider
      :colorProvider
      :foldingRangeProvider
      ;; :codeLensProivder
@@ -761,12 +761,12 @@ Examples:
 							::run_govulncheck t
 							:test t
 							:tidy  t
-							:upgrade_dependency  t
+							:upgrade_dependency  :json-false
 							:vendor  t)
 			     :hints (
-				     :assignVariableTypes    t           ;; bool false
-				     :compositeLiteralFields t           ;; bool false
-				     :compositeLiteralTypes  t           ;; bool false
+				     :assignVariableTypes    :json-false           ;; bool false
+				     :compositeLiteralFields :json-false          ;; bool false
+				     :compositeLiteralTypes  :json-false          ;; bool false
 				     :constantValues         t           ;; bool false
 				     :functionTypeParameters t           ;; bool false
 				     :parameterNames         :json-false ;; bool false
@@ -935,11 +935,11 @@ Examples:
     (unless (null (symbol-function tmp-symbol))
       (funcall (symbol-function tmp-symbol)))))
 
-;; (when (executable-find "emacs-lsp-booster")
-;;   (use-package eglot-booster
-;;     :straight (:host github :repo "jdtsmith/eglot-booster")
-;;     :after eglot
-;;     :config (eglot-booster-mode)))
+(when (executable-find "emacs-lsp-booster")
+  (use-package eglot-booster
+    :straight (:host github :repo "jdtsmith/eglot-booster")
+    :after eglot
+    :config (eglot-booster-mode)))
 
 
 (use-package java-imports

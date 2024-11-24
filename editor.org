@@ -174,20 +174,22 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 (setq frame-title-format
       '(:eval
-	(if buffer-file-name
-	    (let* ((project-root (poly/project-root))
-		   (parent-root (poly/parent-directory project-root))
-		   (buffer-name))
-	      (if parent-root
-		  (progn
-		    (setq buffer-name (replace-regexp-in-string
-				       (regexp-quote (expand-file-name parent-root))
-				       ;; (concat "^" )
-				       ""
-				       (convert-standard-filename buffer-file-name)))
-		    (format "%s [%%m] - Emacs" buffer-name))
-		"%b [%m] - Emacs"))
-	  "Emacs")))
+	(let* ((buffer-name buffer-file-name)
+	       (project-root (poly/project-root))
+	       (parent-root))
+	       (when project-root
+		 (setq parent-root (poly/parent-directory project-root)))
+	       (if (and buffer-name parent-root)
+		   (if parent-root
+		       (progn
+			 (setq buffer-name (replace-regexp-in-string
+					    (regexp-quote (expand-file-name parent-root))
+					    ;; (concat "^" )
+					    ""
+					    (convert-standard-filename buffer-file-name)))
+			 (format "%s [%%m] - Emacs" buffer-name))
+		     "%b [%m] - Emacs")
+		 "Emacs"))))
 
 ;; ;; Add word-wrap-whitespace-mode to visual line mode so line wrapping works as
 ;; ;; expected for non English text.
@@ -911,25 +913,39 @@ WIN-ID : Window index."
 	 (max-frame-width (- monitor-width 92))
 	 (max-frame-height (- monitor-height 55))
 	 (frame-width (frame-text-width frame))
-	 (frame-height (frame-text-height frame)))
+	 (frame-height (frame-text-height frame))
+	 (frame-left (frame-parameter frame 'left))
+	 (frame-top (frame-parameter frame 'top)))
     (if poly/old-frame-parameter
 	(let* ((width (alist-get 'width poly/old-frame-parameter))
-	       (height (alist-get 'height poly/old-frame-parameter)))
+	       (height (alist-get 'height poly/old-frame-parameter))
+	       (top (alist-get 'top poly/old-frame-parameter))
+	       (left (alist-get 'left poly/old-frame-parameter)))
 	  (when (and width height)
 	    (set-frame-width frame width nil t)
-	    (set-frame-height frame height nil t))
+	    (set-frame-height frame height nil t)
+	    (set-frame-parameter frame 'top top)
+	    (set-frame-parameter frame 'left left))
 	  (setq poly/old-frame-parameter nil))
       (set-frame-width frame max-frame-width nil t)
       (set-frame-height frame max-frame-height nil t)
-      ;; (setq poly/old-frame-parameter nil)
+      (set-frame-parameter frame 'fullscreen nil)
+      (set-frame-parameter nil 'fullscreen nil)
+      (set-frame-parameter frame 'top 1)
+      (set-frame-parameter frame 'left 0)
       (setq poly/old-frame-parameter
 	    (list
+	     `(left . ,frame-left)
+	     `(top . ,frame-top)
 	     `(width . ,frame-width)
 	     `(height . ,frame-height))))))
 
+
 (add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
 
-;; (frame-parameter nil 'width)
+(add-hook 'emacs-startup-hook (lambda() (run-at-time 1 nil (lambda() (setf (alist-get 'fullscreen default-frame-alist) 'maximized) )) ))
+
+;; (frame-parameter nil 'fullscreen)
 
 ;; (defun current-monitor-pixel-width ()
 ;;   (car (current-monitor-pixel-dimensions)))
