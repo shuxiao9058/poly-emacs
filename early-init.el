@@ -48,7 +48,7 @@
 			    (tool-bar-lines . 0)
 			    (no-special-glyphs . t)
 			    ;; (fullscreen . maximized)
-			    ;; (undecorated . t) ;; remove title bar
+			    (undecorated . t) ;; remove title bar
 			    (undecorated-round . t)
 			    ;; (font . "JetBrains Mono-14")
 			    (line-spacing . 0.2)))

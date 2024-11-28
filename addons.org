@@ -2495,7 +2495,7 @@ Auto cleanup older buffers
     :straight t
     :init
     (setq +wakatime-hide-filenames t)
-    (setq wakatime-ignore-exit-codes '(0 1 102))
+    (setq wakatime-ignore-exit-codes '(0 1 102 112))
     (when IS-MAC
       (setq wakatime-cli-path "/usr/local/bin/wakatime"))
     :hook ((org-mode . wakatime-mode)
@@ -5188,7 +5188,7 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
   (interactive)
   (let ((dir (poly/project-root)))
     (if dir
-	(poly/run-shell-command-in-dir dir '("buf" "generate"))
+	(poly/run-shell-command-in-dir dir (list '("buf" "generate")))
       (message "Project directory is not exist!"))))
 #+end_src
 

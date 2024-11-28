@@ -769,7 +769,7 @@ Examples:
 				     :constantValues         t           ;; bool false
 				     :functionTypeParameters t           ;; bool false
 				     :parameterNames         :json-false ;; bool false
-				     :rangeVariableTypes     t           ;; bool false
+				     :rangeVariableTypes     :json-false           ;; bool false
 				     )
 			     ;; DIAGNOSTIC
 
@@ -2299,25 +2299,28 @@ use-package will load java-lsp for us simply by calling this function."
 				default-directory))
 	  (cmd-list (list (list "go" "mod" "tidy"))))
       (when (file-directory-p (expand-file-name "vendor" default-directory))
-	(add-to-list 'cmd-list (list "go" "mod" "vendor")))
+	;; (add-to-list 'cmd-list (list "go" "mod" "vendor"))
+	(setq cmd-list (append cmd-list (list '("go" "mod" "vendor")))))
 
-      (dolist (cmd cmd-list)
-	(poly/run-shell-command-in-dir nil cmd)
-	;; (let ((start-time (current-time))
-	;;       (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
-	;;   (process-put process 'cmd-name (mapconcat 'identity cmd " "))
-	;;   (process-put process 'start-time start-time)
-	;;   (set-process-sentinel
-	;;    process
-	;;    (lambda (proc _)
-	;;      (let ((status (process-exit-status proc))
-	;; 	   (cmd-name (process-get proc 'cmd-name))
-	;; 	   (start-time (process-get proc 'start-time))
-	;; 	   (end-time (current-time)))
-	;;        (if (= 0 status)
-	;; 	   (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
-	;; 	 (message "Do \"%s\" Failed." cmd-name))))))
-	)))
+      (poly/run-shell-command-in-dir nil cmd-list)
+      ;; (dolist (cmd cmd-list)
+      ;; 	(poly/run-shell-command-in-dir nil cmd)
+      ;; 	;; (let ((start-time (current-time))
+      ;; 	;;       (process (apply #'start-process (append (list "go-tidy" "*Go Tidy*") cmd))))
+      ;; 	;;   (process-put process 'cmd-name (mapconcat 'identity cmd " "))
+      ;; 	;;   (process-put process 'start-time start-time)
+      ;; 	;;   (set-process-sentinel
+      ;; 	;;    process
+      ;; 	;;    (lambda (proc _)
+      ;; 	;;      (let ((status (process-exit-status proc))
+      ;; 	;; 	   (cmd-name (process-get proc 'cmd-name))
+      ;; 	;; 	   (start-time (process-get proc 'start-time))
+      ;; 	;; 	   (end-time (current-time)))
+      ;; 	;;        (if (= 0 status)
+      ;; 	;; 	   (message "Do \"%s\" successfully! Elapsed time: %.06f seconds" cmd-name (float-time (time-subtract end-time start-time)))
+      ;; 	;; 	 (message "Do \"%s\" Failed." cmd-name))))))
+      ;; 	)
+      ))
 
   (defun poly/go-set-compile-command()
     "Detect compile command."
