@@ -629,6 +629,9 @@ If INTERACTIVE, prompt user for details."
   (eglot-auto-display-help-buffer nil)
   :functions eglot--eclipse-jdt-contact
   :config
+  (with-eval-after-load 'eglot
+    (setq mode-line-misc-info
+          (cl-remove-if (lambda (x) (eq (car x) 'eglot--managed-mode)) mode-line-misc-info)))
    ;; speedup eglot
   (fset #'jsonrpc--log-event #'ignore)
   (setf (plist-get eglot-events-buffer-config :size) 0)
@@ -2297,7 +2300,7 @@ use-package will load java-lsp for us simply by calling this function."
     (let ((default-directory  (if (fboundp 'project-root)
 				  (project-root (project-current))
 				default-directory))
-	  (cmd-list (list (list "go" "mod" "tidy"))))
+	  (cmd-list (list '("go" "mod" "tidy"))))
       (when (file-directory-p (expand-file-name "vendor" default-directory))
 	;; (add-to-list 'cmd-list (list "go" "mod" "vendor"))
 	;; (setq cmd-list (append cmd-list (list '("go" "mod" "vendor"))))
@@ -2956,20 +2959,19 @@ Use clojure-mode for basic syntax support.
 
   ;; ;; Displaying the currently active environment on the `mode-line'
   ;; (add-hook 'python-base-mode-hook #'conda-mode-line-setup)
-  (add-to-list
-   'global-mode-string
-   '(:eval
-     (list
-      (if (and conda-env-current-name (derived-mode-p 'python-mode))
-          (propertize (concat "(py: " conda-env-current-name ") ")
-                      'face 'font-lock-builtin-face
-                      'help-echo "Conda environment"
-                      'mouse-face '(:box 1)
-                      'local-map (make-mode-line-mouse-map
-                                  'mouse-1
-                                  (lambda () (interactive)
-                                    (conda-env-activate))))
-        "")))))
+  (add-to-list 'global-mode-string
+	       '(:eval
+		 (list
+		  (if (and conda-env-current-name (derived-mode-p 'python-mode))
+		      (propertize (concat "(py: " conda-env-current-name ") ")
+				  'face 'font-lock-builtin-face
+				  'help-echo "Conda environment"
+				  'mouse-face '(:box 1)
+				  'local-map (make-mode-line-mouse-map
+					      'mouse-1
+					      (lambda () (interactive)
+						(conda-env-activate))))
+		    "")))))
 #+end_src
 
 ** rust

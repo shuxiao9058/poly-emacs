@@ -595,13 +595,18 @@ RIGHT aligned respectively."
 
 (defun csb/lsp-state-icon ()
   (ignore-errors
-    (if (bound-and-true-p lsp-mode)
-	;; "LSP"
-        (if (lsp-workspaces)
-            (propertize (nerd-icons-octicon "nf-oct-rocket")
- 			'face '(:inherit success :height 1.1))
-          (propertize "💥" 'face '(:height 1.1)))
-      "-")))
+    (let ((succ (propertize (concat " " (nerd-icons-octicon "nf-oct-rocket"))
+ 			    'face '(:inherit success :height 1.1)))
+	  (fail (propertize (concat " " "💥") 'face '(:inherit error :height 1.1))))
+      (cond ((bound-and-true-p lsp-mode)
+	     (if (lsp-workspaces)
+		 succ fail))
+	    ((bound-and-true-p eglot--managed-mode)
+	     (let* ((server (eglot-current-server))
+		    (last-error (and server (jsonrpc-last-error server))))
+	       (if last-error
+		   fail succ)))
+	    (t  "-")))))
 
 ;; Keep `doom-modeline-current-window' up-to-date
 (defun csb/modeline-get-current-window (&optional frame)
@@ -703,11 +708,13 @@ lines are selected, or the NxM dimensions of a block selection."
 	   minions-mode-line-modes
            (vc-mode vc-mode)
            " "
-           mode-line-client
+	   'mode-line-format-right-align
+           ;; mode-line-client
            (:eval (csb/lsp-state-icon))
            (:eval (csb/mode-line-buffer-file-state-icon))
            mode-line-frame-identification
-           mode-line-misc-info)
+           mode-line-misc-info
+	   )
          ;; (csb/mlscroll-mode-right-reserved)
 	 )))
 
@@ -727,6 +734,7 @@ lines are selected, or the NxM dimensions of a block selection."
     (set-face-attribute 'mode-line nil :fontset "fontset-csb modeline")
     (set-face-attribute 'mode-line-inactive nil :fontset "fontset-csb modeline")))
 
+(setq mode-line-right-align-edge 'right-margin)
 (setq-default mode-line-format csb/mode-line-format)
 #+end_src
 
