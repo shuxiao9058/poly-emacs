@@ -2300,7 +2300,8 @@ use-package will load java-lsp for us simply by calling this function."
 	  (cmd-list (list (list "go" "mod" "tidy"))))
       (when (file-directory-p (expand-file-name "vendor" default-directory))
 	;; (add-to-list 'cmd-list (list "go" "mod" "vendor"))
-	(setq cmd-list (append cmd-list (list '("go" "mod" "vendor")))))
+	;; (setq cmd-list (append cmd-list (list '("go" "mod" "vendor"))))
+	(add-to-list 'cmd-list '("go" "mod" "vendor") t))
 
       (poly/run-shell-command-in-dir nil cmd-list)
       ;; (dolist (cmd cmd-list)
