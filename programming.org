@@ -2249,7 +2249,10 @@ use-package will load java-lsp for us simply by calling this function."
     (protoc-gen-buf-breaking . "github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking")
     (protoc-gen-buf-lint . "github.com/bufbuild/buf/cmd/protoc-gen-buf-lint")
     (godoctor . "github.com/godoctor/godoctor")
-    (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")))
+    (golangci-lint . "github.com/golangci/golangci-lint/cmd/golangci-lint")
+    (ginkgo . "github.com/onsi/ginkgo/v2/ginkgo")
+    (gopkgs . "github.com/haya14busa/gopkgs/cmd/gopkgs")
+    (godef . "github.com/rogpeppe/godef")))
 
 (defun poly/install-go-tool (pkg)
   "Install or update go PKG/tools."
@@ -2277,6 +2280,7 @@ use-package will load java-lsp for us simply by calling this function."
 		 (message "%s installed successfully!" pkg-name)
 	       (message "Failed to install %s." pkg-name)))))))))
 
+;; https://blog.dornea.nu/2024/11/28/mastering-golang-debugging-in-emacs/
 (use-package go-mode
   :disabled
   :straight t
@@ -2453,6 +2457,14 @@ use-package will load java-lsp for us simply by calling this function."
   :config
   (unless (executable-find "impl")
     (poly/install-go-tool 'impl)))
+
+(use-package ginkgo-mode
+  :straight (:type git :host github :repo "garslo/ginkgo-mode")
+  ;; :custom
+  ;; (ginkgo-binary "/usr/local/gopath/bin/ginkgo")
+  :init
+  (setq ginkgo-use-pwd-as-test-dir t
+        ginkgo-use-default-keys t))
 
 (use-package gotest
   :straight t

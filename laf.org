@@ -236,12 +236,17 @@ Configuration for look and feels, make UI looks better.
 * Font
 
 #+begin_src emacs-lisp
-(setq +font-family "JetBrains Mono")
+(setq +font-family "JetBrainsMono Nerd Font Mono";; "JetBrains Mono"
+      )
 
 ;; (setq +ufont-family "Sarasa Mono SC")
-(defvar +ufont-family "PingFang SC") ;; chinese font
+;; (defvar +ufont-family "PingFang SC")
+(defvar +ufont-family "Sarasa Fixed SC")
+;; chinese font
 ;; (setq +fixed-pitch-family "Sarasa Mono SC")
-(setq +fixed-pitch-family "JetBrains Mono")
+;; (setq +fixed-pitch-family "JetBrains Mono")
+;; (setq +variable-pitch-family "Sarasa Mono SC")
+(setq +fixed-pitch-family "JetBrainsMono Nerd Font Mono")
 (setq +variable-pitch-family "Sarasa Mono SC")
 
 (defun poly/font-exist-p (fontname)
@@ -249,8 +254,8 @@ Configuration for look and feels, make UI looks better.
   (when (and fontname (not (string= fontname "")))
     (when (x-list-fonts fontname) t)))
 
-(setq english-font-size 12)
-(setq chinese-font-size 14)
+(setq english-font-size 13)
+(setq chinese-font-size 15)
 
 (defun +load-font (&optional frame)
   (interactive)
@@ -284,8 +289,7 @@ Configuration for look and feels, make UI looks better.
          (fixed-pitch-font-spec (format "%s-%d" +fixed-pitch-family +font-size)))
     (set-fontset-font nil nil (font-spec :family +font-family
 					 :size +font-size
-					 :width 'normal
-					 ) frame)
+					 :width 'normal) frame)
     ;; (set-frame-font font-spec frame)
     (set-face-attribute 'variable-pitch nil :font variable-pitch-font-spec)
     (set-face-attribute 'fixed-pitch nil :font fixed-pitch-font-spec))
@@ -305,30 +309,35 @@ Configuration for look and feels, make UI looks better.
 ;;       (when (IS-GUI)
 ;;         (+load-font nil))))
 
-(defun max/set-font (FONT-NAME CN-FONT-NAME &optional INITIAL-SIZE CN-FONT-RESCALE-RATIO)
-  "Set different font-family for Latin and Chinese charactors."
-  (let* ((size (or INITIAL-SIZE 14))
-	 (ratio (or CN-FONT-RESCALE-RATIO 0.0))
-	 (main (font-spec :name FONT-NAME :size size))
-	 (cn (font-spec :name CN-FONT-NAME)))
-    (set-face-attribute 'default nil :font main)
-    (dolist (charset '(kana han symbol cjk-misc bopomofo))
-      (set-fontset-font t charset cn))
-    (setq face-font-rescale-alist (if (/= ratio 0.0) `((,CN-FONT-NAME . ,ratio)) nil))))
+;; (defun max/set-font (FONT-NAME CN-FONT-NAME &optional INITIAL-SIZE CN-FONT-RESCALE-RATIO)
+;;   "Set different font-family for Latin and Chinese charactors."
+;;   (let* ((size (or INITIAL-SIZE 14))
+;; 	 (ratio (or CN-FONT-RESCALE-RATIO 0.0))
+;; 	 (main (font-spec :name FONT-NAME :size size))
+;; 	 (cn (font-spec :name CN-FONT-NAME)))
+;;     (set-face-attribute 'default nil :font main)
+;;     (dolist (charset '(kana han symbol cjk-misc bopomofo))
+;;       (set-fontset-font t charset cn))
+;;     (setq face-font-rescale-alist (if (/= ratio 0.0) `((,CN-FONT-NAME . ,ratio)) nil))))
 
 (when IS-GUI
   (add-hook 'after-init-hook
 	    (lambda ()
 	      ;; (max/set-font "Monaco" "Sarasa Mono SC" 13 1.25)
-	      (max/set-font "JetBrainsMono Nerd Font" ;; "JetBrains Mono"
-			    "Hiragino Sans GB" 13 1.25)
+	      ;; (max/set-font "JetBrainsMono Nerd Font Mono";; "JetBrainsMono Nerd Font"
+	      ;; 		    ;; "JetBrains Mono"
+	      ;; 		   ;; "JetBrainsMono Nerd Font"
+	      ;; 		   "Hiragino Sans GB"
+	      ;; 		    13 1.25)
+
 	      ;; (max/set-font "Fira Code" "Source Han Serif SC" 13 1.3)
-              ;; (+load-font nil)
-	      )))
+              (+load-font nil))))
 
+(set-face-attribute 'fixed-pitch-serif nil :family "Latin Modern Mono")
+(set-fontset-font t 'symbol "Noto Color Emoji")
+(set-fontset-font t 'symbol "Noto Sans Symbols" nil 'append)
+(set-fontset-font t 'symbol "Symbola" nil 'append)
 ;; (max/set-font "Fira Code" "Hiragino Sans GB" 13 1.25)
-
-
 
 ;; (set-face-attribute 'default nil :family "Jetbrains Mono NL" :height 135)
 ;; (set-face-attribute 'fixed-pitch nil :family "Jetbrains Mono NL")
@@ -595,9 +604,9 @@ RIGHT aligned respectively."
 
 (defun csb/lsp-state-icon ()
   (ignore-errors
-    (let ((succ (propertize (concat " " (nerd-icons-octicon "nf-oct-rocket"))
+    (let ((succ (propertize (concat " " (nerd-icons-octicon "nf-oct-rocket") " ")
  			    'face '(:inherit success :height 1.1)))
-	  (fail (propertize (concat " " "💥") 'face '(:inherit error :height 1.1))))
+	  (fail (propertize (concat " " "💥" " ") 'face '(:inherit error :height 1.1))))
       (cond ((bound-and-true-p lsp-mode)
 	     (if (lsp-workspaces)
 		 succ fail))
@@ -647,25 +656,17 @@ RIGHT aligned respectively."
 (defun csb/modeline-selection-info ()
   "Information about the current selection, such as how many characters and
 lines are selected, or the NxM dimensions of a block selection."
-  (when (and (or mark-active (and (bound-and-true-p evil-local-mode)
-                                  (eq evil-state 'visual)))
+  (when (and mark-active
              (csb/modeline-active-p))
     (cl-destructuring-bind (beg . end)
-	(if (and (bound-and-true-p evil-local-mode) (eq evil-state 'visual))
-            (cons evil-visual-beginning evil-visual-end)
-          (cons (region-beginning) (region-end)))
+	(cons (region-beginning) (region-end))
       (propertize
        (let ((lines (count-lines beg (min end (point-max)))))
          (concat " "
-                 (cond ((or (bound-and-true-p rectangle-mark-mode)
-                            (and (bound-and-true-p evil-visual-selection)
-                                 (eq 'block evil-visual-selection)))
+                 (cond ((or (bound-and-true-p rectangle-mark-mode))
                         (let ((cols (abs (- (csb/modeline-column end)
                                             (csb/modeline-column beg)))))
                           (format "%dx%dB" lines cols)))
-                       ((and (bound-and-true-p evil-visual-selection)
-                             (eq evil-visual-selection 'line))
-                        (format "%dL" lines))
                        ((> lines 1)
                         (format "%dC %dL" (- end beg) lines))
                        (t
@@ -692,7 +693,7 @@ lines are selected, or the NxM dimensions of a block selection."
          '((:eval (meow-indicator))
 	   mode-line-mule-info
 	   "%e" mode-line-front-space
-           (:eval (csb/modeline-maybe-popper))
+           ;; (:eval (csb/modeline-maybe-popper))
            " "
            ;; don't display the '-' for local directories, just '@' on remote
            (:eval (when (and (stringp default-directory) (file-remote-p default-directory))
@@ -704,18 +705,19 @@ lines are selected, or the NxM dimensions of a block selection."
            (:eval (csb/modeline-selection-info)))
          ;; right
          '(" "
+	   ;;
            ;; mode-line-modes
 	   minions-mode-line-modes
            (vc-mode vc-mode)
            " "
-	   'mode-line-format-right-align
            ;; mode-line-client
            (:eval (csb/lsp-state-icon))
-	   "  "
+	   ;; " "
+	   ;; "  "
+	    (:eval (propertize " | " 'face 'shadow) ) ; separator
            (:eval (csb/mode-line-buffer-file-state-icon))
            mode-line-frame-identification
-           mode-line-misc-info
-	   )
+           mode-line-misc-info)
          ;; (csb/mlscroll-mode-right-reserved)
 	 )))
 
@@ -775,7 +777,7 @@ lines are selected, or the NxM dimensions of a block selection."
   (treemacs-recenter-after-project-jump   'always)
   (treemacs-recenter-after-project-expand 'on-distance)
   (treemacs-project-follow-into-home      nil)
-  (treemacs--icon-size 12)
+  (treemacs--icon-size 10)
   (treemacs-silent-refresh t)
   (treemacs-follow-mode t)
   (treemacs-show-cursor                   t)
@@ -797,7 +799,7 @@ lines are selected, or the NxM dimensions of a block selection."
   (treemacs-width-increment             1)
   (treemacs-width-is-initially-locked   t)
   (treemacs-workspace-switch-cleanup    nil)
-  (treemacs-fringe-indicator-mode       nil)
+  ;; (treemacs-fringe-indicator-mode       nil)
   ;; (doom-treemacs-use-generic-icons t)
   :defines winum-keymap
   :commands (treemacs-follow-mode
@@ -808,6 +810,12 @@ lines are selected, or the NxM dimensions of a block selection."
   (with-eval-after-load 'winum
     (bind-key (kbd "M-0") #'treemacs-select-window winum-keymap))
   :config
+  ;; (treemacs-fringe-indicator-mode nil)
+  (treemacs-git-commit-diff-mode t)
+  ;; (treemacs-git-mode t)
+  (treemacs-indent-guide-mode t)
+  ;; (treemacs-tag-follow-mode t)
+  (treemacs-project-follow-mode t)
   (treemacs-follow-mode t)
   (treemacs-filewatch-mode t)
   (treemacs-fringe-indicator-mode t)
@@ -1105,6 +1113,7 @@ lines are selected, or the NxM dimensions of a block selection."
   (hl-todo ((t (:inherit hl-todo :underline t))))
   :custom
   (hl-todo-keyword-faces '(("TODO"   . "#ff7060")
+			   ("BUG"   . "#ff0000")
 			   ("DEBUG" . "#A020F0")
 			   ("STUB"   . "#1E90FF")
                            ("FIXME"  . "#caa000")))

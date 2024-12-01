@@ -58,12 +58,26 @@ This is consulted on every `require', `load' and various path/io functions.  You
               (message "Compilation errors, press C-x ` to visit.")
             ;; No errors; make the compilation window go away in 2 seconds.
 	    (unless (string-match (buffer-name buf) "*Go Test*")
-	      (run-at-time 2 nil 'delete-windows-on buf)
-	      (message "Build Succeeded."))
-            )))
+	      ;; (run-at-time 2 nil 'delete-windows-on buf)
+	      (run-with-timer 3 nil
+                              (lambda (buffer)
+				(when-let* ((multi-window (> (count-windows) 1))
+                                            (live (buffer-live-p buffer))
+                                            (window (get-buffer-window buffer t)))
+				  (delete-window window))) buf)
+	      (message "Build Succeeded.")))))
+
+   (defun ar/colorize-compilation-buffer ()
+     (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region (point-min) (point-max))))
+
+  (add-hook 'compilation-filter-hook 'ar/colorize-compilation-buffer)
+
   ;; Follow the compilation buffer scroll instead of remaining at the top line.
   ;; (setq compilation-scroll-output t)
   (setq compilation-scroll-output 'first-error)
+  (setq compilation-max-output-line-length nil)
+  (setopt compilation-ask-about-save nil)
   (setq auto-revert-check-vc-info t)
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 3)
