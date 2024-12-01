@@ -546,14 +546,30 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 #+begin_src emacs-lisp
 (use-package minions
   :init
-  (defface csb/minions-mode-line-lighter '((t (:height 1.1))) "")
+  ;; (defface csb/minions-mode-line-lighter '((t (:height 1.0))) "")
+    (defface my/minions-mode-line-face
+    '((t
+       :weight normal
+       :foreground "MediumPurple1"
+       :background nil
+       :box nil))
+    "Face for the minions mode line."
+    :group 'my/faces)
+    :custom
+  ;; (minions-mode-line-delimiters nil)
+    (minions-mode-line-delimiters '("" . ""))
+  (minions-mode-line-lighter "ϟ")
+  ;; (minions-mode-line-face '((:inherit font-lock-comment-face :slant normal)))
+  (minions-mode-line-face 'my/minions-mode-line-face)
+  ;; (minions-mode-line-lighter "::")
   :config
   (minions-mode)
-  (setq minions-mode-line-lighter  "⚙" ;; "#" ;; "[+]"
-	minions-mode-line-delimiters '("" . "")
-	minions-mode-line-face 'csb/minions-mode-line-lighter
-	minions-prominent-modes nil;; '(lsp-mode)
-	))
+  ;; (setq minions-mode-line-lighter  "⚙" ;; "#" ;; "[+]"
+  ;; 	;; minions-mode-line-delimiters '("" . "")
+  ;; 	;; minions-mode-line-face 'csb/minions-mode-line-lighter
+  ;; 	minions-prominent-modes nil;; '(lsp-mode)
+  ;; 	)
+  )
 #+end_src
 
 ** modeline

@@ -2930,7 +2930,9 @@ Auto cleanup older buffers
 	 (eat-buffer-list (poly/eat-buffer-list))
 	 (eat-buffer)
 	 (eat-win)
-	 (eat-pwd))
+	 (eat-pwd)
+	 (enter-meow-insert-mode-fn (lambda() (unless (meow-insert-mode-p)
+					   (meow-insert-mode t)))))
     (when result
       (setq eat-buffer (car result))
       (setq eat-pwd (expand-file-name (car (cdr result)))))
@@ -2945,7 +2947,8 @@ Auto cleanup older buffers
 		    (select-window eat-win nil)
 		  (if (equal (length eat-buffer-list) 1)
 		      (poly/eat-toggle)
-		    (switch-to-buffer eat-buffer))))
+		    (switch-to-buffer eat-buffer)
+		    (funcall enter-meow-insert-mode-fn))))
 	    (with-current-buffer eat-buffer
 	      (eat-term-send-string eat-terminal cd-cmd)
 	      ;; (eat-term-send-string eat-terminal "\n")
@@ -2953,7 +2956,8 @@ Auto cleanup older buffers
 	  (if (and (poly/buffer-frame-same-p eat-buffer curr-buffer) (window-live-p eat-win))
 	      (select-window eat-win nil)
 	    (switch-to-buffer eat-buffer)
-	    (goto-char (point-max))))
+	    (goto-char (point-max))
+	    (funcall enter-meow-insert-mode-fn)))
       (if (equal (file-truename default-directory) (file-truename dir))
 	  (call-interactively 'eat)
 	(progn
@@ -2961,6 +2965,7 @@ Auto cleanup older buffers
 	  (when result
 	    (setq eat-buffer (car result))
 	    (setq eat-pwd (expand-file-name (car (cdr result))))
+	    (funcall enter-meow-insert-mode-fn)
 	    (unless (equal eat-pwd (expand-file-name (file-truename dir)))
 	      (with-current-buffer eat-buffer
 		(eat-term-send-string eat-terminal cd-cmd)
