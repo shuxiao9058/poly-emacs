@@ -258,11 +258,7 @@ This configuration sticks with Meow for modal editing.
 
 #+begin_src emacs-lisp
 (use-package meow
-  ;; :straight t
-  :straight (:host github
-		   :repo "meow-edit/meow"
-		   :branch nil
-		   :commit "cde5f4c57bc8657bd361f60725338cf218b66e7d")
+  :straight t
   :demand t
   :ensure t
   :init
