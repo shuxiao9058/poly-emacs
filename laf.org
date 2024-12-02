@@ -547,17 +547,18 @@ Implements a menu that lists enabled and disabled minor modes in the mode-line.
 (use-package minions
   :init
   ;; (defface csb/minions-mode-line-lighter '((t (:height 1.0))) "")
-    (defface my/minions-mode-line-face
+  (defface my/minions-mode-line-face
     '((t
        :weight normal
+       :height 1.15
        :foreground "MediumPurple1"
-       :background nil
-       :box nil))
+       :background unspecified
+       :box unspecified))
     "Face for the minions mode line."
     :group 'my/faces)
-    :custom
+  :custom
   ;; (minions-mode-line-delimiters nil)
-    (minions-mode-line-delimiters '("" . ""))
+  (minions-mode-line-delimiters '("" . ""))
   (minions-mode-line-lighter "ϟ")
   ;; (minions-mode-line-face '((:inherit font-lock-comment-face :slant normal)))
   (minions-mode-line-face 'my/minions-mode-line-face)
@@ -708,7 +709,7 @@ lines are selected, or the NxM dimensions of a block selection."
          ;; left
          '((:eval (meow-indicator))
 	   ;; mode-line-mule-info
-	   (:eval (rime-lighter))
+	   (:eval (when (fboundp 'rime-lighter) (rime-lighter)))
 	   ;; "%e"
 	   ;; mode-line-front-space
            ;; (:eval (csb/modeline-maybe-popper))
@@ -734,7 +735,7 @@ lines are selected, or the NxM dimensions of a block selection."
            (:eval (csb/lsp-state-icon))
 	   ;; " "
 	   ;; "  "
-	    (:eval (propertize " | " 'face 'shadow) ) ; separator
+	   (:eval (propertize " | " 'face 'shadow) ) ; separator
            (:eval (csb/mode-line-buffer-file-state-icon))
            mode-line-frame-identification
            mode-line-misc-info)

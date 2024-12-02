@@ -148,38 +148,38 @@
   ;; (defalias 'straight-freeze-versions #'straight-x-freeze-versions)
   )
 
-;; Allow pinning versions from `use-package' using the `:pin-ref' keyword
-(with-eval-after-load 'use-package-core
-  (when (and (boundp 'use-package-keywords)
-	     (listp use-package-keywords))
-    (setq use-package-keywords (remq :pin-ref use-package-keywords))
-    (add-to-list 'use-package-keywords :pin-ref))
+;; ;; Allow pinning versions from `use-package' using the `:pin-ref' keyword
+;; (with-eval-after-load 'use-package-core
+;;   (when (and (boundp 'use-package-keywords)
+;; 	     (listp use-package-keywords))
+;;     (setq use-package-keywords (remq :pin-ref use-package-keywords))
+;;     (add-to-list 'use-package-keywords :pin-ref))
 
-  (defun use-package-normalize/:pin-ref (_name-symbol keyword args)
-    (use-package-only-one (symbol-name keyword) args
-      (lambda (_label arg)
-	(cond
-	 ((stringp arg) arg)
-	 ((symbolp arg) (symbol-name arg))
-	 (t (use-package-error ":pin-ref wants a commit hash or a ref"))))))
+;;   (defun use-package-normalize/:pin-ref (_name-symbol keyword args)
+;;     (use-package-only-one (symbol-name keyword) args
+;;       (lambda (_label arg)
+;; 	(cond
+;; 	 ((stringp arg) arg)
+;; 	 ((symbolp arg) (symbol-name arg))
+;; 	 (t (use-package-error ":pin-ref wants a commit hash or a ref"))))))
 
-  (defun use-package-handler/:pin-ref (name-symbol _keyword ref rest state)
-    (let ((body (use-package-process-keywords name-symbol rest state))
-	  (package (symbol-name name-symbol)))
-      (if (null ref)
-	  body
-	(progn
-	  (setq straight-x-pinned-packages
-		(cl-remove-if (lambda(x)
-				(when x
-				  (equal (car x) package)))
-			      straight-x-pinned-packages))
-	  `((let ((straight-current-profile 'pinned))
-	      ;; (push '(,package . ,ref) straight-x-pinned-packages)
-	      (add-to-list 'straight-x-pinned-packages '(,package . ,ref))
-	      ,(macroexp-progn body)))
-	  ))))
-  )
+;;   (defun use-package-handler/:pin-ref (name-symbol _keyword ref rest state)
+;;     (let ((body (use-package-process-keywords name-symbol rest state))
+;; 	  (package (symbol-name name-symbol)))
+;;       (if (null ref)
+;; 	  body
+;; 	(progn
+;; 	  (setq straight-x-pinned-packages
+;; 		(cl-remove-if (lambda(x)
+;; 				(when x
+;; 				  (equal (car x) package)))
+;; 			      straight-x-pinned-packages))
+;; 	  `((let ((straight-current-profile 'pinned))
+;; 	      ;; (push '(,package . ,ref) straight-x-pinned-packages)
+;; 	      (add-to-list 'straight-x-pinned-packages '(,package . ,ref))
+;; 	      ,(macroexp-progn body)))
+;; 	  ))))
+;;   )
 #+end_src
 
 ** deal with org issue
