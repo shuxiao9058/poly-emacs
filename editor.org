@@ -459,8 +459,14 @@ To find files/buffers and apply commands on project, use builtin package ~projec
       "akonadi*" "balena-etcher/" "cef_user_data/" "chromium/"
       "icedtea-web/" "libreoffice/" "whatsdesk/"
      )
-   '(".log" ".vs" "node_modules")))
-
+   '(".log" ".vs" "node_modules"))
+  :config
+  (defun poly/find-file()
+  "my find file"
+  (interactive)
+  (if (and (fboundp 'project-root) (project-current))
+      (project-find-file)
+    (call-interactively #'find-file))))
 
 (use-package consult-project-extra
   :defer t
@@ -697,13 +703,6 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   :bind (
 	 :map projectile-command-map
 	 ("s s" . projectile-deadgrep)))
-
-(defun poly/find-file()
-  "my find file"
-  (interactive)
-  (if (and (bound-and-true-p projectile-mode) (not (eq (projectile-project-vcs) 'none)))
-      (projectile-find-file)
-    (call-interactively #'find-file)))
 
 (defun my-filter-buffer(buffers)
   (cl-remove-if

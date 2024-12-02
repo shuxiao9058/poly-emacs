@@ -86,7 +86,6 @@
 ;; (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (bind-key (kbd "C-c T") #'poly/open-with-tower)
-(bind-key (kbd "C-c f r" ) #'rename-visited-file)
 ;; (bind-key (kbd "C-x C-b") #'ibuffer)
 (bind-key (kbd "C-c q r") #'restart-emacs)
 (bind-key "<f9>"  #'hide-mode-line-mode)
@@ -97,6 +96,9 @@
 ;; (bind-key (kbd "C-x C-b") #'bs-show)
 (bind-key (kbd "M-/") #'completion-at-point)
 (bind-key (kbd "C-x C-b")  #'ibuffer)         ; or use a nicer switcher, see below
+;; (bind-key (kbd "C-c f r" ) #'rename-visited-file)
+(bind-key (kbd "C-c f r")  #'consult-recent-file)
+(bind-key (kbd "C-c f f")  #'poly/find-file)
 (bind-key (kbd "C-c C-<return>") #'tabnine-chat-menu)
 (bind-key (kbd "C-c t e") #'eat-project)
 (bind-key (kbd "C-c t E") #'eat)
@@ -245,15 +247,15 @@ This configuration sticks with Meow for modal editing.
 ** Define keys
 #+header: :var normal-keybindings=normal-keybindings :var motion-keybindings=motion-keybindings :var leader-keybindings=leader-keybindings
 #+begin_src emacs-lisp
-  (defun meow-setup ()
-    (let ((parse-def (lambda (x)
-                       (cons (format "%s" (car x))
-                             (if (string-prefix-p "dispatch:" (cadr x))
-                                 (string-trim (substring (cadr x) 9))
-                               (intern (cadr x)))))))
-      (apply #'meow-normal-define-key (mapcar parse-def normal-keybindings))
-      (apply #'meow-motion-overwrite-define-key (mapcar parse-def motion-keybindings))
-      (apply #'meow-leader-define-key (mapcar parse-def leader-keybindings))))
+(defun meow-setup ()
+  (let ((parse-def (lambda (x)
+                     (cons (string-trim (format "%s" (car x)) "[[:space:]]" "[[:space:]]")
+                           (if (string-prefix-p "dispatch:" (cadr x))
+                               (string-trim (substring (cadr x) 9))
+                             (intern (cadr x)))))))
+    (apply #'meow-normal-define-key (mapcar parse-def normal-keybindings))
+    (apply #'meow-motion-overwrite-define-key (mapcar parse-def motion-keybindings))
+    (apply #'meow-leader-define-key (mapcar parse-def leader-keybindings))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -364,7 +366,7 @@ This configuration sticks with Meow for modal editing.
 
   (meow-leader-define-key
    ;; '( "e" . recentf-open)
-   '("e" . consult-recent-file)
+   ;; '("e" . consult-recent-file)
    ;; '("r" . recentf-open)
    ;; '("." . find-file)
    ;; '("SPC" . execute-extended-command)
