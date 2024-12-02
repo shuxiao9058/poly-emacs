@@ -703,6 +703,8 @@ lines are selected, or the NxM dimensions of a block selection."
 ;; https://occasionallycogent.com/custom_emacs_modeline/index.html
 (setq csb/original-mode-line-format mode-line-format)
 
+(setq project-mode-line t)
+
 (setq csb/mode-line-format
       '(:eval
         (csb/align-mode-line
@@ -728,9 +730,11 @@ lines are selected, or the NxM dimensions of a block selection."
          '(" "
 	   ;;
            ;; mode-line-modes
+	   (project-mode-line project-mode-line-format)
+	   	   (:eval (propertize " | " 'face 'shadow) ) ; separator
 	   minions-mode-line-modes
-           (vc-mode vc-mode)
-           " "
+          (vc-mode vc-mode)
+          " "
            ;; mode-line-client
            (:eval (csb/lsp-state-icon))
 	   ;; " "
@@ -1140,12 +1144,13 @@ lines are selected, or the NxM dimensions of a block selection."
                            ("FIXME"  . "#caa000")))
   :config
   (global-hl-todo-mode t)
-  :bind
-  (:map hl-todo-mode-map
-	("C-c p" . hl-todo-previous)
-	("C-c n" . hl-todo-next)
-	("C-c o" . hl-todo-occur)
-	("C-c i" . hl-todo-insert)))
+  ;; :bind
+  ;; (:map hl-todo-mode-map
+  ;; 	("C-c p" . hl-todo-previous)
+  ;; 	("C-c n" . hl-todo-next)
+  ;; 	("C-c o" . hl-todo-occur)
+  ;; 	("C-c i" . hl-todo-insert))
+  )
 #+end_src
 
 

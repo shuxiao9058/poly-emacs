@@ -144,8 +144,9 @@
 
 (let ((straight-current-profile 'pinned))
   (straight-use-package 'meow)
-  (add-to-list 'straight-x-pinned-packages
-               '("meow" . "cde5f4c57bc8657bd361f60725338cf218b66e7d")))
+  ;; (add-to-list 'straight-x-pinned-packages
+  ;;              '("meow" . "cde5f4c57bc8657bd361f60725338cf218b66e7d"))
+  )
 
   ;; (autoload #'straight-x-pull-all "straight-x")
   ;; (autoload #'straight-x-freeze-versions "straight-x")

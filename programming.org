@@ -1854,7 +1854,23 @@ use-package will load java-lsp for us simply by calling this function."
   ;;        ["Quit"
   ;;        ("qq" "Quit" dape-quit :transient nil)
   ;;        ("qk" "Kill" dape-kill :transient nil)]])
-  )
+  ;; Basic dape configuration
+  (with-eval-after-load 'dape
+    ;; Add Go debug configuration
+    (add-to-list 'dape-configs
+		 `(go-debug-main
+                   modes (go-mode go-ts-mode)
+                   command "dlv"
+                   command-args ("dap" "--listen" "127.0.0.1::autoport")
+                   command-cwd dape-command-cwd
+                   port :autoport
+                   :type "debug"
+                   :request "launch"
+                   :name "Debug Go Program"
+                   :cwd "."
+                   :program "."
+                   :args [])))
+                   )
 #+end_src
 
 ** yas parameter complete in place required

@@ -332,6 +332,7 @@ This configuration sticks with Meow for modal editing.
 
   (setq
    ;; meow-visit-sanitize-completion nil
+   meow-keypad-leader-dispatch "C-c"
    meow-esc-delay 0.001
    meow-keypad-describe-delay 0.5
    meow-select-on-change t
