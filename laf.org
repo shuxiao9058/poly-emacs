@@ -236,8 +236,14 @@ Configuration for look and feels, make UI looks better.
 * Font
 
 #+begin_src emacs-lisp
-(setq +font-family "JetBrainsMono Nerd Font Mono";; "JetBrains Mono"
-      )
+;; "JetBrains Mono"
+(setq +font-family "JetBrainsMono Nerd Font Mono")
+
+;; (setq +font-family "Monaco")
+;; (setq +font-family "MonoLisa Nerd Font Mono")
+
+;; (setq +font-family "SF Mono";; "JetBrains Mono"
+;;       )
 
 ;; (setq +ufont-family "Sarasa Mono SC")
 ;; (defvar +ufont-family "PingFang SC")
@@ -254,8 +260,11 @@ Configuration for look and feels, make UI looks better.
   (when (and fontname (not (string= fontname "")))
     (when (x-list-fonts fontname) t)))
 
-(setq english-font-size 13)
-(setq chinese-font-size 15)
+;; (setq english-font-size 13)
+;; (setq chinese-font-size 15)
+
+(setq english-font-size 12)
+(setq chinese-font-size 13)
 
 (defun +load-font (&optional frame)
   (interactive)
