@@ -1004,6 +1004,12 @@ lines are selected, or the NxM dimensions of a block selection."
        (t (nerd-icons-octicon "nf-oct-gear" :face 'all-the-icons-silver)))))
   (nerd-icons-completion-mode))
 
+(use-package nerd-icons-corfu
+  :ensure t
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 ;; Disable for now, as having it enabled causes dired to not reliably select the
 ;; current buffer when opening dired for directory of current buffer.
 (use-package nerd-icons-dired

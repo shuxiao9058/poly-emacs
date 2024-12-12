@@ -370,7 +370,7 @@ This configuration sticks with Meow for modal editing.
    ;; '("r" . recentf-open)
    ;; '("." . find-file)
    ;; '("SPC" . execute-extended-command)
-   ;; '("." . poly/find-file)
+   '("." . poly/find-file)
    `("p" . ,project-prefix-map)
    '("b" . switch-to-buffer)
    ;; '("b" . poly/switch-to-buffer)
