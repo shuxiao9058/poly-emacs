@@ -422,17 +422,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
   (vertico-cycle t)
   :bind
-  (:map vertico-map
-	;; ("DEL" . selectrum-backward-kill-sexp)
-	;; ("<S-backspace>" . vertico-backward-kill-sexp)
-	("<down>" . vertico-next)
-	("C-j"  .  vertico-next)
-	("<up>" .  vertico-previous)
-	("C-k"  .  vertico-previous)
-	("<backtab>" . vertico-previous)
-	("?" . minibuffer-completion-help)
-	("M-RET" . minibuffer-force-complete-and-exit)
-	("M-TAB" . minibuffer-complete)))
+  (("C-z" . vertico-quick-jump)
+   (:map vertico-map
+	 ;; ("DEL" . selectrum-backward-kill-sexp)
+	 ;; ("<S-backspace>" . vertico-backward-kill-sexp)
+	 ("<down>" . vertico-next)
+	 ("C-j"  .  vertico-next)
+	 ("<up>" .  vertico-previous)
+	 ("C-k"  .  vertico-previous)
+	 ("<backtab>" . vertico-previous)
+	 ("?" . minibuffer-completion-help)
+	 ("M-RET" . minibuffer-force-complete-and-exit)
+	 ("M-TAB" . minibuffer-complete))))
 
 ;; Configure directory extension.
 (use-package vertico-directory
@@ -448,6 +449,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
+;; Improved Candidate Filtering with Orderless
 
 ;; Optionally use the `orderless' completion style. See
 ;; `+orderless-dispatch' in the Consult wiki for an advanced Orderless style
@@ -457,13 +459,25 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;; wildcard. You may also give the `initials' completion style a try.
 (use-package orderless
   :straight t
-  :init
+  :config
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
   ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-  (setq completion-styles '(orderless basic) ;; basic
-	completion-category-defaults nil
-	completion-category-overrides '((file (styles partial-completion)))))
+  (orderless-define-completion-style orderless+initialism
+    (orderless-matching-styles '(orderless-initialism
+                                 orderless-literal
+                                 orderless-regexp)))
+  (setq ;; completion-styles '(orderless basic) ;; basic
+   ;; `selectrum', `vertico' and `icomplete' will honoring
+   completion-styles '(basic partial-completion substring flex)
+   ;; (completion-category-overrides '((buffer (styles . (flex)))))
+   orderless-matching-styles '(orderless-literal orderless-regexp)
+   completion-category-defaults nil
+   completion-category-overrides '((buffer (styles . (flex)))
+				   (command (styles orderless+initialism))
+				   (symbol (styles orderless-flex orderless-literal))
+				   (variable (styles orderless+initialism))
+				   (file (styles partial-completion)))))
 
 ;; A few more useful configurations...
 
@@ -2233,7 +2247,7 @@ Save cursor position
 
 * minibuffer
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 
 ;; Completion engine
 (use-package minibuffer
@@ -2255,6 +2269,7 @@ Save cursor position
   (completion-show-help nil)
   (completion-cycle-threshold nil)
   (completion-auto-select 'second-tab)
+  ;; Enable recursive minibuffers
   (enable-recursive-minibuffers t)
   (minibuffer-depth-indicate-mode t)
   ;; shorten " (default %s)" => " [%s]"
@@ -2265,13 +2280,6 @@ Save cursor position
   (minibuffer-completion-auto-choose nil)
   ;; One frame one minibuffer.
   (minibuffer-follows-selected-frame nil)
-  ;; Ignore cases when complete
-  (completion-ignore-case t)
-  (read-buffer-completion-ignore-case t)
-  (read-file-name-completion-ignore-case t)
-  ;; `selectrum', `vertico' and `icomplete' will honoring
-  (completion-styles '(basic partial-completion substring flex))
-  (completion-category-overrides '((buffer (styles . (flex)))))
   ;; vertical view
   (completions-format 'one-column)
   (completions-max-height 13)
@@ -2287,12 +2295,29 @@ save minibuffer history
   :straight (:type built-in)
   :custom
   (savehist-file (expand-file-name "history" poly-cache-dir))
+  (savehist-save-minibuffer-history t)
+  (savehist-autosave-interval 60)
+  (savehist-additional-variables '(;; kill-ring
+				   log-edit-comment-ring
+				   last-kbd-macro
+				   search-ring
+				   mark-ring
+				   global-mark-ring
+				   regexp-search-ring
+				   query-replace-history
+				   minibuffer-history
+				   file-name-history
+				   corfu-history
+				   command-history
+				   shell-command-history
+				   compile-history
+				   register-alist
+				   (comint-input-ring        . 50)
+				   (dired-regexp-history     . 20)
+				   (kill-ring                . 1000000)
+				   (face-name-history        . 20)))
   :config
-  (savehist-mode 1)
-  (setq savehist-additional-variables
-	'(kill-ring
-	  log-edit-comment-ring
-	  search-ring regexp-search-ring shell-command-history)))
+  (savehist-mode +1))
 #+end_src
 
 * desktop
@@ -2412,15 +2437,70 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package midnight
-  :init
-  (setq midnight-delay 0)
+  :straight (:type built-in)
+  :defer 30
+  :custom
+  (clean-buffer-list-delay-general 7)   ; default is 3 days
+  (midnight-period (* 60 60)) ;; in seconds
   :config
-  (setq clean-buffer-list-delay-general 30)
-  (setq clean-buffer-list-kill-regexps
-        (nconc clean-buffer-list-kill-regexps
-               '("\\`\\*Customize .*\\*\\'"
-                 "\\`\\magit: .*\\*\\'"
-                 ))))
+  (midnight-mode 1)
+  (midnight-delay-set 'midnight-delay "06:00")
+  (when (fboundp 'native-compile-prune-cache)
+    (add-to-list 'midnight-hook 'native-compile-prune-cache))
+  ;; (setq clean-buffer-list-delay-general 30)
+  (setq clean-buffer-list-delay-general 1 ;; Clean other buffers every day
+	clean-buffer-list-delay-special (* 24 3600)
+	clean-buffer-list-kill-regexps (nconc clean-buffer-list-kill-regexps
+					      '("compile|.*?|.*"
+						"run|.*?|.*"
+						"^.*$"
+						"\\*Help\\*"
+						"\\*ag search "
+						"\\*.*[Ee]diff"
+						"\\*tramp/sudo "
+						"^haris-pipe-"
+						"^\\*Help\\*"
+						"^\\*helpful "
+						"^\\*ivy-occur"
+						"^\\*lsp-help\\*"
+						"^\\*lsp session\\*"
+						"^magit: "
+						"^magit-\\(log\\|diff\\|stash\\|revision\\)"
+						"^\\*Man "
+						"^\\*straight-process\\*"
+						"\\*which-key\\*"
+						"^\\*xref\\*"
+						;; Docker command output buffers
+						"^\\* docker .*\\*"
+						;; Docker compose command output buffers
+						"^\\* .* docker-compose .*\\*"
+						"\\`\\*Customize .*\\*\\'"
+						"\\`\\magit: .*\\*\\'"))
+	clean-buffer-list-kill-buffer-names (nconc clean-buffer-list-kill-buffer-names
+						   '("*buffer-selection*"
+						     "*Finder*"
+						     "*Finder Category*"
+						     "*Finder-package*"
+						     "*RE-Builder*"
+						     "*vc-change-log*"))
+	clean-buffer-list-kill-never-buffer-names (nconc clean-buffer-list-kill-never-buffer-names
+							 '("*scratch*"
+							   "*Messages*"
+							   "*server*"
+							   "*Group*"
+							   "*Org Agenda*"
+							   "*eshell*"
+							   "*ielm*"
+							   "*mail*"
+							   "*w3m*"
+							   "*w3m-cache*"))
+	clean-buffer-list-kill-never-regexps (nconc clean-buffer-list-kill-never-regexps
+						    '("^ \\*Minibuf-.*\\*$"
+						      "^\\*Summary"
+						      "^\\*Article"
+						      "^#"
+						      "\\`\\*tramp/.*\\*\\`"
+						      "\\`\\*ftp .*\\*\\`"))))
 #+end_src
 
 * embark
@@ -2475,7 +2555,8 @@ Auto cleanup older buffers
   (setq +wakatime-hide-filenames t)
   (setq wakatime-ignore-exit-codes '(0 1 102 112))
   (when IS-MAC
-    (setq wakatime-cli-path "/usr/local/bin/wakatime"))
+    ;; (setq wakatime-cli-path "/usr/local/bin/wakatime")
+    (setq wakatime-cli-path (expand-file-name ".wakatime/wakatime-cli-darwin-arm64" "~")))
   :hook ((org-mode . wakatime-mode)
          (prog-mode . wakatime-mode))
   :config
@@ -5478,6 +5559,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
     (modify-syntax-entry '(#x31350 . #x323AF) "_" st) ; CJK Unified Ideographs Extension H
     (modify-syntax-entry '(#x2EBF0 . #x2EE5F) "_" st) ; CJK Unified Ideographs Extension I
     )
+
   (add-to-list
    'jinx-exclude-faces
    '(typst-ts-mode

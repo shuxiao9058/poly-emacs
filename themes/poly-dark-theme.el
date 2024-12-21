@@ -1,4 +1,4 @@
-;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
+;;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
 ;; Package-Requires: ((emacs "24.3"))
 

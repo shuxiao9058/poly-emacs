@@ -1,4 +1,4 @@
-;;; -*- mode: emacs-lisp; eval: (rainbow-mode); lexical-binding: t -*-
+;;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
 ;; fix (void-function cl-defmacro)
 (eval-when-compile
@@ -131,6 +131,20 @@ If FORCE-TANGLE is non-nil, always tangle before load."
     (setq warning-minimum-level :emergency)
     (setq debug-on-error nil)
     (setq stack-trace-on-error nil)))
+
+;; switch off Emoji popup on M-C-Spc, M-h hiding all windows etc.
+;; To turn off M-C-d dictionary popup, see https://stackoverflow.com/a/20692071:
+;; - Edit ~/Library/Preferences/com.apple.symbolichotkeys.plist
+;; - Find the code for kCGHotKeyLookUpWordInDictionary (70), and set
+;;   `enabled' to OFF (if it's not there just create an entry `70' with
+;;   `enabled' = OFF).
+;; - Restart your system
+;; Some mac-bindings interfere with Emacs bindings.
+;; (when (boundp 'mac-pass-command-to-system)
+  ;; disable system call to commands like
+  ;; C-h (hide frame on macOS by default
+  (setq mac-pass-command-to-system nil)
+  (setq mac-pass-control-to-system nil) ;;)
 
 ;; Native compilation settings
 (when (featurep 'native-compile)

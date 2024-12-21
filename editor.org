@@ -45,8 +45,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; Vertico commands are hidden in normal buffers.
   (setq read-extended-command-predicate
         #'command-completion-default-include-p)
-  ;; Enable recursive minibuffers
-  (setq enable-recursive-minibuffers t)
 
   ;; If there were no errors, there's not much to look at in a compilation
   ;; buffer, so make it go away in 2 seconds.
@@ -91,6 +89,17 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; Enable indentation+completion using the TAB key.
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
+
+;; Enhances built-in Emacs help with more information: A "better" Emacs *Help* buffer.
+(use-package helpful
+  :defer t
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  (([remap describe-command] . helpful-command)
+  ([remap describe-key] . helpful-key)
+  ("C-h h" . helpful-at-point)))
 
 (use-package which-func
   :config
@@ -167,8 +176,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
       Man-notify-method 'aggressive
 
       ;; clipboard
-      kill-ring-max 20000
-      yank-menu-max-items 2000
+      kill-ring-max 30000
+      yank-menu-max-items 20000
       save-interprogram-paste-before-kill t
       x-select-enable-clipboard           t
       x-select-enable-primary             t
@@ -281,6 +290,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 
 
 ;; Completion ignores case.
+;; Ignore cases when complete
+(setq completion-ignore-case t)
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
 
@@ -306,22 +317,35 @@ This is consulted on every `require', `load' and various path/io functions.  You
 #+end_src
 
 ** Encoding
+
+Make sure that UTF-8 is used everywhere.
+
 #+begin_src emacs-lisp
-;; handle emacs utf-8 input
-(setq locale-coding-system 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-language-environment "UTF-8")
-(set-default-coding-systems 'utf-8)
-(prefer-coding-system 'utf-8)
-(setenv "LANG" "en_US.UTF-8")
-(setenv "LC_ALL" "en_US.UTF-8")
-(setq mm-coding-system-priorities '(utf-8))
-;; (setq buffer-file-coding-system 'utf-8)
-(setq-default buffer-file-coding-system 'utf-8-auto-unix)
-(setq erc-server-coding-system '(utf-8 . utf-8))
-;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+(use-package mule
+  :straight (:type built-in)
+  :ensure nil
+  :demand t
+  :init
+  (setq locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  ;; (set-language-environment "UTF-8")
+  (set-language-environment 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (setenv "LANG" "en_US.UTF-8")
+  (setenv "LC_ALL" "en_US.UTF-8")
+  (setq mm-coding-system-priorities '(utf-8))
+  ;; (setq buffer-file-coding-system 'utf-8)
+  (setq-default buffer-file-coding-system 'utf-8-auto-unix)
+  (setq erc-server-coding-system '(utf-8 . utf-8))
+  (set-input-method nil)
+  (add-to-list 'process-coding-system-alist '("python" . (utf-8 . utf-8)))
+  (add-to-list 'process-coding-system-alist '("elpy" . (utf-8 . utf-8)))
+  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+  (when (display-graphic-p)
+    (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1206,11 +1230,23 @@ don't pop windows everywhere!
   )
 #+end_src
 
+* colorful-mode
+
+#+begin_src emacs-lisp :tangle no
+(use-package colorful-mode
+  :diminish
+  :hook (after-init . global-colorful-mode)
+  :init (setq colorful-use-prefix t
+              colorful-prefix-string "⬤")
+  :config (dolist (mode '(html-mode php-mode help-mode helpful-mode))
+            (add-to-list 'global-colorful-modes mode)))
+#+end_src
+
 * rainbow-mode
 
 Visualizing Color Codes with rainbow-mode.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package rainbow-mode
     :straight t
     :diminish rainbow-mode
@@ -1218,8 +1254,11 @@ Visualizing Color Codes with rainbow-mode.
     ;; :init
     ;; (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
     )
+#+end_src
 
-;; Colored parentheses
+* Colored parentheses
+
+#+begin_src emacs-lisp
 (use-package rainbow-delimiters
     :straight t
     :ensure t
