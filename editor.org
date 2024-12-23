@@ -20,7 +20,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
 #+begin_src emacs-lisp
 ;; A few more useful configurations...
 (global-prettify-symbols-mode t)
-(global-display-fill-column-indicator-mode t)
 
 (use-package emacs
   :custom
@@ -1288,10 +1287,16 @@ Visualizing Color Codes with rainbow-mode.
   )
 
 (use-package display-fill-column-indicator
-  :if EMACS27+
-  :straight nil
+  :straight (:type built-in)
   :hook ((prog-mode . display-fill-column-indicator-mode)
-         (text-mode . display-fill-column-indicator-mode)))
+         (text-mode . display-fill-column-indicator-mode))
+  :config
+  (global-display-fill-column-indicator-mode t)
+  (setq display-fill-column-indicator-character ?\u254e)
+  ;; (setq display-fill-column-indicator-character ?┊)
+  ;; (setq display-fill-column-indicator-column 80)
+  ;; (setq display-fill-column-indicator-character ?\u2502)
+  (setq indicate-buffer-boundaries 'left))
 
 ;; copied from +spacemacs/spacemacs-editing-visual
 (use-package highlight-parentheses
@@ -2074,9 +2079,23 @@ do not already have one."
 				  (org-agenda-show-all-dates nil)
 				  (org-agenda-entry-types '(:deadline)) ;; this entry excludes :scheduled
 				  (org-deadline-warning-days 0)))
-				("2" "Show Work GTD & meeting appointment" todo ""
-				 ((org-agenda-files '(,+org-capture-work-gtd-file
-						      ,+org-capture-work-meeting-file))))))
+				("w" "Show Work GTD & meeting appointment" todo ""
+				 ((org-agenda-span 'week)
+				  (org-agenda-show-all-dates t)
+				  (org-agenda-files '(,+org-capture-work-gtd-file
+						      ,+org-capture-work-team-gtd-file
+						      ,+org-capture-work-meeting-file))))
+				("d" "Work Agenda for the day"
+				 ((agenda "" ((org-agenda-span 'day)
+					      ;; (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))
+					      ))
+				  ;; (tags-todo "work")
+				  (org-agenda-files '(,+org-capture-work-gtd-file
+						      ,+org-capture-work-team-gtd-file
+						      ,+org-capture-work-meeting-file)))
+				 ;; ((org-agenda-tag-filter-preset '("+work")))
+				 )
+				))
   (org-id-locations-file (expand-file-name "org-id-locations" poly-cache-dir))
   :config
   (appt-activate 1)

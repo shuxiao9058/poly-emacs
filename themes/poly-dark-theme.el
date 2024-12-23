@@ -292,7 +292,7 @@ The theme has to be reloaded after changing anything in this group."
 
 	       ;; Treemacs
 	       (treemacs-root-face             :inherit font-lock-function-name-face :height 1.4 :underline t)
-	       (fill-column-indicator          :foreground ,bg+2 :height 0.10)
+	       (fill-column-indicator          :foreground ,current :height 0.85)
 
 	       (scroll-bar                     :foreground ,fg-1)
 

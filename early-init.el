@@ -1,18 +1,20 @@
 ;;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
-;; fix (void-function cl-defmacro)
-(eval-when-compile
-  (require 'cl-lib)
-  (require 'cl))
+;; ;; fix (void-function cl-defmacro)
+;; (eval-when-compile
+;;   (require 'cl-lib)
+;;   ;;(require 'cl)
+;;   )
 
 (defvar poly/debug nil
   "Debug flag.")
 
-;; Shut off message buffer.  To debug Emacs, comment these out so you can see
-;; output from message function calls.
-(unless poly/debug
-  ;; (setq message-log-max nil)
-  )
+;; ;; Shut off message buffer.  To debug Emacs, comment these out so you can see
+;; ;; output from message function calls.
+;; (unless poly/debug
+;;   (setq message-log-max nil)
+;;   )
+
 ;; Check if message buffer exists before killing (not doing so errors
 ;; eval-buffer of an init file).
 ;; (when (get-buffer "*Messages*")
@@ -118,7 +120,6 @@ If FORCE-TANGLE is non-nil, always tangle before load."
   (copy-file
    (expand-file-name "private_template.org" user-emacs-directory)
    (expand-file-name "private.org" user-emacs-directory)))
-
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
