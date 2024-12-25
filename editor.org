@@ -64,8 +64,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
 				  (delete-window window))) buf)
 	      (message "Build Succeeded.")))))
 
-   (defun ar/colorize-compilation-buffer ()
-     (let ((inhibit-read-only t))
+  (defun ar/colorize-compilation-buffer ()
+    (let ((inhibit-read-only t))
       (ansi-color-apply-on-region (point-min) (point-max))))
 
   (add-hook 'compilation-filter-hook 'ar/colorize-compilation-buffer)
@@ -97,8 +97,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
   (counsel-describe-variable-function #'helpful-variable)
   :bind
   (([remap describe-command] . helpful-command)
-  ([remap describe-key] . helpful-key)
-  ("C-h h" . helpful-at-point)))
+   ([remap describe-key] . helpful-key)
+   ("C-h h" . helpful-at-point)))
 
 (use-package which-func
   :config
@@ -116,7 +116,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
         (assq-delete-all 'which-function-mode mode-line-misc-info)))
 
 (use-package autorevert
-  :straight nil
+  :straight (:type built-in)
   :diminish auto-revert-mode
   :custom
   (auto-revert-use-notify nil)
@@ -1290,13 +1290,16 @@ Visualizing Color Codes with rainbow-mode.
   :straight (:type built-in)
   :hook ((prog-mode . display-fill-column-indicator-mode)
          (text-mode . display-fill-column-indicator-mode))
+  :custom
+  (display-fill-column-indicator-character ?\u254e)
+  (indicate-buffer-boundaries 'left)
   :config
   (global-display-fill-column-indicator-mode t)
-  (setq display-fill-column-indicator-character ?\u254e)
+  ;; (setq display-fill-column-indicator-character 124)
   ;; (setq display-fill-column-indicator-character ?┊)
   ;; (setq display-fill-column-indicator-column 80)
   ;; (setq display-fill-column-indicator-character ?\u2502)
-  (setq indicate-buffer-boundaries 'left))
+  )
 
 ;; copied from +spacemacs/spacemacs-editing-visual
 (use-package highlight-parentheses
@@ -1371,6 +1374,7 @@ Visualizing Color Codes with rainbow-mode.
 
   (setq org-directory "~/Dropbox/org")
   (setq org-beorg-directory (expand-file-name "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/beorg/"))
+  (setq poly/org-agenda-review-directory (expand-file-name "review" org-beorg-directory))
   (setq +org-mu4e-icalendar-org-capture-file (expand-file-name "mu4e.org" org-beorg-directory))
   (setq +org-calfw-org-capture-file (expand-file-name "calfw.org" org-beorg-directory))
   (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
@@ -1394,6 +1398,16 @@ Visualizing Color Codes with rainbow-mode.
 			  +org-capture-work-meeting-file
 			  +org-mu4e-icalendar-org-capture-file
 			  org-caldav-inbox
+			  ))
+  (setq poly/work-org-agenda-files (list
+			  ;; +org-capture-gtd-file
+			  +org-capture-work-gtd-file
+			  +org-capture-work-team-gtd-file
+			  ;; +org-capture-work-kpi-file
+			  ;; +org-capture-work-talk-file
+			  +org-capture-work-meeting-file
+			  ;; +org-mu4e-icalendar-org-capture-file
+			  ;; org-caldav-inbox
 			  ))
   :config
   (setq org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "WAITING(w)" ;; "HOLD(h!)" "NEXT(n!)" "WAIT(w!)"
@@ -1515,6 +1529,7 @@ do not already have one."
 	  (,(list ;; +org-capture-notes-file
 	     ;; +org-capture-work-notes-file
 	     +org-capture-work-kpi-file
+	     +org-capture-work-gtd-file
 	     +org-capture-work-team-gtd-file
 	     +org-capture-work-weekly-file) :maxlevel . 2)))
 
@@ -2072,35 +2087,117 @@ do not already have one."
      ;; (search . "[%-4e] %?-17b")
      )
    )
-  (org-agenda-custom-commands `(
+  (org-id-locations-file (expand-file-name "org-id-locations" poly-cache-dir))
+  :config
+  (appt-activate 1)
+  ;; (org-agenda-to-appt)
+
+  ;; Common settings for all reviews
+  (setq poly/work-org-agenda-review-settings
+	'((org-agenda-files poly/work-org-agenda-files)
+          ;; (org-super-agenda-groups
+          ;;  '((:auto-property "CATEGORY")))
+          (org-agenda-show-all-dates t)
+	  (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp ":Habit:"))
+          (org-agenda-start-with-log-mode t)
+          (org-agenda-start-with-clockreport-mode t)
+          (org-agenda-archives-mode t)
+          ;; I don't care if an entry was archived
+          (org-agenda-hide-tags-regexp
+           (concat org-agenda-hide-tags-regexp
+                   "\\|ARCHIVE"))
+          ))
+  (setq org-agenda-custom-commands `(
 				("1" "Events" agenda "display deadlines and exclude scheduled"
 				 ((org-agenda-span 'month)
 				  (org-agenda-time-grid nil)
 				  (org-agenda-show-all-dates nil)
 				  (org-agenda-entry-types '(:deadline)) ;; this entry excludes :scheduled
 				  (org-deadline-warning-days 0)))
-				("w" "Show Work GTD & meeting appointment" todo ""
+				("wg" "Show Work GTD & meeting appointment" todo "Work GTD"
 				 ((org-agenda-span 'week)
 				  (org-agenda-show-all-dates t)
-				  (org-agenda-files '(,+org-capture-work-gtd-file
-						      ,+org-capture-work-team-gtd-file
-						      ,+org-capture-work-meeting-file))))
-				("d" "Work Agenda for the day"
-				 ((agenda "" ((org-agenda-span 'day)
-					      ;; (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))
-					      ))
-				  ;; (tags-todo "work")
-				  (org-agenda-files '(,+org-capture-work-gtd-file
-						      ,+org-capture-work-team-gtd-file
-						      ,+org-capture-work-meeting-file)))
-				 ;; ((org-agenda-tag-filter-preset '("+work")))
+				  (org-agenda-files poly/work-org-agenda-files)
+				  (org-agenda-overriding-header "Work GTD ")
+				  ))
+				("wd" agenda "Today's Deadlines"
+				 ((org-agenda-span 'day)
+				  (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))
+				  (org-agenda-entry-types '(:deadline))
+				  (org-agenda-overriding-header "Today's Deadlines "))
 				 )
-				))
-  (org-id-locations-file (expand-file-name "org-id-locations" poly-cache-dir))
-  :config
-  (appt-activate 1)
-  ;; (org-agenda-to-appt)
+				("ws" agenda "Today's Schedule"
+				 ((org-agenda-span 'day)
+				  (org-agenda-skip-function '(org-agenda-skip-schedule-if-not-today))
+				  (org-agenda-entry-types '(:schedule))
+				  (org-agenda-overriding-header "Today's Schedule ")))
+				("wrd" "Day in review" agenda "Day Review"
+				 ;; agenda settings
+				 ,(append
+				   poly/work-org-agenda-review-settings
+				   '((org-agenda-span 'day)
+				     (org-agenda-overriding-header "Day in Review"))
+				   )
+				 ,(list (expand-file-name "day.html" poly/org-agenda-review-directory))
+				 )
+				("wrw" "Week in review" agenda "Week Review"
+				 ;; agenda settings
+				 ,(append
+				   poly/work-org-agenda-review-settings
+				   '((org-agenda-span 'week)
+				     (org-agenda-start-on-weekday 1)
+				     (org-agenda-overriding-header "Week in Review")))
+				 ,(list (expand-file-name "week.html" poly/org-agenda-review-directory)))
+				("wrm" "Month in review" agenda ""
+				 ;; agenda settings
+				 ,(append
+				   poly/work-org-agenda-review-settings
+				   '((org-agenda-span 'month)
+				     (org-agenda-start-day "01")
+				     (org-read-date-prefer-future nil)
+				     (org-agenda-overriding-header "Month in Review"))
+				   )
+				 ,(list (expand-file-name "month.html" poly/org-agenda-review-directory))
+				 )
+				("wd" "Work Agenda for the day" agenda "Work Agenda"
+				 ((org-agenda-span 'day)
+				  (org-agenda-files poly/work-org-agenda-files;; '(,+org-capture-work-gtd-file
+						    ;;   ,+org-capture-work-team-gtd-file
+						    ;;   ,+org-capture-work-meeting-file)
+						    )
+				  (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))))))
   )
+
+;; https://github.com/komali2/Configs/blob/413d2bd8ae2f618603e9c3a87e30c5ab0cf17509/emacs/.doom.d/config.el#L314
+(defun org-agenda-skip-deadline-if-not-today ()
+  "If this function returns nil, the current match should not be skipped.
+Otherwise, the function must return a position from where the search
+should be continued."
+  (ignore-errors
+    (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+          (deadline-day
+           (time-to-days
+            (org-time-string-to-time
+             (org-entry-get nil "DEADLINE"))))
+          (now (time-to-days (current-time))))
+      (and deadline-day
+           (not (= deadline-day now))
+           subtree-end))))
+
+(defun org-agenda-skip-schedule-if-not-today ()
+  "If this function returns nil, the current match should not be skipped.
+Otherwise, the function must return a position from where the search
+should be continued."
+  (ignore-errors
+    (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+          (schedule-day
+           (time-to-days
+            (org-time-string-to-time
+             (org-entry-get nil "SCHEDULED"))))
+          (now (time-to-days (current-time))))
+      (and schedule-day
+           (not (= deadline-day now))
+           subtree-end))))
 #+end_src
 ** Write codes in org-mode
 #+begin_src emacs-lisp

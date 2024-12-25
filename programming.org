@@ -2363,7 +2363,7 @@ use-package will load java-lsp for us simply by calling this function."
   (add-hook 'magit-mode-hook #'poly/go-set-compile-command)
   (setq gofmt-command "goimports")
   ;; Sets the fill column (where to break paragraphs on M-q)
-  (add-hook 'go-ts-mode-hook (lambda () (setq fill-column 100))))
+  (add-hook 'go-ts-mode-hook (lambda () (setq fill-column 120))))
 
 (unless (executable-find "gopls")
   (poly/install-go-tool 'gopls))
