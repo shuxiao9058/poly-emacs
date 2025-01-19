@@ -441,9 +441,9 @@
   (undo-strong-limit 3000000)
   (undo-outer-limit 3000000)
   :init
-  (global-unset-key (kbd "C-z"))
-  (global-set-key (kbd "C-z")   'undo-fu-only-undo)
-  (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+  (keymap-global-unset "C-z")
+  (keymap-global-set "C-z" 'undo-fu-only-undo)
+  (keymap-global-set "C-S-z" 'undo-fu-only-redo))
 
 ;; persistent undo across sessions
 (use-package undo-fu-session

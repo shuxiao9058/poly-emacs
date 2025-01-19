@@ -81,6 +81,9 @@
         ("http" . "127.0.0.1:6152")
         ("https" . "127.0.0.1:6152")))
 
+(setenv "HTTP_PROXY"  "http://127.0.0.1:6152")
+(setenv "HTTPS_PROXY" "http://127.0.0.1:6152")
+
  ;; (setq url-proxy-services
  ;;      '(("no_proxy" . "^\\(127.0.0.1\\|localhost\\|10.*|192\\.168\\..*\\)")
  ;;        ("http" . "127.0.0.1:8888")

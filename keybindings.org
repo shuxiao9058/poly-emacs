@@ -141,7 +141,7 @@
     (let ((end (point)))
       (my-text-transform start end))))
 
-(global-set-key (kbd "M-y") 'yank-pop-custom-transform)
+(keymap-global-set "M-y" 'yank-pop-custom-transform)
  #+end_src
 
 * Meow

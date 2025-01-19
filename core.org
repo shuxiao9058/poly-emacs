@@ -304,21 +304,31 @@ Accepts the same arguments as `message'."
 ;;       " --title " (shell-quote-argument g-title)
 ;;       " --message " (shell-quote-argument message)))))
 
+;; (defun terminal-notify (message &optional title)
+;;   "Display a Notify MESSAGE. The optional TITLE's default value is \"Emacs\"."
+;;   (interactive "Message: ")
+;;   (let* ((g-title (if (and title (not (eq title ""))) title "Emacs"))
+;; 	 (notify-command (string-join `("terminal-notifier"
+;; 					"-ignoreDnD"
+;; 					;; "-appIcon"
+;; 					;; "file://Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
+;; 					"-title" ,(shell-quote-argument g-title)
+;; 					;; "-sender" ,(shell-quote-argument "org.gnu.Emacs")
+;; 					;; "-sender" ,(shell-quote-argument "com.apple.Reminders")
+;; 					"-sender" ,(shell-quote-argument "org.hammerspoon.Hammerspoon")
+;; 					"-message" ,(shell-quote-argument message))
+;; 				      " ")))
+;;     (shell-command notify-command)))
+
 (defun terminal-notify (message &optional title)
   "Display a Notify MESSAGE. The optional TITLE's default value is \"Emacs\"."
   (interactive "Message: ")
   (let* ((g-title (if (and title (not (eq title ""))) title "Emacs"))
-	 (notify-command (string-join `("terminal-notifier"
-					"-ignoreDnD"
-					;; "-appIcon"
-					;; "file://Applications/MacPorts/EmacsMac.app/Contents/Resources/Emacs.icns"
-					"-title" ,(shell-quote-argument g-title)
-					;; "-sender" ,(shell-quote-argument "org.gnu.Emacs")
-					;; "-sender" ,(shell-quote-argument "com.apple.Reminders")
-					"-sender" ,(shell-quote-argument "org.hammerspoon.Hammerspoon")
-					"-message" ,(shell-quote-argument message))
-				      " ")))
-    (shell-command notify-command)))
+	 (title (replace-regexp-in-string "\"" "#" g-title))
+	 (message (replace-regexp-in-string "\"" "#" message))
+	 )
+    ;; (shell-command notify-command)
+    (ns-do-applescript (format "display notification \"%s\" with title \"%s\"" message title))))
 #+end_src
 
 ** ui

@@ -804,6 +804,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (tabnine-minimum-prefix-length 0)
   (tabnine-max-wait-count-while-nil 5)
   (tabnine-wait-interval-while-nil 0.2)
+  (tabnine-max-consecutive-restart-count most-positive-fixnum)
   ;; (tabnine-network-proxy "http://127.0.0.1:8888")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
@@ -1850,8 +1851,8 @@ To manage the git repository, use builtin package ~vc~.
 
   ;; (progn
   ;;   ;; (add-hook 'magit-status-sections-hook #'gerrit-magit-insert-status t)
-  ;;   (global-set-key (kbd "C-x i") 'gerrit-upload-transient)
-  ;;   (global-set-key (kbd "C-x o") 'gerrit-download))
+  ;;   (keymap-global-set "C-x i" 'gerrit-upload-transient)
+  ;;   (keymap-global-set "C-x o" 'gerrit-download))
   )
 
 (use-package code-review
@@ -5521,9 +5522,9 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp
 (defvar poly-http-proxy-host "localhost")
-(defvar poly-http-proxy-port 7890)
+(defvar poly-http-proxy-port 6153)
 ;; (defvar poly-socks5-proxy-host "localhost")
-;; (defvar poly-socks5-proxy-port 7891)
+;; (defvar poly-socks5-proxy-port 6152)
 
 ;; (setq url-proxy-services
 ;;       `(("http" . ,(format "%s:%s" poly-http-proxy-host  poly-http-proxy-port))

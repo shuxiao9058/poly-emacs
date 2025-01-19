@@ -192,8 +192,8 @@ Configuration for look and feels, make UI looks better.
                       (+ (face-attribute 'default :height)
                          (* (if (> n 0) 1 -1) 10))))
 ;; Add some zoom keybindings.
-(global-set-key (kbd "C-+") #'(lambda () (interactive) (bcm/zoom 1)))
-(global-set-key (kbd "C--") #'(lambda () (interactive) (bcm/zoom -1)))
+(keymap-global-set "C-+" #'(lambda () (interactive) (bcm/zoom 1)))
+(keymap-global-set "C--" #'(lambda () (interactive) (bcm/zoom -1)))
 
 (when (and IS-GUI IS-MAC)
   (add-hook 'focus-in-hook
@@ -737,13 +737,17 @@ lines are selected, or the NxM dimensions of a block selection."
            (:eval (csb/modeline-selection-info)))
          ;; right
          '(" "
+	   ;; (:eval (breadcrumb-project-crumbs))
+	   ;; " / "
+	   (:eval (breadcrumb-imenu-crumbs))
+	   (:eval (propertize " | " 'face 'shadow) )
 	   ;;
            ;; mode-line-modes
 	   (project-mode-line project-mode-line-format)
-	   	   (:eval (propertize " | " 'face 'shadow) ) ; separator
+	   (:eval (propertize " | " 'face 'shadow) ) ; separator
 	   minions-mode-line-modes
-          (vc-mode vc-mode)
-          " "
+           (vc-mode vc-mode)
+           " "
            ;; mode-line-client
            (:eval (csb/lsp-state-icon))
 	   ;; " "

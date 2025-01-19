@@ -18,7 +18,7 @@ Configuration for programming and languages support.
 
 * Format
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package apheleia
   :delight "\U000f0276"
   :straight (:host github :repo "radian-software/apheleia" :branch "main")
@@ -141,7 +141,8 @@ Configuration for programming and languages support.
 	  ;; fish-mode
 	  ;; sh-mode
 	  ;; ;; prog-mode
-	  ;; lua-mode
+	  lua-mode
+	  lua-ts-mode
 	  ;; ;; go-mode
 	  ;; ;; go-ts-mode
 	  ;; ;; go-mod-ts-mode
@@ -164,8 +165,8 @@ Configuration for programming and languages support.
 	  ;; clojure-mode
 	  ;; web-mode
 	  ;; web-mode-prog-mode
-	  ;; objc-mode
-	  ;;  swift-mode
+	  objc-mode
+	  swift-mode
 	  ;;  typescript-mode
 	  ;;  web-mode
 	  ) . format-all-mode)
@@ -530,6 +531,11 @@ Configuration for programming and languages support.
 Use eglot as LSP client.
 
 #+begin_src emacs-lisp
+(use-package breadcrumb
+  :ensure t
+  :straight (:host github :repo "joaotavora/breadcrumb")
+  :defer 1)
+
 (defun project-name (project)
   "A human-readable name for the project.
 	Nominally unique, but not enforced."
@@ -689,7 +695,8 @@ Examples:
 
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
-  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls"))
+  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
+   			   ))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
@@ -1040,11 +1047,11 @@ Examples:
     (unless (null (symbol-function tmp-symbol))
       (funcall (symbol-function tmp-symbol)))))
 
-(when (executable-find "emacs-lsp-booster")
-  (use-package eglot-booster
-    :straight (:host github :repo "jdtsmith/eglot-booster")
-    :after eglot
-    :config (eglot-booster-mode)))
+;; (when (executable-find "emacs-lsp-booster")
+;;   (use-package eglot-booster
+;;     :straight (:host github :repo "jdtsmith/eglot-booster")
+;;     :after eglot
+;;     :config (eglot-booster-mode)))
 
 
 (use-package java-imports
@@ -2754,7 +2761,7 @@ Use clojure-mode for basic syntax support.
      (point-max)
      (concat "open " (buffer-file-name))
      "*open*"))
-  ;; (global-set-key (kbd "C-c h") 'open-html-file)
+  ;; (keymap-global-set "C-c h" 'open-html-file)
   )
 
 (use-package emmet-mode

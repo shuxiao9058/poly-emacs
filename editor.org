@@ -146,6 +146,15 @@ This is consulted on every `require', `load' and various path/io functions.  You
       ffap-machine-p-known 'reject
       highlight-nonselected-windows nil
       idle-update-delay 1.0
+      make-cursor-line-fully-visible nil
+      ;; frame-title-format '("%b [%m] - Emacs")
+      ;; frame-title-format '(multiple-frames "%b" ("%b\t%f"))
+      ;; frame-title-format '(:eval (if (buffer-file-name)
+      ;; 				     (abbreviate-file-name (buffer-file-name)) "%b"));; '(multiple-frames "%b"
+      ;; ;; 		   ("" invocation-name "@" system-name))
+      ;; frame-title-format '("%b [%m] %f")
+
+      ;; frame-title-format nil
       ;; 指针宽度与字符一致
       x-stretch-cursor t
       ns-use-proxy-icon nil
@@ -856,8 +865,8 @@ No tab will created if the command is cancelled."
 		   (funcall tab-bar-tab-face-function tab))
        " ")))
 
-  (global-set-key (kbd "C-x t .") #'tab-bar-rename-tab)
-  (global-set-key (kbd "C-x t l") #'+tab-bar-switch-project)
+  (keymap-global-set "C-x t ." #'tab-bar-rename-tab)
+  (keymap-global-set "C-x t l" #'+tab-bar-switch-project)
 
   (tab-bar-mode 1)
   :bind
@@ -927,14 +936,13 @@ WIN-ID : Window index."
   :straight t
   :ensure t
   :defer t
-  :init
-  (global-set-key [remap other-window] #'ace-window)
   :custom
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'global)
   (aw-background t)
   :bind
-  (("C-x o" . ace-window)))
+  (("C-x o" . ace-window)
+   ([remap other-window] . switch-window)))
 
 ;;;###autoload
 (defun ace-maximize-window ()
@@ -2105,8 +2113,7 @@ do not already have one."
           ;; I don't care if an entry was archived
           (org-agenda-hide-tags-regexp
            (concat org-agenda-hide-tags-regexp
-                   "\\|ARCHIVE"))
-          ))
+                   "\\|ARCHIVE"))))
   (setq org-agenda-custom-commands `(
 				("1" "Events" agenda "display deadlines and exclude scheduled"
 				 ((org-agenda-span 'month)
@@ -2114,24 +2121,26 @@ do not already have one."
 				  (org-agenda-show-all-dates nil)
 				  (org-agenda-entry-types '(:deadline)) ;; this entry excludes :scheduled
 				  (org-deadline-warning-days 0)))
-				("wg" "Show Work GTD & meeting appointment" todo "Work GTD"
+				("wg" "Show Work GTD & meeting appointment" todo ""
 				 ((org-agenda-span 'week)
 				  (org-agenda-show-all-dates t)
 				  (org-agenda-files poly/work-org-agenda-files)
-				  (org-agenda-overriding-header "Work GTD ")
+				  ;; (org-agenda-overriding-header "Work GTD ")
 				  ))
-				("wd" agenda "Today's Deadlines"
+				("wd" "Today's Deadlines" agenda ""
 				 ((org-agenda-span 'day)
 				  (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))
 				  (org-agenda-entry-types '(:deadline))
-				  (org-agenda-overriding-header "Today's Deadlines "))
+				  ;; (org-agenda-overriding-header "Today's Deadlines ")
+				  )
 				 )
-				("ws" agenda "Today's Schedule"
+				("ws" "Today's Schedule" agenda ""
 				 ((org-agenda-span 'day)
 				  (org-agenda-skip-function '(org-agenda-skip-schedule-if-not-today))
 				  (org-agenda-entry-types '(:schedule))
-				  (org-agenda-overriding-header "Today's Schedule ")))
-				("wrd" "Day in review" agenda "Day Review"
+				  ;; (org-agenda-overriding-header "Today's Schedule ")
+				  ))
+				("wrd" "Day in review" agenda ""
 				 ;; agenda settings
 				 ,(append
 				   poly/work-org-agenda-review-settings
@@ -2140,7 +2149,7 @@ do not already have one."
 				   )
 				 ,(list (expand-file-name "day.html" poly/org-agenda-review-directory))
 				 )
-				("wrw" "Week in review" agenda "Week Review"
+				("wrw" "Week in review" agenda ""
 				 ;; agenda settings
 				 ,(append
 				   poly/work-org-agenda-review-settings
@@ -2159,12 +2168,9 @@ do not already have one."
 				   )
 				 ,(list (expand-file-name "month.html" poly/org-agenda-review-directory))
 				 )
-				("wd" "Work Agenda for the day" agenda "Work Agenda"
+				("wd" "Work Agenda for the day" agenda ""
 				 ((org-agenda-span 'day)
-				  (org-agenda-files poly/work-org-agenda-files;; '(,+org-capture-work-gtd-file
-						    ;;   ,+org-capture-work-team-gtd-file
-						    ;;   ,+org-capture-work-meeting-file)
-						    )
+				  (org-agenda-files poly/work-org-agenda-files)
 				  (org-agenda-skip-function '(org-agenda-skip-deadline-if-not-today))))))
   )
 
