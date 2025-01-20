@@ -706,8 +706,15 @@ lines are selected, or the NxM dimensions of a block selection."
   "Has popper claimed this as a popup!?"
   (if (and (boundp 'popper-popup-status)
            popper-popup-status)
-      (propertize "🎈" 'face 'mode-line-emphasis)
-    ""))
+      (propertize "🎈" 'face 'mode-line-emphasis) ""))
+
+(defun poly/breadcrumb ()
+  "breadcrumb modeline"
+  (when (and (derived-mode-p 'prog-mode))
+    (let* ((breadcrumb (breadcrumb-imenu-crumbs)))
+      (when breadcrumb
+	(concat (propertize " | " 'face 'shadow)
+		breadcrumb)))))
 
 ;; https://occasionallycogent.com/custom_emacs_modeline/index.html
 (setq csb/original-mode-line-format mode-line-format)
@@ -734,13 +741,16 @@ lines are selected, or the NxM dimensions of a block selection."
            ;; "%l:%c "
 	   mode-line-percent-position
 	   " "
-           (:eval (csb/modeline-selection-info)))
-         ;; right
-         '(" "
+           (:eval (csb/modeline-selection-info))
+	   ;; " "
+	   (:eval (poly/breadcrumb))
+	   ;; (:eval (propertize " | " 'face 'shadow) )
 	   ;; (:eval (breadcrumb-project-crumbs))
 	   ;; " / "
-	   (:eval (breadcrumb-imenu-crumbs))
-	   (:eval (propertize " | " 'face 'shadow) )
+	   ;; (:eval (breadcrumb-imenu-crumbs))
+	   )
+         ;; right
+         '(" "
 	   ;;
            ;; mode-line-modes
 	   (project-mode-line project-mode-line-format)
