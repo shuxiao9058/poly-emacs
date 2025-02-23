@@ -1697,7 +1697,6 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; browse-at-remote - Browse target page on github/gitlab/bitbucket
 (use-package browse-at-remote
-  :disabled
   :config
   (add-to-list 'browse-at-remote-remote-type-regexps '(:host "^git\\.17usoft\\.com$" :type "gitlab" :actual-host "git.17usoft.com"))
   (transient-append-suffix 'magit-file-dispatch "m"
