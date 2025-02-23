@@ -127,7 +127,7 @@ Configuration for addons, additional features provided by individual packages.
 #+begin_src emacs-lisp :tangle no
 (use-package selectrum
   :disabled
-  :straight t
+  ;; :straight t
   :hook (after-init . selectrum-mode)
   :custom
   (selectrum-fix-vertical-window-height t)
@@ -154,7 +154,7 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
   (use-package marginalia
-    :straight t
+    ;; :straight t
     :ensure t
     :demand t
     :defer 1
@@ -218,7 +218,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp :tangle no
 (use-package orderless
-  :straight t
+  ;; :straight t
   :after selectrum
   :config
   (setq completion-styles '(orderless))
@@ -303,7 +303,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src  emacs-lisp :tangle no
 (use-package selectrum-prescient
-  :straight t
+  ;; :straight t
   :after selectrum
   :config
   (selectrum-prescient-mode t)
@@ -314,7 +314,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package consult
-  :straight t
+  ;; :straight t
   :ensure t
   :demand t
   :defer 1
@@ -397,19 +397,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ** vertico
 #+BEGIN_SRC emacs-lisp
 (use-package vertico
-  :straight (vertico
-	     :files (:defaults "extensions/*")
-	     :includes (vertico-buffer
-			vertico-directory
-			vertico-flat
-			vertico-indexed
-			vertico-mouse
-			vertico-quick
-			vertico-repeat
-			vertico-reverse))
+  ;; :straight (vertico
+	;;      :files (:defaults "extensions/*")
+	;;      :includes (vertico-buffer
+	;; 		vertico-directory
+	;; 		vertico-flat
+	;; 		vertico-indexed
+	;; 		vertico-mouse
+	;; 		vertico-quick
+	;; 		vertico-repeat
+	;; 		vertico-reverse))
   ;; :straight t
-  :init
-  (vertico-mode)
+  ;; :init
   :custom
   ;; Different scroll margin
   (vertico-scroll-margin 0)
@@ -433,11 +432,13 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("<backtab>" . vertico-previous)
 	 ("?" . minibuffer-completion-help)
 	 ("M-RET" . minibuffer-force-complete-and-exit)
-	 ("M-TAB" . minibuffer-complete))))
+	 ("M-TAB" . minibuffer-complete)))
+   :config
+   (vertico-mode))
 
 ;; Configure directory extension.
 (use-package vertico-directory
-  :straight nil
+ ;; :straight nil
   :after vertico
   :ensure nil
   ;; More convenient directory navigation commands
@@ -458,7 +459,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;; Multiple files can be opened at once with `find-file' if you enter a
 ;; wildcard. You may also give the `initials' completion style a try.
 (use-package orderless
-  :straight t
+  ;; :straight t
   :config
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
@@ -483,12 +484,12 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Sorting and filtering
 (use-package prescient
-  :straight t
+  ;; :straight t
   :config
   (prescient-persist-mode 1))
 
 (use-package vertico-prescient
-  :straight t
+  ;; :straight t
   :config
   (vertico-prescient-mode 1))
 #+END_SRC
@@ -497,8 +498,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package corfu
-  :straight (:files (:defaults "extensions/*")
-		    :includes (corfu-history))
+  ;; :straight (:files (:defaults "extensions/*")
+	;; 	    :includes (corfu-history))
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
@@ -527,11 +528,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-scroll-margin 5)        ;; Use scroll margin
   (corfu-right-margin-width 2.0)
   (corfu-left-margin-width 1.0)
-  :init
+  :config
   (global-corfu-mode)
   (corfu-history-mode)
   (corfu-popupinfo-mode)
-  :config
+
   (unbind-key (kbd "TAB") corfu-map)
   (unbind-key (kbd "<tab>") corfu-map)
   (add-hook 'eshell-mode-hook
@@ -560,7 +561,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;; Icon support
 (use-package kind-icon
   :ensure t
-  :straight t
+  ;; :straight t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default)
@@ -621,6 +622,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
  bookmark-save-flag 1)                        ; Autosave each change.
 
 (use-package corfu-history
+  :ensure nil
   :after corfu
   :init (corfu-history-mode))
 
@@ -677,7 +679,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Completion At Point Extensions made for `corfu'
 (use-package cape
-  :straight t
+  ;; :straight t
   ;; ;; Bind dedicated completion commands
   ;; ;; Alternative prefix keys: C-c p, M-p, M-+, ...
   ;; :bind (("C-c p p" . completion-at-point) ;; capf
@@ -696,7 +698,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;;        ("C-c p ^" . cape-tex)
   ;;        ("C-c p &" . cape-sgml)
   ;;        ("C-c p r" . cape-rfc1345))
-  :init
+  ;; :init
   ;; Add `completion-at-point-functions', used by `completion-at-point'.
   ;; (add-to-list 'completion-at-point-functions #'cape-file)
   ;; (add-to-list 'completion-at-point-functions #'cape-tex)
@@ -708,13 +710,40 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (add-to-list 'completion-at-point-functions #'cape-dict)
   ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
   ;; (add-to-list 'completion-at-point-functions #'cape-line)
-  :hook ((prog-mode . poly/set-basic-capf)
-	 (org-mode . poly/set-basic-capf)
-	 (text-mode . poly/set-basic-capf)
-	 (emacs-lisp-mode . (lambda ()
-			      (poly/convert-super-capf #'elisp-completion-at-point)))
-	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
+  ;; :hook ((prog-mode . poly/set-basic-capf)
+	;;  (org-mode . poly/set-basic-capf)
+	;;  (text-mode . poly/set-basic-capf)
+	;;  ;; (emacs-lisp-mode . (lambda ()
+	;;  ;;      (poly/convert-super-capf #'elisp-completion-at-point)))
+	;;  ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
   :config
+  (with-eval-after-load 'cape 
+    (add-hook 'prog-mode-hook  #'poly/set-basic-capf)
+    (add-hook 'org-mode-hook  #'poly/set-basic-capf)
+    (add-hook 'text-mode-hook  #'poly/set-basic-capf)
+     (add-hook 'eglot-managed-mode-hook  #'poly/set-lsp-capf)
+  )
+  ;; fix (void-function cape-capf-buster)
+(defun cape-capf-buster (capf &optional valid)
+  "Return transformed CAPF where the cache is busted on input change.
+VALID is the input comparator, see `cape--input-valid-p'."
+  (lambda ()
+    (pcase (funcall capf)
+      (`(,beg ,end ,table . ,plist)
+       `(,beg ,end
+              ,(let* ((beg (copy-marker beg))
+                      (end (copy-marker end t))
+                      (input (buffer-substring-no-properties beg end)))
+                 (lambda (str pred action)
+                   (let ((new-input (buffer-substring-no-properties beg end)))
+                     (unless (cape--input-valid-p input new-input valid)
+                       (pcase (funcall capf)
+                         (`(,_beg ,_end ,new-table . ,_plist)
+                          ;; NOTE: We have to make sure that the completion table is interruptible.
+                          ;; An interruption should not happen between the setqs.
+                          (setq table new-table input new-input)))))
+                   (complete-with-action action table str pred)))
+              ,@plist)))))
   (poly/set-basic-capf)
   (setq dabbrev-upcase-means-case-search t)
   (setq case-fold-search nil)
@@ -761,18 +790,19 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Configure Tempel
 (use-package tempel
-  :straight t
+  ;; :straight t
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
 	 ("M-*" . tempel-insert))
   :config
   (global-tempel-abbrev-mode))
 
 (use-package tempel-collection
-  :straight t
+  ;; :straight t
   :after tempel)
 
 (use-package editorconfig
-  :straight t)
+  ;; :straight t
+  )
 #+end_src
 
 *** ldap-mode
@@ -792,12 +822,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package tabnine
+:vc (:url "https://github.com/shuxiao9058/tabnine")
   :commands (tabnine-start-process)
   :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . tabnine-mode)
+  ;; :straight (:host github :repo "shuxiao9058/tabnine" :branch "main")
   ;; :straight (tabnine :package "tabnine"
-  ;; 		     :type git
-  ;; 		     :host nil
-  ;; 		     :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git")
+	;; 	     :type git
+	;; 	     :host nil
+	;; 	     :branch "main"
+	;; 	     :repo "git@github.com:shuxiao9058/tabnine.git"
+	;; 	     ;; :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git"
+	;; 	     ;; :repo "http://192.168.199.8:30008/shuxiao9058/tabnine.git"
+	;;	     )
   :diminish "⌬"
   :custom
   (tabnine-wait 1.0)
@@ -807,6 +843,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (tabnine-max-consecutive-restart-count most-positive-fixnum)
   ;; (tabnine-network-proxy "http://127.0.0.1:8888")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
+  ;; (tabnine-log-file-path "/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
   (tabnine-chat-prompt-alist '((explain-code . "解释这段代码含义")
 			       (generate-test-for-code . "为这段代码编写测试用例")
@@ -816,6 +853,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :init
   (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "true"))
   :hook (kill-emacs . tabnine-kill-process)
+  :after cape
   :config
   (tabnine-start-process)
   ;; (setq tabnine-network-proxy "http://127.0.0.1:8888")
@@ -850,7 +888,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 #+begin_src emacs-lisp
 (use-package corfu-quick
   :after corfu
-  :straight nil
+  :ensure nil
   :bind
   (:map corfu-map
         ("C-q" . corfu-quick-insert)))
@@ -858,7 +896,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 *** corfu-terminal & popon
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (unless IS-GUI
   (use-package popon
     :straight (popon :package "popon"
@@ -1492,7 +1530,7 @@ To manage the git repository, use builtin package ~vc~.
   (insert (concat "Change-Id: I" (substring (secure-hash 'sha256 (number-to-string (random t))) 0 40))))
 
 (use-package magit
-  :straight t
+  ;; :straight t
   :commands (magit-file-delete magit-status magit-checkout)
   :hook ((magit-pop-mode . hide-mode-line-mode)
 	 ;; (git-commit-setup . git-commit-turn-on-flyspell)
@@ -1658,13 +1696,13 @@ To manage the git repository, use builtin package ~vc~.
 ;;   :hook (magit-mode . magit-delta-mode))
 
 (use-package magit-gitflow
-  :straight t
+  ;; :straight t
   :after magit
   :commands magit-gitflow-popup
   :hook (magit-mode . turn-on-magit-gitflow))
 
 (use-package magit-todos
-  :straight t
+  ;; :straight t
   :disabled
   :diminish
   :after magit
@@ -1699,7 +1737,7 @@ To manage the git repository, use builtin package ~vc~.
 ;; git-gutter-plus - View, stage and revert Git changes from the buffer (inspired by package of same name from vim)
 ;; diff-hl is better
 (use-package git-gutter+
-  :straight t
+  ;; :straight t
   :diminish "Git↓"
   :demand t
   :disabled
@@ -1723,11 +1761,12 @@ To manage the git repository, use builtin package ~vc~.
 
 (use-package git-gutter-fringe+
   :disabled
-  :straight t)
+  ;; :straight t
+  )
 
 ;; git-messenger - Provides a function popup commit message at current line (port of package of same name from vim)
 (use-package git-messenger
-  :straight t
+  ;; :straight t
   :bind ("C-c g p" . git-messenger:popup-message)
   :init
   (custom-set-variables
@@ -1739,7 +1778,7 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; git-timemachine - Step through historic versions of a git controlled file
 (use-package git-timemachine
-  :straight t
+  ;; :straight t
   :bind ("C-c g t" . git-timemachine-toggle))
 
 ;; ;; gitignore-mode - Major mode for various Git configuration files
@@ -1747,7 +1786,7 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; browse-at-remote - Browse target page on github/gitlab/bitbucket
 (use-package browse-at-remote
-  :straight t
+:disabled
   :config
   (add-to-list 'browse-at-remote-remote-type-regexps '(:host "^git\\.17usoft\\.com$" :type "gitlab" :actual-host "git.17usoft.com"))
   (transient-append-suffix 'magit-file-dispatch "m"
@@ -1764,11 +1803,9 @@ To manage the git repository, use builtin package ~vc~.
 ;;     (mapc #'kill-buffer buffers)))
 
 (use-package yaml
-  :straight t
   :disabled)
 
 (use-package forge
-  :straight t
   :after (magit yaml)
   :disabled
   :commands forge-create-pullreq forge-create-issue
@@ -1799,7 +1836,7 @@ To manage the git repository, use builtin package ~vc~.
 ;;   )
 
 (use-package smerge-mode
-  :straight t
+  ;; :straight t
   :ensure t
   :diminish
   :commands (smerge-mode
@@ -1834,7 +1871,7 @@ To manage the git repository, use builtin package ~vc~.
 ;; (use-package vdiff
 ;;   :straight t)
 (use-package gerrit
-  :straight t
+  ;; :straight t
   :ensure t
   :custom
   (gerrit-use-ssl nil)
@@ -1857,7 +1894,7 @@ To manage the git repository, use builtin package ~vc~.
 
 (use-package code-review
   :disabled
-  :straight t
+  ;; :straight t
   :bind (:map forge-topic-mode-map
 	      ("C-c r" . code-review-forge-pr-at-point)
 	      :map code-review-feedback-section-map
@@ -2016,6 +2053,7 @@ pulse
 
 ;; Pulse modified region
 (use-package goggles
+:ensure t
   :diminish
   :hook ((prog-mode text-mode) . goggles-mode))
 #+end_src
@@ -2060,10 +2098,14 @@ Magit with cz
     (member rime--current-input-key '(91 93 96))))
 
 (use-package rime
-  :straight (rime
-	     :host github
-	     :repo "DogLooksGood/emacs-rime"
-	     :files (:defaults "lib.c" "Makefile"))
+:vc (:url "https://github.com/DogLooksGood/emacs-rime"
+       :branch "main"
+       ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
+       )
+  ;; :straight (rime
+	;;      :host github
+	;;      :repo "DogLooksGood/emacs-rime"
+	;;     :files (:defaults "lib.c" "Makefile"))
   :defer t
   :custom
   (rime-disable-predicates '(;; +rime-disable-predicate
@@ -2151,7 +2193,7 @@ deal with rime search in minibuffer
 
 #+begin_src emacs-lisp
 (use-package isearch-mb
-  :straight t
+  ;; :straight t
   :custom
   ;; Match count next to the minibuffer prompt
   (isearch-lazy-count t)
@@ -2176,7 +2218,7 @@ deal with rime search in minibuffer
 
 Use Telega as Telegram client.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package telega
   :straight (telega
 	     :host github
@@ -2226,11 +2268,13 @@ Use Telega as Telegram client.
 * Directory environment support with direnv
 
 #+begin_src emacs-lisp
-(straight-use-package 'direnv)
-
+(use-package direnv
+:config
 (setq direnv-always-show-summary nil)
 
 (autoload 'direnv-mode "direnv" nil t)
+)
+
 #+end_src
 
 * saveplace
@@ -2238,7 +2282,7 @@ Save cursor position
 
 #+begin_src emacs-lisp
 (use-package saveplace
-  :straight (:type built-in)
+  :ensure nil
   :custom
   (save-place-file (expand-file-name "saveplace" poly-cache-dir))
   (save-place t)
@@ -2252,7 +2296,6 @@ Save cursor position
 
 ;; Completion engine
 (use-package minibuffer
-  :straight (:type built-in)
   :ensure nil
   :bind (:map minibuffer-local-map
               ([escape] . abort-recursive-edit)
@@ -2293,7 +2336,7 @@ save minibuffer history
 
 #+begin_src emacs-lisp
 (use-package savehist
-  :straight (:type built-in)
+  :ensure nil
   :custom
   (savehist-file (expand-file-name "history" poly-cache-dir))
   (savehist-save-minibuffer-history t)
@@ -2345,7 +2388,7 @@ save minibuffer history
 
 (use-package desktop
   :defer 2
-  :straight (:type built-in)
+  :ensure nil
   :init
   (setq desktop-dirname (expand-file-name "desktop/" poly-cache-dir))
   (setq desktop-save t
@@ -2422,7 +2465,7 @@ session
 
 #+begin_src emacs-lisp :tangle no
 (use-package session
-  :straight t
+ ;; :straight t
   :custom
   (session-save-file (expand-file-name "session" poly-cache-dir))
   (session-name-disable-regexp "\\(?:\\`'/tmp\\|\\.git/[A-Z_]+\\'\\)")
@@ -2438,7 +2481,7 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package midnight
-  :straight (:type built-in)
+  :ensure nil
   :defer 30
   :custom
   (clean-buffer-list-delay-general 7)   ; default is 3 days
@@ -2508,7 +2551,7 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package embark
-  :straight t
+  ;; :straight t
   :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -2524,7 +2567,7 @@ Auto cleanup older buffers
 		 (window-parameters (mode-line-format . none)))))
 
 (use-package embark-consult
-  :straight t
+  ;; :straight t
   ;; :disabled
   :after (embark consult)
   :demand t ; only necessary if you have the hook below
@@ -2534,24 +2577,26 @@ Auto cleanup older buffers
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package docker-compose-mode
-  :straight t)
+  ;; :straight t
+  )
 #+end_src
 * activity log
 ** activity-watch
 #+begin_src emacs-lisp
 (use-package activity-watch-mode
   :diminish
-  :straight t
+  ;; :straight t
   :config
   (global-activity-watch-mode))
 #+end_src
 ** wakatime
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package wakatime-mode
-  :straight (wakatime-mode
-	     :host github
-	     :repo "shuxiao9058/wakatime-mode")
+ :vc (:url "https://github.com/shuxiao9058/wakatime-mode"
+       ;; :branch "emacs29"
+       ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
+       )
   :init
   (setq +wakatime-hide-filenames t)
   (setq wakatime-ignore-exit-codes '(0 1 102 112))
@@ -2568,7 +2613,7 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp :tangle no
 (use-package vterm
-  :straight t
+  ;; :straight t
   ;; :straight (vterm :type git :flavor melpa
   ;; 		   :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
   ;; 		   :host github :repo "akermu/emacs-libvterm"
@@ -2652,7 +2697,7 @@ Auto cleanup older buffers
       (vterm))))
 
 (use-package vterm-toggle
-  :straight t
+ ;; :straight t
   ;; :when (memq window-system '(mac ns x))
   :bind (([f2] . mb/vterm-right-here)
 	 ("C-<return>" . mb/vterm-right-here)
@@ -2748,9 +2793,10 @@ Auto cleanup older buffers
   )
 
 (use-package meow-vterm
-  :straight (meow-vterm
-	     :host github
-	     :repo "accelbread/meow-vterm")
+:vc (:url "https://github.com/accelbread/meow-vterm"
+      ;; :branch "emacs29"
+      ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
+      )
   :after vterm
   :init
   (setq vterm-keymap-exceptions '("C-c"))
@@ -2769,7 +2815,7 @@ Auto cleanup older buffers
 | C-c C-l        | line mode                       |
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package eat
   :straight (:type git :host codeberg
 		   :repo "akib/emacs-eat"
@@ -3097,7 +3143,7 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 
 #+begin_src emacs-lisp
 (use-package hideshow
-  :straight (:type built-in)
+  :ensure nil
   :diminish hs-minor-mode
   :bind (("C-`" . hs-toggle-hiding)
 	 ("C-c <left>" . hs-hide-block)
@@ -3171,9 +3217,7 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
   (setenv "GPG_AGENT_INFO" nil))
 
 (use-package epa-file
-    :straight (:type built-in)
-    :pdump nil
-    :ensure t
+    :ensure nil
     ;; :if (string-match "socrates" (system-name))
     :commands epa-file-enable
     ;; :init (epa-file-enable)
@@ -3191,13 +3235,12 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 
 
 (use-package auth-source-pass
-    :straight (:type built-in)
-    :ensure t
+    :ensure nil 
     ;; :if (file-exists-p "~/.password-store")
     :config (auth-source-pass-enable))
 
 (use-package pinentry
-    :straight t
+   ;; :straight t
     :config
     (pinentry-start)
     (setq epa-pinentry-mode 'loopback))
@@ -3511,7 +3554,7 @@ there are no attachments."
 ;;   :straight t)
 
 (use-package message
-  :straight (:type built-in)
+  :ensure nil
   :hook ((message-send . v/message-warn-if-no-attachments)
          (message-mode . turn-on-orgtbl))
   :after mu4e
@@ -3560,7 +3603,7 @@ there are no attachments."
 #+end_src
 
 ** notmuch
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package notmuch
   :straight (notmuch :url "https://git.notmuchmail.org/git/notmuch"
 		     :fetcher git
@@ -3940,9 +3983,8 @@ determine which browser function to use."
   )
 
 (use-package notmuch-capf
-  :straight (notmuch-capf
-	     :host github
-	     :repo "tpeacock19/notmuch-capf"))
+:vc (:url "https://github.com/tpeacock19/notmuch-capf")
+ )
 
 ;; (use-package notmuch-labeler
 ;;   :straight t
@@ -3982,8 +4024,7 @@ determine which browser function to use."
 (use-package notmuch-notify
   :ensure t
   :disabled
-  :straight (notmuch-notify :host github :repo "firmart/notmuch-notify"
-			    :files (:defaults "*.png" "*.wav"))
+  :vc (:url "https://github.com/firmart/notmuch-notify")
   ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
   :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
   :custom
@@ -4024,7 +4065,7 @@ except for `notmuch-show-mode' buffers."
   (:map notmuch-common-keymap (("u" . notmuch-update))))
 
 (use-package notmuch-indicator
-  :straight t
+  ;; :straight t
   :disabled
   :init
   (setq notmuch-indicator-args
@@ -4041,8 +4082,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package gnus
-  :straight (:type built-in)
-  :ensure t
+  :ensure nil
   ;; :straight (nnhackernews :type built-in)
   ;; :straight (nnreddit :type built-in)
   ;; :bind (("C-c m" . 'gnus))
@@ -4291,9 +4331,8 @@ except for `notmuch-show-mode' buffers."
   )
 
 (use-package gnus-group
-  :straight (:type built-in)
   :after gnus
-  :ensure t
+  :ensure nil 
   :custom
   (gnus-group-sort-function 'gnus-group-sort-by-server)
   (gnus-level-subscribed 6)
@@ -4323,7 +4362,6 @@ except for `notmuch-show-mode' buffers."
 	      ("M-p" . gnus-topic-goto-previous-topic)))
 
 (use-package gnus-topic
-  :straight (:type built-in)
   :after (gnus gnus-group)
   :ensure nil
   :config
@@ -4346,7 +4384,6 @@ except for `notmuch-show-mode' buffers."
   )
 
 (use-package gnus-async
-  :straight (:type built-in)
   :after gnus
   :ensure nil
   :defer t
@@ -4355,7 +4392,6 @@ except for `notmuch-show-mode' buffers."
   (setq gnus-use-article-prefetch 15))
 
 (use-package gnus-sum
-  :straight (:type built-in)
   :after gnus
   :defer t
   :ensure nil
@@ -4403,13 +4439,13 @@ except for `notmuch-show-mode' buffers."
   (setq gnus-sum-thread-tree-vertical "│"))
 
 (use-package gnus-dired
-  :straight (:type built-in)
+  :ensure nil
   :after gnus
   :hook (dired-mode . gnus-dired-mode)
   )
 
 (use-package gnus-art
-  :straight (:type built-in)
+  :ensure nil
   :after gnus
   :config
   (setq
@@ -4475,7 +4511,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package w3m
-  :straight t
+  ;; :straight t
   :config
   (with-eval-after-load 'notmuch
     (notmuch-show-setup-w3m)))
@@ -4485,7 +4521,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package ebdb
-  :straight t
+  ;; :straight t
   :config
   (require 'ebdb-message)
   (require 'ebdb-notmuch) ; FIXME 2021-05-13: does not activate the corfu-mode UI
@@ -4612,7 +4648,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package outline
-  :straight (:type built-in)
+  :ensure nil
   :diminish outline-minor-mode
   :commands outline-minor-mode
   :init
@@ -4680,7 +4716,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp
 (use-package outshine
-  :straight t
+  ;; :straight t
   :diminish outshine-mode
   :commands (outshine-mode
              outshine-cycle-buffer
@@ -4701,7 +4737,7 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp
 (use-package outorg
-  :straight t
+  ;; :straight t
   ;; M-O # current heading.
   ;; C-u M-O # current buffer.
   ;; M-# outorg-copy-edits-and-exit.
@@ -4714,14 +4750,14 @@ org-download-paste for clipboard images
 
 #+begin_src emacs-lisp
 (use-package org-download
-  :straight t
+  ;; :straight t
   :ensure t)
 #+end_src
 
 ** org-msg send mail
 #+begin_src emacs-lisp
 (use-package org-msg
-  :straight t
+  ;; :straight t
   :hook (org-msg-edit-mode . (lambda ()
 			       (wakatime-mode -1)
 			       (poly/set-mail-capf)
@@ -5077,7 +5113,7 @@ org-download-paste for clipboard images
 
 (use-package org-mime
   :defer t
-  :straight (:type built-in)
+  :ensure nil
   :after org
   :commands (org-mime-htmlize org-mime-edit-mail-in-org-mode))
 #+end_src
@@ -5088,7 +5124,7 @@ org-download-paste for clipboard images
 
 #+begin_src emacs-lisp
 (use-package osx-trash
-  :straight t
+  ;; :straight t
   :commands osx-trash-move-file-to-trash
   :init
   ;; Delete files to trash on macOS, as an extra layer of precaution against
@@ -5113,7 +5149,7 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
 #+begin_src emacs-lisp :tangle no
 (use-package pdf-tools
   :defer t
-  :straight t
+  ;; :straight t
   :config
   ;; initialize
   (setenv "PKG_CONFIG_PATH" "/opt/local/lib/pkgconfig:/opt/X11/lib/pkgconfig")
@@ -5135,7 +5171,8 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
 
 (use-package pdf-continuous-scroll-mode
   :defer t
-  :straight (:host github :repo "dalanicolai/pdf-continuous-scroll-mode.el")
+  :vc (:url "https://github.com/dalanicolai/pdf-continuous-scroll-mode.el"
+       )
   :after pdf-tools
   :config
   (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode))
@@ -5151,19 +5188,19 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
   (save-place-mode 1))
 
 (use-package mixed-pitch
-  :straight t
+  ;; :straight t
   :hook
   (text-mode . mixed-pitch-mode))
 
 (use-package org-analyzer
-  :straight t
+  ;; :straight t
   :after org
   :custom
   (org-analyzer-org-directory org-beorg-directory))
 
 ;; devonthink
-(use-package org-devonthink
-  :straight (:host github :repo "lasvice/org-devonthink"))
+;; (use-package org-devonthink
+;;  :straight (:host github :repo "lasvice/org-devonthink"))
 #+end_src
 
 *** open with vscode
@@ -5347,7 +5384,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp
 (use-package dumb-jump
-  :straight t
+  ;; :straight t
   :commands dumb-jump-result-follow
   :config
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
@@ -5430,7 +5467,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 #+begin_src emacs-lisp
 ;; sudo port install gifsicle
 (use-package gif-screencast
-  :straight t
+  ;; :straight t
   :init
   (when IS-MAC
     (setq gif-screencast-args '("-x")
@@ -5481,10 +5518,9 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** beancount
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package beancount
-  :straight (:type git :host github
-		   :repo "beancount/beancount-mode")
+:vc (:url "https://github.com/beancount/beancount-mode")
   ;; :mode "\\.bean\\'"
     :mode (;; ("CMakeLists\\.txt\\'" . cmake-mode)
          ("\\.bean\\'" . beancount-mode))
@@ -5506,7 +5542,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** kdl-mode
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; (use-package kdl-ts-mode
 ;;   :straight (:type git :host github
 ;; 		   :repo "dataphract/kdl-ts-mode")
@@ -5592,4 +5628,79 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
   :hook (after-init . buffer-name-relative-mode)
   :config
   (setq buffer-name-relative-prefix '("" . "/")))
+#+end_src
+
+
+** safari tab jump
+
+https://gist.github.com/bunnylushington/e4b8ca6cdec28aa5eccf2875ac1f3518
+
+#+begin_src emacs-lisp :tangle no
+(defun ii/safari-retrieve-open-tabs ()
+  "Use applescript to retrieve string representing open safari tabs."
+  (do-applescript "
+      tell application \"Safari\"
+      	set windowList to windows
+      	set tabList to {}
+      	repeat with aWindow in windowList
+      		set tabList to tabList & (tabs of aWindow)
+      	end repeat
+      	set output to \"\"
+      	repeat with aTab in tabList
+      		set tabTitle to name of aTab
+      		set tabURL to URL of aTab
+      		set output to output & tabTitle & \"::-::\" & tabURL & \"
+      \"
+      	end repeat
+      end tell
+      return output"))
+
+(defun ii/safari-tab-format (tab)
+  "Format safari tab from applescript for display"
+  (let ((title (car tab))
+        (url (cadr tab)))
+    (format "%s    [%s]" title url)))
+
+(defun ii/safari-open-tab-completion ()
+  "Completion list for `ii/safari-jump-to-tab'"
+  (let* ((output (ii/safari-retrieve-open-tabs))
+         (tabs (mapcar (lambda (s) (s-split "::-::" s))
+                       (s-split "\n" output)))
+         (tablist (-zip (mapcar #'ii/safari-tab-format tabs)
+                        (mapcar #'cadr tabs))))
+    tablist))
+
+(defun ii/safari-jump-to-tab (&optional make-active)
+  "Foreground an existing Safari tab, focus with prefix arg."
+  (interactive "p")
+  (let* ((completions (ii/safari-open-tab-completion))
+         (choice (completing-read "Tab: " completions))
+         (tab-url (cdr (assoc choice completions))))
+    (message "Opening Safari Tab: %s" choice)
+    (ii/safari-foreground-tab tab-url make-active)))
+
+(defun ii/safari-foreground-tab (url make-active)
+  "Run the applescript to foreground a Safari tab."
+  (do-applescript (format "
+      tell application \"Safari\"
+          set windowList to windows
+          repeat with aWindow in windowList
+              set tabList to tabs of aWindow
+              repeat with aTab in tabList
+                  if (URL of aTab) is \"%s\" then
+                      set index of aWindow to 1
+                      set current tab of aWindow to aTab
+                      return
+                  end if
+              end repeat
+          end repeat
+      end tell
+      " url))
+  (if (> make-active 1)
+      (do-applescript "
+    tell application \"System Events\" to tell application process \"Safari\"
+        set frontmost to true
+    end tell")))
+
+(keymap-global-set "C-c t" #'ii/safari-jump-to-tab)
 #+end_src

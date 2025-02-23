@@ -21,7 +21,9 @@ Configuration for programming and languages support.
 #+begin_src emacs-lisp :tangle no
 (use-package apheleia
   :delight "\U000f0276"
-  :straight (:host github :repo "radian-software/apheleia" :branch "main")
+  :vc (:url "https://github.com/radian-software/apheleia"
+       :branch "main"
+       )
   :ensure t
   :hook (((;; protobuf-ts-mode ;; emacs-lisp-mode
 	   ;; protobuf-mode
@@ -135,7 +137,6 @@ Configuration for programming and languages support.
 
 #+begin_src emacs-lisp
 (use-package format-all
-  :straight t
   :ensure t
   :hook ((
 	  ;; fish-mode
@@ -165,7 +166,7 @@ Configuration for programming and languages support.
 	  ;; clojure-mode
 	  ;; web-mode
 	  ;; web-mode-prog-mode
-	  objc-mode
+	  ;; objc-mode
 	  swift-mode
 	  ;;  typescript-mode
 	  ;;  web-mode
@@ -261,13 +262,32 @@ Configuration for programming and languages support.
 			      '(("C"               . ".c")
 				("C++"             . ".cpp")
 				("Java"            . ".java")
-				("Objective-C"     . ".m")
-				("Objective-C" . ".x")
-				("Objective-C" . ".xm")
-				("Objective-C" . ".m")
-				("Objective-C" . ".mm")
+				;; ("Objective-C"     . ".m")
+				;; ("Objective-C" . ".x")
+				;; ("Objective-C" . ".xm")
+				;; ("Objective-C" . ".m")
+				;; ("Objective-C" . ".mm")
 				("Protocol Buffer" . ".proto")))))))))
 
+
+  (define-format-all-formatter logos-format
+    (:executable "/Users/jiya/miniconda3/bin/python")
+    (:install
+     (macos "brew install clang-format")
+     (windows "scoop install llvm"))
+    (:languages "Objective-C")
+    (:features)
+    (:format
+     (format-all--buffer-easy
+      executable
+      "-W"
+      "ignore"
+      "/Users/jiya/workspace/iOS/logos-format/logos_format/logos_format.py"
+      "--assume-filename=/Users/jiya/workspace/iOS/logos-format/.clang-format"
+      ;; "-i"
+      "--files"
+      (buffer-file-name)
+      )))
 
   (define-format-all-formatter buf-format
     (:executable "buf")
@@ -411,7 +431,7 @@ Configuration for programming and languages support.
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
 		  ("C++" my-clang-format)
-		  ("Objective-C" clang-format-google-style)
+		  ("Objective-C" logos-format)
 		  ("Protocol Buffer" my-clang-format)
 		  ;; ("Protocol Buffer" buf-format)
 		  ("SQL" pgformatter)
@@ -433,8 +453,6 @@ Configuration for programming and languages support.
 
 #+begin_src emacs-lisp
 (use-package flycheck
-  :straight t
-  ;; :straight (:type built-in)
   :ensure t
   :init (global-flycheck-mode)
   :custom
@@ -453,7 +471,7 @@ Configuration for programming and languages support.
   )
 
 (use-package flycheck-color-mode-line
-  :straight t
+:vc (:url "https://github.com/flycheck/flycheck-color-mode-line")
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 
 ;; (use-package flycheck-pos-tip
@@ -491,7 +509,7 @@ Configuration for programming and languages support.
 
 #+begin_src emacs-lisp
 (use-package flymake
-  :straight (:type built-in))
+:ensure nil)
 #+end_src
 
 
@@ -500,7 +518,7 @@ Configuration for programming and languages support.
 #+begin_src emacs-lisp :tangle no
 (use-package ispell
   :disabled
-  :straight (:type built-in)
+  :ensure nil
   :config
   (setq ispell-really-aspell t
 	ispell-silently-savep t
@@ -533,7 +551,8 @@ Use eglot as LSP client.
 #+begin_src emacs-lisp
 (use-package breadcrumb
   :ensure t
-  :straight (:host github :repo "joaotavora/breadcrumb")
+  :vc (:url "https://github.com/joaotavora/breadcrumb"
+       )
   :defer 1)
 
 (defun project-name (project)
@@ -579,7 +598,6 @@ If INTERACTIVE, prompt user for details."
 	"--client-id=emacs.eglot"))
 
 (use-package eglot
-  :straight (:type built-in)
   :unless poly-use-lsp-mode
   :hook ((go-mode
 	  go-ts-mode
@@ -602,9 +620,14 @@ If INTERACTIVE, prompt user for details."
 	  clojure-mode
 	  clojurescript-mode
 	  js-mode typescript-mode
-	  c-mode c++-mode objc-mode swift-mode
+	  c-mode c++-mode
+	  c-ts-mode
+	  c++-ts-mode
+	  c-or-c++-ts-mode
+	  objc-mode swift-mode
 	  ;; java-mode
 	  ) . eglot-ensure)
+  :after cape
   :custom
   (eglot-autoshutdown t)
   (eglot-sync-connect 1)
@@ -699,6 +722,15 @@ Examples:
    			   ))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
+
+  (+eglot-register '(c-ts-mode c++-ts-mode c-mode c++-mode) '("/opt/local/bin/clangd" "-j=12" "--log=error"
+                     ;; "--malloc-trim"
+                     "--background-index"
+                     "--clang-tidy"
+                     "--completion-style=detailed"
+                     "--pch-storage=memory"
+                     "--header-insertion=never"
+                     "--header-insertion-decorators=0"))
 
   ;; (add-to-list 'eglot-server-programs
   ;; 	       '(java-mode .  my-eclipse-jdt-contact))
@@ -1172,7 +1204,6 @@ Examples:
     (lsp-deferred)))
 
 (use-package lsp-mode
-  :straight t
   :when poly-use-lsp-mode
   :diminish
   :commands (lsp lsp-deferred lsp-enable-which-key-integration lsp-format-buffer lsp-organize-imports)
@@ -1500,7 +1531,6 @@ Examples:
 
 (use-package lsp-pyright
   :ensure t
-  :straight t
   :after lsp-mode
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
@@ -1509,7 +1539,6 @@ Examples:
   (add-to-list 'lsp-enabled-clients 'lsp-pyright))
 
 (use-package dap-mode
-  :straight t
   :when poly-use-lsp-mode
   :disabled
   :ensure t
@@ -1553,7 +1582,6 @@ Examples:
 
 (use-package lsp-treemacs
   :when poly-use-lsp-mode
-  :straight t
   :after (treemacs lsp-mode)
   :commands (lsp-treemacs-errors-list lsp-treemacs-implementations lsp-treemacs-references)
   :custom
@@ -1566,7 +1594,6 @@ Examples:
               ("<f7>" . lsp-treemacs-symbols)))
 
 (use-package lsp-ui
-  :straight t
   :after lsp-mode
   :when poly-use-lsp-mode
   :diminish
@@ -1614,7 +1641,8 @@ Examples:
 	  )))
 
 (use-package lsp-protobuf
-  :straight (:host github :repo "shuxiao9058/lsp-protobuf")
+:vc (:url "https://github.com/shuxiao9058/lsp-protobuf"
+       )
   :custom
   (lsp-protobuf-bufls-server-path "/usr/local/gopath/bin/bufls"))
 
@@ -1697,7 +1725,6 @@ use-package will load java-lsp for us simply by calling this function."
   )
 
 (use-package dap-java
-  :straight nil
   :after lsp-java
   :config
   (dap-register-debug-template "VulpxLauncher"
@@ -1738,18 +1765,18 @@ use-package will load java-lsp for us simply by calling this function."
 
 ** debug
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package jsonrpc
   :defer t
-  :straight t
   :ensure t)
 
 (use-package dape
-  :straight (dape :type git :host github :repo "svaante/dape")
+:vc (:url "https://github.com/svaante/dape"
+       )
   :bind (("<f5>" . dape)
          ("M-<f5>" . dape-hydra/body))
   :custom (dape-buffer-window-arrangment 'right)
-  :after (pretty-hydra)
+  :after (major-mode-hydra)
   :ensure t
   :hook
   ((kill-emacs . dape-breakpoint-save) ; Save breakpoints on quit
@@ -1885,14 +1912,12 @@ use-package will load java-lsp for us simply by calling this function."
 
 #+begin_src emacs-lisp
 (use-package yasnippet-snippets
-  :straight t
   :ensure t
   :config
   (add-to-list 'yas-snippet-dirs
 	       (expand-file-name "snippets" poly-cache-dir) t))
 
 (use-package yasnippet
-  :straight t
   :ensure t
   :diminish yas-global-mode
   :commands yas-global-mode
@@ -1912,19 +1937,18 @@ use-package will load java-lsp for us simply by calling this function."
   (yas-reload-all))
 
 (use-package java-snippets
-  :straight t
   :defer t
   :after yasnippet)
 
 (use-package javadoc-lookup
-  :straight t)
+  )
 
 (use-package cape-yasnippet
   :defer t
   :disabled
   :after cape yasnippet
-  :straight (:host github :repo "elken/cape-yasnippet")
-  :init
+  :vc (:url "https://github.com/elken/cape-yasnippet")
+  :ini
   (add-to-list 'completion-at-point-functions #'cape-yasnippet)
   ;; :config
   ;; (defun cae-yas-setup-capf ()
@@ -1964,7 +1988,7 @@ use-package will load java-lsp for us simply by calling this function."
   (require 'treesit))
 
 (use-package treesit
-  :straight (:type built-in)
+  :ensure nil
   :commands treesit-font-lock-rules treesit-font-lock-recompute-features
   :when (and (fboundp 'treesit-available-p)
            (treesit-available-p))
@@ -2147,6 +2171,7 @@ use-package will load java-lsp for us simply by calling this function."
 		js-ts-mode-hook
 		python-ts-mode-hook
 		python-mode-hook
+		c-ts-mode-hook c++-ts-mode-hook c-mode-hook c++-mode-hook
 		;; lua-mode-hook
 		typescript-ts-mode-hook
 		javascript-ts-mode-hoo))
@@ -2157,7 +2182,7 @@ use-package will load java-lsp for us simply by calling this function."
 ** cc-mode
 #+begin_src emacs-lisp
 (use-package cc-mode
-  :straight t
+  ;; :straight t
   :ensure t
   :mode (
 	 ("\\.c\\'" . c-mode)
@@ -2201,12 +2226,12 @@ use-package will load java-lsp for us simply by calling this function."
   )
 
 (use-package modern-cpp-font-lock
-  :straight t
+  ;; :straight t
   :ensure t
   :hook (c++-mode . modern-c++-font-lock-mode))
 
 (use-package cmake-mode
-  :straight t
+  ;; :straight t
   :ensure t
   ;; :defines (company-backends)
   :mode (("CMakeLists\\.txt\\'" . cmake-mode)
@@ -2230,9 +2255,9 @@ use-package will load java-lsp for us simply by calling this function."
 ;;   )
 
 (use-package cpp-auto-include
-  :straight   (cpp-auto-include
-               :host github
-               :repo "emacsorphanage/cpp-auto-include")
+:vc (:url "https://github.com/emacsorphanage/cpp-auto-include"
+:rev :newest
+       :branch "master")
   :commands (cpp-auto-include)
   )
 #+end_src
@@ -2306,7 +2331,7 @@ use-package will load java-lsp for us simply by calling this function."
 ;; https://blog.dornea.nu/2024/11/28/mastering-golang-debugging-in-emacs/
 (use-package go-mode
   :disabled
-  :straight t
+  ;; :straight t
   :ensure t
   :commands (godoc gofmt gofmt-before-save)
   :after (eglot)
@@ -2317,7 +2342,7 @@ use-package will load java-lsp for us simply by calling this function."
   )
 
 (use-package go-ts-mode
-  :straight (:type built-in)
+  :ensure nil
   :mode (("\\.go$"  . go-ts-mode)
 	 ("^go.mod$" . go-ts-mode))
   :config
@@ -2376,7 +2401,7 @@ use-package will load java-lsp for us simply by calling this function."
   (poly/install-go-tool 'gopls))
 
 (use-package gorepl-mode
-  :straight t
+  ;; :straight t
   :after go-mode
   :commands gorepl-run-load-current-file)
 
@@ -2391,7 +2416,7 @@ use-package will load java-lsp for us simply by calling this function."
   :init
   (setenv "GO111MODULE" "on")
   :custom
-  (flycheck-golangci-lint-enable-all t)
+  (flycheck-golangci-lint-enable-all nil)
   (flycheck-golangci-lint-deadline "1m")
   ;; (flycheck-golangci-lint-enable-all t)
   (flycheck-golangci-lint-fast t)
@@ -2402,7 +2427,7 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'golangci-lint)))
 
 (use-package go-eldoc
-  :straight t
+  ;; :straight t
   :after go-mode
   :ensure t
   ;; :disabled
@@ -2411,14 +2436,14 @@ use-package will load java-lsp for us simply by calling this function."
   (add-hook 'go-mode-hook #'go-eldoc-setup))
 
 (use-package go-rename
-  :straight t
+  ;; :straight t
   :after go-mode
   :disabled
   :ensure t
   :commands go-rename)
 
 (use-package go-guru
-  :straight t
+  ;; :straight t
   :after go-mode
   :disabled
   :ensure t
@@ -2432,7 +2457,7 @@ use-package will load java-lsp for us simply by calling this function."
 ;;     :mode (("go\\.mod\\'" . go-mod-mode)))
 
 (use-package go-tag
-  :straight t
+  ;; :straight t
   :bind (:map go-mode-map
 	      ("C-c t a" . go-tag-add)
 	      ("C-c t r" . go-tag-remove))
@@ -2442,7 +2467,7 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool  'gomodifytags)))
 
 (use-package go-fill-struct
-  :straight t
+  ;; :straight t
   :after go-mode
   :config
   ;; fillstruct - fills a struct literal with default values
@@ -2450,7 +2475,7 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'fillstruct)))
 
 (use-package go-dlv
-  :straight t
+  ;; :straight t
   :after go-mode
   :config
   ;; Delve is a debugger for the Go programming language.
@@ -2458,7 +2483,7 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'dlv)))
 
 (use-package go-errcheck
-  :straight t
+  ;; :straight t
   :disabled
   :after go-mode
   :bind (:map go-mode-map
@@ -2469,12 +2494,12 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'errcheck)))
 
 (use-package go-gen-test
-  :straight t
+  ;; :straight t
   :bind (:map go-mode-map
 	      ("C-c t g" . go-gen-test-dwim)))
 
 (use-package go-impl
-  :straight t
+  ;; :straight t
   :commands (go-impl)
   :after go-mode
   :config
@@ -2482,7 +2507,10 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'impl)))
 
 (use-package ginkgo-mode
-  :straight (:type git :host github :repo "garslo/ginkgo-mode")
+:vc (:url "https://github.com/garslo/ginkgo-mode"
+:rev :newest
+       :branch "master"
+      )
   ;; :custom
   ;; (ginkgo-binary "/usr/local/gopath/bin/ginkgo")
   :init
@@ -2490,7 +2518,6 @@ use-package will load java-lsp for us simply by calling this function."
         ginkgo-use-default-keys t))
 
 (use-package gotest
-  :straight t
   :custom
   (go-test-verbose t)
   :bind (:map go-mode-map
@@ -2502,7 +2529,6 @@ use-package will load java-lsp for us simply by calling this function."
 	      ("C-c t x" . go-run)))
 
 (use-package go-playground
-  :straight t
   :diminish
   :commands (go-playground-mode)
   :after go-mode
@@ -2511,7 +2537,6 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'goplay)))
 
 (use-package godoctor
-  :straight t
   :ensure t
   :after go-mode
   :bind (:map go-mode-map
@@ -2521,7 +2546,6 @@ use-package will load java-lsp for us simply by calling this function."
               ("C-c d t" . godoctor-toggle)))
 
 (use-package go-projectile
-  :straight t
   :after (projectile go-mode))
 
 (defun go-install-tools ()
@@ -2534,7 +2558,6 @@ use-package will load java-lsp for us simply by calling this function."
 
 #+begin_src emacs-lisp
 (use-package lisp-mode
-  :straight nil
   :after paredit
   :ensure nil
   :defer t
@@ -2557,7 +2580,6 @@ use-package will load java-lsp for us simply by calling this function."
 
 #+begin_src emacs-lisp
 (use-package lua-mode
-  :straight t
   :ensure t
   :defer t
   :custom
@@ -2577,7 +2599,6 @@ use-package will load java-lsp for us simply by calling this function."
 
 #+begin_src emacs-lisp
 (use-package tramp
-  :straight (:type built-in)
   :ensure t
   :custom
   (tramp-default-method "ssh")
@@ -2595,14 +2616,12 @@ use-package will load java-lsp for us simply by calling this function."
 	tramp-default-host "10\.181\.24\.12"))
 
 (use-package password-cache
-  :straight (:type built-in)
   :ensure nil
   :custom
   ;; Never expire passwords
   (password-cache-expiry nil))
 
 (use-package tramp-sh
-  :straight (:type built-in)
   :ensure nil
   :custom
   ;; Use out-of-band method for big files
@@ -2612,7 +2631,6 @@ use-package will load java-lsp for us simply by calling this function."
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 (use-package tramp-gvfs
-  :straight (:type built-in)
   :disabled
   :ensure nil
   :if (not IS-MAC)
@@ -2640,7 +2658,6 @@ Use clojure-mode for basic syntax support.
 ;;     )
 
 (use-package clojure-ts-mode
-    :straight t
     :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
 	   ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
 	   ("\\.cljc\\'" . clojure-ts-clojurec-mode)
@@ -2669,7 +2686,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package cider
-    :straight t
     :ensure t
     :commands cider-mode
     :custom
@@ -2687,7 +2703,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package flycheck-clj-kondo
-  :straight t
   :ensure t
   :hook ((clojure-mode clojure-ts-mode clojure-ts-clojurec-mode clojure-ts-clojurescript-mode) . flycheck-mode)
   ;; :config
@@ -2700,7 +2715,6 @@ Use clojure-mode for basic syntax support.
 ** vue
 #+begin_src emacs-lisp
 (use-package vue-mode
-  :straight t
   :commands (vue-mode)
   :mode "\\.vue"
   ;; :config
@@ -2731,7 +2745,6 @@ Use clojure-mode for basic syntax support.
 ;; (typescript/set-lsp-linter)
 
 (use-package web-mode
-  :straight t
   :mode (;; ("\\.js\\'" . web-mode)
 	 ;; ("\\.jsx\\'" . web-mode)
 	 ("\\.vue\\'" . web-mode)
@@ -2814,7 +2827,6 @@ Use clojure-mode for basic syntax support.
 ;;   )
 
 (use-package tide
-  :straight t
   :commands tide-setup
   :hook
   (before-save . poly/tide-before-save)
@@ -2829,7 +2841,6 @@ Use clojure-mode for basic syntax support.
 ** typescript
 #+begin_src emacs-lisp :tangle no
 (use-package typescript-mode
-  :straight t
   :init
   (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
   :custom
@@ -2847,7 +2858,6 @@ Use clojure-mode for basic syntax support.
 ** prettier-js
 #+begin_src emacs-lisp :tangle no
 (use-package prettier-js
-  :straight t
   :commands (prettier-js-mode prettier)
   :custom
   (prettier-target-mode "js-mode")
@@ -2861,7 +2871,6 @@ Use clojure-mode for basic syntax support.
 ** js-mode
 #+begin_src emacs-lisp :tangle no
 (use-package js
-  :straight (:type built-in)
   :mode ("\\.js$" . js-mode)
   :hook
   (;; (js-mode . lsp)
@@ -2874,7 +2883,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package tagedit
-  :straight t
   :ensure t
   :commands tagedit-mode
   :config
@@ -2896,7 +2904,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package protobuf-mode
-  :straight t
   :defer 1
   :config
   (defconst my-protobuf-style
@@ -2905,7 +2912,6 @@ Use clojure-mode for basic syntax support.
   (add-hook 'protobuf-mode-hook (lambda () (c-add-style "my-style" my-protobuf-style t))))
 
 (use-package flycheck-buf-lint
-  :straight t
   :init
   (push 'buf-lint flycheck-checkers)
   :config
@@ -2918,7 +2924,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package python
-  :straight (:type built-in)
   :mode ("\\.py" . python-mode)
   :interpreter ("python" . python-mode)
   :delight "π "
@@ -2958,7 +2963,6 @@ Use clojure-mode for basic syntax support.
   (ein:worksheet-enable-undo t))
 
 (use-package poetry
-  :straight t
   :disabled
   :ensure t
   :hook ((python-mode python-ts-mode) . poetry-tracking-mode)
@@ -2974,7 +2978,6 @@ Use clojure-mode for basic syntax support.
 
 (use-package conda
   :ensure t
-  :straight t
   :commands (conda-env-list
              conda-env-activate
              conda-env-deactivate
@@ -3050,5 +3053,5 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package imenu-list
-  :straight t)
+  )
 #+end_src

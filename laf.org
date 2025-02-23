@@ -405,8 +405,7 @@ enable ligatures with emacs-mac, must install font first
 ;; (add-hook 'prog-mode-hook #'aa/enable-auto-composition)
 
 (use-package composite
-  :straight (:type built-in)
-  :ensure t
+  :ensure nil 
   :init (defvar composition-ligature-table (make-char-table nil))
   :hook (((prog-mode
            conf-mode nxml-mode markdown-mode help-mode
@@ -455,7 +454,7 @@ enable ligatures with emacs-mac, must install font first
 
 #+begin_src emacs-lisp :tangle no
 (use-package doom-modeline
-  :straight t;; (doom-modeline
+ ;; :straight t;; (doom-modeline
 	    ;;  :type git
 	    ;;  :host github
 	    ;;  :repo "seagle0128/doom-modeline")
@@ -530,7 +529,7 @@ enable ligatures with emacs-mac, must install font first
 ** simple-modeline
 #+begin_src emacs-lisp :tangle no
 (use-package simple-modeline
-  :straight t
+  ;; :straight t
   :hook (after-init . simple-modeline-mode)
   :config
   (setq simple-modeline-segments
@@ -792,7 +791,7 @@ lines are selected, or the NxM dimensions of a block selection."
 * treemacs
 #+begin_src emacs-lisp
 (use-package treemacs
-  :straight t
+ ;; :straight t
   :custom
   (treemacs-collapse-dirs                 (if (executable-find "python") 3 0))
   (treemacs-deferred-git-apply-delay      0.5)
@@ -918,7 +917,7 @@ lines are selected, or the NxM dimensions of a block selection."
          ([mouse-1]   . treemacs-single-click-expand-action)))
 
 (use-package treemacs-magit
-  :straight t
+  ;; :straight t
   :after magit
   :commands treemacs-magit--schedule-update
   :hook ((magit-post-commit
@@ -929,7 +928,7 @@ lines are selected, or the NxM dimensions of a block selection."
   :ensure t)
 
 (use-package treemacs-projectile
-  :straight t
+  ;; :straight t
   :ensure t
   :disabled
   :after (treemacs projectile)
@@ -956,9 +955,10 @@ lines are selected, or the NxM dimensions of a block selection."
 (use-package nerd-icons-completion
   :demand t
   :after nerd-icons
-  :hook
-  (marginalia-mode . nerd-icons-completion-marginalia-setup)
   :config
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+
   (cl-defmethod nerd-icons-completion-get-icon (cand (_cat (eql project-buffer)))
     "Return the icon for the candidate CAND of completion category project-buffer."
     (nerd-icons-completion-get-icon cand 'buffer))
@@ -1027,8 +1027,8 @@ lines are selected, or the NxM dimensions of a block selection."
 ;; Disable for now, as having it enabled causes dired to not reliably select the
 ;; current buffer when opening dired for directory of current buffer.
 (use-package nerd-icons-dired
-  :straight (nerd-icons-dired :type git :host github
-                              :repo "rainstormstudio/nerd-icons-dired")
+:vc (:url "https://github.com/rainstormstudio/nerd-icons-dired"
+       )
   :hook
   (dired-mode . nerd-icons-dired-mode)
   :custom
@@ -1044,13 +1044,13 @@ lines are selected, or the NxM dimensions of a block selection."
     (treemacs-load-theme "nerd-icons")))
 
 (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
-  :straight t
+  ;; :straight t
   :defer t
   :after (treemacs)
   :config (treemacs-set-scope-type 'Tabs))
 
 (use-package treemacs-persp
-  :straight t
+  ;; :straight t
   :after (treemacs persp-mode)
   :commands treemacs-set-scope-type
   :init (treemacs-set-scope-type 'Perspectives))
@@ -1061,7 +1061,7 @@ lines are selected, or the NxM dimensions of a block selection."
 #+begin_src emacs-lisp :tangle no
 
 (use-package all-the-icons-completion
-  :straight t
+  ;; :straight t
   :after marginalia
   :commands all-the-icons-completion-marginalia-setup
   :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
@@ -1069,13 +1069,13 @@ lines are selected, or the NxM dimensions of a block selection."
   (all-the-icons-completion-mode))
 
 (use-package treemacs-icons-dired
-  :straight t
+  ;; :straight t
   :after treemacs dired
   :ensure t
   :config (treemacs-icons-dired-mode))
 
 (use-package all-the-icons
-  :straight t
+  ;; :straight t
   :if IS-GUI
   ;; :if (or IS-GUI (daemonp))
   ;; :init
@@ -1083,7 +1083,7 @@ lines are selected, or the NxM dimensions of a block selection."
   )
 
 (use-package treemacs-all-the-icons
-  :straight t
+  ;; :straight t
   :disabled
   :after treemacs
   :defer t
@@ -1091,13 +1091,13 @@ lines are selected, or the NxM dimensions of a block selection."
   (treemacs-load-theme "all-the-icons"))
 
 (use-package all-the-icons-dired
-  :straight t
+  ;; :straight t
   :if IS-GUI
   :after (all-the-icons dired)
   :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package all-the-icons-ibuffer
-  :straight t
+  ;; :straight t
   :if IS-GUI
   :after (all-the-icons ibuffer)
   :config
@@ -1146,7 +1146,7 @@ lines are selected, or the NxM dimensions of a block selection."
 
 #+begin_src emacs-lisp :tangle no
 (use-package auto-highlight-symbol
-  :straight t
+  ;; :straight t
   :bind (:map auto-highlight-symbol-mode-map
          ("M-<"     . ahs-backward)
          ("M->"     . ahs-forward)
@@ -1187,7 +1187,7 @@ lines are selected, or the NxM dimensions of a block selection."
 
 #+begin_src emacs-lisp
 (use-package ansi-color
-  :straight t
+  ;; :straight t
   :ensure t
   :init
   (defun colorize-compilation-buffer ()
@@ -1197,4 +1197,19 @@ lines are selected, or the NxM dimensions of a block selection."
   (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
   ;; (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
   )
+#+end_src
+
+
+** tab-line
+#+begin_src emacs-lisp
+(use-package tab-line
+  :demand t
+  :bind
+  (("C-<iso-lefttab>" . tab-line-switch-to-prev-tab)
+   ("C-<tab>" . tab-line-switch-to-next-tab))
+  :config
+  (global-tab-line-mode 1)
+  (setq
+   tab-line-new-button-show nil
+   tab-line-close-button-show nil))
 #+end_src

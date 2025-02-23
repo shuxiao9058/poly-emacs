@@ -92,6 +92,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
 ;; Enhances built-in Emacs help with more information: A "better" Emacs *Help* buffer.
 (use-package helpful
   :defer t
+  :ensure nil
   :custom
   (counsel-describe-function-function #'helpful-callable)
   (counsel-describe-variable-function #'helpful-variable)
@@ -116,7 +117,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
         (assq-delete-all 'which-function-mode mode-line-misc-info)))
 
 (use-package autorevert
-  :straight (:type built-in)
+  :ensure nil
   :diminish auto-revert-mode
   :custom
   (auto-revert-use-notify nil)
@@ -330,7 +331,6 @@ Make sure that UTF-8 is used everywhere.
 
 #+begin_src emacs-lisp
 (use-package mule
-  :straight (:type built-in)
   :ensure nil
   :demand t
   :init
@@ -388,7 +388,6 @@ Don't show *Buffer list* when opening multiple files at the same time.
 
  #+begin_src emacs-lisp
 (use-package newcomment
-  :straight (:type built-in)
   :ensure nil
   :bind ([remap comment-dwim] . comment-or-uncomment)
   :config
@@ -443,7 +442,7 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
 
 #+begin_src emacs-lisp
 (use-package perspective
-  :straight t
+  ;; :straight t
   :demand t
   :commands
   (persp-mode)
@@ -462,7 +461,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 #+begin_src emacs-lisp
 (use-package project
-  :straight (:type built-in)
+  :ensure nil
   :custom
   (project-switch-commands 'consult-project-extra-find)
   (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod" "Cargo.toml"
@@ -470,6 +469,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
                                         "pom.xml"
                                         "package.json"
                                         "Makefile"
+					"tsconfig.json"
                                         ;; "README.org"
                                         ;; "README.md"
 					))
@@ -502,13 +502,14 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 (use-package consult-project-extra
   :defer t
-  :straight (consult-project-extra :type git :host github :repo "Qkessler/consult-project-extra")
+  :vc (:url "https://github.com/Qkessler/consult-project-extra"
+       )
    :bind
   ([remap project-find-file] . consult-project-extra-find)
   ("C-x p 4 f" . consult-project-extra-find-other-window))
 
 (use-package ag
-  :straight t
+  ;; :straight t
   :ensure t
   :commands (ag ag-regexp ag-project)
   :custom
@@ -526,7 +527,6 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 ;;
 ;; `sR': switch to saved filter groups
 (use-package ibuffer
-  :straight (:type built-in)
   :ensure nil
   :hook (ibuffer-mode . ibuffer-auto-mode)
   :bind ([remap list-buffers] . ibuffer)
@@ -582,6 +582,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 #+end_src
 
 
+
 #+begin_src emacs-lisp :tangle no
 (defun my/projectile-ignored-project-function(project-root)
   (member t (mapcar
@@ -601,10 +602,11 @@ To find files/buffers and apply commands on project, use builtin package ~projec
     (deadgrep search-term)))
 
 (use-package ibuffer-projectile
-  :straight t)
+ ;; :straight t
+  )
 
 (use-package projectile
-  :straight t
+ ;; :straight t
   :disabled
   :commands projectile-global-mode
   :after rg
@@ -755,7 +757,8 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 (use-package persp-projectile
 :disabled
-:straight t)
+;; :straight t
+)
 #+end_src
 
 * Enanced completion commands
@@ -770,7 +773,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 #+begin_src emacs-lisp
 (use-package rg
-  :straight t
+  ;; :straight t
   ;; :hook (rg-mode . wgrep-ag-setup)
   :custom
   (rg-custom-type-aliases
@@ -793,9 +796,9 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 
 Tab bar represents a named persistent window configuration.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package tab-bar
-  :straight nil
+  ;; :straight nil
   :custom
   (tab-bar-close-button-show nil)
   (tab-bar-new-tab-choice "*scratch*")
@@ -933,7 +936,7 @@ WIN-ID : Window index."
      (string-to-number (car (nreverse (split-string key-desc "-")))))))
 
 (use-package ace-window
-  :straight t
+  ;; :straight t
   :ensure t
   :defer t
   :custom
@@ -956,7 +959,7 @@ WIN-ID : Window index."
 
 #+begin_src emacs-lisp
 (use-package windswap
-  :straight t
+ ;; :straight t
   ;; https://github.com/amnn/windswap
   ;; windswap-left|right|up|down
   :commands (windswap-up windswap-down windswap-left windswap-right))
@@ -1112,7 +1115,7 @@ don't pop windows everywhere!
 
 ;; don't pop windows everywhere!
 (use-package shackle
-  :straight t
+  ;; :straight t
   :hook (after-init . shackle-mode)
   :custom
   (shackle-default-size 0.5)
@@ -1145,7 +1148,7 @@ don't pop windows everywhere!
 #+begin_src emacs-lisp
 
 (use-package paredit
-  :straight t
+  ;; :straight t
   :disabled
   ;; :straight (:type git
   ;;		   :host github
@@ -1166,7 +1169,7 @@ don't pop windows everywhere!
 
 ;; keeps our parentheses balanced and allows for easy manipulation
 (use-package smartparens
-    :straight t
+    ;; :straight t
     :ensure t
     :disabled
     :diminish smartparens-mode
@@ -1255,7 +1258,7 @@ Visualizing Color Codes with rainbow-mode.
 
 #+begin_src emacs-lisp :tangle no
 (use-package rainbow-mode
-    :straight t
+    ;; :straight t
     :diminish rainbow-mode
     :commands rainbow-mode
     ;; :init
@@ -1267,7 +1270,7 @@ Visualizing Color Codes with rainbow-mode.
 
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
-    :straight t
+    ;; :straight t
     :ensure t
     :diminish rainbow-delimiters-mode
     :commands rainbow-delimiters-mode
@@ -1279,12 +1282,12 @@ Visualizing Color Codes with rainbow-mode.
 
 #+begin_src emacs-lisp
 (use-package highlight-indent-guides
-  :straight t
+:vc (:url "https://github.com/DarthFennec/highlight-indent-guides")
   :hook (prog-mode . highlight-indent-guides-mode)
   :delight highlight-indent-guides-mode
-  :init
+  :config
   (setq highlight-indent-guides-method 'character
-	highlight-indent-guides-auto-enabled nil
+	      highlight-indent-guides-auto-enabled nil
         ;; default is \x2502 but it is very slow on Mac
         highlight-indent-guides-character ?\xFFE8
         highlight-indent-guides-responsive 'top)
@@ -1295,7 +1298,7 @@ Visualizing Color Codes with rainbow-mode.
   )
 
 (use-package display-fill-column-indicator
-  :straight (:type built-in)
+  :ensure nil
   :hook ((prog-mode . display-fill-column-indicator-mode)
          (text-mode . display-fill-column-indicator-mode))
   :custom
@@ -1311,7 +1314,7 @@ Visualizing Color Codes with rainbow-mode.
 
 ;; copied from +spacemacs/spacemacs-editing-visual
 (use-package highlight-parentheses
-  :straight t
+  :vc (:url "https://git.sr.ht/~tsdh/highlight-parentheses.el")
   :hook (prog-mode . highlight-parentheses-mode)
   :init
   (setq hl-paren-delay 0.2)
@@ -1358,15 +1361,14 @@ Visualizing Color Codes with rainbow-mode.
                                                        (when (and buffer-file-name (string= lang "restclient"))
                                                          (save-buffer))))))
 
-(use-package zmq
-  :straight(zmq :type git :host github
-                :repo "dzop/emacs-zmq"
-                :files (:defaults "Makefile" "src"))
-  :disabled
-  :init
-  (setenv "ZMQ_CFLAGS" "-I/opt/local/include")
-  (setenv "ZMQ_LIBS" "-L/opt/local/lib -lzmq"))
-
+;; (use-package zmq
+;;   :straight(zmq :type git :host github
+;;                 :repo "dzop/emacs-zmq"
+;;                 :files (:defaults "Makefile" "src"))
+;;   :disabled
+;;   :init
+;;   (setenv "ZMQ_CFLAGS" "-I/opt/local/include")
+;;   (setenv "ZMQ_LIBS" "-L/opt/local/lib -lzmq"))
 #+end_src
 
 
@@ -1375,7 +1377,7 @@ Visualizing Color Codes with rainbow-mode.
 ** org-mode config
 #+begin_src emacs-lisp
 (use-package org
-  :straight t
+  ;; :straight t
   :init
   ;; NOTE org-fold-core-style needs to be set before org is loaded
   (setq org-fold-core-style 'overlays)
@@ -1482,7 +1484,8 @@ Visualizing Color Codes with rainbow-mode.
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-element)
 
-  (require 'ox-confluence)
+  ;; disable now
+  ;; (require 'ox-confluence)
 
   ;; (add-to-list 'org-modules 'org-bars)
   ;; (add-to-list 'org-modules 'org-pdfview)
@@ -1975,14 +1978,25 @@ do not already have one."
 
 (use-package org-contrib
   :after org
-  :straight t)
+  ;; :straight t
+  )
+
+
+;; https://stackoverflow.com/questions/4872088/is-there-any-way-for-subtasks-to-inherit-deadlines-in-org-mode
+(defun poly/org-insert-sub-task ()
+  (interactive)
+  (let ((parent-deadline (org-get-deadline-time nil)))
+    (org-goto-sibling)
+    (org-insert-todo-subheading t)
+    (when parent-deadline
+      (org-deadline nil parent-deadline))))
 #+end_src
 
 ** org-download
 
 #+begin_src emacs-lisp
 (use-package org-download
-  :straight t
+  ;; :straight t
   :ensure t
   :hook ((org-mode dired-mode) . org-download-enable)
   :commands (org-download-enable
@@ -2025,7 +2039,7 @@ do not already have one."
 #+begin_src emacs-lisp
 (use-package org-agenda
   :ensure nil
-  :straight nil
+  ;; :straight nil
   :after (org hydra)
   :hook (org-agenda-finalize . org-agenda-to-appt)
   :config
@@ -2208,7 +2222,7 @@ should be continued."
 ** Write codes in org-mode
 #+begin_src emacs-lisp
 (use-package org-src
-  :straight nil
+ ;;  :straight nil
   :ensure nil
   :after org
   :hook (org-babel-after-execute . org-redisplay-inline-images)
@@ -2260,7 +2274,7 @@ should be continued."
 
 #+begin_src emacs-lisp
     (use-package org-tempo
-      :straight nil
+    :ensure nil
       :hook (org-mode . (lambda()
 			  (require 'org-tempo)))
       )
@@ -2269,7 +2283,6 @@ should be continued."
 ** org-habbit
 #+begin_src emacs-lisp
        (use-package org-habit
-         :straight nil
          :ensure nil
          :after org
          :custom
@@ -2279,7 +2292,7 @@ should be continued."
 ** task
 #+begin_src emacs-lisp
 (use-package ox-taskjuggler
-  :straight (:type built-in)
+  :ensure nil
   :after (org osx)
   :custom
   (org-taskjuggler-process-command  "tj3 --silent --no-color --output-dir %o %f && open %o/Plan.html")
@@ -2314,9 +2327,9 @@ should be continued."
 #+end_src
 
 ** bullet
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package org-bullets
-  :straight t
+  ;; :straight t
   :commands (org-bullets-mode org-bullets)
   :hook (org-mode . org-bullets-mode)
   :custom
@@ -2327,10 +2340,33 @@ should be continued."
   )
 #+end_src
 
+instead with =org-superstar-mode=
+
+#+begin_src emacs-lisp
+;; Pretty stars for org-mode
+(use-package org-superstar-mode
+  :vc (:url "https://github.com/integral-dw/org-superstar-mode" :branch "main")
+  :hook (org-mode . org-superstar-mode)
+  :init
+  (setq org-superstar-prettify-item-bullets t
+        org-superstar-headline-bullets-list
+        '("◉" "✸" "⚫" "○" "•")
+
+        org-superstar-leading-bullet ?\s
+        org-hide-leading-stars t
+
+        org-superstar-item-bullet-alist
+        '((?* . ?●)
+          (?+ . ?➤)
+          (?- . ?—)))
+)
+#+end_src
+
+
 ** kanban
 #+begin_src emacs-lisp
 (use-package org-kanban
-  :straight t
+  ;; :straight t
   :commands (org-kanban/initialize-at-end)
   :after org
   :config
@@ -2341,7 +2377,7 @@ should be continued."
 ** org-crypt
 #+begin_src emacs-lisp
 (use-package org-crypt
-  :straight nil
+  :ensure nil
   :after org
   :config
   (org-crypt-use-before-save-magic)
@@ -2369,7 +2405,7 @@ should be continued."
 ** org-dashboard
 #+begin_src emacs-lisp
 (use-package org-dashboard
-  :straight t
+  ;; :straight t
   :after org
   )
 #+end_src
@@ -2427,7 +2463,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+begin_src emacs-lisp
 (use-package org-present
-  :straight t
+  ;; :straight t
   :after org
   :config
   (add-hook 'org-present-mode-hook
@@ -2448,7 +2484,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+BEGIN_SRC emacs-lisp
   (use-package org-ref
-    :straight t
+    ;; :straight t
     :after org
     :config
     (setq
@@ -2466,7 +2502,7 @@ Prefix arguments are interpreted by `org-refile'."
      org-ref-notes-function 'orb-edit-notes))
 
 (use-package bibtex
-  :straight t
+  ;; :straight t
   :after org
   :config
   (setq
@@ -2503,7 +2539,7 @@ Prefix arguments are interpreted by `org-refile'."
 #+begin_src emacs-lisp
 (use-package org-noter
   :after (org pdf-tools)
-  :straight t
+ ;;  :straight t
   :config
   (setq
    ;; The WM can handle splits
@@ -2525,7 +2561,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+begin_src emacs-lisp
 (use-package org-clock
-  :straight nil
+  :ensure nil
   ;; ensure we always run org-clock-persistence-insinuate below
   :demand t
   :after (org alert)
@@ -2559,10 +2595,8 @@ Prefix arguments are interpreted by `org-refile'."
   ("C-c C-x C-x" . org-clock-in-last))
 
 (use-package org-clock-budget
-  :straight (org-clock-budget
-             :host github
-             :repo "Fuco1/org-clock-budget"
-             )
+:vc (:url "https://github.com/Fuco1/org-clock-budget"
+       )
   :commands (org-clock-budget-report)
   :init
   (defun my-buffer-face-mode-org-clock-budget ()
@@ -2665,7 +2699,7 @@ Prefix arguments are interpreted by `org-refile'."
 ;; https://github.com/iecaser/Configurations/blob/a7e61c25c49556b33d7888599a853da9d4c9cb95/.doom.d/note.el
 ;; https://www.orgroam.com/manual/Installation-_00281_0029.html#Installation-_00281_0029
 (use-package org-roam
-  :straight t
+  ;; :straight t
   ;; ;; :straight (:files (:defaults "extensions/*"))
   ;; :straight (:host github :repo "org-roam/org-roam"
   ;; 		     :files (:defaults "extensions/*"))
@@ -2796,7 +2830,9 @@ Prefix arguments are interpreted by `org-refile'."
 
 
 (use-package org-roam-ui
-  :straight (:type git :host github :repo "org-roam/org-roam-ui" :files ("*.el" "out"))
+:vc (:url "https://github.com/org-roam/org-roam-ui"
+       )
+;;  :straight (:type git :host github :repo "org-roam/org-roam-ui" :files ("*.el" "out"))
   :after org-roam
   :custom
   (org-roam-ui-sync-theme t)
@@ -2866,7 +2902,7 @@ Prefix arguments are interpreted by `org-refile'."
 	   (tl/open-hammerspoon-url "Clocking" "status" "No Task")))))
 
 (use-package org-pomodoro
-  :straight t
+  ;; :straight t
   :ensure t
   :after org
   :commands org-pomodoro
@@ -2917,7 +2953,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+begin_src emacs-lisp
 (use-package org-mind-map
-    :straight t
+   ;; :straight t
     :init
     (require 'ox-org)
     :ensure t
@@ -2941,7 +2977,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 #+begin_src emacs-lisp
 (use-package markdown-mode
-  :straight t
+  ;; :straight t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
 	 ("\\.mdx\\'" . markdown-mode)
@@ -3069,7 +3105,7 @@ mermaid.initialize({
   )
 
 (use-package markdown-toc
-  :straight t
+  ;; :straight t
   :commands (markdown-toc-generate-toc markdown-toc-generate-or-refresh-toc)
   :hook ((markdown-mode . markdown-toc-mode))
   :custom
@@ -3087,15 +3123,16 @@ mermaid.initialize({
   (add-hook 'before-save-hook #'markdown-toc-refresh-before-save))
 
 (use-package edit-indirect
-  :straight t)
+  ;; :straight t
+  )
 
 (use-package grip-mode
-  :straight t
+  ;; :straight t
   :bind (:map markdown-mode-command-map
               ("g" . grip-mode)))
 
 (use-package mmm-mode
-  :straight t
+  ;; :straight t
   :hook (markdown-mode . mmm-mode))
 
 (use-package pandoc-mode
@@ -3115,18 +3152,21 @@ mermaid.initialize({
   :init  (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notdeft-allow-org-property-drawers t)
-  :straight (:host github :repo "hasu/notdeft" :files ("*.el" "extras/*.el" "xapian"))
+  :vc (:url "https://github.com/hasu/notdeft"
+       )
+  ;; :straight (:host github :repo "hasu/notdeft" :files ("*.el" "extras/*.el" "xapian"))
   :config
   (setq notdeft-directories `(,org-beorg-directory)
 	notdeft-extension "org")
   (add-hook 'org-mode-hook 'notdeft-note-mode)
   (require 'notdeft-global)
-  (require 'notdeft-global-hydra))
+  ;; (require 'notdeft-global-hydra)
+  )
 #+end_src
 
 *** plantuml
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package plantuml-mode
   :straight (:host github :repo "shuxiao9058/plantuml-mode"
 		   :branch "develop")
@@ -3134,8 +3174,8 @@ mermaid.initialize({
   :config
   ;; (setq plantuml-mode-debug-enabled t)
   (setq plantuml-default-exec-mode 'server
-	plantuml-server-url "http://localhost:8080"
-	;; plantuml-server-url "https://ops.shmao.net/plantuml"
+	;; plantuml-server-url "http://localhost:8080"
+	plantuml-server-url "https://ops.shmao.net/plantuml"
 	;; plantuml-server-url "https://www.plantuml.com/plantuml"
 	plantuml-output-type "svg"
         plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"
@@ -3149,7 +3189,7 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp :tangle no
 (use-package valign
-  :straight t
+ ;; :straight t
   :config
   (valign-mode)
   (add-hook 'gfm-mode-hook 'valign-mode)
@@ -3161,7 +3201,7 @@ valign for org-mode & markdown table
 
  edit Atlassian Confluence wiki pages.
 
- #+begin_src emacs-lisp
+ #+begin_src emacs-lisp :tangle no
 (use-package tributary
   :straight (:host github :repo "mrkrd/tributary" :files ("*.el" "confluence.rnc"))
   :custom
@@ -3174,7 +3214,7 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp
 (use-package calendar
-  :straight (:type built-in)
+:ensure nil
   :custom
   (calendar-week-start-day 1))
 #+end_src
@@ -3183,7 +3223,7 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp :tangle no
 (use-package calfw
-  :straight t
+  ;; :straight t
   :config
   (setq cfw:fchar-junction ?╋
         cfw:fchar-vertical-line ?┃
@@ -3199,12 +3239,12 @@ valign for org-mode & markdown table
   )
 
 (use-package calfw-ical
-  :straight t
+  ;; :straight t
   :disabled
   :after calfw)
 
 (use-package calfw-org
-  :straight t
+  ;; :straight t
   :disabled
   :custom
   (cfw:org-agenda-schedule-args '(:timestamp))
@@ -3340,9 +3380,9 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp
 ;; Kill & Mark things easily
-(use-package easy-kill
-  :bind (([remap kill-ring-save] . easy-kill)
-         ([remap mark-sexp] . easy-mark)))
+;; (use-package easy-kill
+;;   :bind (([remap kill-ring-save] . easy-kill)
+;;          ([remap mark-sexp] . easy-mark)))
 
 ;; Interactively insert and edit items from kill-ring
 (use-package browse-kill-ring
@@ -3366,7 +3406,9 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp :tangle no
 (use-package uniline
-  :straight(uniline :type git :host github :repo "tbanel/uniline")
+:vc (:url "https://github.com/tbanel/uniline"
+       )
+ ;; :straight(uniline :type git :host github :repo "tbanel/uniline")
   :bind (:map uniline-mode-map
 	      ("C-c /" . uniline-hydra-choose-body)
 	      ("C-c u" . uniline--set-brush-0)

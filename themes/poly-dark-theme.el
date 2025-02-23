@@ -66,6 +66,7 @@ The theme has to be reloaded after changing anything in this group."
 
 ;;
 ;; Assigment form: VARIABLE COLOR [TTY-COLOR]
+;; graphic color, term color, tty color
 (let ((colors '(
                 (bg "#22212C" "#201F2E" nil) ;; Background
 		(fg "#F8F8F2" "#F9F9F1" "brightwhite")   ;; Foreground
@@ -865,14 +866,23 @@ The theme has to be reloaded after changing anything in this group."
 	       (tab-bar-tab-ungrouped :inherit :background ,bg+2)
 	       (tab-bar-tab :bold t :foreground ,blue :background ,bg
 			    :box (:line-width 2 :color ,bg :style nil))
-	       (tab-line :foreground ,purple :background ,current
-			 :height 0.9 :inherit variable-pitch)
+
+	       (tab-line :foreground ,purple ;; :background ,current
+			 :height 1.1 :inherit variable-pitch)
 	       (tab-line-tab :foreground ,pink :background ,bg
 			     :box (:line-width 2 :color ,bg :style nil))
-	       (tab-line-tab-inactive :foreground ,purple :background ,bg2
+	       (tab-line-tab-inactive :foreground "Grey"
+                                      :background ,bg
 				      :box (:line-width 2 :color ,bg2 :style nil))
-	       (tab-line-tab-current :inherit tab-line-tab)
-	       (tab-line-close-highlight :foreground ,red)
+               (tab-line-tab-inactive-alternate :inherit 'tab-line-tab-inactive)
+	       ;; (tab-line-tab-current :inherit tab-line-tab)
+               (tab-line-tab-current :background ,bg
+                                     :foreground ,bright-red :underline (:style dots :color ,alt-blue))
+	       (tab-line-close-highlight :foreground ,purple)
+               ;; (tab-line-special )
+               (tab-line-highlight :inherit 'tab-line-tab
+                                   :underline (:style dots :color ,alt-blue))
+
 	       ;; term
 	       (term :foreground ,fg :background ,bg)
 	       (term-color-black :foreground ,bg :background ,bg)

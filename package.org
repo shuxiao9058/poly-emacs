@@ -4,10 +4,26 @@
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+* package
+
+#+begin_src emacs-lisp
+(require 'package)
+(setq use-package-always-ensure t)
+
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t)
+
+;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+;; and `package-pinned-packages`. Most users will not need or want to do this.
+;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(package-initialize)
+#+end_src
+
 * Package Configuration with straight
 
 ** setting default directory
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; Emacs wants to load `package.el' before the init file,
 ;; so we do the same with `straight.el'
 (setq straight-base-dir poly-local-dir
@@ -136,7 +152,7 @@
 
 ** add :pin tag
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (with-eval-after-load 'straight
   ;; Add a profile (and lockfile) for stable package revisions.
   (add-to-list 'straight-profiles '(pinned . "pinned.el"))
@@ -190,7 +206,7 @@
 
 ** deal with org issue
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; (straight-use-package 'org)
 (straight-use-package 'org-contrib)
 #+end_src
@@ -200,7 +216,7 @@
 #+begin_src emacs-lisp
 
 (use-package exec-path-from-shell
-  :straight t
+  ;; :straight t
   :ensure t
   :if IS-MAC
   :config
@@ -285,9 +301,8 @@
 	      (advice-remove #'tty-run-terminal-initialization #'ignore)
 	      (tty-run-terminal-initialization (selected-frame) nil t))))
 
-
 (use-package recentf
-  :straight nil
+  :ensure nil
   :commands (recentf-mode
 	     recentf-add-file
 	     recentf-apply-filename-handlers
@@ -355,7 +370,7 @@
   )
 
 (use-package server ; built-in
-  :straight nil
+  ;; :straight nil
   :defer 1
   :init
   (if IS-WINDOWS
@@ -374,7 +389,7 @@
     (server-start)))
 
 (use-package dired
-  :straight (:type built-in)
+  ;; :straight (:type built-in)
   :ensure nil
   :commands (dired)
   :hook
@@ -408,7 +423,7 @@
   (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
 (use-package delsel
-  :straight (:type built-in)
+ ;; :straight (:type built-in)
   :ensure nil
   :hook (after-init . delete-selection-mode))
 
@@ -448,7 +463,7 @@
 ;; persistent undo across sessions
 (use-package undo-fu-session
   :disabled
-  :straight t
+  ;; :straight t
   :after undo-fu
   :demand t
   :custom
@@ -461,7 +476,8 @@
 
 (use-package undo-tree
   :disabled
-  :straight (:type git :host nil :repo "http://www.dr-qubit.org/git/undo-tree.git")
+  :vc (:url "http://www.dr-qubit.org/git/undo-tree.git"
+       )
   ;; :disabled
   ;; :if IS-MAC
   :commands global-undo-tree-mode
@@ -489,7 +505,7 @@
       :config (setq vundo-glyph-alist vundo-unicode-symbols))
 
 (use-package hide-mode-line
-  :straight t
+ ;; :straight t
   :commands (hide-mode-line-mode))
 
 ;; (use-package xclip
@@ -504,18 +520,18 @@
 ;;   )
 
 (use-package clipetty
-  :straight t
+  ;; :straight t
   :ensure t
   :hook (after-init . global-clipetty-mode)
   )
 
 (use-package pbcopy
-  :straight t
-  :if IS-MAC
-  :init (turn-on-pbcopy))
+  ;; :straight t
+  ;; :if IS-MAC
+  :config (turn-on-pbcopy))
 
 (use-package reveal-in-osx-finder
-  :straight t
+  ;; :straight t
   :if IS-MAC
   :commands reveal-in-osx-finder
   :bind ("C-c z" . reveal-in-osx-finder))
@@ -528,13 +544,13 @@
 ;;   :ensure t)
 
 (use-package restart-emacs
-  :straight t
+ ;; :straight t
   :ensure t)
 
 ;; Adopt a sneaky garbage collection strategy of waiting until idle time to
 ;; collect; staving off the collector while the user is working.
 (use-package gcmh
-  :straight t
+  ;; :straight t
   :custom
   (gcmh-verbose             nil)
   ;; (gcmh-lows
@@ -556,21 +572,21 @@
 ;;   (global-command-log-mode))
 
 (use-package transient
-  :straight t
+  ;; :straight t
   :bind
   (:map transient-map
 	([escape] . transient-quit-one)
 	("q" . transient-quit-one)))
 
 (use-package multiple-cursors
-  :straight t
+  ;; :straight t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
 	 ("C-<" . mc/mark-next-like-this)
 	 ("C->" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)))
 
 (use-package conf-mode
-  :straight (:type built-in)
+  ;; :straight (:type built-in)
   :ensure nil
   :mode (("\\.ht\\(access\\|passwd\\)\\'" . conf-mode)
 	 ("\\.pgmodule\\'" . conf-mode)
@@ -578,7 +594,7 @@
 
 ;; Command line interpreter
 (use-package comint
-  :straight (:type built-in)
+  ;; :straight (:type built-in)
   :ensure nil
   :bind (:map comint-mode-map
               ([remap kill-region]   . backward-kill-word))
@@ -592,9 +608,8 @@
   (comint-terminfo-terminal "dumb-emacs-ansi"))
 
 (use-package emacsql
-   :straight (:host github
-             :repo "magit/emacsql"
-             :commit "491105a01f58bf0b346cbc0254766c6800b229a2")
+:vc (:url "https://github.com/magit/emacsql"
+       :rev "491105a01f58bf0b346cbc0254766c6800b229a2")
   :ensure t
   ;; :pin "491105a"
   )
@@ -607,11 +622,12 @@
 ;; :straight (:type built-in))
 
 (use-package emacsql-sqlite3 ; for org-roam
-  :straight (:host github :repo "cireu/emacsql-sqlite3"))
+:vc (:url "https://github.com/cireu/emacsql-sqlite3"
+       )
+  )
 
 ;; required by core-hammerspoon
-(use-package dash
-  :straight t)
+(use-package dash)
 
 ;;;; disable annoying notifications
 (defcustom message-filter-regexp-list '("^Starting new Ispell process \\[.+\\] \\.\\.\\.$"
@@ -671,7 +687,6 @@
 #+begin_src emacs-lisp
 
 (use-package f
-  :straight t
   :config
   (let* ((site-dir (expand-file-name "site-lisp" user-emacs-directory))
 	 (files (directory-files site-dir))
@@ -690,15 +705,14 @@
 
 #+begin_src emacs-lisp
 (use-package hydra
-  :straight t
   :ensure t
   :custom
   (hydra-if-helpful t)
   :commands (defhydra)
   :bind ("M-o" . hydra-base/body))
 
-(use-package pretty-hydra
-  :straight t
+;; (use-package pretty-hydra
+(use-package major-mode-hydra
   :custom (pretty-hydra-default-title-body-format-spec " %s%s")
   :hook (emacs-lisp-mode . (lambda ()
                              (add-to-list
