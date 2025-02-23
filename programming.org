@@ -475,7 +475,6 @@ Configuration for programming and languages support.
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 
 ;; (use-package flycheck-pos-tip
-;;   :straight t
 ;;   :hook
 ;;   (flycheck-mode . flycheck-pos-tip-mode)
 ;;   :after flycheck)
@@ -551,8 +550,7 @@ Use eglot as LSP client.
 #+begin_src emacs-lisp
 (use-package breadcrumb
   :ensure t
-  :vc (:url "https://github.com/joaotavora/breadcrumb"
-       )
+  :vc (:url "https://github.com/joaotavora/breadcrumb")
   :defer 1)
 
 (defun project-name (project)
@@ -598,7 +596,7 @@ If INTERACTIVE, prompt user for details."
 	"--client-id=emacs.eglot"))
 
 (use-package eglot
-  :unless poly-use-lsp-mode
+  ;; :unless poly-use-lsp-mode
   :hook ((go-mode
 	  go-ts-mode
 	  protobuf-ts-mode
@@ -661,7 +659,7 @@ If INTERACTIVE, prompt user for details."
   (with-eval-after-load 'eglot
     (setq mode-line-misc-info
           (cl-remove-if (lambda (x) (eq (car x) 'eglot--managed-mode)) mode-line-misc-info)))
-   ;; speedup eglot
+  ;; speedup eglot
   (fset #'jsonrpc--log-event #'ignore)
   (setf (plist-get eglot-events-buffer-config :size) 0)
   ;; flymake-start after eglot publishDiagnostics
@@ -719,18 +717,18 @@ Examples:
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
   (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
-   			   ))
+   											    ))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
   (+eglot-register '(c-ts-mode c++-ts-mode c-mode c++-mode) '("/opt/local/bin/clangd" "-j=12" "--log=error"
-                     ;; "--malloc-trim"
-                     "--background-index"
-                     "--clang-tidy"
-                     "--completion-style=detailed"
-                     "--pch-storage=memory"
-                     "--header-insertion=never"
-                     "--header-insertion-decorators=0"))
+							      ;; "--malloc-trim"
+							      "--background-index"
+							      "--clang-tidy"
+							      "--completion-style=detailed"
+							      "--pch-storage=memory"
+							      "--header-insertion=never"
+							      "--header-insertion-decorators=0"))
 
   ;; (add-to-list 'eglot-server-programs
   ;; 	       '(java-mode .  my-eclipse-jdt-contact))
@@ -1081,10 +1079,9 @@ Examples:
 
 ;; (when (executable-find "emacs-lsp-booster")
 ;;   (use-package eglot-booster
-;;     :straight (:host github :repo "jdtsmith/eglot-booster")
+;;     :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev :newest :branch "main")
 ;;     :after eglot
 ;;     :config (eglot-booster-mode)))
-
 
 (use-package java-imports
   :disabled
@@ -2182,8 +2179,6 @@ use-package will load java-lsp for us simply by calling this function."
 ** cc-mode
 #+begin_src emacs-lisp
 (use-package cc-mode
-  ;; :straight t
-  :ensure t
   :mode (
 	 ("\\.c\\'" . c-mode)
          ("\\.h\\'" . c-mode)
@@ -2226,13 +2221,10 @@ use-package will load java-lsp for us simply by calling this function."
   )
 
 (use-package modern-cpp-font-lock
-  ;; :straight t
   :ensure t
   :hook (c++-mode . modern-c++-font-lock-mode))
 
 (use-package cmake-mode
-  ;; :straight t
-  :ensure t
   ;; :defines (company-backends)
   :mode (("CMakeLists\\.txt\\'" . cmake-mode)
          ("\\.cmake\\'" . cmake-mode))
@@ -2242,7 +2234,6 @@ use-package will load java-lsp for us simply by calling this function."
   )
 
 ;; (use-package clang-format
-;;   :straight t
 ;;   :defer t
 ;;   ;; :load-path "site-lisp"
 ;;   :commands (clang-format-buffer)
@@ -2255,11 +2246,10 @@ use-package will load java-lsp for us simply by calling this function."
 ;;   )
 
 (use-package cpp-auto-include
-:vc (:url "https://github.com/emacsorphanage/cpp-auto-include"
-:rev :newest
-       :branch "master")
-  :commands (cpp-auto-include)
-  )
+  :vc (:url "https://github.com/emacsorphanage/cpp-auto-include"
+	    :rev :newest
+	    :branch "master")
+  :commands (cpp-auto-include))
 #+end_src
 ** Go Language
 #+begin_src emacs-lisp
@@ -2331,7 +2321,6 @@ use-package will load java-lsp for us simply by calling this function."
 ;; https://blog.dornea.nu/2024/11/28/mastering-golang-debugging-in-emacs/
 (use-package go-mode
   :disabled
-  ;; :straight t
   :ensure t
   :commands (godoc gofmt gofmt-before-save)
   :after (eglot)
@@ -2384,11 +2373,11 @@ use-package will load java-lsp for us simply by calling this function."
 				  (project-root (project-current))
 				default-directory)))
       (unless (poly/dir-local-variable default-directory 'compile-command)
-	  (if (or (file-exists-p "makefile")
-	      (file-exists-p "Makefile"))
-	  (setq-local compile-command "make build")
-	(when (derived-mode-p 'go-mode);; (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
-	  (setq-local compile-command "go build"))))))
+	(if (or (file-exists-p "makefile")
+		(file-exists-p "Makefile"))
+	    (setq-local compile-command "make build")
+	  (when (derived-mode-p 'go-mode);; (or (eq major-mode 'go-mode) (eq major-mode 'go-ts-mode))
+	    (setq-local compile-command "go build"))))))
 
   (add-hook 'go-mode-hook #'poly/go-set-compile-command)
   (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
@@ -2401,7 +2390,6 @@ use-package will load java-lsp for us simply by calling this function."
   (poly/install-go-tool 'gopls))
 
 (use-package gorepl-mode
-  ;; :straight t
   :after go-mode
   :commands gorepl-run-load-current-file)
 
@@ -2427,37 +2415,25 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'golangci-lint)))
 
 (use-package go-eldoc
-  ;; :straight t
   :after go-mode
-  :ensure t
   ;; :disabled
   :commands go-eldoc-setup
   :init
   (add-hook 'go-mode-hook #'go-eldoc-setup))
 
 (use-package go-rename
-  ;; :straight t
   :after go-mode
   :disabled
-  :ensure t
   :commands go-rename)
 
 (use-package go-guru
-  ;; :straight t
   :after go-mode
   :disabled
-  :ensure t
   :commands go-guru-hl-identifier-mode
   :init
   (add-hook 'go-mode-hook #'go-guru-hl-identifier-mode))
 
-;; (use-package go-mod-mode
-;;     :straight (:host github :repo "zkry/go-mod-mode")
-;;     :ensure t
-;;     :mode (("go\\.mod\\'" . go-mod-mode)))
-
 (use-package go-tag
-  ;; :straight t
   :bind (:map go-mode-map
 	      ("C-c t a" . go-tag-add)
 	      ("C-c t r" . go-tag-remove))
@@ -2467,7 +2443,6 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool  'gomodifytags)))
 
 (use-package go-fill-struct
-  ;; :straight t
   :after go-mode
   :config
   ;; fillstruct - fills a struct literal with default values
@@ -2475,7 +2450,6 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'fillstruct)))
 
 (use-package go-dlv
-  ;; :straight t
   :after go-mode
   :config
   ;; Delve is a debugger for the Go programming language.
@@ -2483,7 +2457,6 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'dlv)))
 
 (use-package go-errcheck
-  ;; :straight t
   :disabled
   :after go-mode
   :bind (:map go-mode-map
@@ -2494,12 +2467,10 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'errcheck)))
 
 (use-package go-gen-test
-  ;; :straight t
   :bind (:map go-mode-map
 	      ("C-c t g" . go-gen-test-dwim)))
 
 (use-package go-impl
-  ;; :straight t
   :commands (go-impl)
   :after go-mode
   :config
@@ -2507,10 +2478,9 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'impl)))
 
 (use-package ginkgo-mode
-:vc (:url "https://github.com/garslo/ginkgo-mode"
-:rev :newest
-       :branch "master"
-      )
+  :vc (:url "https://github.com/garslo/ginkgo-mode"
+	    :rev :newest
+	    :branch "master")
   ;; :custom
   ;; (ginkgo-binary "/usr/local/gopath/bin/ginkgo")
   :init
@@ -2537,7 +2507,6 @@ use-package will load java-lsp for us simply by calling this function."
     (poly/install-go-tool 'goplay)))
 
 (use-package godoctor
-  :ensure t
   :after go-mode
   :bind (:map go-mode-map
               ("C-c d d" . godoctor-godoc)
@@ -2650,7 +2619,6 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 ;; (use-package clojure-mode
-;;     :straight t
 ;;     :disabled t
 ;;     :commands (clojurescript-mode)
 ;;     ;; :config
@@ -2658,26 +2626,22 @@ Use clojure-mode for basic syntax support.
 ;;     )
 
 (use-package clojure-ts-mode
-    :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
-	   ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
-	   ("\\.cljc\\'" . clojure-ts-clojurec-mode)
-	   ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-ts-mode)
-	   ("bb" . clojure-ts-mode)
-	   ("nbb" . clojure-ts-clojurescript-mode))
-    :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
-						    lsp-ui-sideline-enable nil)))
-    :custom
-    (clojure-ts-toplevel-inside-comment-form t))
+  :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
+	 ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
+	 ("\\.cljc\\'" . clojure-ts-clojurec-mode)
+	 ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-ts-mode)
+	 ("bb" . clojure-ts-mode)
+	 ("nbb" . clojure-ts-clojurescript-mode))
+  :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
+						  lsp-ui-sideline-enable nil)))
+  :custom
+  (clojure-ts-toplevel-inside-comment-form t))
 
 ;; (use-package clojure-mode-extra-font-locking
-;;     :straight t
 ;;     :disabled
-;;     :ensure t
 ;;     :after clojure-mode)
 
 ;; (use-package flycheck-clojure
-;;     :straight t
-;;     :ensure t
 ;;     :config
 ;;     (flycheck-clojure-setup))
 #+end_src
@@ -2686,24 +2650,22 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package cider
-    :ensure t
-    :commands cider-mode
-    :custom
-    (cider-print-fn 'zprint)
-    :hook (cider-repl-mode . paredit-mode)
-    :config
-    (setq nrepl-popup-stacktraces nil)
-    ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-    ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-    ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)
-    )
+  :commands cider-mode
+  :custom
+  (cider-print-fn 'zprint)
+  :hook (cider-repl-mode . paredit-mode)
+  :config
+  (setq nrepl-popup-stacktraces nil)
+  ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+  ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+  ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)
+  )
 #+end_src
 
 ** Linting with flycheck-clj-kondo
 
 #+begin_src emacs-lisp
 (use-package flycheck-clj-kondo
-  :ensure t
   :hook ((clojure-mode clojure-ts-mode clojure-ts-clojurec-mode clojure-ts-clojurescript-mode) . flycheck-mode)
   ;; :config
   ;; (flycheck-clojure-setup)

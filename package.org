@@ -216,9 +216,8 @@
 #+begin_src emacs-lisp
 
 (use-package exec-path-from-shell
-  ;; :straight t
   :ensure t
-  :if IS-MAC
+  ;; :if IS-MAC
   :config
   ;; (setq shell-default-term-shell "/bin/zsh")
   ;; (setq exec-path-from-shell-shell-name "/bin/zsh")
@@ -370,7 +369,7 @@
   )
 
 (use-package server ; built-in
-  ;; :straight nil
+  :ensure nil
   :defer 1
   :init
   (if IS-WINDOWS
@@ -389,7 +388,6 @@
     (server-start)))
 
 (use-package dired
-  ;; :straight (:type built-in)
   :ensure nil
   :commands (dired)
   :hook
@@ -423,13 +421,11 @@
   (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
 (use-package delsel
- ;; :straight (:type built-in)
   :ensure nil
   :hook (after-init . delete-selection-mode))
 
 ;; (use-package files
-;;   :straight nil
-;;   :ensure t
+;;   :ensure nil
 ;;   :init
 ;;   (setq make-backup-files nil
 ;;         enable-local-variables :all
@@ -444,11 +440,7 @@
 ;; trying another undo package
 ;; https://gitlab.com/ideasman42/emacs-undo-fu
 (use-package undo-fu
-  ;; :straight (undo-fu
-  ;; 	     :host gitlab
-  ;; 	     :repo "ideasman42/emacs-undo-fu"
-  ;; 	     :files ("undo-fu.el"))
-  :ensure t
+  :vc (:url "https://github.com/ideasman42/emacs-undo-fu")
   :demand t
   :custom
   ;; Store more undo history to prevent loss of data
@@ -463,7 +455,6 @@
 ;; persistent undo across sessions
 (use-package undo-fu-session
   :disabled
-  ;; :straight t
   :after undo-fu
   :demand t
   :custom
@@ -476,16 +467,13 @@
 
 (use-package undo-tree
   :disabled
-  :vc (:url "http://www.dr-qubit.org/git/undo-tree.git"
-       )
+  :vc (:url "http://www.dr-qubit.org/git/undo-tree.git")
   ;; :disabled
   ;; :if IS-MAC
   :commands global-undo-tree-mode
   ;; Pull package directly from maintainer, the elpa package is behind.
-  ;; :straight (:local-repo  "~/.emacs.d/site-lisp/undo-tree")
   :demand
   :delight
-  :ensure t
   :custom
   ;; supposedly causes errors in undo read
   ;; see https://emacs.stackexchange.com/a/34214/11934
@@ -500,16 +488,14 @@
   :config
   (global-undo-tree-mode))
 
- (use-package vundo
-      :bind ("C-x u" . vundo)
-      :config (setq vundo-glyph-alist vundo-unicode-symbols))
+(use-package vundo
+  :bind ("C-x u" . vundo)
+  :config (setq vundo-glyph-alist vundo-unicode-symbols))
 
 (use-package hide-mode-line
- ;; :straight t
   :commands (hide-mode-line-mode))
 
 ;; (use-package xclip
-;;   :straight t
 ;;   ;; :if IS-LINUX
 ;;   :ensure t
 ;;   :custom
@@ -520,37 +506,28 @@
 ;;   )
 
 (use-package clipetty
-  ;; :straight t
   :ensure t
   :hook (after-init . global-clipetty-mode)
   )
 
 (use-package pbcopy
-  ;; :straight t
   ;; :if IS-MAC
   :config (turn-on-pbcopy))
 
 (use-package reveal-in-osx-finder
-  ;; :straight t
   :if IS-MAC
   :commands reveal-in-osx-finder
   :bind ("C-c z" . reveal-in-osx-finder))
 
 ;; (use-package posframe
-;;   :straight (posframe
-;;       :host github
-;;       :repo "tumashu/posframe"
-;;       :files ("posframe.el"))
-;;   :ensure t)
+;;   :vc (:url "https://github.com/tumashu/posframe"))
 
 (use-package restart-emacs
- ;; :straight t
   :ensure t)
 
 ;; Adopt a sneaky garbage collection strategy of waiting until idle time to
 ;; collect; staving off the collector while the user is working.
 (use-package gcmh
-  ;; :straight t
   :custom
   (gcmh-verbose             nil)
   ;; (gcmh-lows
@@ -562,31 +539,25 @@
   (setq gc-cons-percentage 0.6)
   (when (not noninteractive)
     (gcmh-mode +1)
-    (add-function :after after-focus-change-function #'gcmh-idle-garbage-collect)
-    ))
+    (add-function :after after-focus-change-function #'gcmh-idle-garbage-collect)))
 
 ;; (use-package command-log-mode
-;;   :straight t
-;;   :ensure t
 ;;   :config
 ;;   (global-command-log-mode))
 
 (use-package transient
-  ;; :straight t
   :bind
   (:map transient-map
 	([escape] . transient-quit-one)
 	("q" . transient-quit-one)))
 
 (use-package multiple-cursors
-  ;; :straight t
   :bind (("C-S-c C-S-c" . mc/edit-lines)
 	 ("C-<" . mc/mark-next-like-this)
 	 ("C->" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)))
 
 (use-package conf-mode
-  ;; :straight (:type built-in)
   :ensure nil
   :mode (("\\.ht\\(access\\|passwd\\)\\'" . conf-mode)
 	 ("\\.pgmodule\\'" . conf-mode)
@@ -594,7 +565,6 @@
 
 ;; Command line interpreter
 (use-package comint
-  ;; :straight (:type built-in)
   :ensure nil
   :bind (:map comint-mode-map
               ([remap kill-region]   . backward-kill-word))
@@ -608,23 +578,19 @@
   (comint-terminfo-terminal "dumb-emacs-ansi"))
 
 (use-package emacsql
-:vc (:url "https://github.com/magit/emacsql"
-       :rev "491105a01f58bf0b346cbc0254766c6800b229a2")
-  :ensure t
-  ;; :pin "491105a"
-  )
+  :vc (:url "https://github.com/magit/emacsql"
+	    :rev "491105a01f58bf0b346cbc0254766c6800b229a2")
+  :ensure t)
 ;; (use-package emacsql-sqlite-builtin :ensure t)
 ;; (use-package emacsql-sqlite
 ;;    :after emacsql
 ;;    :defer nil)
 
 ;;(use-package emacsql-sqlite
-;; :straight (:type built-in))
+;; )
 
 (use-package emacsql-sqlite3 ; for org-roam
-:vc (:url "https://github.com/cireu/emacsql-sqlite3"
-       )
-  )
+  :vc (:url "https://github.com/cireu/emacsql-sqlite3"))
 
 ;; required by core-hammerspoon
 (use-package dash)
@@ -705,7 +671,6 @@
 
 #+begin_src emacs-lisp
 (use-package hydra
-  :ensure t
   :custom
   (hydra-if-helpful t)
   :commands (defhydra)

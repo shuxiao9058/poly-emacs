@@ -127,7 +127,6 @@ Configuration for addons, additional features provided by individual packages.
 #+begin_src emacs-lisp :tangle no
 (use-package selectrum
   :disabled
-  ;; :straight t
   :hook (after-init . selectrum-mode)
   :custom
   (selectrum-fix-vertical-window-height t)
@@ -154,7 +153,6 @@ Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
   (use-package marginalia
-    ;; :straight t
     :ensure t
     :demand t
     :defer 1
@@ -218,7 +216,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp :tangle no
 (use-package orderless
-  ;; :straight t
   :after selectrum
   :config
   (setq completion-styles '(orderless))
@@ -237,7 +234,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   )
 
 ;; (use-package orderless
-;;   :straight t
 ;;   :ensure t
 ;;   :after icomplete
 ;;   :custom
@@ -303,7 +299,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src  emacs-lisp :tangle no
 (use-package selectrum-prescient
-  ;; :straight t
   :after selectrum
   :config
   (selectrum-prescient-mode t)
@@ -314,7 +309,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package consult
-  ;; :straight t
   :ensure t
   :demand t
   :defer 1
@@ -397,18 +391,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ** vertico
 #+BEGIN_SRC emacs-lisp
 (use-package vertico
-  ;; :straight (vertico
-	;;      :files (:defaults "extensions/*")
-	;;      :includes (vertico-buffer
-	;; 		vertico-directory
-	;; 		vertico-flat
-	;; 		vertico-indexed
-	;; 		vertico-mouse
-	;; 		vertico-quick
-	;; 		vertico-repeat
-	;; 		vertico-reverse))
-  ;; :straight t
-  ;; :init
+  :vc (:url "https://github.com/minad/vertico"
+       :rev :newest
+       lisp-dir "extensions/")
   :custom
   ;; Different scroll margin
   (vertico-scroll-margin 0)
@@ -433,14 +418,21 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("?" . minibuffer-completion-help)
 	 ("M-RET" . minibuffer-force-complete-and-exit)
 	 ("M-TAB" . minibuffer-complete)))
-   :config
-   (vertico-mode))
+  :config
+  (require 'vertico-buffer)
+  (require 'vertico-directory)
+  (require 'vertico-flat)
+  (require 'vertico-indexed)
+  (require 'vertico-mouse)
+  (require 'vertico-quick)
+  (require 'vertico-repeat)
+  (require 'vertico-reverse)
+  (vertico-mode))
 
 ;; Configure directory extension.
 (use-package vertico-directory
- ;; :straight nil
-  :after vertico
   :ensure nil
+  :after vertico
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
 	      ("RET" . vertico-directory-enter)
@@ -459,7 +451,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 ;; Multiple files can be opened at once with `find-file' if you enter a
 ;; wildcard. You may also give the `initials' completion style a try.
 (use-package orderless
-  ;; :straight t
   :config
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
@@ -484,12 +475,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Sorting and filtering
 (use-package prescient
-  ;; :straight t
   :config
   (prescient-persist-mode 1))
 
 (use-package vertico-prescient
-  ;; :straight t
   :config
   (vertico-prescient-mode 1))
 #+END_SRC
@@ -498,8 +487,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package corfu
-  ;; :straight (:files (:defaults "extensions/*")
-	;; 	    :includes (corfu-history))
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
@@ -560,8 +547,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Icon support
 (use-package kind-icon
-  :ensure t
-  ;; :straight t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default)
@@ -679,7 +664,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Completion At Point Extensions made for `corfu'
 (use-package cape
-  ;; :straight t
   ;; ;; Bind dedicated completion commands
   ;; ;; Alternative prefix keys: C-c p, M-p, M-+, ...
   ;; :bind (("C-c p p" . completion-at-point) ;; capf
@@ -710,40 +694,39 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;; (add-to-list 'completion-at-point-functions #'cape-dict)
   ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
   ;; (add-to-list 'completion-at-point-functions #'cape-line)
-  ;; :hook ((prog-mode . poly/set-basic-capf)
-	;;  (org-mode . poly/set-basic-capf)
-	;;  (text-mode . poly/set-basic-capf)
-	;;  ;; (emacs-lisp-mode . (lambda ()
-	;;  ;;      (poly/convert-super-capf #'elisp-completion-at-point)))
-	;;  ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
+  :hook ((prog-mode . poly/set-basic-capf)
+	 (org-mode . poly/set-basic-capf)
+	 (text-mode . poly/set-basic-capf)
+	 ;; (emacs-lisp-mode . (lambda ()
+	 ;;      (poly/convert-super-capf #'elisp-completion-at-point)))
+	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
   :config
-  (with-eval-after-load 'cape 
-    (add-hook 'prog-mode-hook  #'poly/set-basic-capf)
-    (add-hook 'org-mode-hook  #'poly/set-basic-capf)
-    (add-hook 'text-mode-hook  #'poly/set-basic-capf)
-     (add-hook 'eglot-managed-mode-hook  #'poly/set-lsp-capf)
-  )
+  ;; (with-eval-after-load 'cape
+  ;;   (add-hook 'prog-mode-hook  #'poly/set-basic-capf)
+  ;;   (add-hook 'org-mode-hook  #'poly/set-basic-capf)
+  ;;   (add-hook 'text-mode-hook  #'poly/set-basic-capf)
+  ;;    (add-hook 'eglot-managed-mode-hook  #'poly/set-lsp-capf))
   ;; fix (void-function cape-capf-buster)
-(defun cape-capf-buster (capf &optional valid)
-  "Return transformed CAPF where the cache is busted on input change.
-VALID is the input comparator, see `cape--input-valid-p'."
-  (lambda ()
-    (pcase (funcall capf)
-      (`(,beg ,end ,table . ,plist)
-       `(,beg ,end
-              ,(let* ((beg (copy-marker beg))
-                      (end (copy-marker end t))
-                      (input (buffer-substring-no-properties beg end)))
-                 (lambda (str pred action)
-                   (let ((new-input (buffer-substring-no-properties beg end)))
-                     (unless (cape--input-valid-p input new-input valid)
-                       (pcase (funcall capf)
-                         (`(,_beg ,_end ,new-table . ,_plist)
-                          ;; NOTE: We have to make sure that the completion table is interruptible.
-                          ;; An interruption should not happen between the setqs.
-                          (setq table new-table input new-input)))))
-                   (complete-with-action action table str pred)))
-              ,@plist)))))
+;; (defun cape-capf-buster (capf &optional valid)
+;;   "Return transformed CAPF where the cache is busted on input change.
+;; VALID is the input comparator, see `cape--input-valid-p'."
+;;   (lambda ()
+;;     (pcase (funcall capf)
+;;       (`(,beg ,end ,table . ,plist)
+;;        `(,beg ,end
+;;               ,(let* ((beg (copy-marker beg))
+;;                       (end (copy-marker end t))
+;;                       (input (buffer-substring-no-properties beg end)))
+;;                  (lambda (str pred action)
+;;                    (let ((new-input (buffer-substring-no-properties beg end)))
+;;                      (unless (cape--input-valid-p input new-input valid)
+;;                        (pcase (funcall capf)
+;;                          (`(,_beg ,_end ,new-table . ,_plist)
+;;                           ;; NOTE: We have to make sure that the completion table is interruptible.
+;;                           ;; An interruption should not happen between the setqs.
+;;                           (setq table new-table input new-input)))))
+;;                    (complete-with-action action table str pred)))
+;;               ,@plist)))))
   (poly/set-basic-capf)
   (setq dabbrev-upcase-means-case-search t)
   (setq case-fold-search nil)
@@ -777,7 +760,6 @@ VALID is the input comparator, see `cape--input-valid-p'."
 ;; (use-package corfu-doc
 ;;   :disabled
 ;;   :ensure t
-;;   :straight t
 ;;   :config
 ;;   :hook
 ;;   (corfu-mode-hook . corfu-doc-mode)
@@ -790,19 +772,15 @@ VALID is the input comparator, see `cape--input-valid-p'."
 
 ;; Configure Tempel
 (use-package tempel
-  ;; :straight t
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
 	 ("M-*" . tempel-insert))
   :config
   (global-tempel-abbrev-mode))
 
 (use-package tempel-collection
-  ;; :straight t
   :after tempel)
 
-(use-package editorconfig
-  ;; :straight t
-  )
+(use-package editorconfig)
 #+end_src
 
 *** ldap-mode
@@ -822,18 +800,9 @@ VALID is the input comparator, see `cape--input-valid-p'."
 
 #+begin_src emacs-lisp
 (use-package tabnine
-:vc (:url "https://github.com/shuxiao9058/tabnine")
+  :vc (:url "https://github.com/shuxiao9058/tabnine" :rev :newest :branch "main")
   :commands (tabnine-start-process)
   :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . tabnine-mode)
-  ;; :straight (:host github :repo "shuxiao9058/tabnine" :branch "main")
-  ;; :straight (tabnine :package "tabnine"
-	;; 	     :type git
-	;; 	     :host nil
-	;; 	     :branch "main"
-	;; 	     :repo "git@github.com:shuxiao9058/tabnine.git"
-	;; 	     ;; :repo "ssh://git@h.jiya.net:9922/shuxiao9058/tabnine.git"
-	;; 	     ;; :repo "http://192.168.199.8:30008/shuxiao9058/tabnine.git"
-	;;	     )
   :diminish "⌬"
   :custom
   (tabnine-wait 1.0)
@@ -862,14 +831,14 @@ VALID is the input comparator, see `cape--input-valid-p'."
      (meow-motion-mode-p)
      (meow-normal-mode-p)))
   (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate))
+
 #+end_src
 
 **** copilot
 
 #+begin_src emacs-lisp :tangle no
 (use-package copilot
-  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
-  :ensure t
+  :vc (:url "https://github.com/zerolfx/copilot.el" :rev :newest)
   :hook (prog-mode . copilot-mode)
   ;; :custom
   ;; (copilot-network-proxy
@@ -896,18 +865,12 @@ VALID is the input comparator, see `cape--input-valid-p'."
 
 *** corfu-terminal & popon
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (unless IS-GUI
   (use-package popon
-    :straight (popon :package "popon"
-		     :type git
-		     :host nil
-		     :repo "https://codeberg.org/akib/emacs-popon.git"))
+    :vc (:url "https://codeberg.org/akib/emacs-popon.git"))
   (use-package corfu-terminal
-    :straight (corfu-terminal
-	       :type git
-	       :host nil
-               :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+    :vc (:url "https://codeberg.org/akib/emacs-corfu-terminal.git")
     :after popon
     :config
     (unless IS-GUI
@@ -1510,13 +1473,6 @@ _t_:      select tab 											_R_ : redo
 
 #+end_src
 
-* on
-
-#+begin_src emacs-lisp :tangle no
-(use-package on
-  :straight (:host github :repo "ajgrf/on.el"))
-#+end_src
-
 * Git integration with magit & diff-hl & smerge
 
 To manage the git repository, use builtin package ~vc~.
@@ -1530,7 +1486,6 @@ To manage the git repository, use builtin package ~vc~.
   (insert (concat "Change-Id: I" (substring (secure-hash 'sha256 (number-to-string (random t))) 0 40))))
 
 (use-package magit
-  ;; :straight t
   :commands (magit-file-delete magit-status magit-checkout)
   :hook ((magit-pop-mode . hide-mode-line-mode)
 	 ;; (git-commit-setup . git-commit-turn-on-flyspell)
@@ -1586,7 +1541,7 @@ To manage the git repository, use builtin package ~vc~.
   (defun my/magit-quit-window-after (orig-fn &rest args)
     (jump-to-register :magit-fullscreen)
     (apply orig-fn args))
-    (advice-add #'magit-quit-window :after 'my/magit-quit-window-after)
+  (advice-add #'magit-quit-window :after 'my/magit-quit-window-after)
 
   ;; (defadvice magit-quit-window (after magit-restore-screen activate)
   ;;   (jump-to-register :magit-fullscreen))
@@ -1690,19 +1645,15 @@ To manage the git repository, use builtin package ~vc~.
 	("<escape>" . transient-quit-one)))
 
 ;; (use-package magit-delta
-;;   :straight t
-;;   :ensure t
 ;;   :if (executable-find "delta")
 ;;   :hook (magit-mode . magit-delta-mode))
 
 (use-package magit-gitflow
-  ;; :straight t
   :after magit
   :commands magit-gitflow-popup
   :hook (magit-mode . turn-on-magit-gitflow))
 
 (use-package magit-todos
-  ;; :straight t
   :disabled
   :diminish
   :after magit
@@ -1737,7 +1688,6 @@ To manage the git repository, use builtin package ~vc~.
 ;; git-gutter-plus - View, stage and revert Git changes from the buffer (inspired by package of same name from vim)
 ;; diff-hl is better
 (use-package git-gutter+
-  ;; :straight t
   :diminish "Git↓"
   :demand t
   :disabled
@@ -1760,13 +1710,10 @@ To manage the git repository, use builtin package ~vc~.
   )
 
 (use-package git-gutter-fringe+
-  :disabled
-  ;; :straight t
-  )
+  :disabled)
 
 ;; git-messenger - Provides a function popup commit message at current line (port of package of same name from vim)
 (use-package git-messenger
-  ;; :straight t
   :bind ("C-c g p" . git-messenger:popup-message)
   :init
   (custom-set-variables
@@ -1778,15 +1725,14 @@ To manage the git repository, use builtin package ~vc~.
 
 ;; git-timemachine - Step through historic versions of a git controlled file
 (use-package git-timemachine
-  ;; :straight t
   :bind ("C-c g t" . git-timemachine-toggle))
 
 ;; ;; gitignore-mode - Major mode for various Git configuration files
-;; (use-package git-modes :straight t)
+;; (use-package git-modes)
 
 ;; browse-at-remote - Browse target page on github/gitlab/bitbucket
 (use-package browse-at-remote
-:disabled
+  :disabled
   :config
   (add-to-list 'browse-at-remote-remote-type-regexps '(:host "^git\\.17usoft\\.com$" :type "gitlab" :actual-host "git.17usoft.com"))
   (transient-append-suffix 'magit-file-dispatch "m"
@@ -1829,15 +1775,12 @@ To manage the git repository, use builtin package ~vc~.
   )
 
 ;; (use-package ghub
-;;   :straight t
 ;;   :after (magit forge)
 ;;   ;; :custom
 ;;   ;; (ghub-insecure-hosts '("git.17usoft.com/api/v4"))
 ;;   )
 
 (use-package smerge-mode
-  ;; :straight t
-  :ensure t
   :diminish
   :commands (smerge-mode
 	     smerge-auto-leave
@@ -1868,11 +1811,9 @@ To manage the git repository, use builtin package ~vc~.
 				     (when smerge-mode
 				       (hydra-smerge/body))))))
 
-;; (use-package vdiff
-;;   :straight t)
+;; (use-package vdiff)
+
 (use-package gerrit
-  ;; :straight t
-  :ensure t
   :custom
   (gerrit-use-ssl nil)
   (gerrit-host "10.177.9.244:11832")  ;; is needed for REST API calls
@@ -1894,7 +1835,6 @@ To manage the git repository, use builtin package ~vc~.
 
 (use-package code-review
   :disabled
-  ;; :straight t
   :bind (:map forge-topic-mode-map
 	      ("C-c r" . code-review-forge-pr-at-point)
 	      :map code-review-feedback-section-map
@@ -2062,7 +2002,7 @@ Magit with cz
 
 #+begin_src emacs-lisp :tangle no
 (use-package magit-cz
-  :straight (magit-cz :host github :repo "yqrashawn/magit-cz")
+  :vc (:url "https://github.com/yqrashawn/magit-cz" :rev :newest)
   :after magit)
 #+end_src
 
@@ -2098,14 +2038,8 @@ Magit with cz
     (member rime--current-input-key '(91 93 96))))
 
 (use-package rime
-:vc (:url "https://github.com/DogLooksGood/emacs-rime"
-       :branch "main"
-       ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
-       )
-  ;; :straight (rime
-	;;      :host github
-	;;      :repo "DogLooksGood/emacs-rime"
-	;;     :files (:defaults "lib.c" "Makefile"))
+  :vc (:url "https://github.com/DogLooksGood/emacs-rime"
+	    :branch "main" :rev :newest)
   :defer t
   :custom
   (rime-disable-predicates '(;; +rime-disable-predicate
@@ -2193,7 +2127,6 @@ deal with rime search in minibuffer
 
 #+begin_src emacs-lisp
 (use-package isearch-mb
-  ;; :straight t
   :custom
   ;; Match count next to the minibuffer prompt
   (isearch-lazy-count t)
@@ -2220,11 +2153,7 @@ Use Telega as Telegram client.
 
 #+begin_src emacs-lisp :tangle no
 (use-package telega
-  :straight (telega
-	     :host github
-	     :repo "zevlg/telega.el"
-	     :branch "master"
-	     :files (:defaults "contrib" "etc" "server" "Makefile"))
+  :vc (:url "https://github.com/zevlg/telega.el" :rev :newest :branch "master")
   :commands (telega)
   :defer t
   :custom
@@ -2465,7 +2394,6 @@ session
 
 #+begin_src emacs-lisp :tangle no
 (use-package session
- ;; :straight t
   :custom
   (session-save-file (expand-file-name "session" poly-cache-dir))
   (session-name-disable-regexp "\\(?:\\`'/tmp\\|\\.git/[A-Z_]+\\'\\)")
@@ -2551,7 +2479,6 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package embark
-  ;; :straight t
   :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -2567,7 +2494,6 @@ Auto cleanup older buffers
 		 (window-parameters (mode-line-format . none)))))
 
 (use-package embark-consult
-  ;; :straight t
   ;; :disabled
   :after (embark consult)
   :demand t ; only necessary if you have the hook below
@@ -2576,27 +2502,23 @@ Auto cleanup older buffers
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(use-package docker-compose-mode
-  ;; :straight t
-  )
+(use-package docker-compose-mode)
 #+end_src
 * activity log
 ** activity-watch
 #+begin_src emacs-lisp
 (use-package activity-watch-mode
   :diminish
-  ;; :straight t
   :config
   (global-activity-watch-mode))
 #+end_src
 ** wakatime
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package wakatime-mode
- :vc (:url "https://github.com/shuxiao9058/wakatime-mode"
-       ;; :branch "emacs29"
-       ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
-       )
+  :vc (:url "https://github.com/shuxiao9058/wakatime-mode"
+	    :branch "master"
+	    :rev :newest)
   :init
   (setq +wakatime-hide-filenames t)
   (setq wakatime-ignore-exit-codes '(0 1 102 112))
@@ -2613,11 +2535,6 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp :tangle no
 (use-package vterm
-  ;; :straight t
-  ;; :straight (vterm :type git :flavor melpa
-  ;; 		   :files ("*" (:exclude ".dir-locals.el" ".gitignore" ".clang-format" ".travis.yml") "vterm-pkg.el")
-  ;; 		   :host github :repo "akermu/emacs-libvterm"
-  ;; 		   :no-native-compile t)
   :demand
   :commands (vterm ds/vterm)
   :custom
@@ -2697,7 +2614,6 @@ Auto cleanup older buffers
       (vterm))))
 
 (use-package vterm-toggle
- ;; :straight t
   ;; :when (memq window-system '(mac ns x))
   :bind (([f2] . mb/vterm-right-here)
 	 ("C-<return>" . mb/vterm-right-here)
@@ -2815,15 +2731,9 @@ Auto cleanup older buffers
 | C-c C-l        | line mode                       |
 
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package eat
-  :straight (:type git :host codeberg
-		   :repo "akib/emacs-eat"
-		   :files ("*.el" ("term" "term/*.el") "*.texi"
-			   "*.ti" ("terminfo/e" "terminfo/e/*")
-			   ("terminfo/65" "terminfo/65/*")
-			   ("integration" "integration/*")
-			   (:exclude ".dir-locals.el" "*-tests.el")))
+  :vc (:url "https://codeberg.org/akib/emacs-eat.git")
   :custom
   (eat-kill-buffer-on-exit t)
   (eat-enable-shell-prompt-annotation nil)
@@ -2966,7 +2876,7 @@ Auto cleanup older buffers
   (add-hook 'eat-eshell-mode-hook #'meow-eat-eshell-setup-hooks))
 
 ;; (use-package term-toggle
-;;   :straight (term-toggle :host github :repo "amno1/emacs-term-toggle")
+;;   :vc (:url "https://github.com/amno1/emacs-term-toggle")
 ;;   :config
 ;;   (setq term-toggle-no-confirm-exit t))
 
@@ -3059,7 +2969,7 @@ Auto cleanup older buffers
 	 (eat-win)
 	 (eat-pwd)
 	 (enter-meow-insert-mode-fn (lambda() (unless (meow-insert-mode-p)
-					   (meow-insert-mode t)))))
+						(meow-insert-mode t)))))
     (when result
       (setq eat-buffer (car result))
       (setq eat-pwd (expand-file-name (car (cdr result)))))
@@ -3235,12 +3145,11 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 
 
 (use-package auth-source-pass
-    :ensure nil 
+    :ensure nil
     ;; :if (file-exists-p "~/.password-store")
     :config (auth-source-pass-enable))
 
 (use-package pinentry
-   ;; :straight t
     :config
     (pinentry-start)
     (setq epa-pinentry-mode 'loopback))
@@ -3256,10 +3165,7 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
   (auto-fill-mode -1))
 
 (use-package mu4e
-  :straight (mu4e :host github
-		  :files ("mu4e/*")
-		  :repo "djcb/mu"
-		  :branch "release/1.6")
+  :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/" :branch "release/1.6")
   :commands mu4e
   :defer nil
   :custom
@@ -3355,9 +3261,9 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 	  ;; (gnus-article-inline-part (car html-part))
 	  (message "save file to %s html-part: %s" outfile (car html-part))
 
-	  (with-temp-buffer
-	    (shell-command
-	     (format "wkhtmltopdf %s ~/Desktop/%s" (car html-part) outfile) t)))
+	(with-temp-buffer
+	  (shell-command
+	   (format "wkhtmltopdf %s ~/Desktop/%s" (car html-part) outfile) t)))
       ;; (mu4e-warn "No html part in this message")
       )
     )
@@ -3404,7 +3310,7 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
     (mu4e-headers-rerun-search))
 
   (define-key 'mu4e-headers-mode-map "o"
-    'my:mu4e-toggle-headers-include-related)
+	      'my:mu4e-toggle-headers-include-related)
 
   (setq mail-user-agent 'mu4e-user-agent)
 
@@ -3443,7 +3349,6 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
   'mu4e-user-agent)
 
 (use-package mu4e-maildirs-extension
-  :straight t
   :after mu4e
   :custom
   (mu4e-maildirs-extension-fake-maildir-separator "\\.")
@@ -3451,7 +3356,6 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
   (mu4e-maildirs-extension))
 
 (use-package mu4e-alert
-  :straight t
   :after mu4e
   :hook (after-init . mu4e-alert-enable-notifications)
   :custom
@@ -3473,8 +3377,7 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 		;; "OR "
 		)))
 
-(use-package olivetti
-  :straight t)
+(use-package olivetti)
 
 (require 'epg-config)
 
@@ -3483,7 +3386,6 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 	      mml2015-sign-with-sender t)
 
 (use-package mu4e-marker-icons
-  :straight t
   :after mu4e
   :init (mu4e-marker-icons-mode 1)
   (defcustom v/message-attachment-intent-re
@@ -3550,8 +3452,7 @@ there are no attachments."
   (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
   (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
 
-;; (use-package validate
-;;   :straight t)
+;; (use-package validate)
 
 (use-package message
   :ensure nil
@@ -3603,11 +3504,9 @@ there are no attachments."
 #+end_src
 
 ** notmuch
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package notmuch
-  :straight (notmuch :url "https://git.notmuchmail.org/git/notmuch"
-		     :fetcher git
-		     :files ("emacs/*.el" "emacs/*.svg"))
+  :vc (:url "https://git.notmuchmail.org/git/notmuch")
   :commands notmuch
   :bind (("C-c m" . notmuch)
          :map notmuch-show-mode-map (("D" . apm-notmuch-toggle-deleted)
@@ -3946,13 +3845,13 @@ determine which browser function to use."
       (when (get-buffer gnus-article-buffer)
 	(kill-buffer gnus-article-buffer))))
 
- ;; (defun text-newline-to-br (text)
- ;;  "Convert plain TEXT newline to <br/>."
- ;;  (with-temp-buffer
- ;;    (insert text)
- ;;    (goto-char (point-min))
- ;;    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
- ;;    (buffer-string)))
+  ;; (defun text-newline-to-br (text)
+  ;;  "Convert plain TEXT newline to <br/>."
+  ;;  (with-temp-buffer
+  ;;    (insert text)
+  ;;    (goto-char (point-min))
+  ;;    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
+  ;;    (buffer-string)))
 
   (defun new-html-buffer(txt)
     (with-temp-buffer
@@ -3979,30 +3878,24 @@ determine which browser function to use."
 	(warn "Unkown coding system %s in email" fixed)
 	(setq fixed  "utf-8"))
       (message "translate coding system %s into %s" charset fixed)
-      fixed))
-  )
+      fixed)))
 
-(use-package notmuch-capf
-:vc (:url "https://github.com/tpeacock19/notmuch-capf")
- )
+;; (use-package notmuch-capf
+;;   :vc (:url "https://github.com/tpeacock19/notmuch-capf"))
 
 ;; (use-package notmuch-labeler
-;;   :straight t
 ;;   :commands notmuch-labeler-rename
 ;;   :defer t
 ;;   :after notmuch
 ;;   )
 
 ;; (use-package notmuch-bookmarks
-;;   :straight t
 ;;   :after notmuch
 ;;   :config
 ;;   (notmuch-bookmarks-mode))
 
 ;; (use-package notmuch-alert
-;;   :straight (notmuch-alert
-;;              :host github
-;;              :repo "publicimageltd/notmuch-alerts")
+;; :vc (:url "https://github.com/publicimageltd/notmuch-alerts" :rev :newest)
 ;;   :after notmuch-bookmarks
 ;;   :config
 ;;   (notmuch-alert-mode)
@@ -4045,7 +3938,7 @@ determine which browser function to use."
   (notmuch-notify-set-refresh-timer))
 
 (use-package notmuch-update
-  :straight (:host github :repo "shuxiao9058/notmuch-update")
+  :vc (:url "https://github.com/shuxiao9058/notmuch-update" :rev :newest )
   :disabled
   :custom
   (notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
@@ -4065,7 +3958,6 @@ except for `notmuch-show-mode' buffers."
   (:map notmuch-common-keymap (("u" . notmuch-update))))
 
 (use-package notmuch-indicator
-  ;; :straight t
   :disabled
   :init
   (setq notmuch-indicator-args
@@ -4083,8 +3975,6 @@ except for `notmuch-show-mode' buffers."
 #+begin_src emacs-lisp :tangle no
 (use-package gnus
   :ensure nil
-  ;; :straight (nnhackernews :type built-in)
-  ;; :straight (nnreddit :type built-in)
   ;; :bind (("C-c m" . 'gnus))
   ;; :bind (:map gnus-article-mode-map
   ;;             ("o" . gnus-mime-copy-part)
@@ -4332,7 +4222,7 @@ except for `notmuch-show-mode' buffers."
 
 (use-package gnus-group
   :after gnus
-  :ensure nil 
+  :ensure nil
   :custom
   (gnus-group-sort-function 'gnus-group-sort-by-server)
   (gnus-level-subscribed 6)
@@ -4511,7 +4401,6 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package w3m
-  ;; :straight t
   :config
   (with-eval-after-load 'notmuch
     (notmuch-show-setup-w3m)))
@@ -4521,7 +4410,6 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp :tangle no
 (use-package ebdb
-  ;; :straight t
   :config
   (require 'ebdb-message)
   (require 'ebdb-notmuch) ; FIXME 2021-05-13: does not activate the corfu-mode UI
@@ -4716,7 +4604,6 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp
 (use-package outshine
-  ;; :straight t
   :diminish outshine-mode
   :commands (outshine-mode
              outshine-cycle-buffer
@@ -4737,7 +4624,6 @@ except for `notmuch-show-mode' buffers."
 
 #+begin_src emacs-lisp
 (use-package outorg
-  ;; :straight t
   ;; M-O # current heading.
   ;; C-u M-O # current buffer.
   ;; M-# outorg-copy-edits-and-exit.
@@ -4749,15 +4635,12 @@ except for `notmuch-show-mode' buffers."
 org-download-paste for clipboard images
 
 #+begin_src emacs-lisp
-(use-package org-download
-  ;; :straight t
-  :ensure t)
+(use-package org-download)
 #+end_src
 
 ** org-msg send mail
 #+begin_src emacs-lisp
 (use-package org-msg
-  ;; :straight t
   :hook (org-msg-edit-mode . (lambda ()
 			       (wakatime-mode -1)
 			       (poly/set-mail-capf)
@@ -4765,7 +4648,7 @@ org-download-paste for clipboard images
 			       ;; (turn-on-auto-fill)
 			       (electric-indent-local-mode -1)
 			       ;; (turn-on-flyspell)
-             ))
+			       ))
   :config
   (org-msg-mode-notmuch)
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil num:t \\n:t"
@@ -5095,10 +4978,10 @@ org-download-paste for clipboard images
 		 ,font-family
 		 ,color))
 	    (span tag ((background-color . "eee")
-		      (font-family . "monospace")
-		      (padding . "2px")
-		      (font-size . "80%")
-		      (font-weight . "normal")))
+		       (font-family . "monospace")
+		       (padding . "2px")
+		       (font-size . "80%")
+		       (font-weight . "normal")))
 	    (p nil
                ((text-decoration . "none")
 		(margin-bottom . "0px")
@@ -5124,7 +5007,6 @@ org-download-paste for clipboard images
 
 #+begin_src emacs-lisp
 (use-package osx-trash
-  ;; :straight t
   :commands osx-trash-move-file-to-trash
   :init
   ;; Delete files to trash on macOS, as an extra layer of precaution against
@@ -5149,7 +5031,6 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
 #+begin_src emacs-lisp :tangle no
 (use-package pdf-tools
   :defer t
-  ;; :straight t
   :config
   ;; initialize
   (setenv "PKG_CONFIG_PATH" "/opt/local/lib/pkgconfig:/opt/X11/lib/pkgconfig")
@@ -5172,7 +5053,7 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
 (use-package pdf-continuous-scroll-mode
   :defer t
   :vc (:url "https://github.com/dalanicolai/pdf-continuous-scroll-mode.el"
-       )
+	    )
   :after pdf-tools
   :config
   (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode))
@@ -5188,19 +5069,17 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
   (save-place-mode 1))
 
 (use-package mixed-pitch
-  ;; :straight t
   :hook
   (text-mode . mixed-pitch-mode))
 
 (use-package org-analyzer
-  ;; :straight t
   :after org
   :custom
   (org-analyzer-org-directory org-beorg-directory))
 
 ;; devonthink
-;; (use-package org-devonthink
-;;  :straight (:host github :repo "lasvice/org-devonthink"))
+(use-package org-devonthink
+  :vc (:url "https://github.com/lasvice/org-devonthink" :rev :newest))
 #+end_src
 
 *** open with vscode
@@ -5359,11 +5238,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package emacs-gc-stats
-  :straight
-  (emacs-gc-stats :package "emacs-gc-stats"
-		  :type git
-		  :host nil
-		  :repo "https://git.sr.ht/~yantar92/emacs-gc-stats")
+  :vc (emacs-gc-stats :url "https://git.sr.ht/~yantar92/emacs-gc-stats")
   :config
   (setq emacs-gc-stats-gc-defaults 'emacs-defaults)
   (emacs-gc-stats-mode +1))
@@ -5384,7 +5259,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp
 (use-package dumb-jump
-  ;; :straight t
   :commands dumb-jump-result-follow
   :config
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
@@ -5455,10 +5329,10 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package replace-regexp-list
-  :straight (:host github :repo "emacsattic/replace-regexp-list"))
+  :vc (:url "https://github.com/emacsattic/replace-regexp-list"))
 
 (use-package text-to-html
-  :straight (:host github :repo "emacsattic/text-to-html"))
+  :vc (:url "https://github.com/emacsattic/text-to-html"))
 #+end_src
 
 
@@ -5467,7 +5341,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 #+begin_src emacs-lisp
 ;; sudo port install gifsicle
 (use-package gif-screencast
-  ;; :straight t
   :init
   (when IS-MAC
     (setq gif-screencast-args '("-x")
@@ -5543,14 +5416,12 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 ** kdl-mode
 
 #+begin_src emacs-lisp :tangle no
-;; (use-package kdl-ts-mode
-;;   :straight (:type git :host github
-;; 		   :repo "dataphract/kdl-ts-mode")
-;;   :mode (("\\.kdl\\'" . kdl-ts-mode)))
+(use-package kdl-ts-mode
+  :vc (:url "https://github.com/dataphract/kdl-ts-mode")
+  :mode (("\\.kdl\\'" . kdl-ts-mode)))
 
 (use-package kdl-mode
-  :straight (:type git :host github
-		   :repo "bobuk/kdl-mode")
+  :vc (:url "https://github.com/bobuk/kdl-mode")
   :mode (("\\.kdl\\'" . kdl-mode)))
 #+end_src
 
@@ -5624,7 +5495,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package buffer-name-relative
-  :straight (:host codeberg :repo "ideasman42/emacs-buffer-name-relative")
+  :vc (buffer-name-relative :url "https://codeberg.org/ideasman42/emacs-buffer-name-relative")
   :hook (after-init . buffer-name-relative-mode)
   :config
   (setq buffer-name-relative-prefix '("" . "/")))

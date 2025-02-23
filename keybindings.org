@@ -6,7 +6,7 @@
 
 #+begin_src emacs-lisp
 (use-package which-key
-  ;; :straight t
+  :ensure nil
   :defer 1
   :custom
   (which-key-idle-delay 0.5)
@@ -260,7 +260,6 @@ This configuration sticks with Meow for modal editing.
 
 #+begin_src emacs-lisp
 (use-package meow
-  ;; :straight t
   :demand t
   :ensure t
   :init
@@ -434,11 +433,9 @@ This configuration sticks with Meow for modal editing.
   (add-to-list 'meow-char-thing-table '(?a . arrow)))
 
 (use-package meow-tree-sitter
-  ;; :straight (meow-tree-sitter :host github :repo "skissue/meow-tree-sitter")
   :vc (:url "https://github.com/skissue/meow-tree-sitter"
-	    :branch "main"
-	    ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
-	    )
+	    :rev :newest
+	    :branch "main")
   :after meow
   :config
   (meow-tree-sitter-register-defaults))
