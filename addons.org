@@ -3471,7 +3471,10 @@ there are no attachments."
 ** notmuch
 #+begin_src emacs-lisp
 (use-package notmuch
-  :vc (:url "https://git.notmuchmail.org/git/notmuch")
+  :vc (:url "https://git.notmuchmail.org/git/notmuch"
+	    :lisp-dir "emacs"
+	    :rev :newest
+	    :branch "release")
   :commands notmuch
   :bind (("C-c m" . notmuch)
          :map notmuch-show-mode-map (("D" . apm-notmuch-toggle-deleted)
@@ -3504,7 +3507,7 @@ there are no attachments."
   (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notmuch-show-logo nil)
-  (notmuch-command "/usr/local/bin/notmuch")
+  (notmuch-command "/opt/local/bin/notmuch")
   (notmuch-show-indent-messages-width 0)
   (notmuch-show-single-message t)
   ;; (notmuch-wash-wrap-lines-length 150)

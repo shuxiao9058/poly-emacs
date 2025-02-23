@@ -268,7 +268,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 
 (use-package exec-path-from-shell
   :ensure t
-  ;; :if IS-MAC
+  :if IS-MAC
   :config
   ;; (setq shell-default-term-shell "/bin/zsh")
   ;; (setq exec-path-from-shell-shell-name "/bin/zsh")
@@ -336,8 +336,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 						  (expand-file-name "/opt/local/lib/gcc11/")))))
 	;; Only set after LIBRARY_PATH can find gcc libraries.
 	(setq comp-deferred-compilation t))
-    (message "Native comp is *not* available"))
-  )
+    (message "Native comp is *not* available")))
 #+end_src
 
 ** core packages

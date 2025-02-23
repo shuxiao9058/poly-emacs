@@ -1261,7 +1261,8 @@ Visualizing Color Codes with rainbow-mode.
 
 #+begin_src emacs-lisp
 (use-package highlight-indent-guides
-  :vc (:url "https://github.com/DarthFennec/highlight-indent-guides")
+  :vc (:url "https://github.com/DarthFennec/highlight-indent-guides"
+	    :ignored-files ("tests/highlight-indent-guides-tests.el" "tests/highlight-indent-guides-known-bugs-tests.el"))
   :hook (prog-mode . highlight-indent-guides-mode)
   :delight highlight-indent-guides-mode
   :config
