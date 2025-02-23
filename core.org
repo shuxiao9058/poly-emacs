@@ -182,7 +182,6 @@ See `eval-after-load' for the possible formats of FORM."
 	  (quote ,(cdr my-features))
 	  (quote ,form))))))
 
-
 (cl-defmacro after-load (pkgs &body body)
   "Waits until all packages are loaded before evaluating body.
 Example:

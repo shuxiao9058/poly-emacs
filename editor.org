@@ -439,7 +439,7 @@ Expand template with =TAB=. Jump between the placeholders with =TAB= and =S-TAB=
 
 #+begin_src emacs-lisp
 (use-package perspective
-  :ensure nil
+  ;; :ensure nil
   :demand t
   :commands
   (persp-mode)
