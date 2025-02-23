@@ -132,6 +132,8 @@ If FORCE-TANGLE is non-nil, always tangle before load."
       (setq debug-on-error t)
       (setq stack-trace-on-error t))
   (progn
+    ;; Not really liking that warnings create a buffer at the bottom.
+    (setq warning-display-at-bottom nil)
     (setq warning-minimum-level :emergency)
     (setq debug-on-error nil)
     (setq stack-trace-on-error nil)))

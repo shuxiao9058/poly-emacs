@@ -28,6 +28,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; ;;  Always scroll the compilation window
   ;; (compilation-scroll-output t)
   :init
+  (setq trusted-content '("~/workspace"))
   (setq completion-cycle-threshold 3)
   ;; Add prompt indicator to `completing-read-multiple'.
   ;; Alternatively try `consult-completing-read-multiple'.
@@ -308,10 +309,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
 ;; Completion ignores filenames ending in any string in this list.
 (setq completion-ignored-extensions
       '(".o" ".elc" ".class" "java~" ".ps" ".abs" ".mx" ".~jv" ".bak" ))
-
-;; ;;; lisp
-;; (setq ;; lisp-body-indent   2
-;;  lisp-indent-function  'lisp-indent-function)
 
 ;; enable C-x C-u to upcase-region
 (put 'upcase-region 'disabled nil)
