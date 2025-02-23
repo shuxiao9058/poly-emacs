@@ -487,6 +487,10 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package corfu
+  :vc (:url "https://github.com/minad/corfu"
+	    :rev :newest
+	    :branch "main"
+	    :lisp-dir "extensions")
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
@@ -515,17 +519,22 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-scroll-margin 5)        ;; Use scroll margin
   (corfu-right-margin-width 2.0)
   (corfu-left-margin-width 1.0)
+  (corfu-popupinfo-mode t)
+  (corfu-history-mode t)
+  (global-corfu-mode t)
+  ;; :init
+  ;; (global-corfu-mode)
+  ;; (require 'corfu-history)
+  ;; (require 'corfu-popupinfo)
+  ;; (corfu-history-mode)
+  ;; (corfu-popupinfo-mode)
   :config
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode)
-
   (unbind-key (kbd "TAB") corfu-map)
   (unbind-key (kbd "<tab>") corfu-map)
   (add-hook 'eshell-mode-hook
             (lambda () (setq-local corfu-quit-at-boundary t
-			      corfu-quit-no-match t
-			      corfu-auto nil)
+				   corfu-quit-no-match t
+				   corfu-auto nil)
               (corfu-mode)))
   :bind (:map corfu-map
 	      ;; ("TAB" . corfu-next)
@@ -658,9 +667,13 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (interactive)
   (setq completion-category-defaults nil)
   (setq-local completion-at-point-functions
-	      (poly/convert-super-capf (if poly-use-lsp-mode
-					   #'lsp-completion-at-point
-					 #'eglot-completion-at-point))))
+	      (poly/convert-super-capf
+	       (if eglot--managed-mode
+		   (progn
+		     (message "is eglot")
+		     #'eglot-completion-at-point
+		     )
+		 #'lsp-completion-at-point))))
 
 ;; Completion At Point Extensions made for `corfu'
 (use-package cape
@@ -697,36 +710,18 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   :hook ((prog-mode . poly/set-basic-capf)
 	 (org-mode . poly/set-basic-capf)
 	 (text-mode . poly/set-basic-capf)
+	 (eglot-managed-mode . poly/set-lsp-capf)
 	 ;; (emacs-lisp-mode . (lambda ()
 	 ;;      (poly/convert-super-capf #'elisp-completion-at-point)))
-	 ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf))
+	 ;; ((lsp-completion-mode eglot-managed-mode) . poly/set-lsp-capf)
+	 )
   :config
   ;; (with-eval-after-load 'cape
   ;;   (add-hook 'prog-mode-hook  #'poly/set-basic-capf)
   ;;   (add-hook 'org-mode-hook  #'poly/set-basic-capf)
   ;;   (add-hook 'text-mode-hook  #'poly/set-basic-capf)
   ;;    (add-hook 'eglot-managed-mode-hook  #'poly/set-lsp-capf))
-  ;; fix (void-function cape-capf-buster)
-;; (defun cape-capf-buster (capf &optional valid)
-;;   "Return transformed CAPF where the cache is busted on input change.
-;; VALID is the input comparator, see `cape--input-valid-p'."
-;;   (lambda ()
-;;     (pcase (funcall capf)
-;;       (`(,beg ,end ,table . ,plist)
-;;        `(,beg ,end
-;;               ,(let* ((beg (copy-marker beg))
-;;                       (end (copy-marker end t))
-;;                       (input (buffer-substring-no-properties beg end)))
-;;                  (lambda (str pred action)
-;;                    (let ((new-input (buffer-substring-no-properties beg end)))
-;;                      (unless (cape--input-valid-p input new-input valid)
-;;                        (pcase (funcall capf)
-;;                          (`(,_beg ,_end ,new-table . ,_plist)
-;;                           ;; NOTE: We have to make sure that the completion table is interruptible.
-;;                           ;; An interruption should not happen between the setqs.
-;;                           (setq table new-table input new-input)))))
-;;                    (complete-with-action action table str pred)))
-;;               ,@plist)))))
+  ;; (add-hook 'eglot-managed-mode-hook  (lambda() (poly/set-lsp-capf #'eglot-completion-at-point)))
   (poly/set-basic-capf)
   (setq dabbrev-upcase-means-case-search t)
   (setq case-fold-search nil)
@@ -889,7 +884,7 @@ Quick action with hydra
   "
 _a_genda         | _f_lycheck         |      _n_otdeft
 _d_ap            | _l_sp              |      _o_utline & outshine
-_e_in            | _s_traight         |      _t_ab
+_e_in            | _t_ab
                |                  |      _w_indow
 "
   ("a" hydra-agenda-view/body :exit t)
@@ -899,38 +894,8 @@ _e_in            | _s_traight         |      _t_ab
   ("n" notdeft-global-hydra/body :exit t)
   ("w" hydra-window/body :exit t)
   ("o" hydra-outline/body :exit t)
-  ("s" hydra-straight/body :exit t)
   ("t" hydra-tab/body :exit t)
   ("e" hydra-ein/body :exit t))
-
-(defhydra hydra-straight (:hint nil)
-  "
-_c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
-_C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
-----------------^^+--------------^^+---------------^^+----------------^^+------------||_q_uit||
-_r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
-_R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
-  ("c" straight-check-all)
-  ("C" straight-check-package)
-  ("r" straight-rebuild-all)
-  ("R" straight-rebuild-package)
-  ("f" straight-fetch-all)
-  ("F" straight-fetch-package)
-  ("p" straight-x-pull-all)
-  ("P" straight-pull-package)
-  ("m" straight-merge-all)
-  ("M" straight-merge-package)
-  ("n" straight-normalize-all)
-  ("N" straight-normalize-package)
-  ("u" straight-push-all)
-  ("U" straight-push-package)
-  ("v" straight-x-freeze-versions)
-  ("V" straight-x-thaw-pinned-versions)
-  ("w" straight-watcher-start)
-  ("W" straight-watcher-quit)
-  ("g" straight-get-recipe)
-  ("e" straight-prune-build)
-  ("q" nil))
 
 (defhydra hydra-window (:exit nil)
   "

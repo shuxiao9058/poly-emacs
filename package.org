@@ -20,6 +20,57 @@
 (package-initialize)
 #+end_src
 
+** [[https://github.com/formsandlines/dotfiles/blob/405498c15f2fa07bb75e7fe5e14cbd2e3cab0e26/.emacs.d/init.org#L78][use-package autoremove fix]]
+
+Custom ~package-autoremove~ that only removes packages not ~:ensure~'d in
+~use-package~ declarations by building a custom list that overrides
+~package-selected-packages~.
+
+Normally, ~use-package~ should add (via ~:ensure~) auto-installed packages to
+~package-selected-packages~, but it seems like they are added only as
+dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
+- may be fixed properly in the future (hopefully?), then this snippet can be
+  removed
+- [[https://github.com/jwiegley/use-package/issues/870#issuecomment-771881305][Source]] (GitHub)
+#+begin_src elisp
+(defvar use-package-selected-packages '(use-package)
+  "Packages pulled in by use-package.")
+(defun use-package-autoremove ()
+  "Autoremove packages not used by use-package."
+  (interactive)
+  (let ((package-selected-packages use-package-selected-packages))
+    (package-autoremove)))
+
+(eval-and-compile
+  (define-advice use-package-handler/:ensure (:around (fn name-symbol keyword args rest state) select)
+    (let ((items (funcall fn name-symbol keyword args rest state)))
+      (dolist (ensure args items)
+        (let ((package
+	       (or (and (eq ensure t) (use-package-as-symbol name-symbol))
+                   ensure)))
+          (when package
+            (when (consp package)
+	      (setq package (car package)))
+            (push `(add-to-list 'use-package-selected-packages ',package) items))))))
+  (define-advice use-package-handler/:vc (:around (fn name-symbol keyword args rest state) select)
+    (let ((items (funcall fn name-symbol keyword args rest state)))
+      (dolist (ensure args items)
+        (let ((package
+	       (or (and (eq ensure t) (use-package-as-symbol name-symbol))
+                   ensure)))
+          (when package
+            (when (consp package)
+	      (setq package (car package)))
+            (push `(add-to-list 'use-package-selected-packages ',package) items))))))
+  (define-advice use-package-handler/:quelpa (:around (fn name-symbol keyword args rest state) select)
+    (let ((package (pcase (car args)
+                     ((pred symbolp) (car args))
+                     ((pred listp) (car (car args))))))
+      (cons `(add-to-list 'use-package-selected-packages ',package)
+            (funcall fn name-symbol keyword args rest state)))))
+#+end_src
+
+
 * Package Configuration with straight
 
 ** setting default directory
