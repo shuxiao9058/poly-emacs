@@ -144,6 +144,11 @@ Core configuration of poly emacs, global variable declare.
     (move-to-column col)))
 #+end_src
 
+** custom package install path
+
+#+begin_src emacs-lisp
+(setq package-user-dir (expand-file-name "elpa" poly-local-dir))
+#+end_src
 
 ** core lib
 
