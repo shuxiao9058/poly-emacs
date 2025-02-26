@@ -195,6 +195,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
       history-delete-duplicates t
       set-mark-command-repeat-pop t ;; C-u SPC pops the last mark, afterwords no C-u is needed for further pops.
       show-paren-context-when-offscreen 'overlay      ;; Show the paired paren at the top-right corner when it's off screen.
+      blink-matching-paren-highlight-offscreen t
       backup-inhibited t
       kill-whole-line t
       xref-history-storage 'xref-window-local-history
@@ -462,14 +463,14 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   :custom
   (project-switch-commands 'consult-project-extra-find)
   (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod" "Cargo.toml"
-                                        "project.clj"
-                                        "pom.xml"
-                                        "package.json"
-                                        "Makefile"
-					"tsconfig.json"
-                                        ;; "README.org"
-                                        ;; "README.md"
-					))
+                                   "project.clj"
+                                   "pom.xml"
+                                   "package.json"
+                                   "Makefile"
+				   "tsconfig.json"
+                                   ;; "README.org"
+                                   ;; "README.md"
+				   ))
   (project-vc-ignores
    '("vendor/" "*.elc" "*.a" ".DS_Store" "__pycache__"
      "tmp" "dist" "coverage"
@@ -483,23 +484,24 @@ To find files/buffers and apply commands on project, use builtin package ~projec
      "ido.last" "eln-cache/" ".cache/" ".saves/" "save-perspective"
      "elpa/" "straight/" "auto-save-list/" "undo/" "var/" "tramp"
      ".lsp-session-v1" "history" "org-roam.db" "multisession/"
-      "vimish-fold/" "transient/" "tree-sitter/" "Clementine/"
-      "Code - OSS/" "Element/" "Pulsar/" "Signal*/" "Chromium/"
-      "akonadi*" "balena-etcher/" "cef_user_data/" "chromium/"
-      "icedtea-web/" "libreoffice/" "whatsdesk/"
+     "vimish-fold/" "transient/" "tree-sitter/" "Clementine/"
+     "Code - OSS/" "Element/" "Pulsar/" "Signal*/" "Chromium/"
+     "akonadi*" "balena-etcher/" "cef_user_data/" "chromium/"
+     "icedtea-web/" "libreoffice/" "whatsdesk/"
      )
    '(".log" ".vs" "node_modules"))
   :config
   (defun poly/find-file()
-  "my find file"
-  (interactive)
-  (if (and (fboundp 'project-root) (project-current))
-      (project-find-file)
-    (call-interactively #'find-file))))
+    "my find file"
+    (interactive)
+    (if (and (fboundp 'project-root) (project-current))
+	(project-find-file)
+      (call-interactively #'find-file))))
 
 (use-package consult-project-extra
   :defer t
-  :vc (:url "https://github.com/Qkessler/consult-project-extra")
+  :vc (consult-project-extra :url "https://github.com/Qkessler/consult-project-extra" :branch "main" :rev :newest)
+  :commands (consult-project-extra-find consult-project-extra-find-other-window)
   :bind
   ([remap project-find-file] . consult-project-extra-find)
   ("C-x p 4 f" . consult-project-extra-find-other-window))
@@ -1259,6 +1261,7 @@ Visualizing Color Codes with rainbow-mode.
 #+begin_src emacs-lisp
 (use-package highlight-indent-guides
   :vc (:url "https://github.com/DarthFennec/highlight-indent-guides"
+	    :branch "master" :rev :newest
 	    :ignored-files ("tests/highlight-indent-guides-tests.el" "tests/highlight-indent-guides-known-bugs-tests.el"))
   :hook (prog-mode . highlight-indent-guides-mode)
   :delight highlight-indent-guides-mode
@@ -1291,7 +1294,7 @@ Visualizing Color Codes with rainbow-mode.
 
 ;; copied from +spacemacs/spacemacs-editing-visual
 (use-package highlight-parentheses
-  :vc (:url "https://git.sr.ht/~tsdh/highlight-parentheses.el")
+  :vc (:url "https://git.sr.ht/~tsdh/highlight-parentheses.el" :branch "main" :rev :newest)
   :hook (prog-mode . highlight-parentheses-mode)
   :init
   (setq hl-paren-delay 0.2)
@@ -1339,7 +1342,7 @@ Visualizing Color Codes with rainbow-mode.
                                                          (save-buffer))))))
 
 (use-package zmq
-  :vc (:url "https://github.com/dzop/emacs-zmq")
+  :vc (:url "https://github.com/dzop/emacs-zmq" :branch "master" :rev :newest)
   ;; :disabled
   :init
   (setenv "ZMQ_CFLAGS" "-I/opt/local/include")
@@ -1352,6 +1355,7 @@ Visualizing Color Codes with rainbow-mode.
 ** org-mode config
 #+begin_src emacs-lisp
 (use-package org
+  :ensure nil
   :init
   ;; NOTE org-fold-core-style needs to be set before org is loaded
   (setq org-fold-core-style 'overlays)
@@ -2310,7 +2314,7 @@ instead with =org-superstar-mode=
 #+begin_src emacs-lisp
 ;; Pretty stars for org-mode
 (use-package org-superstar-mode
-  :vc (:url "https://github.com/integral-dw/org-superstar-mode" :branch "main")
+  :vc (:url "https://github.com/integral-dw/org-superstar-mode" :branch "master" :rev :newest)
   :hook (org-mode . org-superstar-mode)
   :init
   (setq org-superstar-prettify-item-bullets t
@@ -2359,7 +2363,9 @@ instead with =org-superstar-mode=
 	;; ("C-c I" . org-insert-epa-file-local-variables)
 	))
 #+end_src
+
 ** Toggle markup visibility with visible mode
+
 #+begin_src emacs-lisp
   (with-eval-after-load "org"
     (define-key org-mode-map (kbd "C-c v") 'visible-mode))
@@ -2552,8 +2558,7 @@ Prefix arguments are interpreted by `org-refile'."
   ("C-c C-x C-x" . org-clock-in-last))
 
 (use-package org-clock-budget
-:vc (:url "https://github.com/Fuco1/org-clock-budget"
-       )
+  :vc (:url "https://github.com/Fuco1/org-clock-budget" :branch "master" :rev :newest)
   :commands (org-clock-budget-report)
   :init
   (defun my-buffer-face-mode-org-clock-budget ()
@@ -2566,10 +2571,7 @@ Prefix arguments are interpreted by `org-refile'."
   (add-hook 'org-clock-budget-report-mode-hook (lambda()
 						 (progn
 						   (toggle-truncate-lines 1)
-						   (my-buffer-face-mode-org-clock-budget)
-						   )
-						 ))
-  )
+						   (my-buffer-face-mode-org-clock-budget)))))
 
 ;; (use-package secretaria
 ;;   :after (alert f s)
@@ -2780,7 +2782,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 
 (use-package org-roam-ui
-  :vc (:url "https://github.com/org-roam/org-roam-ui")
+  :vc (:url "https://github.com/org-roam/org-roam-ui" :branch "main" :rev :newest)
   :after org-roam
   :custom
   (org-roam-ui-sync-theme t)
@@ -3088,7 +3090,7 @@ mermaid.initialize({
   :init  (setenv "XAPIAN_CJK_NGRAM" "1")
   :custom
   (notdeft-allow-org-property-drawers t)
-  :vc (:url "https://github.com/hasu/notdeft")
+  :vc (:url "https://github.com/hasu/notdeft" :branch "master" :rev :newest)
   :config
   (setq notdeft-directories `(,org-beorg-directory)
 	notdeft-extension "org")
@@ -3133,7 +3135,7 @@ valign for org-mode & markdown table
 
  #+begin_src emacs-lisp :tangle no
 (use-package tributary
-  :vc (:url "https://github.com/mrkrd/tributary" :rev :newest)
+  :vc (:url "https://github.com/mrkrd/tributary" :branch "master" :rev :newest)
   :custom
   (tributary-api-url "http://wiki.17usoft.com/rest/api/content/"))
  #+end_src
@@ -3332,7 +3334,7 @@ valign for org-mode & markdown table
 
 #+begin_src emacs-lisp :tangle no
 (use-package uniline
-  :vc (:url "https://github.com/tbanel/uniline")
+  :vc (:url "https://github.com/tbanel/uniline" :branch "main" :rev :newest)
   :bind (:map uniline-mode-map
 	      ("C-c /" . uniline-hydra-choose-body)
 	      ("C-c u" . uniline--set-brush-0)

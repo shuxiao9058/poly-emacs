@@ -22,8 +22,7 @@ Configuration for programming and languages support.
 (use-package apheleia
   :delight "\U000f0276"
   :vc (:url "https://github.com/radian-software/apheleia"
-       :branch "main"
-       )
+	    :branch "main" :rev :newest       )
   :ensure t
   :hook (((;; protobuf-ts-mode ;; emacs-lisp-mode
 	   ;; protobuf-mode
@@ -471,7 +470,7 @@ Configuration for programming and languages support.
   )
 
 (use-package flycheck-color-mode-line
-:vc (:url "https://github.com/flycheck/flycheck-color-mode-line")
+  :vc (:url "https://github.com/flycheck/flycheck-color-mode-line" :branch "master" :rev :newest)
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 
 ;; (use-package flycheck-pos-tip
@@ -495,10 +494,10 @@ Configuration for programming and languages support.
               (set-face-attribute 'flycheck-info nil :foreground "yellow"))))
 
 (setq tooltip-frame-parameters
-        '((name . "tooltip")
-          (internal-border-width . 6)
-          (border-width . 0)
-          (no-special-glyphs . t)))
+      '((name . "tooltip")
+        (internal-border-width . 6)
+        (border-width . 0)
+        (no-special-glyphs . t)))
 
 (setq tooltip-delay 0.5)
 (setq tooltip-short-delay 0.5)
@@ -552,7 +551,7 @@ Use eglot as LSP client.
 #+begin_src emacs-lisp
 (use-package breadcrumb
   :ensure t
-  :vc (:url "https://github.com/joaotavora/breadcrumb")
+  :vc (:url "https://github.com/joaotavora/breadcrumb" :branch "master" :rev :newest)
   :defer 1)
 
 (defun project-name (project)
@@ -1398,19 +1397,19 @@ Examples:
 				   (require 'css-ls nil t)
 				   (lsp-deferred))))
 
-(with-eval-after-load 'lsp-pylsp
-  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D101")
-  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D102")
-  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D213")
-  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D400")
-  (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D401")
-  (add-to-list 'lsp-pylsp-plugins-pycodestyle-ignore "W503")
-  (add-to-list 'lsp-pylsp-plugins-pycodestyle-exclude "W503")
-  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "W503")
-  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "F401")
-  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E231")
-  (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E226")
-  (add-to-list 'lsp-pylsp-plugins-flake8-exclude "W503"))
+  (with-eval-after-load 'lsp-pylsp
+    (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D101")
+    (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D102")
+    (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D213")
+    (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D400")
+    (add-to-list 'lsp-pylsp-plugins-pydocstyle-ignore "D401")
+    (add-to-list 'lsp-pylsp-plugins-pycodestyle-ignore "W503")
+    (add-to-list 'lsp-pylsp-plugins-pycodestyle-exclude "W503")
+    (add-to-list 'lsp-pylsp-plugins-flake8-ignore "W503")
+    (add-to-list 'lsp-pylsp-plugins-flake8-ignore "F401")
+    (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E231")
+    (add-to-list 'lsp-pylsp-plugins-flake8-ignore "E226")
+    (add-to-list 'lsp-pylsp-plugins-flake8-exclude "W503"))
 
   (lsp-register-custom-settings
    `(("gopls.usePlaceholders" t t)
@@ -1640,8 +1639,7 @@ Examples:
 	  )))
 
 (use-package lsp-protobuf
-:vc (:url "https://github.com/shuxiao9058/lsp-protobuf"
-       )
+  :vc (:url "https://github.com/shuxiao9058/lsp-protobuf" :branch "main" :rev :newest)
   :custom
   (lsp-protobuf-bufls-server-path "/usr/local/gopath/bin/bufls"))
 
@@ -1679,7 +1677,7 @@ Examples:
 	  ])
   :config
   (defun lsp-java--ls-command ()
-      (list (expand-file-name "bin/jdtls" lsp-java-server-install-dir)
+    (list (expand-file-name "bin/jdtls" lsp-java-server-install-dir)
           "-configuration" (concat (getenv "HOME") "/.cache/jdtls/")
           "-data" (concat (getenv "HOME") "/.jdtls")))
   (defun java-lsp-init ()
@@ -1770,8 +1768,7 @@ use-package will load java-lsp for us simply by calling this function."
   :ensure t)
 
 (use-package dape
-:vc (:url "https://github.com/svaante/dape"
-       )
+  :vc (:url "https://github.com/svaante/dape" :branch "master" :rev :newest)
   :bind (("<f5>" . dape)
          ("M-<f5>" . dape-hydra/body))
   :custom (dape-buffer-window-arrangment 'right)
@@ -1902,8 +1899,7 @@ use-package will load java-lsp for us simply by calling this function."
                    :name "Debug Go Program"
                    :cwd "."
                    :program "."
-                   :args [])))
-                   )
+                   :args []))))
 #+end_src
 
 ** yas parameter complete in place required
@@ -1946,7 +1942,7 @@ use-package will load java-lsp for us simply by calling this function."
   :defer t
   :disabled
   :after cape yasnippet
-  :vc (:url "https://github.com/elken/cape-yasnippet")
+  :vc (:url "https://github.com/elken/cape-yasnippet" :branch "master" :rev :newest)
   :ini
   (add-to-list 'completion-at-point-functions #'cape-yasnippet)
   ;; :config
@@ -2248,9 +2244,7 @@ use-package will load java-lsp for us simply by calling this function."
 ;;   )
 
 (use-package cpp-auto-include
-  :vc (:url "https://github.com/emacsorphanage/cpp-auto-include"
-	    :rev :newest
-	    :branch "master")
+  :vc (:url "https://github.com/emacsorphanage/cpp-auto-include" :branch "master" :rev :newest)
   :commands (cpp-auto-include))
 #+end_src
 ** Go Language
@@ -2481,8 +2475,7 @@ use-package will load java-lsp for us simply by calling this function."
 
 (use-package ginkgo-mode
   :vc (:url "https://github.com/garslo/ginkgo-mode"
-	    :rev :newest
-	    :branch "master")
+	    :branch "master" :rev :newest)
   ;; :custom
   ;; (ginkgo-binary "/usr/local/gopath/bin/ginkgo")
   :init

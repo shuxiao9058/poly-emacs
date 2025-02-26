@@ -8,7 +8,10 @@
 
 #+begin_src emacs-lisp
 (require 'package)
-(setq use-package-always-ensure t)
+(setq use-package-always-ensure t
+      ;; use-package-always-defer t
+      use-package-expand-minimally t
+      use-package-vc-prefer-newest t)
 
 (dolist (pkg '(("melpa" . "https://melpa.org/packages/")
 	       ("melpa-stable" . "https://stable.melpa.org/packages/")
@@ -265,7 +268,6 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 ** env
 
 #+begin_src emacs-lisp
-
 (use-package exec-path-from-shell
   :ensure t
   :if IS-MAC
@@ -492,6 +494,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 (use-package undo-fu
   :vc (:url "https://github.com/ideasman42/emacs-undo-fu")
   :demand t
+  :disabled
   :custom
   ;; Store more undo history to prevent loss of data
   (undo-limit 400000)
@@ -518,7 +521,6 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 (use-package undo-tree
   :disabled
   :vc (:url "http://www.dr-qubit.org/git/undo-tree.git")
-  ;; :disabled
   ;; :if IS-MAC
   :commands global-undo-tree-mode
   ;; Pull package directly from maintainer, the elpa package is behind.
@@ -570,7 +572,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
   :bind ("C-c z" . reveal-in-osx-finder))
 
 ;; (use-package posframe
-;;   :vc (:url "https://github.com/tumashu/posframe"))
+;;   :vc (:url "https://github.com/tumashu/posframe" :branch "master" :rev :newest))
 
 (use-package restart-emacs
   :ensure t)
@@ -640,7 +642,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 ;; )
 
 (use-package emacsql-sqlite3 ; for org-roam
-  :vc (:url "https://github.com/cireu/emacsql-sqlite3"))
+  :vc (:url "https://github.com/cireu/emacsql-sqlite3" :branch "master" :rev :newest))
 
 ;; required by core-hammerspoon
 (use-package dash)

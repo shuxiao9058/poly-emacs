@@ -1017,8 +1017,7 @@ lines are selected, or the NxM dimensions of a block selection."
 ;; Disable for now, as having it enabled causes dired to not reliably select the
 ;; current buffer when opening dired for directory of current buffer.
 (use-package nerd-icons-dired
-  :vc (:url "https://github.com/rainstormstudio/nerd-icons-dired"
-	    )
+  :vc (:url "https://github.com/rainstormstudio/nerd-icons-dired" :branch "main" :rev :newest)
   :hook
   (dired-mode . nerd-icons-dired-mode)
   :custom

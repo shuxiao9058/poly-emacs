@@ -392,8 +392,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 #+BEGIN_SRC emacs-lisp
 (use-package vertico
   :vc (:url "https://github.com/minad/vertico"
-       :rev :newest
-       lisp-dir "extensions/")
+	    :branch "main"
+	    :rev :newest
+	    lisp-dir "extensions/")
   :custom
   ;; Different scroll margin
   (vertico-scroll-margin 0)
@@ -863,13 +864,42 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 #+begin_src emacs-lisp
 (unless IS-GUI
   (use-package popon
-    :vc (:url "https://codeberg.org/akib/emacs-popon.git"))
+    :vc (:url "https://codeberg.org/akib/emacs-popon.git" :branch "master" :rev :newest))
   (use-package corfu-terminal
-    :vc (:url "https://codeberg.org/akib/emacs-corfu-terminal.git")
+    :vc (:url "https://codeberg.org/akib/emacs-corfu-terminal.git" :branch "master" :rev :newest)
     :after popon
     :config
     (unless IS-GUI
       (corfu-terminal-mode +1))))
+#+end_src
+
+** completion-preview-mode
+
+Show candidates inline when only one candidate.
+
+#+begin_src emacs-lisp :tangle no
+(use-package completion-preview
+  :ensure nil
+  :hook
+  ((comint-mode-hook
+    eshell-mode-hook
+    prog-mode-hook
+    text-mode-hook) . completion-preview-mode)
+  (minibuffer-setup-hook . completion-preview-enable-in-minibuffer)
+  :bind
+  (:map completion-preview-active-mode-map
+        ("TAB" . completion-preview-complete)
+        ("C-e" . completion-preview-insert))
+  :config
+  (setq completion-preview-exact-match-only t)
+  ;; (setq completion-preview-adapt-background-color nil)
+  (setq completion-preview-minimum-symbol-length 2)
+  (defun completion-preview-enable-in-minibuffer ()
+     "Enable Corfu completion in the minibuffer, e.g., `eval-expression'."
+     (when (where-is-internal #'completion-at-point (list (current-local-map)))
+       (completion-preview-mode 1)))
+  (cl-pushnew 'org-self-insert-command completion-preview-commands :test #'equal)
+  )
 #+end_src
 
 * hydra
@@ -1967,7 +1997,7 @@ Magit with cz
 
 #+begin_src emacs-lisp :tangle no
 (use-package magit-cz
-  :vc (:url "https://github.com/yqrashawn/magit-cz" :rev :newest)
+  :vc (:url "https://github.com/yqrashawn/magit-cz" :branch "master" :rev :newest)
   :after magit)
 #+end_src
 
@@ -2004,7 +2034,7 @@ Magit with cz
 
 (use-package rime
   :vc (:url "https://github.com/DogLooksGood/emacs-rime"
-	    :branch "main" :rev :newest)
+	    :branch "master" :rev :newest)
   :defer t
   :custom
   (rime-disable-predicates '(;; +rime-disable-predicate
@@ -2674,10 +2704,8 @@ Auto cleanup older buffers
   )
 
 (use-package meow-vterm
-:vc (:url "https://github.com/accelbread/meow-vterm"
-      ;; :branch "emacs29"
-      ;; :rev "3bbf59e837b01a611e6d8b97e2328f0729e5e21e"
-      )
+  :vc (:url "https://github.com/accelbread/meow-vterm"
+	    :branch "master" :rev :newest)
   :after vterm
   :init
   (setq vterm-keymap-exceptions '("C-c"))
@@ -2698,7 +2726,7 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package eat
-  :vc (:url "https://codeberg.org/akib/emacs-eat.git")
+  :vc (:url "https://codeberg.org/akib/emacs-eat.git" :branch "master" :rev :newest)
   :custom
   (eat-kill-buffer-on-exit t)
   (eat-enable-shell-prompt-annotation nil)
@@ -3130,7 +3158,7 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
   (auto-fill-mode -1))
 
 (use-package mu4e
-  :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/" :branch "release/1.6")
+  :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/"  :branch "release/1.6" :rev :newest)
   :commands mu4e
   :defer nil
   :custom
@@ -3885,7 +3913,7 @@ determine which browser function to use."
 (use-package notmuch-notify
   :ensure t
   :disabled
-  :vc (:url "https://github.com/firmart/notmuch-notify")
+  :vc (:url "https://github.com/firmart/notmuch-notify" :branch "master" :rev :newest)
   ;; (Recommended) activate stats message when refreshing `notmuch-hello' buffer
   :hook (notmuch-hello-refresh . notmuch-notify-hello-refresh-status-message)
   :custom
@@ -3906,7 +3934,7 @@ determine which browser function to use."
   (notmuch-notify-set-refresh-timer))
 
 (use-package notmuch-update
-  :vc (:url "https://github.com/shuxiao9058/notmuch-update" :rev :newest )
+  :vc (:url "https://github.com/shuxiao9058/notmuch-update" :branch "main" :rev :newest)
   :disabled
   :custom
   (notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
@@ -5018,13 +5046,14 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
   )
 
-(use-package pdf-continuous-scroll-mode
-  :defer t
-  :vc (:url "https://github.com/dalanicolai/pdf-continuous-scroll-mode.el"
-	    )
-  :after pdf-tools
-  :config
-  (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode))
+;; repo archived
+;; (use-package pdf-continuous-scroll-mode
+;;   :defer t
+;;   :disabled
+;;   :vc (:url "https://github.com/dalanicolai/pdf-continuous-scroll-mode.el" :branch "master" :rev :newest)
+;;   :after pdf-tools
+;;   :config
+;;   (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode))
 
 ;; remember pdf position
 ;; https://github.com/politza/pdf-tools/issues/18
@@ -5047,7 +5076,7 @@ http://pragmaticemacs.com/emacs/view-and-annotate-pdfs-in-emacs-with-pdf-tools/
 
 ;; devonthink
 (use-package org-devonthink
-  :vc (:url "https://github.com/lasvice/org-devonthink" :rev :newest))
+  :vc (:url "https://github.com/lasvice/org-devonthink" :branch "master" :rev :newest))
 #+end_src
 
 *** open with vscode
@@ -5206,7 +5235,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package emacs-gc-stats
-  :vc (emacs-gc-stats :url "https://git.sr.ht/~yantar92/emacs-gc-stats")
+  :vc (emacs-gc-stats :url "https://git.sr.ht/~yantar92/emacs-gc-stats" :branch "main" :rev :newest)
   :config
   (setq emacs-gc-stats-gc-defaults 'emacs-defaults)
   (emacs-gc-stats-mode +1))
@@ -5297,10 +5326,10 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package replace-regexp-list
-  :vc (:url "https://github.com/emacsattic/replace-regexp-list"))
+  :vc (:url "https://github.com/emacsattic/replace-regexp-list" :branch "master" :rev :newest))
 
 (use-package text-to-html
-  :vc (:url "https://github.com/emacsattic/text-to-html"))
+  :vc (:url "https://github.com/emacsattic/text-to-html" :branch "master" :rev :newest))
 #+end_src
 
 
@@ -5361,7 +5390,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package beancount
-:vc (:url "https://github.com/beancount/beancount-mode")
+:vc (:url "https://github.com/beancount/beancount-mode" :branch "main" :rev :newest)
   ;; :mode "\\.bean\\'"
     :mode (;; ("CMakeLists\\.txt\\'" . cmake-mode)
          ("\\.bean\\'" . beancount-mode))
@@ -5385,11 +5414,11 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package kdl-ts-mode
-  :vc (:url "https://github.com/dataphract/kdl-ts-mode")
+  :vc (:url "https://github.com/dataphract/kdl-ts-mode" :branch "main" :rev :newest)
   :mode (("\\.kdl\\'" . kdl-ts-mode)))
 
 (use-package kdl-mode
-  :vc (:url "https://github.com/bobuk/kdl-mode")
+  :vc (:url "https://github.com/bobuk/kdl-mode" :branch "main" :rev :newest)
   :mode (("\\.kdl\\'" . kdl-mode)))
 #+end_src
 
@@ -5463,7 +5492,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 #+begin_src emacs-lisp :tangle no
 (use-package buffer-name-relative
-  :vc (buffer-name-relative :url "https://codeberg.org/ideasman42/emacs-buffer-name-relative")
+  :vc (buffer-name-relative :url "https://codeberg.org/ideasman42/emacs-buffer-name-relative" :branch "main" :rev :newest)
   :hook (after-init . buffer-name-relative-mode)
   :config
   (setq buffer-name-relative-prefix '("" . "/")))

@@ -434,8 +434,7 @@ This configuration sticks with Meow for modal editing.
 
 (use-package meow-tree-sitter
   :vc (:url "https://github.com/skissue/meow-tree-sitter"
-	    :rev :newest
-	    :branch "main")
+	    :branch "main" :rev :newest)
   :after meow
   :config
   (meow-tree-sitter-register-defaults))
