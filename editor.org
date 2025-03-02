@@ -127,6 +127,15 @@ This is consulted on every `require', `load' and various path/io functions.  You
   :config
   (global-auto-revert-mode +1))
 
+(defun childframe-workable-p ()
+  "Whether childframe is workable."
+ (and (>= emacs-major-version 26)
+       (not noninteractive)
+       (not emacs-basic-display)
+       (or (display-graphic-p)
+           (featurep 'tty-child-frames))
+       (eq (frame-parameter (selected-frame) 'minibuffer) 't)))
+
 (setq auth-sources '("~/.authinfo")
       ;; auth-sources '("~/.authinfo.gpg")
       package-install-upgrade-built-in t
@@ -194,7 +203,8 @@ This is consulted on every `require', `load' and various path/io functions.  You
       history-length 100000
       history-delete-duplicates t
       set-mark-command-repeat-pop t ;; C-u SPC pops the last mark, afterwords no C-u is needed for further pops.
-      show-paren-context-when-offscreen 'overlay      ;; Show the paired paren at the top-right corner when it's off screen.
+      ;; show-paren-context-when-offscreen 'overlay      ;; Show the paired paren at the top-right corner when it's off screen.
+      show-paren-context-when-offscreen (if (childframe-workable-p) 'child-frame 'overlay)
       blink-matching-paren-highlight-offscreen t
       backup-inhibited t
       kill-whole-line t
@@ -841,7 +851,7 @@ No tab will created if the command is cancelled."
 	  (progn
 	    (tab-bar-new-tab)
 	    (call-interactively #'project-switch-project)
-	    (when-let ((proj (project-current)))
+	    (when-let* ((proj (project-current)))
 	      (tab-bar-rename-tab (format "%s" (file-name-nondirectory (directory-file-name (cdr proj)))))
 	      (setq succ t)))
 	(unless succ
@@ -3264,7 +3274,7 @@ valign for org-mode & markdown table
   (let ((host (or (file-remote-p file 'host) "localhost")))
     (concat "/" (when (file-remote-p file)
                   (concat (file-remote-p file 'method) ":"
-                          (if-let (user (file-remote-p file 'user))
+                          (if-let* ((user (file-remote-p file 'user)))
                               (concat user "@" host)
                             host)
                           "|"))
@@ -3291,7 +3301,7 @@ valign for org-mode & markdown table
   "Save this file as root."
   (interactive)
   (let ((file (poly--sudo-file-path buffer-file-name)))
-    (if-let (buffer (find-file-noselect file))
+    (if-let* ((buffer (find-file-noselect file))) 
         (let ((origin (current-buffer)))
           (copy-to-buffer buffer (point-min) (point-max))
           (unwind-protect

@@ -667,7 +667,7 @@ If INTERACTIVE, prompt user for details."
   (cl-defmethod eglot-handle-notification :after
     (_server (_method (eql textDocument/publishDiagnostics)) &key uri
              &allow-other-keys)
-    (when-let ((buffer (find-buffer-visiting (eglot-uri-to-path uri))))
+    (when-let* ((buffer (find-buffer-visiting (eglot-uri-to-path uri))))
       (with-current-buffer buffer
         (if (and (eq nil flymake-no-changes-timeout)
                  (not (buffer-modified-p)))
@@ -781,7 +781,7 @@ Examples:
 			     :vulncheck  "Imports"
 			     :semanticTokens  t
 			     :directoryFilters  ["-vendor"]
-			     :annotations  (:bounds  t :escape  t :inline  t :nil  t)
+			     ;; :annotations  (:bounds  t :escape  t :inline  t :nil  t)
 			     :hoverKind "NoDocumentation"   ;; "FullDocumentation"|"NoDocumentation"|"SingleLine"|"Structured"|"SynopsisDocumentation" "FullDocumentation"
 			     :linkTarget   "godoc.org" ;; "godoc.org"|"pkg.go.dev"|string                                                         "pkg.go.dev"
 			     :linksInHover :json-false ;; bool
@@ -1036,7 +1036,7 @@ Examples:
   "Run organize-imports action in workspace with changed go files."
   (interactive)
   (save-excursion
-    (when-let ((filename (buffer-file-name))
+    (when-let* ((filename (buffer-file-name))
 	       (directory-name (file-name-directory filename))
 	       (files (magit-changed-files "HEAD")))
       (dolist (go-file files)
@@ -1455,8 +1455,8 @@ Examples:
 				  ;; SA4011
 				  ;; SA4010
 				  )))
-     ("gopls.annotations" ,(mapcar (lambda (a) (cons a :json-false))
-				   '(bounds escape inline nil)))
+     ;; ("gopls.annotations" ,(mapcar (lambda (a) (cons a :json-false))
+     ;; 				   '(bounds escape inline nil)))
      ;; ("gopls.buildFlags" ["-mod=readonly"])
      ("gopls.env" lsp-go-env)
      ("gopls.linkTarget" lsp-go-link-target)
@@ -2395,7 +2395,9 @@ use-package will load java-lsp for us simply by calling this function."
   :hook ((go-mode go-ts-mode) .
 	 (lambda()
            (flycheck-golangci-lint-setup)
-           (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint))))))))
+	   (when poly-use-lsp-mode
+	     (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint)))))))))
+  :disabled
   :defines flycheck-disabled-checkers
   :init
   (setenv "GO111MODULE" "on")

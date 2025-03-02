@@ -478,7 +478,7 @@ Accepts the same arguments as `message'."
 	 (var-value))
     (dolist (class-var class-variables)
       (setq local-vars (cdr class-var))
-      (when-let ((cons-value (assoc var local-vars)))
+      (when-let* ((cons-value (assoc var local-vars)))
 	(setq var-value (cdr cons-value))))
     var-value))
 

@@ -330,7 +330,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (declare-function consult--customize-set "consult")
   (progn
     (setq consult-project-root-function  (lambda ()
-					   (when-let (project (project-current))
+					   (when-let* (project (project-current))
                                              (car (project-roots project))))
           consult-narrow-key             "<"
 	  consult-line-numbers-widen     t
@@ -523,7 +523,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-popupinfo-mode t)
   (corfu-history-mode t)
   (global-corfu-mode t)
-  ;; :init
+  :init
+  (corfu-indexed-mode 1)
   ;; (global-corfu-mode)
   ;; (require 'corfu-history)
   ;; (require 'corfu-popupinfo)
@@ -898,8 +899,7 @@ Show candidates inline when only one candidate.
      "Enable Corfu completion in the minibuffer, e.g., `eval-expression'."
      (when (where-is-internal #'completion-at-point (list (current-local-map)))
        (completion-preview-mode 1)))
-  (cl-pushnew 'org-self-insert-command completion-preview-commands :test #'equal)
-  )
+  (cl-pushnew 'org-self-insert-command completion-preview-commands :test #'equal))
 #+end_src
 
 * hydra
@@ -2895,7 +2895,7 @@ Auto cleanup older buffers
   (unless (poly/eat-buffer-list) ;; create eat while not exist
     (let ((default-directory path))
       (call-interactively 'eat)))
-  (when-let ((eat-buffer-list (poly/eat-buffer-list)))
+  (when-let* ((eat-buffer-list (poly/eat-buffer-list)))
     (when eat-buffer-list
       (let* ((pwd)
 	     (buf (cl-find-if
@@ -3689,7 +3689,7 @@ there are no attachments."
     "Toggle the spam tag for the current message."
     (interactive)
     (if (apm-notmuch-toggle-tag "spam")
-        (when-let ((url (notmuch-show-get-header :X-MailControl-ReportSpam)))
+        (when-let* ((url (notmuch-show-get-header :X-MailControl-ReportSpam)))
           (and (y-or-n-p "Do you also want to report this message as spam to mailcontrol? ")
                (eww-browse-url url)))))
 
