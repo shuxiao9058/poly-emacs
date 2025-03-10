@@ -943,7 +943,6 @@ lines are selected, or the NxM dimensions of a block selection."
     (nerd-icons-install-fonts)))
 
 (use-package nerd-icons-completion
-  :demand t
   :after nerd-icons
   :config
   (nerd-icons-completion-mode)

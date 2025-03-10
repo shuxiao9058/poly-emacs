@@ -309,7 +309,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 #+begin_src emacs-lisp
 (use-package consult
-  :ensure t
   :demand t
   :defer 1
   :custom
@@ -330,7 +329,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (declare-function consult--customize-set "consult")
   (progn
     (setq consult-project-root-function  (lambda ()
-					   (when-let* (project (project-current))
+					   (when-let* ((project (project-current)))
                                              (car (project-roots project))))
           consult-narrow-key             "<"
 	  consult-line-numbers-widen     t
@@ -390,11 +389,22 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ** vertico
 #+BEGIN_SRC emacs-lisp
+;; (with-eval-after-load 'vertico
+;;   (require 'vertico-buffer)
+;;   (require 'vertico-directory)
+;;   (require 'vertico-flat)
+;;   (require 'vertico-indexed)
+;;   (require 'vertico-mouse)
+;;   (require 'vertico-quick)
+;;   (require 'vertico-repeat)
+;;   (require 'vertico-reverse))
+
 (use-package vertico
-  :vc (:url "https://github.com/minad/vertico"
-	    :branch "main"
-	    :rev :newest
-	    lisp-dir "extensions/")
+  ;; :vc (:url "https://github.com/minad/vertico"
+  ;; 	    :branch "main"
+  ;; 	    :rev :newest
+  ;; 	    :main-file "vertico.el"
+  ;; 	    :lisp-dir "extensions/")
   :custom
   ;; Different scroll margin
   (vertico-scroll-margin 0)
@@ -420,28 +430,71 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ("M-RET" . minibuffer-force-complete-and-exit)
 	 ("M-TAB" . minibuffer-complete)))
   :config
-  (require 'vertico-buffer)
-  (require 'vertico-directory)
-  (require 'vertico-flat)
-  (require 'vertico-indexed)
-  (require 'vertico-mouse)
-  (require 'vertico-quick)
-  (require 'vertico-repeat)
-  (require 'vertico-reverse)
-  (vertico-mode))
+  (vertico-mode)
+  ;; (require 'vertico-buffer)
+  ;; (require 'vertico-directory)
+  ;; (require 'vertico-flat)
+  ;; (require 'vertico-indexed)
+  ;; (require 'vertico-mouse)
+  ;; (require 'vertico-quick)
+  ;; (require 'vertico-repeat)
+  ;; (require 'vertico-reverse)
+  )
 
-;; Configure directory extension.
-(use-package vertico-directory
-  :ensure nil
-  :after vertico
-  ;; More convenient directory navigation commands
-  :bind (:map vertico-map
-	      ("RET" . vertico-directory-enter)
-	      ("DEL" . vertico-directory-delete-char)
-	      ("M-DEL" . vertico-directory-delete-word)
-	      ("<S-backspace>" . vertico-directory-delete-word))
-  ;; Tidy shadowed file names
-  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+(require 'vertico-buffer)
+(require 'vertico-directory)
+(require 'vertico-flat)
+(require 'vertico-indexed)
+(require 'vertico-mouse)
+(require 'vertico-quick)
+(require 'vertico-repeat)
+(require 'vertico-reverse)
+
+;; (use-package vertico-buffer
+;;   :ensure nil
+;;   :after vertico
+;;   :custom
+;;   (vertico-buffer-display-action '(display-buffer-same-window))
+;;   ;; :config
+;;   ;; (vertico-buffer-mode)
+;;   )
+
+;; (use-package vertico-flat
+;;   :ensure nil
+;;   :after vertico)
+
+;; (use-package vertico-indexed
+;;   :ensure nil
+;;   :after vertico)
+
+;; (use-package vertico-mouse
+;;   :ensure nil
+;;   :after vertico)
+
+;; (use-package vertico-quick
+;;   :ensure nil
+;;   :after vertico)
+
+;; (use-package vertico-repeat
+;;   :ensure nil
+;;   :after vertico)
+
+;; (use-package vertico-reverse
+;;   :ensure nil
+;;   :after vertico)
+
+;; ;; Configure directory extension.
+;; (use-package vertico-directory
+;;   :ensure nil
+;;   :after vertico
+;;   ;; More convenient directory navigation commands
+;;   :bind (:map vertico-map
+;; 	      ("RET" . vertico-directory-enter)
+;; 	      ("DEL" . vertico-directory-delete-char)
+;; 	      ("M-DEL" . vertico-directory-delete-word)
+;; 	      ("<S-backspace>" . vertico-directory-delete-word))
+;;   ;; Tidy shadowed file names
+;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;; Improved Candidate Filtering with Orderless
 
@@ -458,8 +511,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   ;;       orderless-component-separator #'orderless-escapable-split-on-space)
   (orderless-define-completion-style orderless+initialism
     (orderless-matching-styles '(orderless-initialism
-                                 orderless-literal
-                                 orderless-regexp)))
+				 orderless-literal
+				 orderless-regexp)))
   (setq ;; completion-styles '(orderless basic) ;; basic
    ;; `selectrum', `vertico' and `icomplete' will honoring
    completion-styles '(basic partial-completion substring flex)
@@ -476,22 +529,21 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 ;; Sorting and filtering
 (use-package prescient
+  ;; :after vertico
   :config
+  ;; (require 'vertico-prescient)
+  ;; (vertico-prescient-mode 1)
   (prescient-persist-mode 1))
-
-(use-package vertico-prescient
-  :config
-  (vertico-prescient-mode 1))
 #+END_SRC
 
 ** corfu
 
 #+begin_src emacs-lisp
 (use-package corfu
-  :vc (:url "https://github.com/minad/corfu"
-	    :rev :newest
-	    :branch "main"
-	    :lisp-dir "extensions")
+  ;; :vc (:url "https://github.com/minad/corfu"
+  ;; 	    :rev :newest
+  ;; 	    :branch "main"
+  ;; 	    :lisp-dir "extensions")
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
@@ -525,7 +577,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (global-corfu-mode t)
   :init
   (corfu-indexed-mode 1)
-  ;; (global-corfu-mode)
+  (global-corfu-mode)
   ;; (require 'corfu-history)
   ;; (require 'corfu-popupinfo)
   ;; (corfu-history-mode)
@@ -1510,6 +1562,7 @@ To manage the git repository, use builtin package ~vc~.
   (magit-commit-squash-commit 'marked-or-curren)
   (magit-push-always-verify ni) ;; cuz it says so
   ;; (magit-diff-refine-hunk nil)
+  ;; (magit-diff-highlight-hunk-body nil)
   (git-commit-finish-query-functions nil)
   (magit-log-section-commit-count 10)
   (magit-log-section-arguments '("--graph" "--decorate" "--color"))
@@ -2474,7 +2527,6 @@ Auto cleanup older buffers
 
 #+begin_src emacs-lisp
 (use-package embark
-  :ensure t
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   :bind
@@ -2488,14 +2540,13 @@ Auto cleanup older buffers
 		 nil
 		 (window-parameters (mode-line-format . none)))))
 
-(use-package embark-consult
-  ;; :disabled
-  :after (embark consult)
-  :demand t ; only necessary if you have the hook below
-  ;; if you want to have consult previews as you move around an
-  ;; auto-updating embark collect buffer
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
+;; (use-package embark-consult
+;;   :after (embark consult)
+;;   :demand t ; only necessary if you have the hook below
+;;   ;; if you want to have consult previews as you move around an
+;;   ;; auto-updating embark collect buffer
+;;   :hook
+;;   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package docker-compose-mode)
 #+end_src

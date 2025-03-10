@@ -9,9 +9,11 @@
 #+begin_src emacs-lisp
 (require 'package)
 (setq use-package-always-ensure t
+      package-check-signature nil
       ;; use-package-always-defer t
-      use-package-expand-minimally t
-      use-package-vc-prefer-newest t)
+      ;; use-package-expand-minimally t
+      ;; use-package-vc-prefer-newest t
+      )
 
 (dolist (pkg '(("melpa" . "https://melpa.org/packages/")
 	       ("melpa-stable" . "https://stable.melpa.org/packages/")
@@ -21,6 +23,11 @@
   (add-to-list 'package-archives pkg))
 
 (package-initialize)
+
+;; updates GPG keys used by ELPA package manager
+;; https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html
+(use-package gnu-elpa-keyring-update
+  :ensure t)
 #+end_src
 
 ** [[https://github.com/formsandlines/dotfiles/blob/405498c15f2fa07bb75e7fe5e14cbd2e3cab0e26/.emacs.d/init.org#L78][use-package autoremove fix]]
@@ -541,6 +548,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
   (global-undo-tree-mode))
 
 (use-package vundo
+  :vc (:url "https://github.com/casouri/vundo" :branch "master" :rev :newest)
   :bind ("C-x u" . vundo)
   :config (setq vundo-glyph-alist vundo-unicode-symbols))
 

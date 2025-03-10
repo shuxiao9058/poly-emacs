@@ -27,6 +27,13 @@ This is consulted on every `require', `load' and various path/io functions.  You
   (compilation-window-height 16)
   ;; ;;  Always scroll the compilation window
   ;; (compilation-scroll-output t)
+  ;; Emacs 30 and newer: Disable Ispell completion function.
+  ;; Try `cape-dict' as an alternative.
+  (text-mode-ispell-word-completion nil)
+  ;; Hide commands in M-x which do not apply to the current mode.  Corfu
+  ;; commands are hidden, since they are not used via M-x. This setting is
+  ;; useful beyond Corfu.
+  (read-extended-command-predicate #'command-completion-default-include-p)
   :init
   (setq trusted-content '("~/workspace"))
   (setq completion-cycle-threshold 3)
@@ -37,14 +44,9 @@ This is consulted on every `require', `load' and various path/io functions.  You
   (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
 
   ;; Do not allow the cursor in the minibuffer prompt
-  (setq minibuffer-prompt-properties
-	'(read-only t cursor-intangible t face minibuffer-prompt))
-  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-
-  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-  ;; Vertico commands are hidden in normal buffers.
-  (setq read-extended-command-predicate
-        #'command-completion-default-include-p)
+  ;; (setq minibuffer-prompt-properties
+  ;; 	'(read-only t cursor-intangible t face minibuffer-prompt))
+  ;; (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
   ;; If there were no errors, there's not much to look at in a compilation
   ;; buffer, so make it go away in 2 seconds.
@@ -80,11 +82,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 3)
   (setq compilation-auto-jump-to-first-error t)
-
-  ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
-  ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
-  ;; (setq read-extended-command-predicate
-  ;;       #'command-completion-default-include-p)
 
   ;; Enable indentation+completion using the TAB key.
   ;; `completion-at-point' is often bound to M-TAB.
@@ -315,7 +312,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
 (setq completion-ignore-case t)
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
-
 
 ;; Completion ignores filenames ending in any string in this list.
 (setq completion-ignored-extensions
@@ -1965,8 +1961,7 @@ do not already have one."
 (bind-key "C-c a" #'org-agenda)
 
 (use-package org-contrib
-  :after org)
-
+ :after org)
 
 ;; https://stackoverflow.com/questions/4872088/is-there-any-way-for-subtasks-to-inherit-deadlines-in-org-mode
 (defun poly/org-insert-sub-task ()
@@ -3301,7 +3296,7 @@ valign for org-mode & markdown table
   "Save this file as root."
   (interactive)
   (let ((file (poly--sudo-file-path buffer-file-name)))
-    (if-let* ((buffer (find-file-noselect file))) 
+    (if-let* ((buffer (find-file-noselect file)))
         (let ((origin (current-buffer)))
           (copy-to-buffer buffer (point-min) (point-max))
           (unwind-protect
