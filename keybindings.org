@@ -80,9 +80,10 @@
 (bind-key "s-c" #'copy-to-clipboard)
 (bind-key "s-v" #'paste-from-clipboard)
 (bind-key "s-SPC" #'set-mark-command)
-;; (bind-key "<f11>" #'toggle-frame-maximized)
-(bind-key "<f11>" #'poly/toggle-frame-maximized)
-(bind-key (kbd "M-<f10>") #'poly/toggle-frame-maximized)
+(bind-key "<f11>" #'toggle-frame-maximized)
+(bind-key (kbd "M-<f10>") #'toggle-frame-maximized)
+;; (bind-key "<f11>" #'poly/toggle-frame-maximized)
+;; (bind-key (kbd "M-<f10>") #'poly/toggle-frame-maximized)
 ;; (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (bind-key (kbd "C-c T") #'poly/open-with-tower)
@@ -305,6 +306,7 @@ This configuration sticks with Meow for modal editing.
 		  notmuch-tree-mode
 		  notmuch-hello-mode
 		  notmuch-search-mode
+		  cider-inspector-mode
 		  ;; notmuch-message-mode
 		  ))
     (add-to-list 'meow-mode-state-list `(,mode . motion)))

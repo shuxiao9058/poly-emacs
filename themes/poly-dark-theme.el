@@ -123,7 +123,6 @@ The theme has to be reloaded after changing anything in this group."
                (line-number-current-line       :foreground ,yellow)
 
                (parenthesis                    :foreground ,fg-1)
-               ;; ;; (completions-common-part        )
                (xref-match                     :inherit match)
                (secondary-selection           :background ,region2 :extend t)
 
@@ -336,7 +335,7 @@ The theme has to be reloaded after changing anything in this group."
 		      (list :weight 'normal :foreground fg)
 		    (list :weight 'bold :foreground pink)))
 	       (read-multiple-choice-face :inherit completions-first-difference)
-	       (region :inherit match :extend t)
+	       (region :background ,light-purple :foreground ,bg :extend t)
 	       (trailing-whitespace :foreground unspecified :background ,orange)
 	       (vertical-border :foreground ,bg2)
 	       (success :foreground ,green)

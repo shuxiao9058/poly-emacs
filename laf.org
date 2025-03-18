@@ -105,6 +105,7 @@ Configuration for look and feels, make UI looks better.
 ;; Clear Window clutter and set up the look and feel
 (when (and (fboundp 'menu-bar-mode) (not (eq menu-bar-mode -1)))
   (menu-bar-mode -1))
+
 (when (and (fboundp 'tool-bar-mode) (not (eq tool-bar-mode -1)))
   (tool-bar-mode -1))
 ;; (when (and (fboundp 'scroll-bar-mode) (not (eq scroll-bar-mode -1)))

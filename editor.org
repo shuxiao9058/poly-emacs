@@ -38,7 +38,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
   (setq trusted-content '("~/workspace"))
   (setq completion-cycle-threshold 3)
   ;; Add prompt indicator to `completing-read-multiple'.
-  ;; Alternatively try `consult-completing-read-multiple'.
   (defun crm-indicator (args)
     (cons (concat "[CRM] " (car args)) (cdr args)))
   (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
@@ -1015,9 +1014,10 @@ WIN-ID : Window index."
 	     `(height . ,frame-height))))))
 
 
-(add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
+;; (add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
+(add-hook 'emacs-startup-hook (lambda() (call-interactively #'toggle-frame-maximized)))
 
-(add-hook 'emacs-startup-hook (lambda() (run-at-time 1 nil (lambda() (setf (alist-get 'fullscreen default-frame-alist) 'maximized) )) ))
+;; (add-hook 'emacs-startup-hook (lambda() (run-at-time 1 nil (lambda() (setf (alist-get 'fullscreen default-frame-alist) 'maximized) )) ))
 
 ;; (frame-parameter nil 'fullscreen)
 
@@ -1139,18 +1139,18 @@ don't pop windows everywhere!
 
 #+begin_src emacs-lisp
 
-(use-package paredit
-  :disabled
-  :defer t
-  :hook ((;; scheme-mode
-	  ;; emacs-lisp-mode lisp-mode ielm-mode
-	  clojure-mode cider-repl-mode
-	  ;; cask-mode
-	  ) . paredit-mode)
-  :commands paredit-mode enable-paredit-mode
-  ;; :config
-  ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-  )
+;; (use-package paredit
+;;   :disabled
+;;   :defer t
+;;   :hook ((;; scheme-mode
+;; 	  ;; emacs-lisp-mode lisp-mode ielm-mode
+;; 	  clojure-mode cider-repl-mode
+;; 	  ;; cask-mode
+;; 	  ) . paredit-mode)
+;;   :commands paredit-mode enable-paredit-mode
+;;   ;; :config
+;;   ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+;;   )
 
 ;; electric-pair-mode or smartparens-mode
 
@@ -1211,16 +1211,19 @@ don't pop windows everywhere!
   )
 
 (use-package paren
+  :ensure nil
   :config
   (show-paren-mode +1))
 
 (use-package elec-pair
   :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
   :hook
-  ((prog-mode . electric-pair-local-mode)
+  ((clojure-mode . electric-pair-mode)
+   (prog-mode . electric-pair-local-mode)
    (eval-expression-minibuffer-setup . electric-pair-local-mode)
-   (smartparens-mode . (lambda ()
-                         (electric-pair-local-mode -1))))
+   ;; (smartparens-mode . (lambda ()
+   ;;                       (electric-pair-local-mode -1)))
+   )
   ;; :config
   ;; (electric-pair-mode +1)
   )
@@ -1242,13 +1245,11 @@ don't pop windows everywhere!
 
 Visualizing Color Codes with rainbow-mode.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package rainbow-mode
   :diminish rainbow-mode
   :commands rainbow-mode
-  ;; :init
-  ;; (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-  )
+  :hook (emacs-lisp-mode . rainbow-mode))
 #+end_src
 
 * Colored parentheses
@@ -2324,16 +2325,31 @@ instead with =org-superstar-mode=
   :init
   (setq org-superstar-prettify-item-bullets t
         org-superstar-headline-bullets-list
-        '("◉" "✸" "⚫" "○" "•")
-
+        ;; '("◉" "✸" "⚫" "○" "•")
+	;; '("⊢" "⋮" "⋱" "⋱" "⋱")
+	;; '("»" "◉" "○" "✸" "✿")
+	'("⁖" "✲" "✱" "✻" "✼" "✥" "✿" "❀" "❁" "❂" "❃" "❄" "❅" "❆" "❇")
+	 ;; '("☰" "☷" "☵" "☲"  "☳" "☴"  "☶"  "☱" )
         org-superstar-leading-bullet ?\s
         org-hide-leading-stars t
 
         org-superstar-item-bullet-alist
-        '((?* . ?●)
-          (?+ . ?➤)
-          (?- . ?—)))
-)
+	 ;; '((?- . #x25CF)    ;; ● BLACK CIRCLE
+         ;;    (?+ . #x21AA)    ;; ↪ RIGHT ARROW WITH HOOK
+         ;;    (?* . #x2738));; ✸ HEAVY EIGHT POINTED RECTILINEAR BLACK STAR
+	;; '((?* . ?⌬) (?+ . ?◐) (?- . ?➜))
+	;; '((?- . ?➤) (?* . ?🔻) (?+ . ?△))
+	'((?* . ?✼)
+          (?+ . ?✚)
+	   (?- . ?➤)
+	  ;; (?- . ?✦)
+          ;; (?- . ?⁍)
+	  )
+	 ;; '((?* . ?●) (?+ . ?➤) (?- . ?✦))
+        ;; '((?* . ?●)
+        ;;   (?+ . ?➤)
+        ;;   (?- . ?—))
+	))
 #+end_src
 
 

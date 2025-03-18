@@ -470,6 +470,7 @@ Configuration for programming and languages support.
   )
 
 (use-package flycheck-color-mode-line
+  :ensure t
   :vc (:url "https://github.com/flycheck/flycheck-color-mode-line" :branch "master" :rev :newest)
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
 
@@ -617,7 +618,9 @@ If INTERACTIVE, prompt user for details."
 	  python-mode
 	  python-ts-mode
 	  clojure-mode
+	  clojure-ts-mode
 	  clojurescript-mode
+	  clojurescript-ts-mode
 	  js-mode typescript-mode
 	  c-mode c++-mode
 	  c-ts-mode
@@ -2534,7 +2537,7 @@ use-package will load java-lsp for us simply by calling this function."
     (setq show-paren-delay 0)
     (make-variable-buffer-local 'show-paren-style)
     (setq show-paren-style 'parenthesis) ; or parenthesis/expression
-    (enable-paredit-mode)
+    ;; (enable-paredit-mode)
     (setq abbrev-mode t)
     (setq lisp-indent-function 'common-lisp-indent-function))
   :hook
@@ -2630,9 +2633,20 @@ Use clojure-mode for basic syntax support.
 	 ("bb" . clojure-ts-mode)
 	 ("nbb" . clojure-ts-clojurescript-mode))
   :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
-						  lsp-ui-sideline-enable nil)))
+					     lsp-ui-sideline-enable nil)))
   :custom
+  (clojure-ts-ensure-grammars nil)
+  (clojure-ts-indent-style 'fixed)
+  (clojure-ts-indent-keyword-style 'always-indent)
+  (clojure-ts-enable-indent-specs nil)
+  (clojure-ts-comment-macro-font-lock-body t)
   (clojure-ts-toplevel-inside-comment-form t))
+
+;; For opening .jar files. This is required for Eglot.
+(use-package jarchive
+  :hook (clojure-ts-mode . jarchive-mode))
+
+(use-package svelte-mode)
 
 ;; (use-package clojure-mode-extra-font-locking
 ;;     :disabled
@@ -2649,10 +2663,35 @@ Use clojure-mode for basic syntax support.
 (use-package cider
   :commands cider-mode
   :custom
-  (cider-print-fn 'zprint)
-  :hook (cider-repl-mode . paredit-mode)
+  ;; (cider-print-fn 'zprint)
+  (cider-offer-to-open-cljs-app-in-browser nil)
+  (cider-font-lock-dynamically '(macro deprecated))
+  ;; (cider-preferred-build-tool 'shadow-cljs)
+  (cider-repl-type 'shadow)
+  (cider-use-xref t)
+  (cider-enhanced-cljs-completion-p nil)
+  (cider-save-file-on-load t)
+  :hook (cider-repl-mode . electric-pair-mode)
+  :bind
+  (:map cider-repl-mode-map
+	("<up>"     . cider-repl-backward-input)
+        ("<down>"   . cider-repl-forward-input)
+	("C-<up>"   . cider-repl-previous-input)
+        ("C-<down>" . cider-repl-next-input))
   :config
-  (setq nrepl-popup-stacktraces nil)
+  (setq cider-repl-init-code (append cider-repl-init-code '("(set! *print-length* 50)"))
+	cider-show-error-buffer nil
+        cider-default-cljs-repl 'shadow
+        cider-offer-to-open-cljs-app-in-browser nil
+        cider-auto-jump-to-error nil
+        cider-auto-select-error-buffer nil
+        cider-auto-select-test-report-buffer nil
+        cider-preferred-build-tool 'clojure-cli
+        cider-test-show-report-on-success t
+	cider-eldoc-display-for-symbol-at-point nil ;; disabled in favor of lsp
+	)
+
+  ;; (setq nrepl-popup-stacktraces nil)
   ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
   ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
   ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)

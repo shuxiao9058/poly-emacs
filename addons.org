@@ -353,7 +353,6 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
     (setq consult--source-hidden-buffer
 	  (plist-put consult--source-hidden-buffer :narrow ?h)))
-  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
   (advice-add #'multi-occur :override #'consult-multi-occur)
   (setq consult-narrow-key "<"
 	consult-line-numbers-widen t)
@@ -879,7 +878,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
     (or ;; (derived-mode-p 'vterm-mode)
      (meow-motion-mode-p)
      (meow-normal-mode-p)))
-  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate))
+  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
+  (add-to-list 'tabnine-disable-display-predicates #'+tabnine-disable-predicate))
 
 #+end_src
 
@@ -1538,7 +1538,7 @@ To manage the git repository, use builtin package ~vc~.
 	 ;; (git-commit-setup . git-commit-turn-on-flyspell)
 	 (magit-mode . hack-dir-local-variables-non-file-buffer))
   :custom
-  (magit-section-initial-visibility-alist '((stashes . hide)
+  (magit-section-initial-visibility-alist '((stashes . show)
                                             (unpushed . show)
                                             (pullreqs . show)
                                             (issues . show)))
@@ -5248,7 +5248,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 (define-key global-map "{" 'insert-pair-brace)
 (define-key global-map "(" 'insert-pair-paren)
 (define-key global-map "\"" 'insert-pair-double-straight-quote)
-(define-key global-map "'" 'insert-pair-single-straight-quote)
+;; (define-key global-map "'" 'insert-pair-single-straight-quote)
 (define-key global-map "[" 'insert-pair-bracket)
 (define-key global-map "<" 'insert-pair-angle-bracket)
 #+end_src
