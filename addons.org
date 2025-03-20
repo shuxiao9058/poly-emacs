@@ -548,7 +548,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-auto t)                 ;; Enable auto completion
   (corfu-count 10) ;; Max # of candidates to show
   (corfu-commit-predicate nil)
-  (corfu-auto-delay 0.5)
+  (corfu-auto-delay 0.08)
   (corfu-auto-prefix 1)
   (corfu-quit-at-boundary nil)
   ;; (corfu-separator ?\s)          ;; Orderless field separator
@@ -860,27 +860,36 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (tabnine-max-consecutive-restart-count most-positive-fixnum)
   ;; (tabnine-network-proxy "http://127.0.0.1:8888")
   ;; (tabnine-debug-file-path "/tmp/tabnine-emacs.log")
-  ;; (tabnine-log-file-path "/tmp/tabnine-emacs.log")
+  (tabnine-log-file-path "/private/tmp/tabnine-emacs.log")
   (tabnine-chat-default-mode 'org-mode)
   (tabnine-chat-prompt-alist '((explain-code . "解释这段代码含义")
 			       (generate-test-for-code . "为这段代码编写测试用例")
 			       (document-code . "为这段代码添加文档注释")
 			       (fix-code . "找到并修复这段代码的潜在问题")))
   ;; (tabnine-chat-max-context-length 200)
+  (tabnine-disable-predicates '(window-minibuffer-p +tabnine-disable-predicate))
+  (tabnine-disable-display-predicates '(window-minibuffer-p +tabnine-disable-predicate))
   :init
-  (setq tabnine-executable-args (list "--log-level" "Error" "--no-lsp" "true"))
-  :hook (kill-emacs . tabnine-kill-process)
+  (setq tabnine-executable-args (list "--log-level" "Info" "--no-lsp" "true"))
+  :hook ((kill-emacs . tabnine-kill-process)
+	 (meow-insert-exit . (lambda() (tabnine-clear-overlay))))
   :after cape
   :config
   (tabnine-start-process)
   ;; (setq tabnine-network-proxy "http://127.0.0.1:8888")
   (defun +tabnine-disable-predicate()
-    (or ;; (derived-mode-p 'vterm-mode)
-     (meow-motion-mode-p)
-     (meow-normal-mode-p)))
-  (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
-  (add-to-list 'tabnine-disable-display-predicates #'+tabnine-disable-predicate))
-
+    ;; (let ((is-insert-mode (meow-insert-mode-p)))
+    ;;   (if is-insert-mode
+    ;; 	  (message "is insert-mode: t" )
+    ;; 	(message "not insert-mode" )))
+    (not ;; (derived-mode-p 'vterm-mode)
+     (meow-insert-mode-p)
+     ;; (meow-motion-mode-p)
+     ;; (meow-normal-mode-p)
+     ))
+  ;; (add-to-list 'tabnine-disable-predicates #'+tabnine-disable-predicate)
+  ;; (add-to-list 'tabnine-disable-display-predicates #'+tabnine-disable-predicate)
+  )
 #+end_src
 
 **** copilot

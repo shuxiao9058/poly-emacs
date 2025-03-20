@@ -1014,10 +1014,10 @@ WIN-ID : Window index."
 	     `(height . ,frame-height))))))
 
 
-;; (add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
-(add-hook 'emacs-startup-hook (lambda() (call-interactively #'toggle-frame-maximized)))
+(add-hook 'emacs-startup-hook #'poly/toggle-frame-maximized)
+;; (add-hook 'emacs-startup-hook (lambda() (call-interactively #'toggle-frame-maximized)))
 
-;; (add-hook 'emacs-startup-hook (lambda() (run-at-time 1 nil (lambda() (setf (alist-get 'fullscreen default-frame-alist) 'maximized) )) ))
+(add-hook 'emacs-startup-hook (lambda() (run-at-time 1 nil (lambda() (setf (alist-get 'fullscreen default-frame-alist) 'maximized) )) ))
 
 ;; (frame-parameter nil 'fullscreen)
 
