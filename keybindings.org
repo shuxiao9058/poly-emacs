@@ -6,24 +6,24 @@
 
 #+begin_src emacs-lisp
 (use-package which-key
-  :ensure nil
-  :defer 1
-  :custom
-  (which-key-idle-delay 0.5)
-  (which-key-idle-secondary-delay 0.3)
-  (which-key-sort-order #'which-key-prefix-then-key-order)
-  (which-key-sort-upperjcase-first nil)
-  (which-key-add-column-padding 1)
-  (which-key-max-display-columns nil)
-  (which-key-min-display-lines 4)
-  (which-key-side-window-slot -10)
-  (which-key-show-early-on-C-h t)
-  (which-key-allow-evil-operators t)
-  :config
-  ;; general improvements to which-key readability
-  ;; (set-face-attribute 'which-key-local-map-description-face nil :weight 'bold)
-  (which-key-setup-side-window-bottom)
-  (which-key-mode +1))
+    :ensure nil
+    :defer 1
+    :custom
+    (which-key-idle-delay 0.5)
+    (which-key-idle-secondary-delay 0.3)
+    (which-key-sort-order #'which-key-prefix-then-key-order)
+    (which-key-sort-upperjcase-first nil)
+    (which-key-add-column-padding 1)
+    (which-key-max-display-columns nil)
+    (which-key-min-display-lines 4)
+    (which-key-side-window-slot -10)
+    (which-key-show-early-on-C-h t)
+    (which-key-allow-evil-operators t)
+    :config
+    ;; general improvements to which-key readability
+    ;; (set-face-attribute 'which-key-local-map-description-face nil :weight 'bold)
+    (which-key-setup-side-window-bottom)
+    (which-key-mode +1))
 
 (require 'mouse)
 (xterm-mouse-mode t)
@@ -31,21 +31,17 @@
 
 ;; Yank text to clipboard
 (cond
- ;; OS X
- (IS-MAC ; Mac OS X
-  (progn
-    (setq save-to-clipboard-cmd "pbcopy")
-    (setq paste-from-clipboard-cmd "pbpaste")
-    )
-  )
- ;; Linux
- (IS-LINUX ; linux
-  (progn
-    (setq save-to-clipboard-cmd "xsel -i -b")
-    (setq paste-from-clipboard-cmd "xsel -o -b")
-    )
-  )
- )
+  ;; OS X
+  (IS-MAC ; Mac OS X
+   (progn
+     (setq save-to-clipboard-cmd "pbcopy")
+     (setq paste-from-clipboard-cmd "pbpaste")))
+
+  ;; Linux
+  (IS-LINUX				; linux
+   (progn
+     (setq save-to-clipboard-cmd "xsel -i -b")
+     (setq paste-from-clipboard-cmd "xsel -o -b"))))
 
 (defun copy-to-clipboard ()
   "Copies selection to x-clipboard."
@@ -53,15 +49,13 @@
   (if IS-GUI
       (progn
         (message "Yanked region to x-clipboard!")
-        (call-interactively 'clipboard-kill-ring-save)
-        )
+        (call-interactively 'clipboard-kill-ring-save))
     (if (region-active-p)
         (progn
           (shell-command-on-region (region-beginning) (region-end) save-to-clipboard-cmd)
           (message "Yanked region to clipboard!")
           (deactivate-mark))
-      (message "No region active; can't yank to clipboard!")))
-  )
+      (message "No region active; can't yank to clipboard!"))))
 
 (defun paste-from-clipboard ()
   "Pastes from x-clipboard."
@@ -82,8 +76,8 @@
 (bind-key "s-SPC" #'set-mark-command)
 ;; (bind-key "<f11>" #'toggle-frame-maximized)
 ;; (bind-key (kbd "M-<f10>") #'toggle-frame-maximized)
-(bind-key "<f11>" #'poly/toggle-frame-maximized)
-(bind-key (kbd "M-<f10>") #'poly/toggle-frame-maximized)
+;; (bind-key "<f11>" #'poly/toggle-frame-maximized)
+;; (bind-key (kbd "M-<f10>") #'poly/toggle-frame-maximized)
 ;; (bind-key "M-RET" #'toggle-frame-fullscreen)
 (bind-key (kbd "C-c V") #'poly/open-in-vscode)
 (bind-key (kbd "C-c T") #'poly/open-with-tower)
@@ -107,6 +101,9 @@
 (unbind-key "C-z")
 (unbind-key "s-o")
 ;; (unbind-key "C-x C-q")
+
+(when (and (fboundp 'window-system) (eq (window-system) 'mac))
+  (bind-key (kbd "C-s-q") (lambda() (interactive) (tl/open-hammerspoon-url "lockScreen"))))
 #+end_src
 
 

@@ -1091,10 +1091,10 @@ WIN-ID : Window index."
 ;; (bind-key "C-M-<left>" #'move-frame-to-left-side)
 ;; (bind-key "C-M-<right>" #'move-frame-to-right-side)
 
-(bind-key "C-M-s-<left>" #'move-frame-to-left-side)
-(bind-key "C-M-s-<right>" #'move-frame-to-right-side)
-(bind-key "C-M-s-<up>" #'move-frame-to-top-side)
-(bind-key "C-M-s-<down>" #'move-frame-to-bottom-side)
+;; (bind-key "C-M-s-<left>" #'move-frame-to-left-side)
+;; (bind-key "C-M-s-<right>" #'move-frame-to-right-side)
+;; (bind-key "C-M-s-<up>" #'move-frame-to-top-side)
+;; (bind-key "C-M-s-<down>" #'move-frame-to-bottom-side)
 #+end_src
 
 * shackle
@@ -1138,95 +1138,130 @@ don't pop windows everywhere!
 * pair
 
 #+begin_src emacs-lisp
-
-;; (use-package paredit
-;;   :disabled
-;;   :defer t
-;;   :hook ((;; scheme-mode
-;; 	  ;; emacs-lisp-mode lisp-mode ielm-mode
-;; 	  clojure-mode cider-repl-mode
-;; 	  ;; cask-mode
-;; 	  ) . paredit-mode)
-;;   :commands paredit-mode enable-paredit-mode
-;;   ;; :config
-;;   ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-;;   )
+;; parinfer
+;; lispy/lispyville
+;; SmartParens
+;; symex
+;; puni
+(use-package paredit
+    :vc (:url "https://paredit.org/paredit.git"
+	      :rev :v26)
+    :demand t
+    :defer t
+    :hook ((scheme-mode
+	    lisp-mode
+	    emacs-lisp-mode
+	    clojure-mode cider-repl-mode
+	    eval-expression-minibuffer-setup
+	    lisp-interaction-mode
+	    ielm-mode
+	    slime-repl-mode
+	    ;; cask-mode
+	    ) . paredit-mode)
+    :commands paredit-mode enable-paredit-mode
+    :bind (:map paredit-mode-map
+		([remap forward-sexp] . #'paredit-forward)
+		([remap backward-sexp] . #'paredit-backward))
+    ;; :bind
+    ;; (:map paredit-mode-map
+    ;; 	("M-(" . paredit-wrap-round)
+    ;;       ("M-[" . paredit-wrap-square)
+    ;;       ("M-{" . paredit-wrap-curly)
+    ;;       ("M-<" . paredit-wrap-angled)
+    ;;       ("C-M-<right>" . paredit-backward-barf-sexp)
+    ;;       ("C-M-<left>" . paredit-backward-slurp-sexp)
+    ;; 	;; ("C-k" . paredit-kill-tidy)
+    ;; 	("C-M-<up>" . paredit-splice-sexp-killing-backward))
+    ;; ;; :config
+    ;; ;; (defun paredit-kill-tidy ()
+    ;; ;;   (interactive)
+    ;; ;;   (save-excursion
+    ;; ;;     (while (and (not (eobp))
+    ;; ;; 		  (save-excursion
+    ;; ;; 		    (beginning-of-line)
+    ;; ;; 		    (looking-at "[\s\t]*\)")))
+    ;; ;; 	(delete-indentation)))
+    ;; ;;   (paredit-kill))
+    ;; (dolist (binding '("RET" "M-s" "M-?"))
+    ;;   (define-key paredit-mode-map (read-kbd-macro binding) nil))
+    ;; (define-key paredit-mode-map (kbd "C-M-<up>") 'paredit-splice-sexp-killing-backward)
+    )
 
 ;; electric-pair-mode or smartparens-mode
 
 ;; keeps our parentheses balanced and allows for easy manipulation
 (use-package smartparens
-  :ensure t
-  :disabled
-  :diminish smartparens-mode
-  :commands
-  smartparens-strict-mode
-  smartparens-mode
-  sp-restrict-to-pairs-interactive
-  sp-local-pair
-  :hook  (after-init . smartparens-global-mode)
-  :init
-  (setq sp-interactive-dwim t)
-  :custom
-  (sp-base-key-bindings 'sp)
-  ;; (sp-show-pair-from-inside t)
-  ;; (sp-autoskip-closing-pair 'always)
-  ;; (sp-hybrid-kill-entire-symbol nil)
-  ;; (sp-autowrap-region nil)
-  :config
-  (show-smartparens-global-mode t)
-  ;; (smartparens-global-mode t)
-  (require 'smartparens-config)
-  (sp-use-smartparens-bindings)
-  ;; Only use smartparens in web-mode
-  (with-eval-after-load 'smartparens
-    (setq web-mode-enable-auto-pairing nil)
-    (sp-local-pair 'web-mode "<% " " %>")
-    (sp-local-pair 'web-mode "{ " " }")
-    (sp-local-pair 'web-mode "<%= "  " %>")
-    (sp-local-pair 'web-mode "<%# "  " %>")
-    (sp-local-pair 'web-mode "<%$ "  " %>")
-    (sp-local-pair 'web-mode "<%@ "  " %>")
-    (sp-local-pair 'web-mode "<%: "  " %>")
-    (sp-local-pair 'web-mode "{{ "  " }}")
-    (sp-local-pair 'web-mode "{% "  " %}")
-    (sp-local-pair 'web-mode "{%- "  " %}")
-    (sp-local-pair 'web-mode "{# "  " #}"))
+    :ensure t
+    :disabled
+    :diminish smartparens-mode
+    :commands
+    smartparens-strict-mode
+    smartparens-mode
+    sp-restrict-to-pairs-interactive
+    sp-local-pair
+    :hook  (after-init . smartparens-global-mode)
+    :init
+    (setq sp-interactive-dwim t)
+    :custom
+    (sp-base-key-bindings 'sp)
+    ;; (sp-show-pair-from-inside t)
+    ;; (sp-autoskip-closing-pair 'always)
+    ;; (sp-hybrid-kill-entire-symbol nil)
+    ;; (sp-autowrap-region nil)
+    :config
+    (show-smartparens-global-mode t)
+    ;; (smartparens-global-mode t)
+    (require 'smartparens-config)
+    (sp-use-smartparens-bindings)
+    ;; Only use smartparens in web-mode
+    (with-eval-after-load 'smartparens
+      (setq web-mode-enable-auto-pairing nil)
+      (sp-local-pair 'web-mode "<% " " %>")
+      (sp-local-pair 'web-mode "{ " " }")
+      (sp-local-pair 'web-mode "<%= "  " %>")
+      (sp-local-pair 'web-mode "<%# "  " %>")
+      (sp-local-pair 'web-mode "<%$ "  " %>")
+      (sp-local-pair 'web-mode "<%@ "  " %>")
+      (sp-local-pair 'web-mode "<%: "  " %>")
+      (sp-local-pair 'web-mode "{{ "  " }}")
+      (sp-local-pair 'web-mode "{% "  " %}")
+      (sp-local-pair 'web-mode "{%- "  " %}")
+      (sp-local-pair 'web-mode "{# "  " #}"))
 
-  (sp-pair "(" ")" :wrap "C-(") ;; how do people live without this?
-  (sp-pair "[" "]" :wrap "s-[") ;; C-[ sends ESC
-  (sp-pair "{" "}" :wrap "C-{")
+    (sp-pair "(" ")" :wrap "C-(") ;; how do people live without this?
+    (sp-pair "[" "]" :wrap "s-[") ;; C-[ sends ESC
+    (sp-pair "{" "}" :wrap "C-{")
 
 
-  ;; WORKAROUND https://github.com/Fuco1/smartparens/issues/543
-  (bind-key "C-<left>" nil smartparens-mode-map)
-  (bind-key "C-<right>" nil smartparens-mode-map)
+    ;; WORKAROUND https://github.com/Fuco1/smartparens/issues/543
+    (bind-key "C-<left>" nil smartparens-mode-map)
+    (bind-key "C-<right>" nil smartparens-mode-map)
 
-  (bind-key "s-<delete>" 'sp-kill-sexp smartparens-mode-map)
-  (bind-key "s-<backspace>" 'sp-backward-kill-sexp smartparens-mode-map)
+    (bind-key "s-<delete>" 'sp-kill-sexp smartparens-mode-map)
+    (bind-key "s-<backspace>" 'sp-backward-kill-sexp smartparens-mode-map)
 
-  ;; ;; fix conflict with move frame left/right side
-  ;; (unbind-key "C-M-<left>" smartparens-mode-map)
-  ;; (unbind-key "C-M-<right>" smartparens-mode-map)
-  )
+    ;; ;; fix conflict with move frame left/right side
+    ;; (unbind-key "C-M-<left>" smartparens-mode-map)
+    ;; (unbind-key "C-M-<right>" smartparens-mode-map)
+    )
 
 (use-package paren
-  :ensure nil
-  :config
-  (show-paren-mode +1))
+    :ensure nil
+    :config
+    (show-paren-mode +1))
 
-(use-package elec-pair
-  :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
-  :hook
-  ((clojure-mode . electric-pair-mode)
-   (prog-mode . electric-pair-local-mode)
-   (eval-expression-minibuffer-setup . electric-pair-local-mode)
-   ;; (smartparens-mode . (lambda ()
-   ;;                       (electric-pair-local-mode -1)))
-   )
-  ;; :config
-  ;; (electric-pair-mode +1)
-  )
+;; (use-package elec-pair
+;;   :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
+;;   :hook
+;;   ((clojure-mode . electric-pair-mode)
+;;    (prog-mode . electric-pair-local-mode)
+;;    (eval-expression-minibuffer-setup . electric-pair-local-mode)
+;;    ;; (smartparens-mode . (lambda ()
+;;    ;;                       (electric-pair-local-mode -1)))
+;;    )
+;;   ;; :config
+;;   ;; (electric-pair-mode +1)
+;;   )
 #+end_src
 
 * colorful-mode
@@ -2673,7 +2708,7 @@ Prefix arguments are interpreted by `org-refile'."
 
 ** org-roam
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; https://github.com/iecaser/Configurations/blob/a7e61c25c49556b33d7888599a853da9d4c9cb95/.doom.d/note.el
 ;; https://www.orgroam.com/manual/Installation-_00281_0029.html#Installation-_00281_0029
 (use-package org-roam

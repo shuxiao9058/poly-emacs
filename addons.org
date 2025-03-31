@@ -678,7 +678,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
       (list
        (cape-capf-buster
 	(cape-capf-super
-	 #'tabnine-completion-at-point
+	 ;; #'tabnine-completion-at-point
 	 arg-capf
 	 ;; #'cape-dabbrev
 	 #'tempel-complete)
@@ -687,7 +687,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
       (list
        (cape-capf-buster
 	(cape-capf-super
-	 #'tabnine-completion-at-point
+	 ;; #'tabnine-completion-at-point
 	 #'cape-dabbrev
 	 ;; arg-capf
 	 #'tempel-complete)
@@ -711,7 +711,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 		 ;; #'notmuch-capf
 		 ;; #'ebdb-mail-dwim-completion-at-point-function
 		 ;; #'ebdb-complete-mail
-		 #'tabnine-completion-at-point
+		 ;; #'tabnine-completion-at-point
 		 ;; arg-capf
 		 #'tempel-complete)
 		))))
@@ -846,7 +846,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 
 **** tabnine
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package tabnine
   :vc (:url "https://github.com/shuxiao9058/tabnine" :rev :newest :branch "main")
   :commands (tabnine-start-process)
@@ -3108,11 +3108,12 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 (use-package hideshow
   :ensure nil
   :diminish hs-minor-mode
-  :bind (("C-`" . hs-toggle-hiding)
-	 ("C-c <left>" . hs-hide-block)
-         ("C-c <right>" . hs-show-block)
-         ("C-c <up>" . hs-hide-all)
-         ("C-c <down>" . hs-show-all))
+  ;; :bind (("C-`" . hs-toggle-hiding)
+  ;; 	 ("C-c <left>" . hs-hide-block)
+  ;;        ("C-c <right>" . hs-show-block)
+  ;;        ("C-c <up>" . hs-hide-all)
+         ;; ("C-c <down>" . hs-show-all)
+	 ;; )
   ;; Nicer code-folding overlays (with fringe indicators)
   :hook (prog-mode . hs-minor-mode)
   :custom
@@ -5235,31 +5236,56 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
 https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7/.emacs.d/inits/programming.el#L68
 
 #+begin_src emacs-lisp
-; paired input
+;; paired input
+(defvar poly/insert-bracket-pair-inhibit-modes-list
+  '(scheme-mode
+    lisp-mode
+    emacs-lisp-mode
+    clojure-mode cider-repl-mode
+    eval-expression-minibuffer-setup
+    lisp-interaction-mode
+    ielm-mode
+    slime-repl-mode)
+  "Disable bracket pair in specific mode."
+  )
+
 (defun insert-bracket-pair (leftBracket rightBracket)
-  (if (region-active-p)
-      (let ((p1 (region-beginning))
-	    (p2 (region-end)))
-	(goto-char p2)
-	(insert rightBracket)
-	(goto-char p1)
-	(insert leftBracket)
-	(goto-char (+ p2 2)))
-    (progn
-      (insert leftBracket rightBracket)
-      (backward-char 1))))
-(defun insert-pair-brace () (interactive) (insert-bracket-pair "{" "}") )
-(defun insert-pair-paren () (interactive) (insert-bracket-pair "(" ")") )
-(defun insert-pair-double-straight-quote () (interactive) (insert-bracket-pair "\"" "\"") )
-(defun insert-pair-single-straight-quote () (interactive) (insert-bracket-pair "'" "'") )
+  (unless (memq major-mode poly/insert-bracket-pair-inhibit-modes-list)
+    (if (region-active-p)
+	(let ((p1 (region-beginning))
+	      (p2 (region-end)))
+	  (goto-char p2)
+	  (insert rightBracket)
+	  (goto-char p1)
+	  (insert leftBracket)
+	  (goto-char (+ p2 2)))
+      (progn
+	(insert leftBracket rightBracket)
+	(backward-char 1)))))
+
+(defun insert-pair-brace () (interactive) (insert-bracket-pair "{" "}"))
+(defun insert-pair-paren () (interactive) (insert-bracket-pair "(" ")"))
+(defun insert-pair-double-straight-quote () (interactive) (insert-bracket-pair "\"" "\""))
+(defun insert-pair-single-straight-quote () (interactive) (insert-bracket-pair "'" "'"))
 (defun insert-pair-bracket () (interactive) (insert-bracket-pair "[" "]") )
 (defun insert-pair-angle-bracket () (interactive) (insert-bracket-pair "<" ">") )
-(define-key global-map "{" 'insert-pair-brace)
-(define-key global-map "(" 'insert-pair-paren)
-(define-key global-map "\"" 'insert-pair-double-straight-quote)
-;; (define-key global-map "'" 'insert-pair-single-straight-quote)
-(define-key global-map "[" 'insert-pair-bracket)
-(define-key global-map "<" 'insert-pair-angle-bracket)
+
+(defun set-pair-key-map(mode-map)
+  ;; set bracket pair in particular mode
+  (define-key mode-map "{" 'insert-pair-brace)
+  (define-key mode-map "(" 'insert-pair-paren)
+  (define-key mode-map "\"" 'insert-pair-double-straight-quote)
+  ;; (define-key global-map "'" 'insert-pair-single-straight-quote)
+  (define-key mode-map "[" 'insert-pair-bracket)
+  (define-key mode-map "<" 'insert-pair-angle-bracket))
+
+;; set pair key map global
+(set-pair-key-map global-map)
+;; (with-eval-after-load 'go-ts-mode
+;;   (set-pair-key-map go-ts-mode-map))
+
+;; (with-eval-after-load 'python-ts-mode
+;;   (set-pair-key-map python-ts-mode-map))
 #+end_src
 
 
@@ -5395,7 +5421,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ** gif-screencast
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; sudo port install gifsicle
 (use-package gif-screencast
   :init

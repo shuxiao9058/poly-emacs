@@ -2040,9 +2040,9 @@ use-package will load java-lsp for us simply by calling this function."
               (cmake-mode      . cmake-ts-mode)
               (csharp-mode     . csharp-ts-mode)
               (css-mode        . css-ts-mode)
-	      (clojure-mode . clojure-ts-mode)
-	      (clojurescript-mode . clojure-ts-clojurescript-mode)
-	      (clojurec-mode . clojure-ts-clojurec-mode)
+	      ;; (clojure-mode . clojure-ts-mode)
+	      ;; (clojurescript-mode . clojure-ts-clojurescript-mode)
+	      ;; (clojurec-mode . clojure-ts-clojurec-mode)
 	      (conf-toml-mode . toml-ts-mode)
               (dockerfile-mode . dockerfile-ts-mode)
               (elixir-mode     . elixir-ts-mode)
@@ -2170,6 +2170,8 @@ use-package will load java-lsp for us simply by calling this function."
 		python-ts-mode-hook
 		python-mode-hook
 		c-ts-mode-hook c++-ts-mode-hook c-mode-hook c++-mode-hook
+		clojure-mode
+		clojure-ts-mode
 		;; lua-mode-hook
 		typescript-ts-mode-hook
 		javascript-ts-mode-hoo))
@@ -2618,33 +2620,43 @@ use-package will load java-lsp for us simply by calling this function."
 Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
-;; (use-package clojure-mode
-;;     :disabled t
-;;     :commands (clojurescript-mode)
-;;     ;; :config
-;;     ;; (add-hook 'clojure-mode-hook 'paredit-mode)
-;;     )
+(use-package clojure-mode
+    :commands (clojurescript-mode)
+    :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-mode)
+	   ("\\.cljs\\'" . clojure-clojurescript-mode)
+	   ("\\.cljc\\'" . clojure-clojurec-mode)
+	   ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode)
+	   ("bb" . clojure-mode)
+	   ("nbb" . clojure-clojurescript-mode))
+    :hook (clojure-mode . (lambda () (setq-local lsp-lens-enable nil
+					    lsp-ui-sideline-enable nil)))
+    ;; :after paredit
+    ;; :bind (:map clojure-mode-map
+    ;; 		([remap forward-sexp] . #'paredit-forward)
+    ;; 		([remap backward-sexp] . #'paredit-backward))
+    ;; ;; (add-hook 'clojure-mode-hook 'paredit-mode)
+    )
 
-(use-package clojure-ts-mode
-  :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
-	 ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
-	 ("\\.cljc\\'" . clojure-ts-clojurec-mode)
-	 ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-ts-mode)
-	 ("bb" . clojure-ts-mode)
-	 ("nbb" . clojure-ts-clojurescript-mode))
-  :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
-					     lsp-ui-sideline-enable nil)))
-  :custom
-  (clojure-ts-ensure-grammars nil)
-  (clojure-ts-indent-style 'fixed)
-  (clojure-ts-indent-keyword-style 'always-indent)
-  (clojure-ts-enable-indent-specs nil)
-  (clojure-ts-comment-macro-font-lock-body t)
-  (clojure-ts-toplevel-inside-comment-form t))
+      ;; (use-package clojure-ts-mode
+      ;;   :mode (("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-ts-mode)
+      ;; 	 ("\\.cljs\\'" . clojure-ts-clojurescript-mode)
+      ;; 	 ("\\.cljc\\'" . clojure-ts-clojurec-mode)
+      ;; 	 ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-ts-mode)
+      ;; 	 ("bb" . clojure-ts-mode)
+      ;; 	 ("nbb" . clojure-ts-clojurescript-mode))
+      ;;   :hook (clojure-ts-mode . (lambda () (setq-local lsp-lens-enable nil
+      ;; 					     lsp-ui-sideline-enable nil)))
+      ;;   :custom
+      ;;   (clojure-ts-ensure-grammars nil)
+      ;;   (clojure-ts-indent-style 'fixed)
+      ;;   (clojure-ts-indent-keyword-style 'always-indent)
+      ;;   (clojure-ts-enable-indent-specs nil)
+      ;;   (clojure-ts-comment-macro-font-lock-body t)
+      ;;   (clojure-ts-toplevel-inside-comment-form t))
 
-;; For opening .jar files. This is required for Eglot.
+      ;; For opening .jar files. This is required for Eglot.
 (use-package jarchive
-  :hook (clojure-ts-mode . jarchive-mode))
+    :hook (clojure-ts-mode . jarchive-mode))
 
 (use-package svelte-mode)
 
@@ -2665,6 +2677,7 @@ Use clojure-mode for basic syntax support.
   :custom
   ;; (cider-print-fn 'zprint)
   (cider-offer-to-open-cljs-app-in-browser nil)
+  (cider-repl-display-help-banner nil)
   (cider-font-lock-dynamically '(macro deprecated))
   ;; (cider-preferred-build-tool 'shadow-cljs)
   (cider-repl-type 'shadow)

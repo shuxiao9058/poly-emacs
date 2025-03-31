@@ -183,7 +183,7 @@ Configuration for look and feels, make UI looks better.
 	;; Give focus to emacs window at startup
 	(x-focus-frame nil))))
 
- ;; (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame)
+ (add-hook 'emacs-startup-hook #'poly/startup-maximize-frame)
  )
 
 ;; Call this function to increase/decrease font size.
@@ -901,7 +901,7 @@ lines are selected, or the NxM dimensions of a block selection."
          ("C-`"       . treemacs-select-window)
          ("M-0"       . treemacs-select-window)
          ("C-x t 1"   . treemacs-delete-other-windows)
-	 ("s-t"       . treemacs-display-current-project-exclusively)
+	 ("s-t"       . treemacs-add-and-display-current-project-exclusively)
          ("s-T"       . treemacs-add-and-display-current-project)
          ("C-x t t"   . treemacs)
          ("C-x t b"   . treemacs-bookmark)
@@ -1181,13 +1181,110 @@ lines are selected, or the NxM dimensions of a block selection."
 ** tab-line
 #+begin_src emacs-lisp
 (use-package tab-line
-  :demand t
-  :bind
-  (("C-<iso-lefttab>" . tab-line-switch-to-prev-tab)
-   ("C-<tab>" . tab-line-switch-to-next-tab))
-  :config
-  (global-tab-line-mode 1)
-  (setq
-   tab-line-new-button-show nil
-   tab-line-close-button-show nil))
+    :demand t
+    :bind
+    (("C-<iso-lefttab>" . tab-line-switch-to-prev-tab)
+     ("C-<tab>" . tab-line-switch-to-next-tab))
+    :config
+    ;; custom configurations
+    (defcustom tab-line-tab-min-width 10
+      "Minimum width of a tab in characters."
+      :type 'integer
+      :group 'tab-line)
+    (defcustom tab-line-tab-max-width 30
+      "Maximum width of a tab in characters."
+      :type 'integer
+      :group 'tab-line)
+
+    (defun phd/tab-line-tabs-window-buffers ()
+      "Return a list of tabs displayed in the tab-line, excluding scrachy ones."
+      (let* ((window (selected-window))
+             (buffer (window-buffer window))
+             (next-buffers (seq-remove (lambda (b) (or (eq b buffer)
+                                                  (s-starts-with? "*" (buffer-name b))))
+                                       (window-next-buffers window)))
+             (next-buffers (seq-filter #'buffer-live-p next-buffers))
+             (prev-buffers (seq-remove (lambda (b) (or (eq b buffer)
+                                                  (s-starts-with? "*" (buffer-name b))))
+                                       (mapcar #'car (window-prev-buffers window))))
+             (prev-buffers (seq-filter #'buffer-live-p prev-buffers))
+             ;; Remove next-buffers from prev-buffers
+             (prev-buffers (seq-difference prev-buffers next-buffers)))
+	(append (reverse prev-buffers)
+		(list buffer)
+		next-buffers)))
+    (defun phd/tab-line-name-buffer (buffer &rest _buffers)
+      "Create name for tab with padding and truncation.
+     If buffer name is shorter than `tab-line-tab-max-width' it gets
+     centered with spaces, otherwise it is truncated, to preserve
+     equal width for all tabs.  This function also tries to fit as
+     many tabs in window as possible, so if there are no room for tabs
+     with maximum width, it calculates new width for each tab and
+     truncates text if needed.  Minimal width can be set with
+     `tab-line-tab-min-width' variable."
+      (with-current-buffer buffer
+	(let* ((window-width (window-width (get-buffer-window)))
+               (tab-amount (length (phd/tab-line-tabs-window-buffers)))
+               (window-max-tab-width (if (>= (* (+ tab-line-tab-max-width 3) tab-amount) window-width)
+					 (/ window-width tab-amount)
+                                       tab-line-tab-max-width))
+               (tab-width (- (cond ((> window-max-tab-width tab-line-tab-max-width)
+                                    tab-line-tab-max-width)
+                                   ((< window-max-tab-width tab-line-tab-min-width)
+                                    tab-line-tab-min-width)
+                                   (t window-max-tab-width))
+                             3)) ;; compensation for ' x ' button
+               (buffer-name (string-trim (buffer-name)))
+               (name-width (length buffer-name)))
+          (if (>= name-width tab-width)
+              (concat  " " (truncate-string-to-width buffer-name (- tab-width 2)) "…")
+            (let* ((padding (make-string (+ (/ (- tab-width name-width) 2) 1) ?\s))
+                   (buffer-name (concat padding buffer-name)))
+              (concat buffer-name (make-string (- tab-width (length buffer-name)) ?\s)))))))
+
+    ;; (defun tab2-get-filtered-buffer-list ()
+    ;; (let* ((current-bufs (seq-filter 'tab2-buffer-filter (buffer-list)))
+    ;; 	 (intersect-tabs (seq-filter (lambda (it) (member it current-bufs)) (tab2-get-buffer-list)))
+    ;; 	 (new-tab (when (and (not (member (current-buffer) (tab2-get-buffer-list)))
+    ;; 			     (member (current-buffer) current-bufs))
+    ;; 		    (current-buffer))))
+    ;;   (if new-tab
+    ;; 	(tab2-set-buffer-list (append intersect-tabs (list new-tab)))
+    ;;     (tab2-set-buffer-list intersect-tabs))))
+    ;; (setq tab-line-tabs-function 'tab2-get-filtered-buffer-list)
+    (setq  tab-line-close-button-show t
+	   tab-line-new-button-show nil
+	   tab-line-separator ""
+	   tab-line-tab-name-function #'phd/tab-line-name-buffer
+	   tab-line-tabs-function #'phd/tab-line-tabs-window-buffers
+	   tab-line-right-button (propertize (if (char-displayable-p ?▶) " ▶ " " > ")
+                                             'keymap tab-line-right-map
+                                             'mouse-face 'tab-line-highlight
+                                             'help-echo "Click to scroll right")
+	   tab-line-left-button (propertize (if (char-displayable-p ?◀) " ◀ " " < ")
+					    'keymap tab-line-left-map
+					    'mouse-face 'tab-line-highlight
+					    'help-echo "Click to scroll left")
+	   tab-line-close-button (propertize (if (char-displayable-p ?×) " × " " x ")
+                                             'keymap tab-line-tab-close-map
+                                             'mouse-face 'tab-line-close-highlight
+                                             'help-echo "Click to close tab"))
+    (global-tab-line-mode 1)
+    ;; (defvar eh-space "  ")
+
+    ;; (defun eh-tab-line-format (orig_func)
+    ;;   "在 tab-line 的最后添加一个全角空格，防止 tab-line 抖动。"
+    ;;   (list (funcall orig_func) eh-space))
+
+    ;; (advice-add 'tab-line-format :around #'eh-tab-line-format)
+    ;; (setq
+    ;;  tab-line-new-button-show nil
+    ;;  tab-line-close-button-show nil)
+
+    ;; mode in which tab-line is not displayed
+    (dolist (mode '(term-mode
+                    vterm-mode
+		    eat-mode))
+      (add-to-list 'tab-line-exclude-modes mode))
+    )
 #+end_src

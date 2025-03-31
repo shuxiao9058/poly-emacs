@@ -528,8 +528,8 @@ send [[https://www.hammerspoon.org/docs/hs.urlevent.html][urlevent]] to hammersp
 	    (setq url (concat url "?" querys)))
 	(error "illegal hammerspoon params")))
     (unless (file-remote-p default-directory)
-    (tl/with-suppress-message "Shell command succeeded with"
-      (shell-command (format "open -g \"%s\""
+      (tl/with-suppress-message "Shell command succeeded with"
+	(shell-command (format "open -g \"%s\""
 			       url))))))
 
 ;; (defun tl/notify-hammerspoon-did-init ()
