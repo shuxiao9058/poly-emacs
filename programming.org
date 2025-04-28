@@ -663,8 +663,8 @@ If INTERACTIVE, prompt user for details."
   (with-eval-after-load 'eglot
     (setq mode-line-misc-info
           (cl-remove-if (lambda (x) (eq (car x) 'eglot--managed-mode)) mode-line-misc-info)))
-  ;; speedup eglot
-  (fset #'jsonrpc--log-event #'ignore)
+  ;; ;; speedup eglot
+  ;; (fset #'jsonrpc--log-event #'ignore)
   (setf (plist-get eglot-events-buffer-config :size) 0)
   ;; flymake-start after eglot publishDiagnostics
   (cl-defmethod eglot-handle-notification :after
@@ -720,7 +720,7 @@ Examples:
 
   (let ((html-language-main (expand-file-name "html-language-features/server/dist/node/htmlServerMain.js" poly-vscode-app-extension-path)))
     (+eglot-register '(html-ts-mode html-mode) `("/opt/local/bin/node" ,html-language-main "--stdio")))
-  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" ;; "-rpc.trace" "-vv"
+  (+eglot-register '(go-mode  go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) `("gopls" "-debug" "127.0.0.1:3000" "-logfile=/tmp/gopls-emacs.log" "-rpc.trace" "-vv" ;; "-rpc.trace" "-vv"
    											    ))
   (+eglot-register '(python-mode python-ts-mode) `("pylsp"))
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
@@ -2673,42 +2673,44 @@ Use clojure-mode for basic syntax support.
 
 #+begin_src emacs-lisp
 (use-package cider
-  :commands cider-mode
-  :custom
-  ;; (cider-print-fn 'zprint)
-  (cider-offer-to-open-cljs-app-in-browser nil)
-  (cider-repl-display-help-banner nil)
-  (cider-font-lock-dynamically '(macro deprecated))
-  ;; (cider-preferred-build-tool 'shadow-cljs)
-  (cider-repl-type 'shadow)
-  (cider-use-xref t)
-  (cider-enhanced-cljs-completion-p nil)
-  (cider-save-file-on-load t)
-  :hook (cider-repl-mode . electric-pair-mode)
-  :bind
-  (:map cider-repl-mode-map
-	("<up>"     . cider-repl-backward-input)
-        ("<down>"   . cider-repl-forward-input)
-	("C-<up>"   . cider-repl-previous-input)
-        ("C-<down>" . cider-repl-next-input))
-  :config
-  (setq cider-repl-init-code (append cider-repl-init-code '("(set! *print-length* 50)"))
-	cider-show-error-buffer nil
-        cider-default-cljs-repl 'shadow
-        cider-offer-to-open-cljs-app-in-browser nil
-        cider-auto-jump-to-error nil
-        cider-auto-select-error-buffer nil
-        cider-auto-select-test-report-buffer nil
-        cider-preferred-build-tool 'clojure-cli
-        cider-test-show-report-on-success t
-	cider-eldoc-display-for-symbol-at-point nil ;; disabled in favor of lsp
-	)
+    :vc (:url "https://github.com/clojure-emacs/cider"
+	      :branch "main" :rev "v1.17.1")
+    :commands cider-mode
+    :custom
+    ;; (cider-print-fn 'zprint)
+    (cider-offer-to-open-cljs-app-in-browser nil)
+    (cider-repl-display-help-banner nil)
+    (cider-font-lock-dynamically '(macro deprecated))
+    ;; (cider-preferred-build-tool 'shadow-cljs)
+    (cider-repl-type 'shadow)
+    (cider-use-xref t)
+    (cider-enhanced-cljs-completion-p nil)
+    (cider-save-file-on-load t)
+    :hook (cider-repl-mode . electric-pair-mode)
+    :bind
+    (:map cider-repl-mode-map
+	  ("<up>"     . cider-repl-backward-input)
+          ("<down>"   . cider-repl-forward-input)
+	  ("C-<up>"   . cider-repl-previous-input)
+          ("C-<down>" . cider-repl-next-input))
+    :config
+    (setq cider-repl-init-code (append cider-repl-init-code '("(set! *print-length* 50)"))
+	  cider-show-error-buffer nil
+          cider-default-cljs-repl 'shadow
+          cider-offer-to-open-cljs-app-in-browser nil
+          cider-auto-jump-to-error nil
+          cider-auto-select-error-buffer nil
+          cider-auto-select-test-report-buffer nil
+          cider-preferred-build-tool 'clojure-cli
+          cider-test-show-report-on-success t
+	  cider-eldoc-display-for-symbol-at-point nil ;; disabled in favor of lsp
+	  )
 
-  ;; (setq nrepl-popup-stacktraces nil)
-  ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-  ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-  ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)
-  )
+    ;; (setq nrepl-popup-stacktraces nil)
+    ;; (remove-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+    ;; (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+    ;; (add-hook 'cider-repl-mode-hook 'paredit-mode)
+    )
 #+end_src
 
 ** Linting with flycheck-clj-kondo

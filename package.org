@@ -422,7 +422,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
   ;;  recentf-save-file (expand-file-name "recentf" poly-cache-dir)
   ;;  )
 
-  ;; (recentf-mode +1)
+  (recentf-mode +1)
   ;; (unless noninteractive
   ;;   (add-hook 'kill-emacs-hook #'recentf-cleanup))
   )

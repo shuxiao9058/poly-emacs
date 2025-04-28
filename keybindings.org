@@ -94,7 +94,7 @@
 ;; (bind-key (kbd "C-c f r" ) #'rename-visited-file)
 (bind-key (kbd "C-c f r")  #'consult-recent-file)
 (bind-key (kbd "C-c f f")  #'poly/find-file)
-(bind-key (kbd "C-c C-<return>") #'tabnine-chat-menu)
+;; (bind-key (kbd "C-c C-<return>") #'tabnine-chat-menu)
 (bind-key (kbd "C-c t e") #'eat-project)
 (bind-key (kbd "C-c t E") #'eat)
 
@@ -103,7 +103,7 @@
 ;; (unbind-key "C-x C-q")
 
 (when (and (fboundp 'window-system) (eq (window-system) 'mac))
-  (bind-key (kbd "C-s-q") (lambda() (interactive) (tl/open-hammerspoon-url "lockScreen"))))
+ (bind-key (kbd "C-s-q") (lambda() (interactive) (tl/open-hammerspoon-url "lockScreen"))))
 #+end_src
 
 

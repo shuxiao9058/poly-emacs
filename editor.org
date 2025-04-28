@@ -348,12 +348,13 @@ Make sure that UTF-8 is used everywhere.
   (setenv "LANG" "en_US.UTF-8")
   (setenv "LC_ALL" "en_US.UTF-8")
   (setq mm-coding-system-priorities '(utf-8))
-  ;; (setq buffer-file-coding-system 'utf-8)
-  (setq-default buffer-file-coding-system 'utf-8-auto-unix)
+  (setq buffer-file-coding-system 'utf-8)
+  ;; (setq-default buffer-file-coding-system 'utf-8-auto-unix)
   (setq erc-server-coding-system '(utf-8 . utf-8))
   (set-input-method nil)
   (add-to-list 'process-coding-system-alist '("python" . (utf-8 . utf-8)))
   (add-to-list 'process-coding-system-alist '("elpy" . (utf-8 . utf-8)))
+  (add-to-list 'process-coding-system-alist '("clj-kondo" . (utf-8 . utf-8)))
   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
   (when (display-graphic-p)
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))))
@@ -1137,7 +1138,7 @@ don't pop windows everywhere!
 
 * pair
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; parinfer
 ;; lispy/lispyville
 ;; SmartParens
@@ -1148,6 +1149,7 @@ don't pop windows everywhere!
 	      :rev :v26)
     :demand t
     :defer t
+    :disabled
     :hook ((scheme-mode
 	    lisp-mode
 	    emacs-lisp-mode
