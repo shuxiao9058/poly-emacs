@@ -437,11 +437,10 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 	(setq server-use-socket nil))
     (setq server-use-tcp nil)
     (setq server-use-socket t))
-
-  (defadvice server-ensure-safe-dir
-      (around my-around-server-ensure-safe-dir activate)
-    "Ignores any errors raised from server-ensure-safe-dir"
-    (ignore-errors ad-do-it))
+  ;; (defun my-around-server-ensure-safe-dir (orig &rest args)
+  ;;   "Ignores any errors raised from server-ensure-safe-dir"
+  ;;   (ignore-errors ad-do-it))
+  ;; (advice-add 'server-ensure-safe-dir :around #'my-around-server-ensure-safe-dir)
   :config
   (unless (server-running-p)
     (server-start)))

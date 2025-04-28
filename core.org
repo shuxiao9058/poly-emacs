@@ -75,6 +75,11 @@ Core configuration of poly emacs, global variable declare.
 (defvar poly-use-lsp-mode nil
   "use lsp-mode for completion")
 
+(defvar-local poly-disable-copilot-completion nil
+  "If non-nil, disable copilot completion, can work with .dir-locals
+       ((nil . ((eval . (setq-local poly-disable-copilot-completion t)))))
+    .")
+
 (defvar poly-vscode-extensions-json-file
   (expand-file-name ".vscode/extensions/extensions.json" "~")
   "vscode extensions.json file path")

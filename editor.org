@@ -3160,17 +3160,18 @@ mermaid.initialize({
 
 *** plantuml
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package plantuml-mode
   :vc (:url "https://github.com/shuxiao9058/plantuml-mode" :branch "develop" :rev :newest)
   :config
   ;; (setq plantuml-mode-debug-enabled t)
-  (setq plantuml-default-exec-mode 'server
+  (setq plantuml-default-exec-mode 'jar
+	;; plantuml-default-exec-mode 'server
 	;; plantuml-server-url "http://localhost:8080"
 	plantuml-server-url "https://ops.shmao.net/plantuml"
 	;; plantuml-server-url "https://www.plantuml.com/plantuml"
 	plantuml-output-type "svg"
-        plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"
+	plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"
 	plantuml-jar-args '("-Djava.awt.headless=true" "-jar" "-charset" "UTF-8"))
   ;; (add-to-list 'plantuml-executable-args "~/.config/plantuml/config.cfg")
   (add-to-list 'org-src-lang-modes '("plantuml" . plantuml)))

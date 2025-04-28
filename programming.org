@@ -163,6 +163,7 @@ Configuration for programming and languages support.
 	  ;; nginx-mode
 	  ;; cperl-mode
 	  ;; clojure-mode
+	  ;; clojure-ts-mode
 	  ;; web-mode
 	  ;; web-mode-prog-mode
 	  ;; objc-mode
@@ -395,6 +396,13 @@ Configuration for programming and languages support.
     (:features)
     (:format (format-all--buffer-easy executable)))
 
+;; (define-format-all-formatter clojure-cljfmt
+;;   (:executable "clj")
+;;   (:install)
+;;   (:languages "Clojure")
+;;   (:features)
+;;   (:format (format-all--buffer-easy executable "-Tcljfmt" "fix" "-")))
+
   ;; lsp-format-buffer
   (eval-after-load 'format-all
     (dolist (hook '(;; lua-mode-hook
@@ -439,6 +447,7 @@ Configuration for programming and languages support.
 		  ;; ("Dockerfile" dockfmt)
 		  ;; ("Shell" my-shfmt)
 		  ;; ("Python" py-autopep8)
+		  ;; ("Clojure" clojure-cljfmt)
 		  ("Python" py-black)
 		  ("Shell" my-beautysh)
 		  ;; ("Markdown" prettier)

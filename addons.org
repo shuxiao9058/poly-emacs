@@ -724,9 +724,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	      (poly/convert-super-capf
 	       (if eglot--managed-mode
 		   (progn
-		     (message "is eglot")
-		     #'eglot-completion-at-point
-		     )
+		     #'eglot-completion-at-point)
 		 #'lsp-completion-at-point))))
 
 ;; Completion At Point Extensions made for `corfu'
@@ -893,70 +891,23 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   )
 #+end_src
 
-**** tabby
-
-#+begin_src emacs-lisp :tangle no
-(use-package tabby
-  :vc (:url "https://github.com/shuxiao9058/tabby.git"
-	    ;; :rev "d73f488" ;; bad (invalid-read-syntax #<)
-	    ;; :rev "36db84b";; bad (invalid-read-syntax #<)
-	    ;; :rev "0d4bcbe" ;; fine
-	      ;; :rev "f6696fe" ;; bad
-	      ;; :rev "e32d259" // error
-	      ;; :rev "8e14f6c"
-	      ;; :rev "2e82621" ;; bad
-	      ;; :rev "1a138b3"
-	    ;; :rev "4d85b46" ;; :newest
-	    :rev :newest
-	      :branch "main")
-    :custom
-    (tabby-trigger-mode "auto")
-    (tabby-idle-delay 0.5)
-    :init
-    (defun my/tabby-disable-overlay ()
-      "Disable overlays from Tabby after canceling or dismissing"
-      (or (member real-last-command '(keyboard-quit tabby-dismiss)) (not (meow-insert-mode-p))))
-    (setq tabby-disable-predicates '(my/tabby-disable-overlay window-minibuffer-p)
-          tabby-disable-display-predicates '(my/tabby-disable-overlay window-minibuffer-p))
-    ;; (add-hook 'meow-insert-exit-hook
-    ;; 	      (lambda ()
-    ;; 		(when (featurep 'tabby)
-    ;; 		  (tabby-dismiss)
-    ;; 		  ;; (tabby--clear-overlay)
-    ;; 		  )))
-    :bind
-    (("C-'" . tabby-complete)
-     :map tabby-completion-map
-     ("<tab>" . tabby-accept-completion)
-     ("M-f" . tabby-accept-completion-by-word)
-     ("M-<return>" . tabby-accept-completion-by-line))
-    :commands (tabby-accept-completion)
-    :hook (((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . tabby-mode)
-	   ;; (meow-insert-exit . (lambda() (tabby--clear-overlay)))
-	   )
-    ;; :config
-    ;; (defun custom/tabby-quit ()
-    ;;       "Run `tabby--clear-overlay` or `keyboiard-quit`. If copilot is
-    ;; cleared, make sure the overlay doesn't come back too soon."
-    ;;       (interactive)
-    ;;       (condition-case err
-    ;; 	  (when tabby--overlay
-    ;; 	    (lexical-let ((pre-tabby-disable-predicates tabby-disable-predicates))
-    ;; 			 (setq tabby-disable-predicates (list (lambda () t)))
-    ;; 			 (tabby--clear-overlay)
-    ;; 			 (run-with-idle-timer
-    ;; 			  1.0
-    ;; 			  nil
-    ;; 			  (lambda ()
-    ;; 			    (setq tabby-disable-predicates pre-tabby-disable-predicates)))))
-    ;; 	(error handler)))
-
-    ;; (advice-add 'keyboard-quit :before #'custom/tabby-quit)
-    )
-#+end_src
-
-
 **** minuet
+
+Setup deep complete backend (copilot or minuet).
+
+#+begin_src emacs-lisp
+(add-hook 'hack-local-variables-hook #'poly/setup-deep-completion)
+(defvar poly-deep-completion-enable-modes-list '(prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode))
+
+(defun poly/setup-deep-completion()
+  (when (derived-mode-p poly-deep-completion-enable-modes-list)
+    (if (bound-and-true-p poly-disable-copilot-completion)
+	(progn
+	  (message "enable minuet")
+	  (minuet-auto-suggestion-mode +1))
+      (message "enable copilot")
+      (copilot-mode +1))))
+#+end_src
 
 #+begin_src emacs-lisp
 (defun bjodah/minuet-use-groq-llama ()
@@ -1124,12 +1075,14 @@ fib(5)")
 
 
 (use-package minuet
-  :vc (
-       :url "https://github.com/milanglacier/minuet-ai.el"
-       :rev :newest
-       :branch "main"
-       )
+  :vc (:url "https://github.com/milanglacier/minuet-ai.el"
+	    :rev :newest
+	    :branch "main")
   :ensure t
+  ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
+  ;; 	 (lambda () (when poly-disable-copilot-completion
+  ;; 		 (message "enable minuet")
+  ;; 		 (minuet-auto-suggestion-mode +1))))
   :bind
   (("M-o" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
    ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
@@ -1143,47 +1096,50 @@ fib(5)")
    ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
    ("M-<return>" . #'minuet-accept-suggestion-line)
    ("C-g" . #'minuet-dismiss-suggestion))
-  :init
-  ;; if you want to enable auto suggestion.
-  ;; Note that you can manually invoke completions without enable minuet-auto-suggestion-mode
-  (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
-
+  ;; :init
+  ;; ;; if you want to enable auto suggestion.
+  ;; ;; Note that you can manually invoke completions without enable minuet-auto-suggestion-mode
+  ;; (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
   :config
   (bjodah/minuet-use-localhost-fim) ; or bjodah/minuet-use-smollm2
   (setq minuet-auto-suggestion-throttle-delay 0.5)
   (setq minuet-auto-suggestion-debounce-delay 0.2)
-
   ;; You can use M-x minuet-configure-provider to interactively configure provider and model
   )
-
 
 #+end_src
 
 **** copilot
 
 #+begin_src emacs-lisp
-(use-package copilot :tangle no
-    :vc (:url "https://github.com/copilot-emacs/copilot.el" :branch "main" :rev :newest)
-    :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) . copilot-mode)
-    :custom
-    (copilot-network-proxy
-     '(:host "127.0.0.1" :port 6152))
-    (copilot-max-char 1000000)
-    :bind (:map copilot-completion-map
-		("M-[" . copilot-previous-completion)
-		("M-]" . copilot-next-completion)
-		("<tab>" . copilot-accept-completion)
-		("M-f" . copilot-accept-completion-by-word))
-    :config
-    (setq copilot-enable-predicates nil
-          warning-suppress-types '((copilot copilot--infer-indentation-offset)))
-    (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
-    (add-to-list 'copilot-indentation-alist '(clojurec-mode 2))
-    (add-to-list 'copilot-indentation-alist '(clojurescript-mode 2))
-    (add-to-list 'copilot-disable-predicates
-		 #'(lambda ()
-                     (symbol-value 'meow-normal-mode))))
+(use-package copilot
+  :vc (:url "https://github.com/copilot-emacs/copilot.el" :branch "main" :rev :newest)
+  ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
+  ;; 	 (lambda () (unless poly-disable-copilot-completion
+  ;; 		      (message "enable copilot")
+  ;; 		      (copilot-mode +1))))
+  :custom
+  (copilot-network-proxy
+   '(:host "127.0.0.1" :port 6152))
+  (copilot-max-char 1000000)
+  :bind (:map copilot-completion-map
+	      ("M-[" . copilot-previous-completion)
+	      ("M-]" . copilot-next-completion)
+	      ("<tab>" . copilot-accept-completion)
+	      ("M-f" . copilot-accept-completion-by-word))
+  :config
+  (setq copilot-enable-predicates nil
+        warning-suppress-types '((copilot copilot--infer-indentation-offset)))
+  (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
+  (add-to-list 'copilot-indentation-alist '(clojurec-mode 2))
+  (add-to-list 'copilot-indentation-alist '(clojurescript-mode 2))
+  (add-to-list 'copilot-disable-predicates
+	       #'(lambda ()
+                   (symbol-value 'meow-normal-mode))))
 #+end_src
+
+#+RESULTS:
+: copilot-accept-completion-by-word
 
 *** corfu-quick
 
