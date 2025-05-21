@@ -280,7 +280,7 @@ This configuration sticks with Meow for modal editing.
 		  inferior-python-mode
 		  go-dot-mod-mode
 		  go-mod-mode
-		  mu4e-view-mode
+		  ;; mu4e-view-mode
 		  text-mode
 		  prog-mode
 		  conf-mode
@@ -303,6 +303,9 @@ This configuration sticks with Meow for modal editing.
 		  notmuch-tree-mode
 		  notmuch-hello-mode
 		  notmuch-search-mode
+		  mu4e-main-mode
+		  mu4e-headers-mode
+		  mu4e-view-mode
 		  cider-inspector-mode
 		  ;; notmuch-message-mode
 		  ))
@@ -317,7 +320,10 @@ This configuration sticks with Meow for modal editing.
 		  eat-mode
 		  vterm-mode
 		  eww-mode
-		  notmuch-message-mode))
+		  notmuch-message-mode
+		  org-msg-edit-mode
+		  org-capture-mode
+		  mu4e-compose-mode))
     (add-to-list 'meow-mode-state-list `(,mode . insert)))
 
   ;; specific font so that line won't break

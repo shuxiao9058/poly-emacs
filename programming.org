@@ -810,7 +810,7 @@ Examples:
 			     :codelenses  (:gc_details  :json-false
 							:generate  t
 							:regenerate_cgo  t
-							::run_govulncheck t
+							:run_govulncheck t
 							:test t
 							:tidy  t
 							:upgrade_dependency  :json-false
@@ -820,7 +820,7 @@ Examples:
 				     :compositeLiteralFields :json-false          ;; bool false
 				     :compositeLiteralTypes  :json-false          ;; bool false
 				     :constantValues         t           ;; bool false
-				     :functionTypeParameters t           ;; bool false
+				     :functionTypeParameters :json-false ;; bool false
 				     :parameterNames         :json-false ;; bool false
 				     :rangeVariableTypes     :json-false           ;; bool false
 				     )
@@ -1916,6 +1916,7 @@ use-package will load java-lsp for us simply by calling this function."
 
 ** yas parameter complete in place required
 
+eglot does complete argument through yasnippet.
 
 #+begin_src emacs-lisp
 (use-package yasnippet-snippets

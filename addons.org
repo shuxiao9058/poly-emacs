@@ -519,7 +519,11 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    ;; (completion-category-overrides '((buffer (styles . (flex)))))
    orderless-matching-styles '(orderless-literal orderless-regexp)
    completion-category-defaults nil
-   completion-category-overrides '((buffer (styles . (flex)))
+   completion-category-overrides '((buffer (styles substring basic emacs22);; (styles . (flex))
+					   )
+				   (eglot (styles prescient
+						  ;; orderless
+						  ))
 				   (command (styles orderless+initialism))
 				   (symbol (styles orderless-flex orderless-literal))
 				   (variable (styles orderless+initialism))
@@ -552,8 +556,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (corfu-auto-delay 0.08)
   (corfu-auto-prefix 1)
   (corfu-quit-at-boundary nil)
-  (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-separator  ?_)
+  ;; (corfu-separator ?\s)          ;; Orderless field separator
+  (corfu-separator  ?_)
   (corfu-preview-current 'insert)       ; First candidate as overlay. Insert on input if only one
   (corfu-quit-at-boundary 'separator)   ; Boundary: stay alive if separator inserted
   (corfu-quit-no-match 'separator)      ; No match: stay alive if separator inserted
@@ -682,7 +686,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ;; #'tabnine-completion-at-point
 	 arg-capf
 	 ;; #'cape-dabbrev
-	 #'tempel-complete)
+	 ;; #'tempel-complete
+	 :with #'tempel-complete
+	 )
 	'equal)
        #'cape-file)
       (list
@@ -691,7 +697,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ;; #'tabnine-completion-at-point
 	 #'cape-dabbrev
 	 ;; arg-capf
-	 #'tempel-complete)
+	 ;; #'tempel-complete
+	 :with #'tempel-complete
+	 )
 	'equal)
        #'cape-file)))
 
@@ -902,10 +910,7 @@ Setup deep complete backend (copilot or minuet).
 (defun poly/setup-deep-completion()
   (when (derived-mode-p poly-deep-completion-enable-modes-list)
     (if (bound-and-true-p poly-disable-copilot-completion)
-	(progn
-	  (message "enable minuet")
-	  (minuet-auto-suggestion-mode +1))
-      (message "enable copilot")
+	(minuet-auto-suggestion-mode +1)
       (copilot-mode +1))))
 #+end_src
 
@@ -1014,25 +1019,31 @@ fib(5)")
   )
 
 (defun bjodah/minuet-use-localhost-fim ()
-  (setq minuet-n-completions 1) ; 1 is recommended for Local LLM for resource saving
+  (setq minuet-n-completions 2) ;; 1 is recommended for Local LLM for resource saving
+  (setq minuet-context-window 2048) ;; 4k chars ~= 1000 tokens
+  (setq minuet-provider 'openai-fim-compatible)
   ;; I recommend beginning with a small context window size and incrementally
   ;; expanding it, depending on your local computing power. A context window
   ;; of 512, serves as an good starting point to estimate your computing
   ;; power. Once you have a reliable estimate of your local computing power,
   ;; you should adjust the context window to a larger value.
-  (setq minuet-context-window 2048) ;; 512
+  ;; (setq minuet-context-window 2048) ;; 512
   (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8000/v1/completions")
   ;; an arbitrary non-null environment variable as placeholder
-  (plist-put minuet-openai-fim-compatible-options :name "Tabby-localhost-8080")
+  (plist-put minuet-openai-fim-compatible-options :name "llama")
   (plist-put minuet-openai-fim-compatible-options :api-key (defun my-tabby-api-key () "YE2z1ZHuHUxH8hCsBqD"))
   ;; The model is set by the llama-cpp server and cannot be altered
   ;; post-launch.
-  (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
+  ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:3b")
+  (plist-put minuet-openai-fim-compatible-options :model "JetBrains_Mellum:4b")
+
+  ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:3b")
 
   ;; Llama.cpp does not support the `suffix` option in FIM completion.
   ;; Therefore, we must disable it and manually populate the special
   ;; tokens required for FIM completion.
   (minuet-set-optional-options minuet-openai-fim-compatible-options :suffix nil :template)
+  (minuet-set-optional-options minuet-openai-fim-compatible-options :temperature 0.2)
   (minuet-set-optional-options
    minuet-openai-fim-compatible-options
    :prompt
@@ -1042,10 +1053,8 @@ fib(5)")
              (plist-get ctx :before-cursor)
              (plist-get ctx :after-cursor)))
    :template)
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 256) ; or 56 for local llm?
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 4000) ;; 4k chars ~= 1000 tokens
-  (setq minuet-provider 'openai-fim-compatible))
+  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56) ; or 56 for local llm?
+  )
 
 
 (defun bjodah/minuet-use-llama-swap-ling ()
@@ -1078,11 +1087,14 @@ fib(5)")
   :vc (:url "https://github.com/milanglacier/minuet-ai.el"
 	    :rev :newest
 	    :branch "main")
-  :ensure t
+  :demand t ; Force immediate loading
   ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
   ;; 	 (lambda () (when poly-disable-copilot-completion
   ;; 		 (message "enable minuet")
   ;; 		 (minuet-auto-suggestion-mode +1))))
+  :custom
+  (minuet-request-timeout 10)
+  (minuet-context-ratio 0.8)
   :bind
   (("M-o" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
    ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
@@ -1102,11 +1114,16 @@ fib(5)")
   ;; (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
   :config
   (bjodah/minuet-use-localhost-fim) ; or bjodah/minuet-use-smollm2
-  (setq minuet-auto-suggestion-throttle-delay 0.5)
-  (setq minuet-auto-suggestion-debounce-delay 0.2)
+  (setq minuet-auto-suggestion-throttle-delay 1.5)
+  (setq minuet-auto-suggestion-debounce-delay 0.3)
   ;; You can use M-x minuet-configure-provider to interactively configure provider and model
-  )
 
+  (defun +minuet-disable-suggestion()
+    (not
+     (meow-insert-mode-p)))
+
+  (add-to-list 'minuet-auto-suggestion-block-functions #'+minuet-disable-suggestion)
+  )
 #+end_src
 
 **** copilot
@@ -1116,7 +1133,6 @@ fib(5)")
   :vc (:url "https://github.com/copilot-emacs/copilot.el" :branch "main" :rev :newest)
   ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
   ;; 	 (lambda () (unless poly-disable-copilot-completion
-  ;; 		      (message "enable copilot")
   ;; 		      (copilot-mode +1))))
   :custom
   (copilot-network-proxy
@@ -3442,19 +3458,188 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 
 * Mail
 
+
+** view mail
+
+#+begin_src emacs-lisp
+(require 'gnus-art)
+(require 'mm-util)
+
+(defun poly--get-mail-filename()
+  (if (derived-mode-p 'mu4e-view-mode)
+      (mu4e-message-field (mu4e-message-at-point) :path)
+    (notmuch-show-get-filename)))
+
+(defun poly-view-html-in-browser ()
+  "Show current MSG in browser if it includes an HTML-part.
+The variables `browse-url-browser-function',
+`browse-url-handlers', and `browse-url-default-handlers'
+determine which browser function to use."
+  (interactive)
+  (let* ((filename (poly--get-mail-filename))
+	 (gnus-article-buffer "*nomuch-article*")
+	 (max-specpdl-size 4096)
+         (mm-decrypt-option 'known)
+	 (ct (mail-fetch-field "Content-Type"))
+         (ct (and ct (mail-header-parse-content-type ct)))
+         (charset (mail-content-type-get ct 'charset))
+         (charset (and charset (intern charset)))
+         (mu4e~view-rendering t); Needed if e.g. an ics file is buttonized
+         (gnus-article-emulate-mime t)
+         (gnus-unbuttonized-mime-types '(".*/.*"))
+         (gnus-buttonized-mime-types
+          (append (list "multipart/signed" "multipart/encrypted")
+                  gnus-buttonized-mime-types))
+         (gnus-newsgroup-charset
+          (if (and charset (coding-system-p charset)) charset
+            (detect-coding-region (point-min) (point-max) t)))
+	 (parts)
+	 (header)
+	 (contain-html-parts)
+	 (text-part))
+
+    (unless (file-exists-p filename)
+      (notmuch-refresh-this-buffer)
+      (setq filename (notmuch-show-get-filename)))
+
+    ;; if article buffer exist, kill it then create a new one
+    (when (bufferp gnus-article-buffer)
+      (kill-buffer gnus-article-buffer))
+
+    (with-current-buffer (get-buffer-create gnus-article-buffer)
+      (let ((inhibit-read-only t))
+	(erase-buffer)
+	(insert-file-contents-literally
+	 filename nil nil nil t))
+      (mm-enable-multibyte)
+      (run-hooks 'gnus-article-decode-hook)
+      (gnus-article-prepare-display)
+      (with-temp-buffer
+	(insert-file-contents-literally
+	 filename nil nil nil t)
+	(run-hooks 'gnus-article-decode-hook)
+	(setq header (cl-loop for field in '("from" "to" "cc" "date" "subject")
+			      when (message-fetch-field field)
+			      concat (format "%s: %s\n" (capitalize field) it)))
+	(setq parts (mm-dissect-buffer t t))))
+
+    ;; kill temp article buffer
+    (mm-destroy-parts gnus-article-mime-handles)
+    ;; (kill-buffer gnus-article-buffer)
+
+    (when (and (bufferp (car parts))
+               (stringp (car (mm-handle-type parts))))
+      (setq parts (list parts)))
+
+    (dolist (part parts)
+      (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	(setq text-part t))
+      (when (and (listp part) (equal (car (mm-handle-type part)) "text/html"))
+	(setq contain-html-parts t)))
+
+    (when (and (not contain-html-parts) text-part)
+      (when (get-buffer gnus-article-buffer)
+	(kill-buffer gnus-article-buffer)) 	;; kill old buffer first
+      (dolist (part parts)
+	(when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	  (let* ((type (mm-handle-type part))
+		 (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
+		 (encoding (mm-handle-encoding part))
+		 (txt (mm-get-part part)))
+            (when encoding
+	      (save-restriction
+		(save-restriction
+	          (article-narrow-to-head)
+	          (goto-char (point-max)))
+		(forward-line 1)
+		(save-restriction
+	          (narrow-to-region (point) (point-max))
+                  (setq txt (buffer-string)))))
+
+	    (with-current-buffer (get-buffer-create gnus-article-buffer)
+	      (let ((inhibit-read-only t)
+		    (tmp-parts)
+		    (buffer-txt (new-html-buffer txt)))
+		(insert buffer-txt)
+		;; (with-temp-buffer
+		;;   (insert buffer-txt)
+		;;   (delete-file "/tmp/html.txt")
+		;;   (write-region (point-min) (point-max) "/tmp/html.txt" t 'silent))
+		)
+	      (mm-enable-multibyte)
+	      (run-hooks 'gnus-article-decode-hook)
+	      (setq tmp-parts (mm-dissect-buffer t t))
+	      (when tmp-parts
+		;; (message "success dissect buffer")
+		;; (princ (type-of tmp-parts))
+		;; (princ (mm-get-part tmp-parts))
+		(setq parts tmp-parts)
+		(when (and (bufferp (car parts))
+			   (stringp (car (mm-handle-type parts))))
+		  (setq parts (list parts)))))
+
+	    (when (get-buffer gnus-article-buffer)
+	      (mm-destroy-parts gnus-article-mime-handles))))))
+
+    (when (and parts header)
+      (unless (gnus-article-browse-html-parts parts (concat "\n" header))
+        (message "Message does not contain a \"text/html\" part"))
+      (mm-destroy-parts parts))
+    (when (get-buffer gnus-article-buffer)
+      (kill-buffer gnus-article-buffer))))
+
+;; (defun text-newline-to-br (text)
+;;  "Convert plain TEXT newline to <br/>."
+;;  (with-temp-buffer
+;;    (insert text)
+;;    (goto-char (point-min))
+;;    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
+;;    (buffer-string)))
+
+(defun new-html-buffer(txt)
+  (with-temp-buffer
+    (erase-buffer)
+    (insert "Content-Type: text/html; charset=utf-8\n")
+    (insert "Content-Transfer-Encoding: base64\n\n")
+    (insert (base64-encode-string
+	     (encode-coding-string
+	      (let ((new-tmp (copy-sequence htmlize-basic-character-table))
+		    (htmlize-basic-character-table))
+		(aset new-tmp ?\n "<br/>")
+		(setq htmlize-basic-character-table new-tmp)
+		(htmlize-string-to-html txt))
+	      'utf-8)))
+    (buffer-string)))
+
+(defun mu4e-views--convert-charset (charset)
+  "Translate email coding system CHARSET into Emacs coding system."
+  (let* ((cs (or charset "utf-8"))
+	 (downc (downcase cs))
+	 (fixed (or (alist-get downc '(("utf8" . "utf-8")))
+		    downc)))
+    (unless (coding-system-p (intern fixed))
+      (warn "Unkown coding system %s in email" fixed)
+      (setq fixed  "utf-8"))
+    (message "translate coding system %s into %s" charset fixed)
+    fixed))
+#+end_src
+
 ** mu4e
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (defun no-auto-fill ()
   "Turn off 'auto-fill-mode'."
   (auto-fill-mode -1))
 
 (use-package mu4e
-  :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/"  :branch "release/1.6" :rev :newest)
-  :commands mu4e
-  :defer nil
+  :vc nil
+  ;; :ensure nil
+  :load-path "/Users/jiya/workspace/mu4e/build/mu4e";; (expand-file-name "workspace/mu4e/build/mu4e" "~")
+  ;; :vc (:url "https://github.com/djcb/mu" :lisp-dir "mu4e/" :main-file "mu4e/mu4e.el")
+  ;; :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/"  :branch "release/1.6" :rev :newest)
   :custom
-  (mu4e-mu-binary "/opt/local/bin/mu")
+  ;; (mu4e-mu-binary "/opt/local/bin/mu")
+  (mu4e-mu-binary "/Users/jiya/workspace/mu4e/build/mu/mu")
   (mu4e-update-interval (* 60 10))
   (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
   (mu4e-view-show-addresses t)
@@ -3504,8 +3689,11 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 					(:from . 22)
 					(:thread-subject . ,(- (window-body-width) 70)) ;; alternatively, use :subject
 					(:size . 7))))))
+  :bind (("C-c m" . mu4e)
+	 (:map mu4e-view-mode-map
+	       ("." . mu4e-view-action)))
   :config
-  ;; (require 'mu4e)
+  (require 'mu4e)
   (require 'mu4e-vars)
   (require 'mu4e-contrib)
   (require 'mu4e-icalendar)
@@ -3523,7 +3711,7 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
   ;; (add-hook 'mu4e-view-mode-hook 'olivetti-mode)
   (add-hook 'mu4e-compose-mode-hook #'no-auto-fill)
   (add-to-list 'mu4e-view-actions
-               '("View In Browser" . mu4e-action-view-in-browser) t)
+               '("View In Browser" . (lambda(msg &optional skip-headers) (poly-view-html-in-browser) )) t)
 
   (defun timu-func-mu4e-action-save-to-pdf (msg)
     "Save mu4e MSG as a pdf.
@@ -3594,8 +3782,8 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
           (not mu4e-headers-include-related))
     (mu4e-headers-rerun-search))
 
-  (define-key 'mu4e-headers-mode-map "o"
-	      'my:mu4e-toggle-headers-include-related)
+  ;; (define-key 'mu4e-headers-mode-map "o"
+  ;; 	      'my:mu4e-toggle-headers-include-related)
 
   (setq mail-user-agent 'mu4e-user-agent)
 
@@ -3618,49 +3806,49 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
   ;; 			      (:subject       .   nil)))
   )
 
-  ;;;###autoload
-(define-mail-user-agent 'mu4e-user-agent
-  'mu4e~compose-mail
-  'message-send-and-exit
-  'message-kill-buffer
-  'message-send-hook)
+;;   ;;;###autoload
+;; (define-mail-user-agent 'mu4e-user-agent
+;;   'mu4e~compose-mail
+;;   'message-send-and-exit
+;;   'message-kill-buffer
+;;   'message-send-hook)
 ;; Without this `mail-user-agent' cannot be set to `mu4e-user-agent'
 ;; through customize, as the custom type expects a function.  Not
 ;; sure whether this function is actually ever used; if it is then
 ;; returning the symbol is probably the correct thing to do, as other
 ;; such functions suggest.
-(defun mu4e-user-agent ()
-  "Return the `mu4e-user-agent' symbol."
-  'mu4e-user-agent)
+;; (defun mu4e-user-agent ()
+;;   "Return the `mu4e-user-agent' symbol."
+;;   'mu4e-user-agent)
 
-(use-package mu4e-maildirs-extension
-  :after mu4e
-  :custom
-  (mu4e-maildirs-extension-fake-maildir-separator "\\.")
-  :config
-  (mu4e-maildirs-extension))
+;; (use-package mu4e-maildirs-extension
+;;   :after mu4e
+;;   :custom
+;;   (mu4e-maildirs-extension-fake-maildir-separator "\\.")
+;;   :config
+;;   (mu4e-maildirs-extension))
 
-(use-package mu4e-alert
-  :after mu4e
-  :hook (after-init . mu4e-alert-enable-notifications)
-  :custom
-  (mu4e-alert-notify-repeated-mails nil)
-  :config
-  (mu4e-alert-enable-notifications)
-  ;; (setq mu4e-enable-notifications t)
-  (setq mu4e-alert-set-default-style 'notifier)
-  ;; (setq mu4e-alert-set-default-style (if (eq system-type 'darwin)
-  ;;                                        'notifier '(notifications)))
-  (mu4e-alert-enable-mode-line-display)
-  (defun gjstein-refresh-mu4e-alert-mode-line ()
-    (interactive)
-    (mu4e~proc-kill)
-    (mu4e-alert-enable-mode-line-display))
-  (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
-  (setq mu4e-alert-interesting-mail-query
-	(concat "(maildir:/Work ) AND flag:unread "
-		;; "OR "
-		)))
+;; (use-package mu4e-alert
+;;   :after mu4e
+;;   :hook (after-init . mu4e-alert-enable-notifications)
+;;   :custom
+;;   (mu4e-alert-notify-repeated-mails nil)
+;;   :config
+;;   (mu4e-alert-enable-notifications)
+;;   ;; (setq mu4e-enable-notifications t)
+;;   (setq mu4e-alert-set-default-style 'notifier)
+;;   ;; (setq mu4e-alert-set-default-style (if (eq system-type 'darwin)
+;;   ;;                                        'notifier '(notifications)))
+;;   (mu4e-alert-enable-mode-line-display)
+;;   (defun gjstein-refresh-mu4e-alert-mode-line ()
+;;     (interactive)
+;;     (mu4e~proc-kill)
+;;     (mu4e-alert-enable-mode-line-display))
+;;   (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
+;;   (setq mu4e-alert-interesting-mail-query
+;; 	(concat "(maildir:/Work ) AND flag:unread "
+;; 		;; "OR "
+;; 		)))
 
 (use-package olivetti)
 
@@ -3670,126 +3858,132 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 	      mml2015-encrypt-to-self t
 	      mml2015-sign-with-sender t)
 
-(use-package mu4e-marker-icons
-  :after mu4e
-  :init (mu4e-marker-icons-mode 1)
-  (defcustom v/message-attachment-intent-re
-    (regexp-opt '("I attach"
-		  "I have included"
-		  "I've included"
-                  "attached"
-                  "attachment"
-                  "pdf"))
-    "A regex which - if found in the message, and if there is no
-attachment - should launch the no-attachment warning.")
+;; (use-package mu4e-marker-icons
+;;   :after mu4e
+;;   :init (mu4e-marker-icons-mode 1)
+;;   (defcustom v/message-attachment-intent-re
+;;     (regexp-opt '("I attach"
+;; 		  "I have included"
+;; 		  "I've included"
+;;                   "attached"
+;;                   "attachment"
+;;                   "pdf"))
+;;     "A regex which - if found in the message, and if there is no
+;; attachment - should launch the no-attachment warning.")
 
-  (defcustom v/message-attachment-reminder
-    "Are you sure you want to send this message without any attachment? "
-    "The default question asked when trying to send a message
-containing `v/message-attachment-intent-re' without an
-actual attachment.")
+;;   (defcustom v/message-attachment-reminder
+;;     "Are you sure you want to send this message without any attachment? "
+;;     "The default question asked when trying to send a message
+;; containing `v/message-attachment-intent-re' without an
+;; actual attachment.")
 
-  (defun v/message-warn-if-no-attachments ()
-    "Ask the user if s?he wants to send the message even though
-there are no attachments."
-    (when (and (save-excursion
-	         (save-restriction
-		   (widen)
-		   (goto-char (point-min))
-		   (re-search-forward v/message-attachment-intent-re nil t)))
-	       (not (v/message-attachment-present-p)))
-      (unless (y-or-n-p v/message-attachment-reminder)
-        (keyboard-quit))))(defcustom v/message-attachment-intent-re
-    (regexp-opt '("I attach"
-		  "I have included"
-		  "I've included"
-                  "attached"
-                  "attachment"
-                  "pdf"))
-    "A regex which - if found in the message, and if there is no
-attachment - should launch the no-attachment warning.")
+;;   (defun v/message-warn-if-no-attachments ()
+;;     "Ask the user if s?he wants to send the message even though
+;; there are no attachments."
+;;     (when (and (save-excursion
+;; 	         (save-restriction
+;; 		   (widen)
+;; 		   (goto-char (point-min))
+;; 		   (re-search-forward v/message-attachment-intent-re nil t)))
+;; 	       (not (v/message-attachment-present-p)))
+;;       (unless (y-or-n-p v/message-attachment-reminder)
+;;         (keyboard-quit))))(defcustom v/message-attachment-intent-re
+;;     (regexp-opt '("I attach"
+;; 		  "I have included"
+;; 		  "I've included"
+;;                   "attached"
+;;                   "attachment"
+;;                   "pdf"))
+;;     "A regex which - if found in the message, and if there is no
+;; attachment - should launch the no-attachment warning.")
 
-  (defcustom v/message-attachment-reminder
-    "Are you sure you want to send this message without any attachment? "
-    "The default question asked when trying to send a message
-containing `v/message-attachment-intent-re' without an
-actual attachment.")
+;;   (defcustom v/message-attachment-reminder
+;;     "Are you sure you want to send this message without any attachment? "
+;;     "The default question asked when trying to send a message
+;; containing `v/message-attachment-intent-re' without an
+;; actual attachment.")
 
-  (defun v/message-warn-if-no-attachments ()
-    "Ask the user if s?he wants to send the message even though
-there are no attachments."
-    (when (and (save-excursion
-	         (save-restriction
-		   (widen)
-		   (goto-char (point-min))
-		   (re-search-forward v/message-attachment-intent-re nil t)))
-	       (not (v/message-attachment-present-p)))
-      (unless (y-or-n-p v/message-attachment-reminder)
-        (keyboard-quit))))  (setq mu4e-headers-flagged-mark   '("F" . "🚩 "))
-  (setq mu4e-headers-unread-mark    '("u" . "✉️ "))
-  (setq mu4e-headers-draft-mark     '("D" . "🚧 "))
-  (setq mu4e-headers-new-mark       '("N" . "✨ "))
-  (setq mu4e-headers-passed-mark    '("P" . "↪ "))
-  (setq mu4e-headers-replied-mark   '("R" . "↩ "))
-  (setq mu4e-headers-seen-mark      '("S" . " "))
-  (setq mu4e-headers-trashed-mark   '("T" . "🗑️"))
-  (setq mu4e-headers-attach-mark    '("a" . "📎 "))
-  (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
-  (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
+;;   (defun v/message-warn-if-no-attachments ()
+;;     "Ask the user if s?he wants to send the message even though
+;; there are no attachments."
+;;     (when (and (save-excursion
+;; 	         (save-restriction
+;; 		   (widen)
+;; 		   (goto-char (point-min))
+;; 		   (re-search-forward v/message-attachment-intent-re nil t)))
+;; 	       (not (v/message-attachment-present-p)))
+;;       (unless (y-or-n-p v/message-attachment-reminder)
+;;         (keyboard-quit))))  (setq mu4e-headers-flagged-mark   '("F" . "🚩 "))
+;;   (setq mu4e-headers-unread-mark    '("u" . "✉️ "))
+;;   (setq mu4e-headers-draft-mark     '("D" . "🚧 "))
+;;   (setq mu4e-headers-new-mark       '("N" . "✨ "))
+;;   (setq mu4e-headers-passed-mark    '("P" . "↪ "))
+;;   (setq mu4e-headers-replied-mark   '("R" . "↩ "))
+;;   (setq mu4e-headers-seen-mark      '("S" . " "))
+;;   (setq mu4e-headers-trashed-mark   '("T" . "🗑️"))
+;;   (setq mu4e-headers-attach-mark    '("a" . "📎 "))
+;;   (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
+;;   (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
 
 ;; (use-package validate)
 
-(use-package message
-  :ensure nil
-  :hook ((message-send . v/message-warn-if-no-attachments)
-         (message-mode . turn-on-orgtbl))
-  :after mu4e
-  :config
-  ;; (setq message-send-mail-function 'smtpmail-send-it)
-  ;; (require 'validate)
-  ;; (validate-setq mail-user-agent 'mu4e-user-agent)
-  ;; (validate-setq read-mail-command 'mu4e)
-  ;; From http://mbork.pl/2016-02-06_An_attachment_reminder_in_mu4e
-  (defun v/message-attachment-present-p ()
-    "Return t if an attachment is found in the current message."
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (when (search-forward "<#part" nil t) t))))
+;; (use-package message
+;;   :ensure nil
+;;   :hook ((message-send . v/message-warn-if-no-attachments)
+;;          (message-mode . turn-on-orgtbl))
+;;   :after mu4e
+;;   :config
+;;   ;; (setq message-send-mail-function 'smtpmail-send-it)
+;;   ;; (require 'validate)
+;;   ;; (validate-setq mail-user-agent 'mu4e-user-agent)
+;;   ;; (validate-setq read-mail-command 'mu4e)
+;;   ;; From http://mbork.pl/2016-02-06_An_attachment_reminder_in_mu4e
+;;   (defun v/message-attachment-present-p ()
+;;     "Return t if an attachment is found in the current message."
+;;     (save-excursion
+;;       (save-restriction
+;;         (widen)
+;;         (goto-char (point-min))
+;;         (when (search-forward "<#part" nil t) t))))
 
-  (defcustom v/message-attachment-intent-re
-    (regexp-opt '("I attach"
-		  "I have included"
-		  "I've included"
-                  "attached"
-                  "attachment"
-                  "pdf"))
-    "A regex which - if found in the message, and if there is no
-attachment - should launch the no-attachment warning.")
+;;   (defcustom v/message-attachment-intent-re
+;;     (regexp-opt '("I attach"
+;; 		  "I have included"
+;; 		  "I've included"
+;;                   "attached"
+;;                   "attachment"
+;;                   "pdf"))
+;;     "A regex which - if found in the message, and if there is no
+;; attachment - should launch the no-attachment warning.")
 
-  (defcustom v/message-attachment-reminder
-    "Are you sure you want to send this message without any attachment? "
-    "The default question asked when trying to send a message
-containing `v/message-attachment-intent-re' without an
-actual attachment.")
+;;   (defcustom v/message-attachment-reminder
+;;     "Are you sure you want to send this message without any attachment? "
+;;     "The default question asked when trying to send a message
+;; containing `v/message-attachment-intent-re' without an
+;; actual attachment.")
 
-  (defun v/message-warn-if-no-attachments ()
-    "Ask the user if s?he wants to send the message even though
-there are no attachments."
-    (when (and (save-excursion
-	         (save-restriction
-		   (widen)
-		   (goto-char (point-min))
-		   (re-search-forward v/message-attachment-intent-re nil t)))
-	       (not (v/message-attachment-present-p)))
-      (unless (y-or-n-p v/message-attachment-reminder)
-        (keyboard-quit))))
-  )
+;;   (defun v/message-warn-if-no-attachments ()
+;;     "Ask the user if s?he wants to send the message even though
+;; there are no attachments."
+;;     (when (and (save-excursion
+;; 	         (save-restriction
+;; 		   (widen)
+;; 		   (goto-char (point-min))
+;; 		   (re-search-forward v/message-attachment-intent-re nil t)))
+;; 	       (not (v/message-attachment-present-p)))
+;;       (unless (y-or-n-p v/message-attachment-reminder)
+;;         (keyboard-quit))))
+;;   )
+
+
+;; (defun mu4e-get-filename ()
+;;   "Get the file path of the current email in mu4e."
+;;   (interactive)
+;;   (mu4e-message-field (mu4e-message-at-point) :path))
 #+end_src
 
 ** notmuch
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package notmuch
   :vc (:url "https://git.notmuchmail.org/git/notmuch"
 	    :lisp-dir "emacs"
@@ -3821,7 +4015,7 @@ there are no attachments."
 				     ("/" . #'notmuch-tree-undo-read)
 				     ("F" . #'notmuch-tree-focus)
 				     ("S-SPC" . #'notmuch-tree-scroll-message-window-back))
-	 :map notmuch-show-part-map (("V" . notmuch-view-html))
+	 :map notmuch-show-part-map (("V" . poly-view-html-in-browser))
 	 )
   :init
   (setenv "XAPIAN_CJK_NGRAM" "1")
@@ -4012,161 +4206,8 @@ there are no attachments."
   (remove-hook 'notmuch-show-hook #'notmuch-show-turn-on-visual-line-mode)
   (add-hook 'notmuch-show-hook (lambda () (setq-local header-line-format nil)))
 
-  (require 'gnus-art)
-  (require 'mm-util)
 
-  (defun notmuch-view-html ()
-    "Show current MSG in browser if it includes an HTML-part.
-The variables `browse-url-browser-function',
-`browse-url-handlers', and `browse-url-default-handlers'
-determine which browser function to use."
-    (interactive)
-    (let* ((filename (notmuch-show-get-filename))
-	   (gnus-article-buffer "*nomuch-article*")
-	   (max-specpdl-size 4096)
-           (mm-decrypt-option 'known)
-	   (ct (mail-fetch-field "Content-Type"))
-           (ct (and ct (mail-header-parse-content-type ct)))
-           (charset (mail-content-type-get ct 'charset))
-           (charset (and charset (intern charset)))
-           (mu4e~view-rendering t); Needed if e.g. an ics file is buttonized
-           (gnus-article-emulate-mime t)
-           (gnus-unbuttonized-mime-types '(".*/.*"))
-           (gnus-buttonized-mime-types
-            (append (list "multipart/signed" "multipart/encrypted")
-                    gnus-buttonized-mime-types))
-           (gnus-newsgroup-charset
-            (if (and charset (coding-system-p charset)) charset
-              (detect-coding-region (point-min) (point-max) t)))
-	   (parts)
-	   (header)
-	   (contain-html-parts)
-	   (text-part))
-
-      (unless (file-exists-p filename)
-	(notmuch-refresh-this-buffer)
-	(setq filename (notmuch-show-get-filename)))
-
-      ;; if article buffer exist, kill it then create a new one
-      (when (bufferp gnus-article-buffer)
-	(kill-buffer gnus-article-buffer))
-
-      (with-current-buffer (get-buffer-create gnus-article-buffer)
-	(let ((inhibit-read-only t))
-	  (erase-buffer)
-	  (insert-file-contents-literally
-	   filename nil nil nil t))
-	(mm-enable-multibyte)
-	(run-hooks 'gnus-article-decode-hook)
-	(gnus-article-prepare-display)
-	(with-temp-buffer
-	  (insert-file-contents-literally
-	   filename nil nil nil t)
-	  (run-hooks 'gnus-article-decode-hook)
-	  (setq header (cl-loop for field in '("from" "to" "cc" "date" "subject")
-				when (message-fetch-field field)
-				concat (format "%s: %s\n" (capitalize field) it)))
-	  (setq parts (mm-dissect-buffer t t))))
-
-      ;; kill temp article buffer
-      (mm-destroy-parts gnus-article-mime-handles)
-      ;; (kill-buffer gnus-article-buffer)
-
-      (when (and (bufferp (car parts))
-                 (stringp (car (mm-handle-type parts))))
-        (setq parts (list parts)))
-
-      (dolist (part parts)
-	(when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
-	  (setq text-part t))
-	(when (and (listp part) (equal (car (mm-handle-type part)) "text/html"))
-	  (setq contain-html-parts t)))
-
-      (when (and (not contain-html-parts) text-part)
-	(when (get-buffer gnus-article-buffer)
-	  (kill-buffer gnus-article-buffer)) 	;; kill old buffer first
-	(dolist (part parts)
-	  (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
-	    (let* ((type (mm-handle-type part))
-		   (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
-		   (encoding (mm-handle-encoding part))
-		   (txt (mm-get-part part)))
-              (when encoding
-		(save-restriction
-		  (save-restriction
-	            (article-narrow-to-head)
-	            (goto-char (point-max)))
-		  (forward-line 1)
-		  (save-restriction
-	            (narrow-to-region (point) (point-max))
-                    (setq txt (buffer-string)))))
-
-	      (with-current-buffer (get-buffer-create gnus-article-buffer)
-		(let ((inhibit-read-only t)
-		      (tmp-parts)
-		      (buffer-txt (new-html-buffer txt)))
-		  (insert buffer-txt)
-		  ;; (with-temp-buffer
-		  ;;   (insert buffer-txt)
-		  ;;   (delete-file "/tmp/html.txt")
-		  ;;   (write-region (point-min) (point-max) "/tmp/html.txt" t 'silent))
-		  )
-		(mm-enable-multibyte)
-		(run-hooks 'gnus-article-decode-hook)
-		(setq tmp-parts (mm-dissect-buffer t t))
-		(when tmp-parts
-		  ;; (message "success dissect buffer")
-		  ;; (princ (type-of tmp-parts))
-		  ;; (princ (mm-get-part tmp-parts))
-		  (setq parts tmp-parts)
-		  (when (and (bufferp (car parts))
-			     (stringp (car (mm-handle-type parts))))
-		    (setq parts (list parts)))))
-
-	      (when (get-buffer gnus-article-buffer)
-		(mm-destroy-parts gnus-article-mime-handles))))))
-
-      (when (and parts header)
-	(unless (gnus-article-browse-html-parts parts (concat "\n" header))
-          (message "Message does not contain a \"text/html\" part"))
-	(mm-destroy-parts parts))
-      (when (get-buffer gnus-article-buffer)
-	(kill-buffer gnus-article-buffer))))
-
-  ;; (defun text-newline-to-br (text)
-  ;;  "Convert plain TEXT newline to <br/>."
-  ;;  (with-temp-buffer
-  ;;    (insert text)
-  ;;    (goto-char (point-min))
-  ;;    (while (re-search-forward "\n" nil t) (replace-match "<br/>" nil t))
-  ;;    (buffer-string)))
-
-  (defun new-html-buffer(txt)
-    (with-temp-buffer
-      (erase-buffer)
-      (insert "Content-Type: text/html; charset=utf-8\n")
-      (insert "Content-Transfer-Encoding: base64\n\n")
-      (insert (base64-encode-string
-	       (encode-coding-string
-		(let ((new-tmp (copy-sequence htmlize-basic-character-table))
-		      (htmlize-basic-character-table))
-		  (aset new-tmp ?\n "<br/>")
-		  (setq htmlize-basic-character-table new-tmp)
-		  (htmlize-string-to-html txt))
-		'utf-8)))
-      (buffer-string)))
-
-  (defun mu4e-views--convert-charset (charset)
-    "Translate email coding system CHARSET into Emacs coding system."
-    (let* ((cs (or charset "utf-8"))
-	   (downc (downcase cs))
-	   (fixed (or (alist-get downc '(("utf8" . "utf-8")))
-		      downc)))
-      (unless (coding-system-p (intern fixed))
-	(warn "Unkown coding system %s in email" fixed)
-	(setq fixed  "utf-8"))
-      (message "translate coding system %s into %s" charset fixed)
-      fixed)))
+)
 
 ;; (use-package notmuch-capf
 ;;   :vc (:url "https://github.com/tpeacock19/notmuch-capf"))
@@ -4944,7 +4985,11 @@ org-download-paste for clipboard images
 	org-msg-greeting-fmt "\nHi%s,\n\n"
 	org-msg-greeting-name-limit 3
 	org-export-global-macros  '(("color" . "@@html:<span style=\"color: $1\">$2</span>@@@@latex:\textcolor{$1}{$2}@@@@odt:<text:span text:style-name=\"$1\">$2</text:span>@@"))
-	org-msg-convert-citation t)
+	org-msg-convert-citation t
+	org-msg-default-alternatives '((new		. (text html))
+				       (reply-to-html	. (text html))
+				       (reply-to-text	. (text)))
+	)
 
   (setq org-msg-enforce-css
 	(let* ((font-family '(font-family . "\"PingFang SC Regular\",\"PingFang SC\",\"Microsoft YaHei Regular\",\"Microsoft YaHei\",\"Arial\",\"Helvetica\", \"sans-serif\""))
@@ -5284,7 +5329,7 @@ org-download-paste for clipboard images
 
 (use-package org-mime
   :defer t
-  :ensure nil
+  :ensure t
   :after org
   :commands (org-mime-htmlize org-mime-edit-mail-in-org-mode))
 #+end_src
