@@ -125,13 +125,32 @@ Core configuration of poly emacs, global variable declare.
 ;; Start scrolling when 2 lines from top/bottom.  Set to 0 on systems where I
 ;; use ansi-term a lot.  Eshell is okay with this.  Disabling by default.
 ;; (setq scroll-margin 2)
-;; Keeps the cursor in the same relative row during pgups and downs.
-(setq scroll-preserve-screen-position t)
 
-;;; Mouse wheel scrolling
-;; Scroll in 1-line increments for the buffer under pointer.
-(setq mouse-wheel-follow-mouse t)
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+;; sane trackpad/mouse scroll settings
+(setq mac-redisplay-dont-reset-vscroll t
+      mac-mouse-wheel-smooth-scroll nil)
+
+;; Symbol’s value as variable is void: mouse-wheel-down-event
+(when (require 'mwheel nil 'noerror)
+  ;; scroll two lines at a time (less "jumpy" than defaults)
+  (setq mouse-wheel-scroll-amount
+        '(1                                 ; 一次只滚动 1 行
+          ((shift) . 2)                     ; 按住 Shift 滚动 2 行
+          ((control). 3))                   ; 按住 Ctrl 滚动 3 行
+        mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
+        mouse-wheel-follow-mouse t ;; scroll window under mouse
+        scroll-preserve-screen-position t ;; 鼠标滚动的时候保持光标在屏幕中的位置不变
+	next-screen-context-lines 0
+        scroll-step 2) ;; keyboard scroll two lines at a time
+  (mouse-wheel-mode t)
+  ;; Better scrolling with mouse wheel/trackpad.
+  (unless (and (boundp 'mac-mouse-wheel-smooth-scroll) mac-mouse-wheel-smooth-scroll)
+    (global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
+    (global-set-key [wheel-up] (lambda () (interactive) (scroll-down-command 1)))
+    (global-set-key [double-wheel-down] (lambda () (interactive) (scroll-up-command 2)))
+    (global-set-key [double-wheel-up] (lambda () (interactive) (scroll-down-command 2)))
+    (global-set-key [triple-wheel-down] (lambda () (interactive) (scroll-up-command 4)))
+    (global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))))
 
 ;; Make cursor stay in the same column when scrolling using pgup/dn.
 ;; Previously pgup/dn clobbers column position, moving it to the beginning of

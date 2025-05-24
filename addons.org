@@ -3759,38 +3759,6 @@ MSG is the email(only mu4e)."
   (add-to-list 'mu4e-view-actions
 	       '("View In Browser" . (lambda(msg &optional skip-headers) (poly-view-html-in-browser msg) )) t)
 
-  (defun timu-func-mu4e-action-save-to-pdf (msg)
-    "Save mu4e MSG as a pdf.
-The `wkhtmltopdf' cli command is a dependency.
-Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
-    ;; (let* ((date (mu4e-message-field msg :date))
-    ;;        (infile (mu4e~write-body-to-html msg))
-    ;;        (outfile (format-time-string "%Y-%m-%d%H%M%S.pdf" date)))
-    ;; (with-temp-buffer
-    ;;   (shell-command
-    ;;    (format "wkhtmltopdf %s ~/Desktop/%s" infile outfile) t)))
-    (let* ((html-part
-	    (seq-find (lambda (handle)
-			(equal (mm-handle-media-type (cdr handle)) "text/html"))
-		      gnus-article-mime-handle-alist))
-	   (date (mu4e-message-field msg :date))
-	   (outfile (format-time-string "%Y-%m-%d%H%M%S.pdf" date))
-	   )
-      (if html-part
-	  ;; (gnus-article-inline-part (car html-part))
-	  (message "save file to %s html-part: %s" outfile (car html-part))
-
-	(with-temp-buffer
-	  (shell-command
-	   (format "wkhtmltopdf %s ~/Desktop/%s" (car html-part) outfile) t)))
-      ;; (mu4e-warn "No html part in this message")
-      )
-    )
-
-
-  (add-to-list 'mu4e-view-actions
-	       '("Pdf" . timu-func-mu4e-action-save-to-pdf) t)
-
   (with-eval-after-load 'org
     (setq gnus-icalendar-org-capture-file +org-mu4e-icalendar-org-capture-file
 	  gnus-icalendar-org-capture-headline '("Meetings")

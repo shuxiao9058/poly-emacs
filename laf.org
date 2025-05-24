@@ -77,31 +77,6 @@ Configuration for look and feels, make UI looks better.
 ;;      (require 'ns-auto-titlebar nil t)
 ;;      (ns-auto-titlebar-mode +1))
 
-;; sane trackpad/mouse scroll settings
-(setq mac-redisplay-dont-reset-vscroll t
-      mac-mouse-wheel-smooth-scroll nil)
-
-;; Symbol’s value as variable is void: mouse-wheel-down-event
-(when (require 'mwheel nil 'noerror)
-  ;; scroll two lines at a time (less "jumpy" than defaults)
-  (setq mouse-wheel-scroll-amount
-        '(1                                 ; 一次只滚动 1 行
-          ((shift) . 2)                     ; 按住 Shift 滚动 2 行
-          ((control). 3))                   ; 按住 Ctrl 滚动 3 行
-        mouse-wheel-progressive-speed nil ;; don't accelerate scrolling
-        mouse-wheel-follow-mouse 't ;; scroll window under mouse
-        scroll-preserve-screen-position 't ;; 鼠标滚动的时候保持光标在屏幕中的位置不变
-        scroll-step 2) ;; keyboard scroll two lines at a time
-  (mouse-wheel-mode t)
-  ;; Better scrolling with mouse wheel/trackpad.
-  (unless (and (boundp 'mac-mouse-wheel-smooth-scroll) mac-mouse-wheel-smooth-scroll)
-    (global-set-key [wheel-down] (lambda () (interactive) (scroll-up-command 1)))
-    (global-set-key [wheel-up] (lambda () (interactive) (scroll-down-command 1)))
-    (global-set-key [double-wheel-down] (lambda () (interactive) (scroll-up-command 2)))
-    (global-set-key [double-wheel-up] (lambda () (interactive) (scroll-down-command 2)))
-    (global-set-key [triple-wheel-down] (lambda () (interactive) (scroll-up-command 4)))
-    (global-set-key [triple-wheel-up] (lambda () (interactive) (scroll-down-command 4)))))
-
 ;; Clear Window clutter and set up the look and feel
 (when (and (fboundp 'menu-bar-mode) (not (eq menu-bar-mode -1)))
   (menu-bar-mode -1))
