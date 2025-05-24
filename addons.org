@@ -686,8 +686,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ;; #'tabnine-completion-at-point
 	 arg-capf
 	 ;; #'cape-dabbrev
-	 ;; #'tempel-complete
-	 :with #'tempel-complete
+	 #'tempel-complete
+	 ;; :with #'tempel-complete
 	 )
 	'equal)
        #'cape-file)
@@ -697,8 +697,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	 ;; #'tabnine-completion-at-point
 	 #'cape-dabbrev
 	 ;; arg-capf
-	 ;; #'tempel-complete
-	 :with #'tempel-complete
+	 #'tempel-complete
+	 ;; :with #'tempel-complete
 	 )
 	'equal)
        #'cape-file)))
@@ -3465,42 +3465,52 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
 (require 'gnus-art)
 (require 'mm-util)
 
-(defun poly--get-mail-filename()
-  (if (derived-mode-p 'mu4e-view-mode)
-      (mu4e-message-field (mu4e-message-at-point) :path)
+(defun poly--get-mail-filename(&optional msg)
+  (if (derived-mode-p 'mu4e-view-mode
+		      'mu4e-headers-mode)
+      (mu4e-message-field msg ;; (mu4e-message-at-point)
+			  :path)
     (notmuch-show-get-filename)))
 
-(defun poly-view-html-in-browser ()
+(defun poly-view-html-in-browser (&optional msg)
   "Show current MSG in browser if it includes an HTML-part.
 The variables `browse-url-browser-function',
 `browse-url-handlers', and `browse-url-default-handlers'
-determine which browser function to use."
+determine which browser function to use.
+
+MSG is the email(only mu4e)."
   (interactive)
-  (let* ((filename (poly--get-mail-filename))
-	 (gnus-article-buffer "*nomuch-article*")
+  (let* ((filename (poly--get-mail-filename msg))
+	 (gnus-article-buffer "*gnus-view-article*")
 	 (max-specpdl-size 4096)
          (mm-decrypt-option 'known)
-	 (ct (mail-fetch-field "Content-Type"))
-         (ct (and ct (mail-header-parse-content-type ct)))
-         (charset (mail-content-type-get ct 'charset))
-         (charset (and charset (intern charset)))
+	 ;; (ct (mail-fetch-field "Content-Type"))
+         ;; (ct (and ct (mail-header-parse-content-type ct)))
+         ;; (charset (mail-content-type-get ct 'charset))
+         ;; (charset (and charset (intern charset)))
          (mu4e~view-rendering t); Needed if e.g. an ics file is buttonized
          (gnus-article-emulate-mime t)
          (gnus-unbuttonized-mime-types '(".*/.*"))
          (gnus-buttonized-mime-types
           (append (list "multipart/signed" "multipart/encrypted")
                   gnus-buttonized-mime-types))
-         (gnus-newsgroup-charset
-          (if (and charset (coding-system-p charset)) charset
-            (detect-coding-region (point-min) (point-max) t)))
+         ;; (gnus-newsgroup-charset
+         ;;  (if (and charset (coding-system-p charset)) charset
+         ;;    (detect-coding-region (point-min) (point-max) t)))
 	 (parts)
 	 (header)
 	 (contain-html-parts)
-	 (text-part))
+	 (text-part)
+	 (is-mu4e (derived-mode-p 'mu4e-view-mode
+				  'mu4e-headers-mode)))
 
-    (unless (file-exists-p filename)
+    (when (and (not is-mu4e) (not (file-exists-p filename)))
       (notmuch-refresh-this-buffer)
       (setq filename (notmuch-show-get-filename)))
+    ;; (unless is-mu4e
+    ;;   (unless (file-exists-p filename)
+    ;; 	(notmuch-refresh-this-buffer)
+    ;; 	(setq filename (notmuch-show-get-filename))))
 
     ;; if article buffer exist, kill it then create a new one
     (when (bufferp gnus-article-buffer)
@@ -3511,75 +3521,79 @@ determine which browser function to use."
 	(erase-buffer)
 	(insert-file-contents-literally
 	 filename nil nil nil t))
-      (mm-enable-multibyte)
+      ;; (mm-enable-multibyte)
       (run-hooks 'gnus-article-decode-hook)
       (gnus-article-prepare-display)
+      ;; (setq header (cl-loop for field in '("from" "to" "cc" "date" "subject")
+      ;; 			    when (message-fetch-field field)
+      ;; 			    concat (format "%s: %s\n" (capitalize field) it)))
+      ;; (setq parts (mm-dissect-buffer t t))
       (with-temp-buffer
 	(insert-file-contents-literally
 	 filename nil nil nil t)
+	(mm-enable-multibyte)
 	(run-hooks 'gnus-article-decode-hook)
 	(setq header (cl-loop for field in '("from" "to" "cc" "date" "subject")
 			      when (message-fetch-field field)
 			      concat (format "%s: %s\n" (capitalize field) it)))
-	(setq parts (mm-dissect-buffer t t))))
-
-    ;; kill temp article buffer
-    (mm-destroy-parts gnus-article-mime-handles)
-    ;; (kill-buffer gnus-article-buffer)
-
-    (when (and (bufferp (car parts))
-               (stringp (car (mm-handle-type parts))))
-      (setq parts (list parts)))
-
-    (dolist (part parts)
-      (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
-	(setq text-part t))
-      (when (and (listp part) (equal (car (mm-handle-type part)) "text/html"))
-	(setq contain-html-parts t)))
-
-    (when (and (not contain-html-parts) text-part)
-      (when (get-buffer gnus-article-buffer)
-	(kill-buffer gnus-article-buffer)) 	;; kill old buffer first
+	(setq parts (mm-dissect-buffer t t)))
+      (when (and (bufferp (car parts))
+		 (stringp (car (mm-handle-type parts))))
+	(setq parts (list parts)))
       (dolist (part parts)
 	(when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
-	  (let* ((type (mm-handle-type part))
-		 (charset (mu4e-views--convert-charset (mail-content-type-get type 'charset)))
-		 (encoding (mm-handle-encoding part))
-		 (txt (mm-get-part part)))
-            (when encoding
-	      (save-restriction
-		(save-restriction
-	          (article-narrow-to-head)
-	          (goto-char (point-max)))
-		(forward-line 1)
-		(save-restriction
-	          (narrow-to-region (point) (point-max))
-                  (setq txt (buffer-string)))))
+	  (setq text-part t))
+	(when (and (listp part) (equal (car (mm-handle-type part)) "text/html"))
+	  (setq contain-html-parts t))))
 
-	    (with-current-buffer (get-buffer-create gnus-article-buffer)
-	      (let ((inhibit-read-only t)
-		    (tmp-parts)
-		    (buffer-txt (new-html-buffer txt)))
-		(insert buffer-txt)
-		;; (with-temp-buffer
-		;;   (insert buffer-txt)
-		;;   (delete-file "/tmp/html.txt")
-		;;   (write-region (point-min) (point-max) "/tmp/html.txt" t 'silent))
-		)
-	      (mm-enable-multibyte)
-	      (run-hooks 'gnus-article-decode-hook)
-	      (setq tmp-parts (mm-dissect-buffer t t))
-	      (when tmp-parts
-		;; (message "success dissect buffer")
-		;; (princ (type-of tmp-parts))
-		;; (princ (mm-get-part tmp-parts))
-		(setq parts tmp-parts)
-		(when (and (bufferp (car parts))
-			   (stringp (car (mm-handle-type parts))))
-		  (setq parts (list parts)))))
+    ;; ;; kill temp article buffer
+    ;; (mm-destroy-parts gnus-article-mime-handles)
+    ;; ;; (kill-buffer gnus-article-buffer)
 
-	    (when (get-buffer gnus-article-buffer)
-	      (mm-destroy-parts gnus-article-mime-handles))))))
+    (when (and (not contain-html-parts) text-part)
+      ;; (when (get-buffer gnus-article-buffer)
+      ;; 	(kill-buffer gnus-article-buffer)) 	;; kill old buffer first
+      (dolist (part parts)
+	(with-current-buffer (get-buffer-create gnus-article-buffer)
+	  (when (and (listp part) (equal (car (mm-handle-type part)) "text/plain"))
+	    (let* ((type (mm-handle-type part))
+		   (encoding (mm-handle-encoding part))
+		   (txt (mm-get-part part)))
+
+	      (when encoding
+		(save-restriction
+		  (save-restriction
+		    (article-narrow-to-head)
+		    (goto-char (point-max)))
+		  (forward-line 1)
+		  (save-restriction
+		    (narrow-to-region (point) (point-max))
+		    (setq txt (buffer-string)))))
+
+	      (with-temp-buffer
+		(let ((inhibit-read-only t)
+		      (tmp-parts)
+		      (buffer-txt (new-html-buffer txt)))
+		  (insert buffer-txt)
+		  ;; (with-temp-buffer
+		  ;;   (insert buffer-txt)
+		  ;;   (delete-file "/tmp/html.txt")
+		  ;;   (write-region (point-min) (point-max) "/tmp/html.txt" t 'silent))
+		  (mm-enable-multibyte)
+		  (run-hooks 'gnus-article-decode-hook)
+		  (setq tmp-parts (mm-dissect-buffer t t))
+		  (when tmp-parts
+		    ;; (message "success dissect buffer")
+		    ;; (princ (type-of tmp-parts))
+		    ;; (princ (mm-get-part tmp-parts))
+		    (setq parts tmp-parts)
+		    (when (and (bufferp (car parts))
+			       (stringp (car (mm-handle-type parts))))
+		      (setq parts (list parts)))))))
+
+	    ;; (when (get-buffer gnus-article-buffer)
+	    ;;   (mm-destroy-parts gnus-article-mime-handles))
+	    ))))
 
     (when (and parts header)
       (unless (gnus-article-browse-html-parts parts (concat "\n" header))
@@ -3631,6 +3645,13 @@ determine which browser function to use."
   "Turn off 'auto-fill-mode'."
   (auto-fill-mode -1))
 
+
+;; build mu4e
+;; meson setup build
+;; meson compile -C build
+
+;; delete trashed files
+;; mu find 'flag:trashed' --fields=l | gxargs -l grm
 (use-package mu4e
   :vc nil
   ;; :ensure nil
@@ -3640,7 +3661,7 @@ determine which browser function to use."
   :custom
   ;; (mu4e-mu-binary "/opt/local/bin/mu")
   (mu4e-mu-binary "/Users/jiya/workspace/mu4e/build/mu/mu")
-  (mu4e-update-interval (* 60 10))
+  (mu4e-update-interval (* 60 2))
   (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
   (mu4e-view-show-addresses t)
   (mu4e-context-policy 'pick-first)
@@ -3655,6 +3676,7 @@ determine which browser function to use."
   (mu4e-compose-dont-reply-to-self t)
   (mu4e-change-filenames-when-moving t)
   (mu4e-index-lazy-check nil)
+  (mu4e-main-hide-personal-addresses t)
   (message-kill-buffer-on-exit t)
   (mu4e-hide-index-messages t)
   (mu4e-view-show-images t)
@@ -3668,6 +3690,7 @@ determine which browser function to use."
   (mu4e-headers-auto-update t)
   (mu4e-headers-include-related nil)
   (mu4e-headers-show-threads nil)
+  (mu4e-modeline-support nil)
   (mu4e-split-view nil)
   (mu4e-headers-date-format "%Y-%m-%d %H:%M")
   ;; (mu4e-headers-date-format "%y-%m-%d")
@@ -3690,18 +3713,41 @@ determine which browser function to use."
 					(:thread-subject . ,(- (window-body-width) 70)) ;; alternatively, use :subject
 					(:size . 7))))))
   :bind (("C-c m" . mu4e)
+	 (:map mu4e-headers-mode-map
+	       ("." . mu4e-view-action)
+	       ("o" . my:mu4e-toggle-headers-include-related)
+	       ("R" . bergheim/mu4e-reply-email)
+	       ("C" . bergheim/mu4e-compose-email))
 	 (:map mu4e-view-mode-map
-	       ("." . mu4e-view-action)))
+	       ("." . mu4e-view-action)
+	       ("R" . bergheim/mu4e-reply-email)
+	       ("C" . bergheim/mu4e-compose-email)))
   :config
   (require 'mu4e)
   (require 'mu4e-vars)
   (require 'mu4e-contrib)
   (require 'mu4e-icalendar)
   (require 'mu4e-view)
+  (require 'mu4e-compose)
   (require 'mu4e-org)
   (setq mu4e-org-link-query-in-headers-mode nil)
   (setq mh-mime-save-parts-directory (expand-file-name "Mail/attachments/" "~"))
   (setq mm-default-directory mh-mime-save-parts-directory)
+  (setq
+   mu4e-bookmarks '(("flag:unread"                       "Unread messages"                  ?u)
+		    ("NOT flag:trashed"                  "All messages"                     ?a)
+		    ("date:today..now"                   "Today's messages"                 ?t)
+		    ("date:7d..now"                      "Last 7 days"                      ?w)
+		    ("maildir:/Work"                     "work"                             ?W)
+		    ("date:1d..now"                      "Last 1 days"                      ?y)
+		    ;; ("list:emacs-orgmode.gnu.org"        "Org mode"                         ?o)
+		    ;; ("list:emacs-devel.gnu.org"          "Emacs Devel"                      ?e)
+		    ;; ("flag:f"                            "starred"                          ?m)
+		    ;; ("maildir:/sent"                     "sent"                             ?s)
+		    ;; ("maildir:/drafts"                   "drafts"                           ?d)
+		    ;; ("mime:image/*"                      "Messages with images"             ?p)
+		    ;; ("maildir:/trash"                    "Trash"                            ?g)
+		    ))
 
   (add-hook 'mu4e-compose-mode-hook 'epa-mail-mode)
   (add-hook 'mu4e-compose-mode-hook 'visual-line-mode)
@@ -3711,7 +3757,7 @@ determine which browser function to use."
   ;; (add-hook 'mu4e-view-mode-hook 'olivetti-mode)
   (add-hook 'mu4e-compose-mode-hook #'no-auto-fill)
   (add-to-list 'mu4e-view-actions
-               '("View In Browser" . (lambda(msg &optional skip-headers) (poly-view-html-in-browser) )) t)
+	       '("View In Browser" . (lambda(msg &optional skip-headers) (poly-view-html-in-browser msg) )) t)
 
   (defun timu-func-mu4e-action-save-to-pdf (msg)
     "Save mu4e MSG as a pdf.
@@ -3743,13 +3789,13 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 
 
   (add-to-list 'mu4e-view-actions
-               '("Pdf" . timu-func-mu4e-action-save-to-pdf) t)
+	       '("Pdf" . timu-func-mu4e-action-save-to-pdf) t)
 
   (with-eval-after-load 'org
     (setq gnus-icalendar-org-capture-file +org-mu4e-icalendar-org-capture-file
-          gnus-icalendar-org-capture-headline '("Meetings")
-          mu4e-icalendar-diary-file +org-mu4e-icalendar-org-capture-file
-          mu4e-icalendar-trash-after-reply t))
+	  gnus-icalendar-org-capture-headline '("Meetings")
+	  mu4e-icalendar-diary-file +org-mu4e-icalendar-org-capture-file
+	  mu4e-icalendar-trash-after-reply t))
   (setq gnus-icalendar-org-enabled-p t)
 
   ;; use imagemagick, if available
@@ -3762,10 +3808,10 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
     (cl-defmethod gnus-icalendar-event:inline-reply-buttons :around
       ((event gnus-icalendar-event) handle)
       (if (and (boundp 'mu4e~view-rendering)
-               (gnus-icalendar-event:rsvp event))
-          (let ((method (gnus-icalendar-event:method event)))
-            (when (or (string= method "REQUEST") (string= method "PUBLISH") (string= method "CANCEL"))
-              `(("Accept" mu4e-icalendar-reply (,handle accepted ,event))
+	       (gnus-icalendar-event:rsvp event))
+	  (let ((method (gnus-icalendar-event:method event)))
+	    (when (or (string= method "REQUEST") (string= method "PUBLISH") (string= method "CANCEL"))
+	      `(("Accept" mu4e-icalendar-reply (,handle accepted ,event))
 		("Tentative" mu4e-icalendar-reply (,handle tentative ,event))
 		("Decline" mu4e-icalendar-reply (,handle declined ,event)))))
 	(cl-call-next-method event handle))))
@@ -3779,11 +3825,8 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
     "Toggle `mu4e-headers-include-related' and refresh."
     (interactive)
     (setq mu4e-headers-include-related
-          (not mu4e-headers-include-related))
+	  (not mu4e-headers-include-related))
     (mu4e-headers-rerun-search))
-
-  ;; (define-key 'mu4e-headers-mode-map "o"
-  ;; 	      'my:mu4e-toggle-headers-include-related)
 
   (setq mail-user-agent 'mu4e-user-agent)
 
@@ -3793,17 +3836,17 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
     (defalias 'mu4e--main-action-str 'mu4e~main-action-str))
 
   (add-to-list 'mu4e-header-info-custom
-               '(:mail-directory . (:name "Mail Directory"
+	       '(:mail-directory . (:name "Mail Directory"
 					  :shortname "Dir"
 					  :help "Mail Storage Directory"
 					  :function (lambda (msg)
 						      (or (mu4e-message-field msg :maildir) "")))))
-  ;; (setq mu4e-headers-fields '(;; (:mail-directory . 20)
-  ;; 			      (:human-date    .   12)
-  ;; 			      (:flags         .    6)
-  ;; 			      (:mailing-list  .   10)
-  ;; 			      (:from          .   22)
-  ;; 			      (:subject       .   nil)))
+  (setq mu4e-headers-fields '(;; (:mail-directory . 20)
+			      (:human-date    .   12)
+			      (:flags         .    6)
+			      (:mailing-list  .   10)
+			      (:from          .   22)
+			      (:subject       .   nil)))
   )
 
 ;;   ;;;###autoload
@@ -3820,13 +3863,6 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 ;; (defun mu4e-user-agent ()
 ;;   "Return the `mu4e-user-agent' symbol."
 ;;   'mu4e-user-agent)
-
-;; (use-package mu4e-maildirs-extension
-;;   :after mu4e
-;;   :custom
-;;   (mu4e-maildirs-extension-fake-maildir-separator "\\.")
-;;   :config
-;;   (mu4e-maildirs-extension))
 
 ;; (use-package mu4e-alert
 ;;   :after mu4e
@@ -3858,72 +3894,72 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 	      mml2015-encrypt-to-self t
 	      mml2015-sign-with-sender t)
 
-;; (use-package mu4e-marker-icons
-;;   :after mu4e
-;;   :init (mu4e-marker-icons-mode 1)
-;;   (defcustom v/message-attachment-intent-re
-;;     (regexp-opt '("I attach"
-;; 		  "I have included"
-;; 		  "I've included"
-;;                   "attached"
-;;                   "attachment"
-;;                   "pdf"))
-;;     "A regex which - if found in the message, and if there is no
-;; attachment - should launch the no-attachment warning.")
+(use-package mu4e-marker-icons
+  :after mu4e
+  :init (mu4e-marker-icons-mode 1)
+  (defcustom v/message-attachment-intent-re
+    (regexp-opt '("I attach"
+		  "I have included"
+		  "I've included"
+                  "attached"
+                  "attachment"
+                  "pdf"))
+    "A regex which - if found in the message, and if there is no
+attachment - should launch the no-attachment warning.")
 
-;;   (defcustom v/message-attachment-reminder
-;;     "Are you sure you want to send this message without any attachment? "
-;;     "The default question asked when trying to send a message
-;; containing `v/message-attachment-intent-re' without an
-;; actual attachment.")
+  (defcustom v/message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message
+containing `v/message-attachment-intent-re' without an
+actual attachment.")
 
-;;   (defun v/message-warn-if-no-attachments ()
-;;     "Ask the user if s?he wants to send the message even though
-;; there are no attachments."
-;;     (when (and (save-excursion
-;; 	         (save-restriction
-;; 		   (widen)
-;; 		   (goto-char (point-min))
-;; 		   (re-search-forward v/message-attachment-intent-re nil t)))
-;; 	       (not (v/message-attachment-present-p)))
-;;       (unless (y-or-n-p v/message-attachment-reminder)
-;;         (keyboard-quit))))(defcustom v/message-attachment-intent-re
-;;     (regexp-opt '("I attach"
-;; 		  "I have included"
-;; 		  "I've included"
-;;                   "attached"
-;;                   "attachment"
-;;                   "pdf"))
-;;     "A regex which - if found in the message, and if there is no
-;; attachment - should launch the no-attachment warning.")
+  (defun v/message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though
+there are no attachments."
+    (when (and (save-excursion
+	         (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (re-search-forward v/message-attachment-intent-re nil t)))
+	       (not (v/message-attachment-present-p)))
+      (unless (y-or-n-p v/message-attachment-reminder)
+        (keyboard-quit))))(defcustom v/message-attachment-intent-re
+    (regexp-opt '("I attach"
+		  "I have included"
+		  "I've included"
+                  "attached"
+                  "attachment"
+                  "pdf"))
+    "A regex which - if found in the message, and if there is no
+attachment - should launch the no-attachment warning.")
 
-;;   (defcustom v/message-attachment-reminder
-;;     "Are you sure you want to send this message without any attachment? "
-;;     "The default question asked when trying to send a message
-;; containing `v/message-attachment-intent-re' without an
-;; actual attachment.")
+  (defcustom v/message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message
+containing `v/message-attachment-intent-re' without an
+actual attachment.")
 
-;;   (defun v/message-warn-if-no-attachments ()
-;;     "Ask the user if s?he wants to send the message even though
-;; there are no attachments."
-;;     (when (and (save-excursion
-;; 	         (save-restriction
-;; 		   (widen)
-;; 		   (goto-char (point-min))
-;; 		   (re-search-forward v/message-attachment-intent-re nil t)))
-;; 	       (not (v/message-attachment-present-p)))
-;;       (unless (y-or-n-p v/message-attachment-reminder)
-;;         (keyboard-quit))))  (setq mu4e-headers-flagged-mark   '("F" . "🚩 "))
-;;   (setq mu4e-headers-unread-mark    '("u" . "✉️ "))
-;;   (setq mu4e-headers-draft-mark     '("D" . "🚧 "))
-;;   (setq mu4e-headers-new-mark       '("N" . "✨ "))
-;;   (setq mu4e-headers-passed-mark    '("P" . "↪ "))
-;;   (setq mu4e-headers-replied-mark   '("R" . "↩ "))
-;;   (setq mu4e-headers-seen-mark      '("S" . " "))
-;;   (setq mu4e-headers-trashed-mark   '("T" . "🗑️"))
-;;   (setq mu4e-headers-attach-mark    '("a" . "📎 "))
-;;   (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
-;;   (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
+  (defun v/message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though
+there are no attachments."
+    (when (and (save-excursion
+	         (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (re-search-forward v/message-attachment-intent-re nil t)))
+	       (not (v/message-attachment-present-p)))
+      (unless (y-or-n-p v/message-attachment-reminder)
+        (keyboard-quit))))  (setq mu4e-headers-flagged-mark   '("F" . "🚩 "))
+  (setq mu4e-headers-unread-mark    '("u" . "✉️ "))
+  (setq mu4e-headers-draft-mark     '("D" . "🚧 "))
+  (setq mu4e-headers-new-mark       '("N" . "✨ "))
+  (setq mu4e-headers-passed-mark    '("P" . "↪ "))
+  (setq mu4e-headers-replied-mark   '("R" . "↩ "))
+  (setq mu4e-headers-seen-mark      '("S" . " "))
+  (setq mu4e-headers-trashed-mark   '("T" . "🗑️"))
+  (setq mu4e-headers-attach-mark    '("a" . "📎 "))
+  (setq mu4e-headers-encrypted-mark '("x" . "🔑 "))
+  (setq mu4e-headers-signed-mark    '("s" . "🖊 ")))
 
 ;; (use-package validate)
 
@@ -3976,10 +4012,30 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
 ;;   )
 
 
-;; (defun mu4e-get-filename ()
-;;   "Get the file path of the current email in mu4e."
-;;   (interactive)
-;;   (mu4e-message-field (mu4e-message-at-point) :path))
+(defun bergheim/mu4e-compose-email (arg)
+  "Compose an email. Use universal argument to compose in only plain text mode."
+  (interactive "P")
+  (let ((org-msg-default-alternatives (if arg
+                                          '((new           . (text))
+                                            (reply-to-html . (text))
+                                            (reply-to-text . (text)))
+                                        '((new           . (text html))
+                                          (reply-to-html . (text html))
+                                          (reply-to-text . (text))))))
+    (mu4e-compose-new)))
+
+(defun bergheim/mu4e-reply-email (arg)
+  "Compose a reply to an email. Use universal argument to compose in only plain text mode."
+  (interactive "P")
+  (call-interactively 'org-store-link)
+  (let ((org-msg-default-alternatives (if arg
+                                          '((new           . (text))
+                                            (reply-to-html . (text))
+                                            (reply-to-text . (text)))
+                                        '((new           . (text html))
+                                          (reply-to-html . (text html))
+                                          (reply-to-text . (text))))))
+    (mu4e-compose-reply)))
 #+end_src
 
 ** notmuch
@@ -4204,10 +4260,7 @@ Credit: https://github.com/malb/emacs.d/blob/master/malb.org."
   ;;; Hooks and key bindings
   (add-hook 'notmuch-mua-send-hook #'notmuch-mua-attachment-check)
   (remove-hook 'notmuch-show-hook #'notmuch-show-turn-on-visual-line-mode)
-  (add-hook 'notmuch-show-hook (lambda () (setq-local header-line-format nil)))
-
-
-)
+  (add-hook 'notmuch-show-hook (lambda () (setq-local header-line-format nil))))
 
 ;; (use-package notmuch-capf
 ;;   :vc (:url "https://github.com/tpeacock19/notmuch-capf"))
