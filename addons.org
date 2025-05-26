@@ -518,6 +518,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
    completion-styles '(basic partial-completion substring flex)
    ;; (completion-category-overrides '((buffer (styles . (flex)))))
    orderless-matching-styles '(orderless-literal orderless-regexp)
+   orderless-style-dispatchers '(orderless-affix-dispatch)
    completion-category-defaults nil
    completion-category-overrides '((buffer (styles substring basic emacs22);; (styles . (flex))
 					   )
@@ -1787,6 +1788,15 @@ To manage the git repository, use builtin package ~vc~.
   "Insert a Gerrit-style Change-Id at the cursor."
   (interactive)
   (insert (concat "Change-Id: I" (substring (secure-hash 'sha256 (number-to-string (random t))) 0 40))))
+
+(defun poly/kill-commit-id ()
+  "Copy HEAD commit-id in short."
+  (interactive)
+  (let* ((default-directory (poly/project-root))
+	 (commit-id (string-trim (shell-command-to-string "git rev-parse --short HEAD"))))
+    (when commit-id
+      (message "Commit-Id: %s" commit-id)
+      (kill-new commit-id))))
 
 (use-package magit
   :commands (magit-file-delete magit-status magit-checkout)
@@ -5374,6 +5384,13 @@ org-download-paste for clipboard images
 #+end_src
 
 * Writing
+
+#+begin_src emacs-lisp
+(use-package reader
+  :vc (:url "https://codeberg.org/divyaranjan/emacs-reader"
+	    :branch "master" :rev :newest
+  	    :make "all"))
+#+end_src
 
 Configuration for writing with Emacs, specifically for Markdown and Org mode.
 
