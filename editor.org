@@ -208,7 +208,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       xref-prompt-for-identifier nil
       xref-search-program 'ripgrep
       ;; xref-show-xrefs-function #'xref-show-definitions-completing-read
-      ;; xref-show-definitions-function #'xref-show-definitions-completing-read
       ;; fix massed xref cross multiple project
       xref-history-storage 'xref-window-local-history
       confirm-nonexistent-file-or-buffer nil
@@ -3168,7 +3167,7 @@ mermaid.initialize({
   (setq plantuml-default-exec-mode 'jar
 	;; plantuml-default-exec-mode 'server
 	;; plantuml-server-url "http://localhost:8080"
-	plantuml-server-url "https://ops.shmao.net/plantuml"
+	;; plantuml-server-url "https://ops.shmao.net/plantuml"
 	;; plantuml-server-url "https://www.plantuml.com/plantuml"
 	plantuml-output-type "svg"
 	plantuml-jar-path "/opt/local/share/java/plantuml/plantuml.jar"

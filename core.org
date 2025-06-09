@@ -658,3 +658,11 @@ Run command in project-root directory while dir is nil."
 			(replace-regexp-in-string "\n$" "" (or buf-str ""))))))))
     (message "Directory is nil or not exist.")))
 #+end_src
+
+
+** remove from list
+
+#+begin_src emacs-lisp
+(defmacro remove-from-list (list-var elt)
+  `(set ,list-var (delete ,elt ,(eval list-var))))
+#+end_src

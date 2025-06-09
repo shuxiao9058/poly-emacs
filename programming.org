@@ -472,11 +472,21 @@ Configuration for programming and languages support.
   (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
   (flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
   (flycheck-add-mode 'typescript-tslint 'tsx-ts-mode)
-
+  (dolist (lint '(go-errcheck ;; go-unconvert
+			      ;; go-staticcheck
+			      ))
+    (remove-from-list 'flycheck-checkers lint))
   ;; (remove-hook 'post-command-hook 'flycheck-display-error-at-point-soon)
   ;; (remove-hook 'focus-in-hook 'flycheck-display-error-at-point-soon)
   ;; (advice-add #'flycheck-display-error-at-point-soon :override #'ignore)
   )
+
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
+  :custom (flycheck-eglot-exclusive nil)
+  :config
+  (global-flycheck-eglot-mode 1))
 
 (use-package flycheck-color-mode-line
   :ensure t
@@ -780,7 +790,7 @@ Examples:
     (setq-default eglot-workspace-configuration
 		  `(:gopls  (
 			     :usePlaceholders  t
-			     :staticcheck  :json-false
+			     :staticcheck  t
 			     ;; :matcher  "CaseSensitive"
 			     :gofumpt  t
 			     :completeUnimported  t
@@ -825,7 +835,6 @@ Examples:
 				     :rangeVariableTypes     :json-false           ;; bool false
 				     )
 			     ;; DIAGNOSTIC
-
 			     :analyses
 			     (
 			      ;; :appends              ;; bool true
@@ -839,60 +848,195 @@ Examples:
 			      :composites :json-false           ;; bool true
 			      ;; :copylocks            ;; bool true
 			      ;; :deepequalerrors      ;; bool true
-			      ;; :defers               ;; bool true
-			      ;; :deprecated           ;; bool true
+			      :defers t               ;; bool true
+			      :deprecated t           ;; bool true
 			      ;; :directive            ;; bool true
 			      ;; :embed                ;; bool true
-			      ;; :errorsas             ;; bool true
+			      :errorsas t             ;; bool true
 			      ;; :fieldalignment       ;; bool false
 			      ;; :fillreturns          ;; bool true
 			      ;; :fillstruct           ;; bool true
 			      ;; :httpresponse         ;; bool true
-			      ;; :ifaceassert          ;; bool true
+			      :ifaceassert t          ;; bool true
 			      ;; :infertypeargs        ;; bool true
 			      ;; :loopclosure          ;; bool true
-			      ;; :lostcancel           ;; bool true
+			      :lostcancel t           ;; bool true
 			      ;; :nilfunc              ;; bool true
-			      ;; :nilness              ;; bool true
+			      :nilness t              ;; bool true
 			      ;; :nonewvars            ;; bool true
 			      ;; :noresultvalues       ;; bool true
 			      ;; :printf               ;; bool true
-			      :shadow t                ;; bool false
+			      :shadow :json-false      ;; bool false
 			      ;; :shift                ;; bool true
 			      ;; :simplifycompositelit ;; bool true
 			      ;; :simplifyrange        ;; bool true
 			      ;; :simplifyslice        ;; bool true
-			      ;; :slog                 ;; bool true
-			      ;; :sortslice            ;; bool true
+			      :slog t                 ;; bool true
+			      :sortslice t            ;; bool true
 			      ;; :stdmethods           ;; bool true
 			      ;; :stringintconv        ;; bool true
 			      ;; :structtag            ;; bool true
 			      ;; :stubmethods          ;; bool true
 			      ;; :testinggoroutine     ;; bool true
 			      ;; :tests                ;; bool true
-			      ;; :timeformat           ;; bool true
+			      :timeformat t           ;; bool true
 			      ;; :undeclaredname       ;; bool true
 			      ;; :unmarshal            ;; bool true
-			      ;; :unreachable          ;; bool true
-			      ;; :unsafeptr            ;; bool true
-			      :unusedparams :json-false          ;; bool false
-			      ;; :unusedresult         ;; bool true
-			      :unusedvariable t        ;; bool false
-			      :unusedwrite :json-false           ;; bool false
-			      :useany t                ;; bool false
-			      :ST1003 :json-false
-			      :ST1021 :json-false
-			      :ST1016 :json-false
-			      :SA5011 :json-false
-			      :ST1020 :json-false
-			      :ST1005 :json-false
-			      :SA9003 :json-false
-			      :SA4006 :json-false
-			      :ST1022 :json-false
-			      :S1023 :json-false
-			      :SA4011 :json-false
-			      :SA4010 :json-false
-			      :ST1018 :json-false)
+			      :unreachable t          ;; bool true
+			      :unsafeptr t      ;; check for invalid conversions of uintptr to unsafe.Pointer
+			      :unusedparams t   ;; check for unused parameters of functions
+			      :unusedresult t   ;; check for unused results of calls to some functions
+			      :unusedvariable t ;; check for unused variables and suggest fixes
+			      :unusedwrite t    ;; checks for unused writes
+			      ;; :useany t                ;; bool false
+
+			      :QF1001 t ;; Apply De Morgan's law
+			      :QF1002 t ;; Convert untagged switch to tagged switch
+			      :QF1003 t ;; Convert if/else-if chain to tagged switch
+			      :QF1004 t ;; Use strings.ReplaceAll instead of strings.Replace with n == -1
+			      :QF1005 t ;; Expand call to math.Pow
+			      :QF1006 t ;; Lift if+break into loop condition
+			      :QF1007 t ;; Merge conditional assignment into variable declaration
+			      :QF1008 t ;; Omit embedded fields from selector expression
+			      :QF1009 t ;; Use time.Time.Equal instead of == operator
+			      :QF1010 t ;; Convert slice of bytes to string when printing it
+			      :QF1011 t ;; Omit redundant type from variable declaration
+			      :QF1012 t ;; Use fmt.Fprintf(x, ...) instead of x.Write(fmt.Sprintf(...))
+			      :S1000 t ;; Use plain channel send or receive instead of single-case select
+			      :S1001 t ;; Replace for loop with call to copy
+			      :S1002 t ;; Omit comparison with boolean constant
+			      :S1003 t ;; Replace call to strings.Index with strings.Contains
+			      :S1004 t ;; Replace call to bytes.Compare with bytes.Equal
+			      :S1005 t ;; Drop unnecessary use of the blank identifier
+			      :S1006 t ;; Use 'for { ... }' for infinite loops
+			      :S1007 t ;; Simplify regular expression by using raw string literal
+			      :S1008 t ;; Simplify returning boolean expression
+			      :S1009 t ;; Omit redundant nil check on slices, maps, and channels
+			      :S1010 t ;; Omit default slice index
+			      :S1011 t ;; Use a single append to concatenate two slices
+			      :S1012 t ;; Replace time.Now().Sub(x) with time.Since(x)
+			      :S1016 t ;; Use a type conversion instead of manually copying struct fields
+			      :S1017 t ;; Replace manual trimming with strings.TrimPrefix
+			      :S1018 t ;; Use 'copy' for sliding elements
+			      :S1019 t ;; Simplify 'make' call by omitting redundant arguments
+			      :S1020 t ;; Omit redundant nil check in type assertion
+			      :S1021 t ;; Merge variable declaration and assignment
+			      :S1023 t ;; Omit redundant control flow
+			      :S1024 t ;; Replace x.Sub(time.Now()) with time.Until(x)
+			      :S1025 t ;; Don't use fmt.Sprintf("%s", x) unnecessarily
+			      :S1028 t ;; Simplify error construction with fmt.Errorf
+			      :S1029 t ;; Range over the string directly
+			      :S1030 t ;; Use bytes.Buffer.String or bytes.Buffer.Bytes
+			      :S1031 t ;; Omit redundant nil check around loop
+			      :S1032 t ;; Use sort.Ints(x), sort.Float64s(x), and sort.Strings(x)
+			      :S1033 t ;; Unnecessary guard around call to 'delete'
+			      :S1034 t ;; Use result of type assertion to simplify cases
+			      :S1035 t ;; Redundant call to net/http.CanonicalHeaderKey in method call on net/http.Header
+			      :S1036 t ;; Unnecessary guard around map access
+			      :S1037 t ;; Elaborate way of sleeping
+			      :S1038 t ;; Unnecessarily complex way of printing formatted string
+			      :S1039 t ;; Unnecessary use of fmt.Sprint
+			      :S1040 t ;; Type assertion to current type
+			      :ST1001 t ;; Dot imports are discouraged
+			      :ST1003 t ;; Poorly chosen identifier
+			      :ST1005 t ;; Incorrectly formatted error string
+			      :ST1008 t ;; A function's error value should be its last return value
+			      :ST1011 t ;; Poorly chosen name for variable of type time.Duration
+			      :ST1012 t ;; Poorly chosen name for error variable
+			      :ST1015 t ;; A switch's default case should be the first or last case
+			      :ST1016 t ;; Use consistent method receiver names
+			      :ST1018 t ;; Avoid zero-width and control characters in string literals
+			      :ST1020 t ;; The documentation of an exported function should start with the function's name
+			      :ST1021 t ;; The documentation of an exported type should start with type's name
+			      :ST1022 t ;; The documentation of an exported variable or constant should start with variable's name
+			      :ST1023 t ;; Redundant type in variable declaration
+
+			      :SA1000 t ;; Invalid regular expression
+			      :SA1001 t ;; Invalid template
+			      :SA1002 t ;; Invalid format in time.Parse
+			      :SA1003 t ;; Unsupported argument to functions in encoding/binary
+			      :SA1004 t ;; Suspiciously small untyped constant in time.Sleep
+			      :SA1005 t ;; Invalid first argument to exec.Command
+			      :SA1007 t ;; Invalid URL in net/url.Parse
+			      :SA1008 t ;; Non-canonical key in http.Header map
+			      :SA1010 t ;; (*regexp.Regexp).FindAll called with n == 0, which will always return zero results
+			      :SA1011 t ;; Various methods in the 'strings' package expect valid UTF-8, but invalid input is provided
+			      :SA1012 t ;; A nil context.Context is being passed to a function, consider using context.TODO instead
+			      :SA1013 t ;; io.Seeker.Seek is being called with the whence constant as the first argument, but it should be the second
+			      :SA1014 t ;; Non-pointer value passed to Unmarshal or Decode
+			      :SA1015 t ;; Using time.Tick in a way that will leak. Consider using time.NewTicker, and only use time.Tick in tests, commands and endless functions
+			      :SA1016 t ;; Trapping a signal that cannot be trapped
+			      :SA1017 t ;; Channels used with os/signal.Notify should be buffered
+			      :SA1018 t ;; strings.Replace called with n == 0, which does nothing
+			      :SA1020 t ;; Using an invalid host:port pair with a net.Listen-related function
+			      :SA1021 t ;; Using bytes.Equal to compare two net.IP
+			      :SA1023 t ;; Modifying the buffer in an io.Writer implementation
+			      :SA1024 t ;; A string cutset contains duplicate characters
+			      :SA1025 t ;; It is not possible to use (*time.Timer).Reset's return value correctly
+			      :SA1026 t ;; Cannot marshal channels or functions
+			      :SA1027 t ;; Atomic access to 64-bit variable must be 64-bit aligned
+			      :SA4025 t ;; Integer division of literals that results in zero
+			      :SA1028 t ;; sort.Slice can only be used on slices
+			      :SA1029 t ;; Inappropriate key in call to context.WithValue
+			      :SA1030 t ;; Invalid argument in call to a strconv function
+			      :SA4024 t ;; Checking for impossible return value from a builtin function
+			      :SA1031 t ;; Overlapping byte slices passed to an encoder
+			      :SA1032 t ;; Wrong order of arguments to errors.Is
+			      :SA2001 t ;; Empty critical section, did you mean to defer the unlock?
+			      :SA2002 t ;; Called testing.T.FailNow or SkipNow in a goroutine, which isn't allowed
+			      :SA2003 t ;; Deferred Lock right after locking, likely meant to defer Unlock instead
+			      :SA3000 t ;; TestMain doesn't call os.Exit, hiding test failures
+			      :SA3001 t ;; Assigning to b.N in benchmarks distorts the results
+			      :SA4000 t ;;  Binary operator has identical expressions on both sides
+			      :SA4001 t ;; &*x gets simplified to x, it does not copy x
+			      :SA4003 t ;; Comparing unsigned values against negative values is pointless
+			      :SA4004 t ;; The loop exits unconditionally after one iteration
+			      :SA4005 t ;; Field assignment that will never be observed. Did you mean to use a pointer receiver?
+			      :SA4006 t ;; A value assigned to a variable is never read before being overwritten. Forgotten error check or dead code?
+			      :SA4008 t ;; the variable in the loop condition never changes, are you incrementing the wrong variable?
+			      :SA4009 t ;; A function argument is overwritten before its first use
+			      :SA4010 t ;; The result of append will never be observed anywhere
+			      :SA4011 t ;; Break statement with no effect. Did you mean to break out of an outer loop?
+			      :SA4012 t ;; Comparing a value against NaN even though no value is equal to NaN
+			      :SA4013 t ;; Negating a boolean twice (!!b) is the same as writing b. This is either redundant, or a typo.
+			      :SA4014 t ;; An if/else if chain has repeated conditions and no side-effects; if the condition didn't match the first time, it won't match the second time, either
+			      :SA4015 t ;; Calling functions like math.Ceil on floats converted from integers doesn't do anything useful
+			      :SA4016 t ;; Certain bitwise operations, such as x ^ 0, do not do anything useful
+			      :SA4017 t ;; Discarding the return values of a function without side effects, making the call pointless
+			      :SA4018 t ;; Self-assignment of variables
+			      :SA4019 t ;; Multiple, identical build constraints in the same file
+			      :SA4020 t ;; Unreachable case clause in a type switch
+			      :SA4022 t ;; Comparing the address of a variable against nil
+			      :SA4023 t ;; Impossible comparison of interface value with untyped nil
+			      :SA4030 t ;; Ineffective attempt at generating random number
+			      :SA4031 t ;; Checking never-nil value against nil
+			      :SA4032 t ;; Comparing runtime.GOOS or runtime.GOARCH against impossible value
+			      :SA4026 t ;; Go constants cannot express negative zero
+			      :SA4027 t ;; (*net/url.URL).Query returns a copy, modifying it doesn't change the URL
+			      :SA4028 t ;; x % 1 is always zero
+			      :SA4029 t ;; Ineffective attempt at sorting slice
+			      :SA5001 t ;; Deferring Close before checking for a possible error
+			      :SA5002 t ;; The empty for loop ('for {}') spins and can block the scheduler
+			      :SA5003 t ;; Defers in infinite loops will never execute
+			      :SA5004 t ;; 'for { select { ...' with an empty default branch spins
+			      :SA5005 t ;; The finalizer references the finalized object, preventing garbage collection
+			      :SA5007 t ;; Infinite recursive call
+			      :SA5008 t ;; Invalid struct tag
+			      :SA5010 t ;; Impossible type assertion
+			      :SA5011 t ;; Possible nil pointer dereference
+			      :SA5000 t ;; Assignment to nil map
+			      :SA9001 t ;; Defers in range loops may not run when you expect them to
+			      :SA9003 t ;; Empty body in an if or else branch
+			      :SA9007 t ;; Deleting a directory that shouldn't be deleted
+			      :SA9008 t ;; else branch of a type assertion is probably not reading the right value
+			      :SA6000 t ;; Using regexp.Match or related in a loop, should use regexp.Compile
+			      :SA6002 t ;; Storing non-pointer values in sync.Pool allocates memory
+			      :SA6003 t ;; Converting a string to a slice of runes before ranging over it
+			      :SA6005 t ;; Inefficient string comparison with strings.ToLower or strings.ToUpper
+			      :SA6006 t ;; Using io.WriteString to write []byte
+
+			      :modernize t ;; simplify code by using modern constructs
+			      )
 
 			     ;; NAVIGATION
 
@@ -2405,27 +2549,27 @@ eglot does complete argument through yasnippet.
   :commands gorepl-run-load-current-file)
 
 ;; Install: See https://github.com/golangci/golangci-lint#install
-(use-package flycheck-golangci-lint
-  :after (flycheck)
-  :hook ((go-mode go-ts-mode) .
-	 (lambda()
-           (flycheck-golangci-lint-setup)
-	   (when poly-use-lsp-mode
-	     (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint)))))))))
-  :disabled
-  :defines flycheck-disabled-checkers
-  :init
-  (setenv "GO111MODULE" "on")
-  :custom
-  (flycheck-golangci-lint-enable-all nil)
-  (flycheck-golangci-lint-deadline "1m")
-  ;; (flycheck-golangci-lint-enable-all t)
-  (flycheck-golangci-lint-fast t)
-  (flycheck-golangci-lint-config
-   (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
-  :config
-  (unless (executable-find "golangci-lint")
-    (poly/install-go-tool 'golangci-lint)))
+;; (use-package flycheck-golangci-lint
+;;   :after (flycheck)
+;;   :hook ((go-mode go-ts-mode) .
+;; 	 (lambda()
+;;            (flycheck-golangci-lint-setup)
+;; 	   (when poly-use-lsp-mode
+;; 	     (setq flycheck-local-checkers '((lsp . ((next-checkers . (golangci-lint)))))))))
+;;   :disabled
+;;   :defines flycheck-disabled-checkers
+;;   :init
+;;   (setenv "GO111MODULE" "on")
+;;   :custom
+;;   (flycheck-golangci-lint-enable-all nil)
+;;   (flycheck-golangci-lint-deadline "1m")
+;;   ;; (flycheck-golangci-lint-enable-all t)
+;;   (flycheck-golangci-lint-fast t)
+;;   (flycheck-golangci-lint-config
+;;    (expand-file-name "golangci.yml" "~/.config/golangci-lint"))
+;;   :config
+;;   (unless (executable-find "golangci-lint")
+;;     (poly/install-go-tool 'golangci-lint)))
 
 (use-package go-eldoc
   :after go-mode
@@ -2469,15 +2613,15 @@ eglot does complete argument through yasnippet.
   (unless (executable-find "dlv")
     (poly/install-go-tool 'dlv)))
 
-(use-package go-errcheck
-  :disabled
-  :after go-mode
-  :bind (:map go-mode-map
-	      ("C-c C-e" . go-errcheck))
-  :config
-  ;; errcheck is a program for checking for unchecked errors in Go code.
-  (unless (executable-find "errcheck")
-    (poly/install-go-tool 'errcheck)))
+;; (use-package go-errcheck
+;;   :disabled
+;;   :after go-mode
+;;   :bind (:map go-mode-map
+;; 	      ("C-c C-e" . go-errcheck))
+;;   :config
+;;   ;; errcheck is a program for checking for unchecked errors in Go code.
+;;   (unless (executable-find "errcheck")
+;;     (poly/install-go-tool 'errcheck)))
 
 (use-package go-gen-test
   :bind (:map go-mode-map

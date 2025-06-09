@@ -65,7 +65,8 @@ Configuration for look and feels, make UI looks better.
           ns-use-native-fullscreen t
           ns-use-proxy-icon nil
           ns-use-mwheel-momentum t
-          ns-use-mwheel-acceleration t)
+          ns-use-mwheel-acceleration t
+	  ns-use-srgb-colorspace nil)
     ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
     ;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
     ))
