@@ -659,7 +659,8 @@ If INTERACTIVE, prompt user for details."
   (eglot-confirm-server-initiated-edits nil)
   ;; (eglot-events-buffer-size 500000)
   (eglot-events-buffer-size 0)
-  (eglot-stay-out-of '(imenu eldoc yasnippet))  ;; eglot reinits backends
+  (eglot-stay-out-of '(;; imenu
+		       eldoc yasnippet))  ;; eglot reinits backends
   (eldoc-echo-area-use-multiline-p nil)
   ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
@@ -798,7 +799,8 @@ Examples:
 			     :completionBudget  "150ms"
 			     :completeFunctionCalls t
 			     :diagnosticsDelay    "800ms"
-			     :diagnosticsTrigger  "Save"       ;; "Edit"|"Save"   "Edit"
+			     :diagnosticsTrigger "Save"  ;; "Edit"|"Save"
+			     ;; "Save"       ;; "Edit"|"Save"   "Edit"
 			     ;; :analysisProgressReporting ;; bool            true
 			     :vulncheck  "Imports"
 			     :semanticTokens  t
@@ -817,13 +819,13 @@ Examples:
 			     ;; :upgrade_dependency ;; bool true
 			     ;; :vendor             ;; bool true
 			     ;; )
-			     :codelenses  (:gc_details  :json-false
+			     :codelenses  (:gc_details  t
 							:generate  t
 							:regenerate_cgo  t
 							:run_govulncheck t
 							:test t
 							:tidy  t
-							:upgrade_dependency  :json-false
+							:upgrade_dependency  t
 							:vendor  t)
 			     :hints (
 				     :assignVariableTypes    :json-false           ;; bool false
@@ -1046,7 +1048,7 @@ Examples:
 			     ;; :symbolScope    ;; "all"|"workspace"                                     "all"
 			     ;; :verboseOutput  ;; bool                                                  false
 			     ;; :newDiff        ;; "both"|"old"|"new"                                    "both"
-			     :buildFlags  ["-mod=vendor"]
+			     :buildFlags [] ;; ["-mod=vendor"]
 			     ;; :allowImplicitNetworkAccess  t
 			     ;; :allowModfileModifications  t
 			     :experimentalPostfixCompletions  t
@@ -2536,6 +2538,7 @@ eglot does complete argument through yasnippet.
 
   (add-hook 'go-mode-hook #'poly/go-set-compile-command)
   (add-hook 'go-ts-mode-hook #'poly/go-set-compile-command)
+  (add-hook 'go-mod-ts-mode-hook #'poly/go-set-compile-command)
   (add-hook 'magit-mode-hook #'poly/go-set-compile-command)
   (setq gofmt-command "goimports")
   ;; Sets the fill column (where to break paragraphs on M-q)

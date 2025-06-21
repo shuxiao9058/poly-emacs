@@ -1411,6 +1411,7 @@ Visualizing Color Codes with rainbow-mode.
   (setq +org-capture-gtd-file (expand-file-name  "personal-gtd.org" org-beorg-directory))
   (setq +org-capture-notes-file (expand-file-name  "personal-note.org" org-beorg-directory))
   (setq +org-capture-work-gtd-file (expand-file-name "work-gtd.org" org-beorg-directory))
+  (setq +org-capture-work-project-file (expand-file-name "work-project.org" org-beorg-directory))
   (setq +org-capture-work-kpi-file (expand-file-name "work-kpi.org" org-beorg-directory))
   (setq +org-capture-work-team-gtd-file (expand-file-name "work-team-gtd.org" org-beorg-directory))
   (setq +org-capture-work-notes-file (expand-file-name "work-note.org" org-beorg-directory))
@@ -1424,6 +1425,7 @@ Visualizing Color Codes with rainbow-mode.
 			  +org-capture-gtd-file
 			  +org-capture-work-gtd-file
 			  +org-capture-work-team-gtd-file
+			  +org-capture-work-project-file
 			  ;; +org-capture-work-kpi-file
 			  +org-capture-work-talk-file
 			  +org-capture-work-meeting-file
@@ -1434,6 +1436,7 @@ Visualizing Color Codes with rainbow-mode.
 				    ;; +org-capture-gtd-file
 				    +org-capture-work-gtd-file
 				    +org-capture-work-team-gtd-file
+				    +org-capture-work-project-file
 				    ;; +org-capture-work-kpi-file
 				    ;; +org-capture-work-talk-file
 				    +org-capture-work-meeting-file
@@ -1563,6 +1566,7 @@ do not already have one."
 	     +org-capture-work-kpi-file
 	     +org-capture-work-gtd-file
 	     +org-capture-work-team-gtd-file
+	     +org-capture-work-project-file
 	     +org-capture-work-weekly-file) :maxlevel . 2)))
 
   (setq org-tag-alist
@@ -1587,6 +1591,9 @@ do not already have one."
 	   "* TODO %?\n%i%U\n")
 	  ("wn" "Work notes" entry
 	   (file+olp +org-capture-work-notes-file  "W-Note")
+	   "* %u %?\n%i\n%a" :kill-buffer nil)
+	  ("wp" "Work project notes" entry
+	   (file+olp +org-capture-work-project-file  "W-Project")
 	   "* %u %?\n%i\n%a" :kill-buffer nil)
 	  ("ww" "Work weekly" entry
 	   (file+olp +org-capture-work-weekly-file "W-Weekly")
@@ -3144,11 +3151,16 @@ mermaid.initialize({
 
 #+begin_src emacs-lisp
 (use-package notdeft
-  :init  (setenv "XAPIAN_CJK_NGRAM" "1")
+  :init
+  (setenv "XAPIAN_CJK_NGRAM" "1")
+  (autoload 'notdeft-xapian-make-program-when-uncurrent "notdeft-xapian-make")
+  (add-hook 'notdeft-load-hook 'notdeft-xapian-make-program-when-uncurrent)
+  (add-hook 'org-mode-hook 'notdeft-note-mode)
   :custom
   (notdeft-allow-org-property-drawers t)
   :vc (:url "https://github.com/hasu/notdeft" :branch "master" :rev :newest)
   :config
+  (autoload 'notdeft-mode-hydra/body "notdeft-mode-hydra")
   (setq notdeft-directories `(,org-beorg-directory)
 	notdeft-extension "org")
   (add-hook 'org-mode-hook 'notdeft-note-mode)

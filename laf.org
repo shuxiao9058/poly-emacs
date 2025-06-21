@@ -1263,4 +1263,21 @@ lines are selected, or the NxM dimensions of a block selection."
 		    eat-mode))
       (add-to-list 'tab-line-exclude-modes mode))
     )
+
+(use-package tab-line-nerd-icons
+  :hook (global-tab-line-mode . tab-line-nerd-icons-global-mode))
+#+end_src
+
+** tab new
+
+#+begin_src emacs-lisp
+(defun +workspace/tab-new (name)
+  (interactive (list
+                (read-from-minibuffer
+                 "New Tab Name(*scratch*): "
+                 nil nil nil nil (buffer-name))))
+  (tab-new)
+  (if (> (length name) 0)
+      (tab-rename name)))
+
 #+end_src

@@ -126,6 +126,8 @@ Core configuration of poly emacs, global variable declare.
 ;; use ansi-term a lot.  Eshell is okay with this.  Disabling by default.
 ;; (setq scroll-margin 2)
 
+(setq mac-underwave-thickness 0.8)
+
 ;; sane trackpad/mouse scroll settings
 (setq mac-redisplay-dont-reset-vscroll t
       mac-mouse-wheel-smooth-scroll nil)

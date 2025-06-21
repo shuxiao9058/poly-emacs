@@ -1155,8 +1155,21 @@ fib(5)")
                    (symbol-value 'meow-normal-mode))))
 #+end_src
 
-#+RESULTS:
-: copilot-accept-completion-by-word
+**** aider
+
+#+begin_src emacs-lisp :tangle no
+(use-package aidermacs
+  :vc (:url "https://github.com/MatthewZMD/aidermacs" :branch "main" :rev :newest)
+  :bind (("C-c a a m" . aidermacs-transient-menu)) ;; FIXME
+  :custom
+  (aidermacs-watch-files t)
+  (aidermacs-show-diff-after-change t)
+  (aidermacs-use-architect-mode t)
+  (aidermacs-auto-commits nil)
+  :config
+  (aidermacs-setup-minor-mode))
+#+end_src
+
 
 *** corfu-quick
 
@@ -2606,7 +2619,9 @@ save minibuffer history
   (savehist-mode +1))
 #+end_src
 
-* desktop
+* Session Manager
+
+** desktop
 #+begin_src emacs-lisp :tangle no
 (defun sanityinc/desktop-time-restore (orig &rest args)
   (let ((start-time (current-time)))
@@ -2787,6 +2802,78 @@ Auto cleanup older buffers
 						      "\\`\\*tramp/.*\\*\\`"
 						      "\\`\\*ftp .*\\*\\`"))))
 #+end_src
+
+** session
+
+Easily persist and restore your Emacs editing sessions.
+
+#+begin_src emacs-lisp :tangle no
+(use-package easysession
+  :commands (easysession-switch-to
+             easysession-save-as
+             easysession-save-mode
+             easysession-load-including-geometry)
+  ;; :ensure t
+  :vc (:url "https://github.com/jamescherti/easysession.el" :branch "main" :rev :newest)
+  ;; :preface
+  ;; (defun +easysession-load-ask ()
+  ;;   (interactive)
+  ;;   (when (y-or-n-p "Restore previous session?")
+  ;;     (easysession-load)))
+  ;; FIXME: hack to restore tab-bar
+  ;; (defun +easysession-restore-tab-bar ()
+  ;;   (when (cdr (funcall tab-bar-tabs-function))
+  ;;     (let ((tab-bar-show t))
+  ;;       (tab-bar-mode +1))))
+  :custom
+  (easysession-mode-line-misc-info-format '(" {" easysession-mode-line-session-name "} "))
+  (easysession-mode-line-misc-info t)   ; Display the session in the modeline
+  (easysession-save-interval (* 10 60)) ; Save every 10 minutes
+  (easysession-directory (expand-file-name "easysession" poly-local-dir))
+  (easysession-frameset-restore-geometry nil)
+  :init
+  ;; (setq easysession-save-interval (* 10 60))
+  ;; (add-hook 'emacs-startup-hook #'+easysession-load-ask 102)
+  ;; (add-hook 'emacs-startup-hook #'easysession-save-mode 102)
+
+  ;; The depth 102 and 103 have been added to to `add-hook' to ensure that the
+  ;; session is loaded after all other packages. (Using 103/102 is particularly
+  ;; useful for those using minimal-emacs.d, where some optimizations restore
+  ;; `file-name-handler-alist` at depth 101 during `emacs-startup-hook`.)
+  ;; (add-hook 'emacs-startup-hook #'easysession-load-including-geometry 102)
+  (add-hook 'emacs-startup-hook #'easysession-load 102)
+  (add-hook 'emacs-startup-hook #'easysession-save-mode 103)
+  ;; :hook
+  ;; (easysession-after-load-hook . +easysession-restore-tab-bar)
+  ;; :bind (("C-c l" . easysession-switch-to)
+  ;; 	 ("C-c s" . easysession-save-as))
+  ;; :config
+  ;; ;; Only persist and restore visible buffers
+  ;;   ;; https://github.com/jamescherti/easysession.el?tab=readme-ov-file#how-to-only-persist-and-restore-visible-buffers
+  ;;   (defun my-easysession-visible-buffer-list ()
+  ;;     "Return a list of all visible buffers in the current session.
+  ;; This includes buffers visible in windows or tab-bar tabs."
+  ;;     (let ((visible-buffers '()))
+  ;;       (dolist (buffer (buffer-list))
+  ;;         (when (or
+  ;;                ;; Windows
+  ;;                (get-buffer-window buffer 'visible)
+  ;;                ;; Tab-bar windows
+  ;;                (and (bound-and-true-p tab-bar-mode)
+  ;;                     (fboundp 'tab-bar-get-buffer-tab)
+  ;;                     (tab-bar-get-buffer-tab buffer t nil)))
+  ;;           (push buffer visible-buffers)))
+  ;;       visible-buffers))
+  ;; (setq easysession-buffer-list-function #'my-easysession-visible-buffer-list)
+
+  ;; (when tab-bar-mode
+  ;;   (advice-add 'easysession-switch-to :after
+  ;;               (lambda (&optional session-name)
+  ;;                 (tab-bar--update-tab-bar-lines))))
+  )
+
+#+end_src
+
 
 * embark
 
@@ -5465,8 +5552,10 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
   (interactive "P")
   (let* ((file-directory (expand-file-name default-directory))
 	 (project-root-directory
-	  (if (fboundp 'project-root)
-	      (project-root (project-current t)) file-directory))
+	  (or ;; (fboundp 'project-root)
+	   ;; (project-root (project-current t))
+	   (poly/project-root)
+	   file-directory))
 	 (code-path (expand-file-name "code" "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"))
 	 (file-path (if buffer-file-name buffer-file-name file-directory))
 	 (xpath (if arg file-path project-root-directory))
@@ -5475,7 +5564,6 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
 	 (shell-cmd-str)
 	 (default-directory project-root-directory))
     ;; (message "path is %s" xpath)
-    ;; (message "project-root is: %s" (file-name-directory project-root-directory))
     (cond
      ((string-equal system-type "darwin")
       ;; VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
@@ -5486,9 +5574,7 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
 				      (format " -g %s:%d:%d "
 					      (shell-quote-argument buffer-file-name)
 					      line
-					      (1+ character)
-					      ;; (shell-quote-argument project-root-directory)
-					      ) "")))
+					      (1+ character)) "")))
       ;; (message shell-cmd-str)
       (shell-command shell-cmd-str))
      ((string-equal system-type "windows-nt")
@@ -5551,10 +5637,11 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
 
 *** pair
 
+paired input
+
 https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7/.emacs.d/inits/programming.el#L68
 
 #+begin_src emacs-lisp
-;; paired input
 (defvar poly/insert-bracket-pair-inhibit-modes-list
   '(scheme-mode
     ;; lisp-mode
@@ -5600,6 +5687,9 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 ;; set pair key map global
 (set-pair-key-map global-map)
+(with-eval-after-load 'protobuf-mode
+  (set-pair-key-map protobuf-mode-map))
+
 ;; (with-eval-after-load 'go-ts-mode
 ;;   (set-pair-key-map go-ts-mode-map))
 
