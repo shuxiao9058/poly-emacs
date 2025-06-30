@@ -82,6 +82,11 @@ Configuration for look and feels, make UI looks better.
 (when (and (fboundp 'menu-bar-mode) (not (eq menu-bar-mode -1)))
   (menu-bar-mode -1))
 
+;; (use-package menu-bar
+;;   :ensure nil
+;;   :config
+;;   (menu-bar-mode +1))
+
 (when (and (fboundp 'tool-bar-mode) (not (eq tool-bar-mode -1)))
   (tool-bar-mode -1))
 ;; (when (and (fboundp 'scroll-bar-mode) (not (eq scroll-bar-mode -1)))
@@ -1017,6 +1022,15 @@ lines are selected, or the NxM dimensions of a block selection."
   :after (treemacs persp-mode)
   :commands treemacs-set-scope-type
   :init (treemacs-set-scope-type 'Perspectives))
+
+(add-hook 'after-make-frame-functions
+          (lambda (frame)
+            (run-with-timer
+             1 nil
+             (lambda ()
+               (with-selected-frame frame
+                 (save-selected-window
+                   (treemacs-select-window)))))))
 #+end_src
 
 * icon

@@ -4,6 +4,15 @@
   ;;; -*- lexical-binding: t -*-
 #+end_src
 
+* Shortcut
+
+| shortcut | note                                                                           |
+|----------+--------------------------------------------------------------------------------|
+| M-c      | puts the first letter of the word into upper case and the rest into lower case |
+| M-u      | converts to all capitals to upper case                                         |
+
+* Whick-key
+
 #+begin_src emacs-lisp
 (use-package which-key
     :ensure nil

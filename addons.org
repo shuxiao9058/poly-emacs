@@ -1157,17 +1157,193 @@ fib(5)")
 
 **** aider
 
+***** aidermacs
+
 #+begin_src emacs-lisp :tangle no
 (use-package aidermacs
   :vc (:url "https://github.com/MatthewZMD/aidermacs" :branch "main" :rev :newest)
-  :bind (("C-c a a m" . aidermacs-transient-menu)) ;; FIXME
+  ;; :bind (("C-c a a m" . aidermacs-transient-menu)) ;; FIXME
   :custom
   (aidermacs-watch-files t)
   (aidermacs-show-diff-after-change t)
   (aidermacs-use-architect-mode t)
+  (aidermacs-default-chat-mode 'architect)
+  (aidermacs-default-model "gemini/gemini-2.0-flash")
   (aidermacs-auto-commits nil)
-  :config
   (aidermacs-setup-minor-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package aider
+    :vc (:url "https://github.com/tninja/aider.el" :branch "main" :rev :newest)
+  :config
+  ;; For latest claude sonnet model
+  (setq aider-args '("--model" "gemini/gemini-2.0-flash" "--no-auto-accept-architect" "--no-auto-commits")) ;; add --no-auto-commits if you don't want it
+  ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
+  ;; Or chatgpt model
+  ;; (setq aider-args '("--model" "o4-mini"))
+  ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
+  ;; Or use your personal config file
+  ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
+  ;; ;;
+  ;; Optional: Set a key binding for the transient menu
+  (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
+  ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
+  (aider-magit-setup-transients)) ;; add aider magit function to magit menu
+#+end_src
+
+#+begin_src emacs-lisp
+;; (use-package gptel
+;;   :defer t
+;;   :hook ((gptel-mode . (lambda () (visual-line-mode 1)))
+;; 	 (gptel-mode . (lambda () (auto-fill-mode 0))))
+;;   (setq gptel-backend (gptel-make-gemini "Gemini"
+;; 					 :key (auth-source-pick-first-password
+;; 					       :host "generativelanguage.googleapis.com")
+;; 					 :stream t))
+;;   ;; :config
+;;   ;; (setq gptel-backend (gptel-make-ollama "Ollama"
+;;   ;;                       :host "localhost:11434"
+;;   ;;                       :stream t
+;;   ;;                       :models '("deepseek-r1"))
+;;   ;;       gptel-model "deepseek-r1"
+;;   ;;       gptel-api-key (auth-source-pick-first-password
+;;   ;;                      :host "generativelanguage.googleapis.com"))
+;;   )
+
+(use-package gptel
+  :ensure t
+  :bind
+  ("C-c g s" . gptel-send)
+  ;; ("C-c g e" . gptel-check-cost)
+  ("C-c g r" . gptel-rewrite)
+  ("C-c g m" . gptel-menu)
+  ("C-c g a a" . gptel-add)
+  ("C-c g a f" . gptel-add-file)
+  ("C-c g c" . gptel)
+  ("C-c g g" . gptel-display-keybindings) ;; Updated keybinding to display keybindings
+  :config
+  (let* (;; (anthropic-key (auth-source-pick-first-password
+         ;;                 :host "api.anthropic.com"))
+         (gemini-key (auth-source-pick-first-password
+                      :host "generativelanguage.googleapis.com")))
+    ;; (gptel-make-anthropic "claude" :stream t :key anthropic-key)
+    (gptel-make-gemini "Gemini" :stream t :key gemini-key))
+  (setq gptel-model 'gemini-2.5-flash
+	gptel-backend (gptel-make-gemini "Gemini"
+                        :key (auth-source-pick-first-password
+			      ;; 					       :host "generativelanguage.googleapis.com");; (lambda () (getenv "GPTEL_GEMINI_KEY"))
+                              :stream nil)))
+  ;; (setq
+  ;;  gptel-model 'llama3.2:latest
+  ;;  gptel-backend (gptel-make-ollama "Ollama"
+  ;;                  :host "localhost:11434"
+  ;;                  :stream t
+  ;;                  :models '(llama3.2:latest)))
+  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response))
+
+;; Get Anthropic API key from ~/.authinfo
+(defun gptel-get-anthropic-api-key ()
+  "Get Anthropic API key from auth-source."
+  (require 'auth-source)
+  (let ((auth-info (car (auth-source-search :host "api.anthropic.com"
+                                            :require '(:secret)))))
+    (when auth-info
+      (funcall (plist-get auth-info :secret)))))
+
+(defun gptel-calculate-cost (prompt model)
+  "Calculate cost of PROMPT string using tokencost Python package for MODEL."
+  (let* ((temp-file (make-temp-file "gptel-prompt-")))
+    (with-temp-file temp-file
+      (insert prompt))
+    (let* ((python-command
+            (if (or (string-match "claude" model)
+                    (string-match "anthropic" model))
+                (let ((api-key (gptel-get-anthropic-api-key)))
+                  (format "ANTHROPIC_API_KEY='%s' python3 -c \"
+  import tokencost;\
+  content = open('%s','r').read();\
+  messages = [{'role':'user','content':content}];\
+  cost = tokencost.calculate_prompt_cost(messages, '%s');\
+  print(cost)\" 2>&1"
+                          api-key temp-file model))
+              (format "python3 -c \"
+  import tokencost;\
+  content = open('%s','r').read();\
+  cost = tokencost.calculate_prompt_cost(content, '%s');\
+  print(cost)\" 2>&1"
+                      temp-file model)))
+           (output (shell-command-to-string python-command)))
+      (delete-file temp-file)
+      (message "Debug - Model: %s" model)
+      (message "Debug - Output: '%s'" output)
+      (let* ((lines (split-string output "[\n\r]+" t))
+             (last-line (car (last lines)))
+             (match (and last-line
+                         (string-match "\([0-9]+\(?:\.[0-9]+\)\)" last-line)
+                         (match-string 1 last-line))))
+        (if match
+            (string-to-number match)
+          (error "Failed to parse cost from output: %s" output))))))
+
+;; TODO: need a way to get the prompt, otherwise this doesn't estimate well.
+(defun gptel-send-with-confirmation (start end &optional arg)
+  "Send query to GPT with cost estimation and user confirmation."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end) current-prefix-arg)
+     (list (point-min) (point-max) current-prefix-arg)))
+  (let* ((raw-text       (buffer-substring-no-properties start end))
+         (model          (or gptel-model "claude-3-5-sonnet-20240620"))
+         (prompt         (gptel-build-full-prompt-from-text raw-text))
+         (estimated-cost (gptel-calculate-cost prompt model))
+         (cost-limit     0.03))         ; USD limit
+    (if (> estimated-cost cost-limit)
+        (when (yes-or-no-p
+               (format "Estimated cost: $%.6f (limit $%.2f). Send anyway? "
+                       estimated-cost cost-limit))
+          (gptel-send start end arg))
+      (gptel-send start end arg)
+      (message "Query sent. Estimated cost: $%.6f" estimated-cost))))
+
+(defun gptel-check-cost (start end)
+  "Estimate the cost of exactly the prompt gptel would send (with context)."
+  (interactive "r")
+  (let* ((raw-text (buffer-substring-no-properties start end))
+         (prompt   (gptel-build-full-prompt-from-text raw-text))
+         (model    (or gptel-model "claude-3-5-sonnet-20240620"))
+         (cost     (gptel-calculate-cost prompt model)))
+    (message "Estimated cost for this prompt: $%.6f" cost)))
+
+(defun gptel-check-cost (start end)
+  "Estimate the cost of exactly the prompt gptel would send (with all context)."
+  (interactive "r")
+  (let* ((text        (buffer-substring-no-properties start end))
+         ;; temporarily yank it into a temp buffer so preview uses exactly that region
+         (prompt      (with-temp-buffer
+                        (insert text)
+                        (gptel-preview-prompt)    ; dumps the full prompt into *gptel-prompt*
+                        (with-current-buffer "*gptel-prompt*"
+                          (buffer-string))))
+         (model       (or gptel-model "claude-3-5-sonnet-20240620"))
+         (cost        (gptel-calculate-cost prompt model)))
+    (message "Estimated cost for this prompt: $%.6f" cost)))
+
+
+(defun gptel-display-keybindings ()
+  "Display gptel keybindings in an interactive transient menu."
+  (interactive)
+  (transient-define-prefix gptel-transient-menu ()
+    ["GPTel Keybindings"
+     ("s" "Send (C-c g s)" gptel-send)
+     ;; ("e" "Estimate cost (C-c g e)" gptel-check-cost)
+     ("r" "Rewrite (C-c g r)" gptel-rewrite)
+     ("m" "Menu (C-c g m)" gptel-menu)
+     ("a" "Add (C-c g a a)" gptel-add)
+     ("f" "Add File (C-c g a f)" gptel-add-file)
+     ("g" "Gptel (C-c g c)" gptel)])
+  (transient-setup 'gptel-transient-menu))
 #+end_src
 
 
