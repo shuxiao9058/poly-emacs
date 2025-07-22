@@ -386,23 +386,113 @@ Accepts the same arguments as `message'."
 (add-to-list 'load-path
 	     (expand-file-name "themes" user-emacs-directory))
 
-(defun poly/reload-theme()
-  "Reload theme."
-  (interactive)
-  (require 'poly-dark-theme)
-  (load-theme 'poly-dark t)
+(defun poly/catppuccin-latte()
+  ;; (catppuccin-set-color 'base "#f5f3f0" 'latte)
+  ;; (catppuccin-set-color 'text "#18181A" 'latte)
 
-  ;; (require 'vitesse-theme)
-  ;; (load-theme 'vitesse t)
-  ;; (load-theme 'phoebe t)
-  ;; (require 'catppuccin-theme)
-  ;; (setq catppuccin-flavor 'latte)
-  ;; (setq catppuccin-flavor 'macchiato)
-  ;; (setq catppuccin-flavor 'frappe)
-  ;; (load-theme 'catppuccin t)
+  ;; (catppuccin-set-color 'surface2 "#38393d" 'latte)
+  ;; (catppuccin-set-color 'surface1 "#9699a3" 'latte)
+  ;; (catppuccin-set-color 'overlay0 "#acb0be" 'latte)
+
+  ;; (catppuccin-set-color 'lavender "#5b6cca" 'latte)
+
+  (catppuccin-set-color 'base "#FBF7F0" 'latte)
+  (catppuccin-set-color 'mantle "#EFE9DD" 'latte)
+  (catppuccin-set-color 'crust "#C9B9B0" 'latte)
   )
 
-(poly/reload-theme)
+
+
+(defun nox/diff-hl-update-colors ()
+  "Change diff-hl colors."
+  (interactive)
+
+  (set-face-attribute 'diff-hl-change nil
+                      :foreground (catppuccin-get-color 'yellow)
+                      :background (catppuccin-get-color 'base))
+  (set-face-attribute 'diff-hl-delete nil
+                      :foreground (catppuccin-get-color 'red)
+                      :background (catppuccin-get-color 'base))
+  (set-face-attribute 'diff-hl-insert nil
+                      :foreground (catppuccin-get-color 'green)
+                      :background (catppuccin-get-color 'base)))
+
+(defun nox/change-colors ()
+  "Change colors throughout."
+  (interactive)
+
+  (set-face-attribute 'highlight nil :foreground 'unspecified)
+  (set-face-attribute 'mode-line nil :background 'unspecified)
+  (set-face-attribute 'calendar-today nil
+                      :underline 'unspecified
+                      :foreground (catppuccin-get-color 'green))
+  (set-face-attribute 'holiday nil
+                      :background 'unspecified
+                      :foreground (catppuccin-get-color 'red))
+  (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
+  (nox/diff-hl-update-colors))
+
+;; (defun poly/reload-theme()
+;;   "Reload theme."
+;;   (interactive)
+;;   ;; (require 'poly-dark-theme)
+;;   ;; (load-theme 'poly-dark t)
+
+;;   ;; (require 'vitesse-theme)
+;;   ;; (load-theme 'vitesse t)
+;;   ;; (load-theme 'phoebe t)
+;;   (require 'catppuccin-theme)
+;;   (setq catppuccin-flavor 'latte)
+;;   (poly/catppuccin-latte)
+
+;;   ;; (setq catppuccin-flavor 'macchiato)
+;;   ;; (setq catppuccin-flavor 'frappe)
+;;   ;; (load-theme 'catppuccin t)
+;;   (catppuccin-reload)
+;;   )
+
+;; (poly/reload-theme)
+
+
+
+(use-package catppuccin-theme
+  :custom
+  (catppuccin-highlight-matches t)
+  (catppuccin-italic-comments t)
+  (catppuccin-italic-variables t)
+  :config
+  (setq catppuccin-flavor 'latte)
+  (catppuccin-set-color 'base "#000000" 'mocha)
+  (catppuccin-set-color 'mantle "#090909" 'mocha)
+  (catppuccin-set-color 'crust "#181825" 'mocha)
+  (catppuccin-set-color 'base "#FBF7F0" 'latte)
+  (catppuccin-set-color 'mantle "#EFE9DD" 'latte)
+  (catppuccin-set-color 'crust "#C9B9B0" 'latte)
+  (load-theme 'catppuccin t)
+  (nox/change-colors))
+
+;; (use-package catppuccin-theme
+;;   :vc (:url "https://h.jiya.net:9933/shuxiao9058/catppuccin-theme.git" :branch "main" :rev :newest)
+;;   :disabled
+;;   :config
+;;   (setq catppuccin-flavor 'macchiato) ;; or 'latte, 'macchiato, or 'mocha
+;;   (catppuccin-reload))
+
+;; adding padding to ui elements to make doing tasks feel more comfortable
+(use-package spacious-padding
+  :after catppuccin-theme
+  :config
+  (setq spacious-padding-widths
+        '( :internal-border-width 5
+           :header-line-width 0
+           :mode-line-width 0
+           :tab-width 4
+           :right-divider-width 0
+           :scroll-bar-width 8
+           :fringe-width 8))
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'spacious-padding-mode)
+    (spacious-padding-mode)))
 #+end_src
 
 ** gc timer
