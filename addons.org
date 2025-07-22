@@ -416,6 +416,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   (vertico-resize t)
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
   (vertico-cycle t)
+  (vertico-sort-function 'vertico-sort-history-length-alpha)
   :bind
   (("C-z" . vertico-quick-jump)
    (:map vertico-map
@@ -1187,7 +1188,7 @@ fib(5)")
   ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
   ;; ;;
   ;; Optional: Set a key binding for the transient menu
-  (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
+  ;; (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
   ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
   (aider-magit-setup-transients)) ;; add aider magit function to magit menu
 #+end_src
@@ -5647,7 +5648,7 @@ org-download-paste for clipboard images
 
 * Writing
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package reader
   :vc (:url "https://codeberg.org/divyaranjan/emacs-reader"
 	    :branch "master" :rev :newest
@@ -5866,8 +5867,8 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 (with-eval-after-load 'protobuf-mode
   (set-pair-key-map protobuf-mode-map))
 
-;; (with-eval-after-load 'go-ts-mode
-;;   (set-pair-key-map go-ts-mode-map))
+(with-eval-after-load 'go-ts-mode
+  (set-pair-key-map go-ts-mode-map))
 
 ;; (with-eval-after-load 'python-ts-mode
 ;;   (set-pair-key-map python-ts-mode-map))
@@ -5914,7 +5915,7 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 
 *** restclient
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package restclient
   :mode ("\\.http\\'" . restclient-mode)
   :config

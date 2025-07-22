@@ -468,6 +468,7 @@ Configuration for programming and languages support.
   ;;  '(save idle-change mode-enabled))
   (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
   (flycheck-checker-error-threshold nil)
+  (flycheck-relevant-error-other-file-show nil)
   :config
   (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode)
   (flycheck-add-mode 'typescript-tslint 'typescript-ts-mode)
@@ -484,7 +485,7 @@ Configuration for programming and languages support.
 (use-package flycheck-eglot
   :ensure t
   :after (flycheck eglot)
-  :custom (flycheck-eglot-exclusive nil)
+  :custom (flycheck-eglot-exclusive t)
   :config
   (global-flycheck-eglot-mode 1))
 
@@ -492,6 +493,14 @@ Configuration for programming and languages support.
   :ensure t
   :vc (:url "https://github.com/flycheck/flycheck-color-mode-line" :branch "master" :rev :newest)
   :hook (flycheck-mode-hook . flycheck-color-mode-line-mode))
+
+(use-package flyover
+  :after flycheck
+  :hook (flycheck-mode . flyover-mode)
+  :custom
+  (flyover-show-at-eol t)
+  (flyover-hide-when-cursor-is-on-same-line t)
+  (flyover-show-virtual-line t))
 
 ;; (use-package flycheck-pos-tip
 ;;   :hook
@@ -960,7 +969,7 @@ Examples:
 			      :SA1004 t ;; Suspiciously small untyped constant in time.Sleep
 			      :SA1005 t ;; Invalid first argument to exec.Command
 			      :SA1007 t ;; Invalid URL in net/url.Parse
-			      :SA1008 t ;; Non-canonical key in http.Header map
+			      :SA1008 :json-false ;; Non-canonical key in http.Header map
 			      :SA1010 t ;; (*regexp.Regexp).FindAll called with n == 0, which will always return zero results
 			      :SA1011 t ;; Various methods in the 'strings' package expect valid UTF-8, but invalid input is provided
 			      :SA1012 t ;; A nil context.Context is being passed to a function, consider using context.TODO instead
@@ -2487,12 +2496,7 @@ eglot does complete argument through yasnippet.
   ;; so that that notification reports the actual contents that will be saved.
   )
 
-(use-package go-ts-mode
-  :ensure nil
-  :mode (("\\.go$"  . go-ts-mode)
-	 ("^go.mod$" . go-ts-mode))
-  :config
-  (defun go-mod-tidy()
+(defun go-mod-tidy()
     "Run go mod tidy"
     (interactive)
     (let ((default-directory  (if (fboundp 'project-root)
@@ -2524,6 +2528,11 @@ eglot does complete argument through yasnippet.
       ;; 	)
       ))
 
+(use-package go-ts-mode
+  :ensure t
+  :mode (("\\.go$"  . go-ts-mode)
+	 ("^go.mod$" . go-ts-mode))
+  :config
   (defun poly/go-set-compile-command()
     "Detect compile command."
     (let ((default-directory  (if (fboundp 'project-root)
