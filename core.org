@@ -406,7 +406,6 @@ Accepts the same arguments as `message'."
 (defun nox/diff-hl-update-colors ()
   "Change diff-hl colors."
   (interactive)
-
   (set-face-attribute 'diff-hl-change nil
                       :foreground (catppuccin-get-color 'yellow)
                       :background (catppuccin-get-color 'base))
@@ -417,12 +416,30 @@ Accepts the same arguments as `message'."
                       :foreground (catppuccin-get-color 'green)
                       :background (catppuccin-get-color 'base)))
 
+;; (with-eval-after-load 'catppuccin-theme
+;;     ;; Must be used *after* the theme is loaded
+;;     (custom-set-faces
+;;      ;; The default `region` and `highlight` colors in Mocha don't look good against a black background.
+;;      `(region ((t (:background "#313244"))))
+;;      `(highlight ((t (:foreground "#313244"))))))
+
 (defun nox/change-colors ()
   "Change colors throughout."
   (interactive)
-
   (set-face-attribute 'highlight nil :foreground 'unspecified)
   (set-face-attribute 'mode-line nil :background 'unspecified)
+  (set-face-attribute 'meow-keypad-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'red))
+  (set-face-attribute 'meow-insert-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'yellow))
+  (set-face-attribute 'meow-normal-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'green))
+  (set-face-attribute 'meow-motion-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'blue))
+  (set-face-attribute 'meow-beacon-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'purple))
+
+  (set-face-attribute 'meow-keypad-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'red))
+  (set-face-attribute 'meow-insert-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'yellow))
+  (set-face-attribute 'meow-normal-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'green))
+  (set-face-attribute 'meow-motion-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'blue))
+  (set-face-attribute 'meow-beacon-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'purple))
+
   (set-face-attribute 'calendar-today nil
                       :underline 'unspecified
                       :foreground (catppuccin-get-color 'green))
@@ -462,21 +479,14 @@ Accepts the same arguments as `message'."
   (catppuccin-italic-variables t)
   :config
   (setq catppuccin-flavor 'latte)
-  (catppuccin-set-color 'base "#000000" 'mocha)
-  (catppuccin-set-color 'mantle "#090909" 'mocha)
-  (catppuccin-set-color 'crust "#181825" 'mocha)
+  ;; (catppuccin-set-color 'base "#000000" 'mocha)
+  ;; (catppuccin-set-color 'mantle "#090909" 'mocha)
+  ;; (catppuccin-set-color 'crust "#181825" 'mocha)
   (catppuccin-set-color 'base "#FBF7F0" 'latte)
   (catppuccin-set-color 'mantle "#EFE9DD" 'latte)
   (catppuccin-set-color 'crust "#C9B9B0" 'latte)
   (load-theme 'catppuccin t)
   (nox/change-colors))
-
-;; (use-package catppuccin-theme
-;;   :vc (:url "https://h.jiya.net:9933/shuxiao9058/catppuccin-theme.git" :branch "main" :rev :newest)
-;;   :disabled
-;;   :config
-;;   (setq catppuccin-flavor 'macchiato) ;; or 'latte, 'macchiato, or 'mocha
-;;   (catppuccin-reload))
 
 ;; adding padding to ui elements to make doing tasks feel more comfortable
 (use-package spacious-padding
