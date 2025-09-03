@@ -127,7 +127,7 @@ Configuration for programming and languages support.
 		   (go-mode . gofumpt)
 		   (lua-mode . cpp-lua-format)
 		   (lua-ts-mode . cpp-lua-format)
-		   (objc-mode . clang-format-objc)
+		   ;; (objc-mode . clang-format-objc)
 		   (java-ts-mode . google-java-format)
 		   (java-mode . google-java-format)
 		   (sql-mode . sql-format)))
@@ -150,9 +150,9 @@ Configuration for programming and languages support.
 	  ;; python-ts-mode
 	  java-mode
 	  java-ts-mode
-	  ;; cc-mode
-	  ;; c-mode
-	  ;; c++-mode
+	  cc-mode
+	  c-mode
+	  c++-mode
 	  ;; clang-mode
 	  ;; elisp-mode
 	  ;; emacs-lisp-mode
@@ -166,7 +166,7 @@ Configuration for programming and languages support.
 	  ;; clojure-ts-mode
 	  ;; web-mode
 	  ;; web-mode-prog-mode
-	  ;; objc-mode
+	  objc-mode
 	  swift-mode
 	  ;;  typescript-mode
 	  ;;  web-mode
@@ -269,6 +269,20 @@ Configuration for programming and languages support.
 				;; ("Objective-C" . ".mm")
 				("Protocol Buffer" . ".proto")))))))))
 
+  (define-format-all-formatter uncrustify
+    (:executable "uncrustify")
+    (:install (macos ""))
+    (:languages ;; "C" "C++" "Java"
+		"Objective-C")
+    (:features)
+    (:format (format-all--buffer-easy executable "-c"
+				      (expand-file-name (if (derived-mode-p 'objc-mode) "objc.cfg" "defaults.cfg") "~/.config/uncrustify")
+				      ;; "-f" (buffer-file-name)
+				      (if (derived-mode-p 'objc-mode)
+					  (list "-l" "OC+")
+					"-f" (buffer-file-name)
+					)
+				       )))
 
   (define-format-all-formatter logos-format
     (:executable "/Users/jiya/miniconda3/bin/python")
@@ -438,7 +452,7 @@ Configuration for programming and languages support.
 		  ("Markdown" prettier)
 		  ("C" my-clang-format)
 		  ("C++" my-clang-format)
-		  ("Objective-C" logos-format)
+		  ("Objective-C" uncrustify)
 		  ("Protocol Buffer" my-clang-format)
 		  ;; ("Protocol Buffer" buf-format)
 		  ("SQL" pgformatter)
@@ -496,6 +510,7 @@ Configuration for programming and languages support.
 
 (use-package flyover
   :after flycheck
+  :disabled
   :hook (flycheck-mode . flyover-mode)
   :custom
   (flyover-show-at-eol t)
@@ -654,7 +669,8 @@ If INTERACTIVE, prompt user for details."
 	  c-ts-mode
 	  c++-ts-mode
 	  c-or-c++-ts-mode
-	  objc-mode swift-mode
+	  objc-mode
+	  swift-mode
 	  ;; java-mode
 	  ) . eglot-ensure)
   :after cape
@@ -679,7 +695,7 @@ If INTERACTIVE, prompt user for details."
      ;; :documentHighlightProvider
      ;; :documentFormattingProvider
      ;; :documentRangeFormattingProvider
-     ;; :documentOnTypeFormattingProvider
+     :documentOnTypeFormattingProvider ;; disable indent line format
      :colorProvider
      :foldingRangeProvider
      ;; :codeLensProivder
@@ -772,9 +788,13 @@ Examples:
   (add-to-list 'eglot-server-programs
 	       '(dart-mode . dart-lsp-contact))
 
-  (when (executable-find "ccls")
-    (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode) "ccls"
-					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
+  ;; (when (executable-find "ccls")
+  ;;   (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode
+  ;; 						  ) "ccls"
+  ;; 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
+
+  (when (executable-find "clangd")
+    (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode) "clangd")))
 
   (when (executable-find "pyright-langserver")
     (add-to-list 'eglot-server-programs '((python-ts-mode) "pyright-langserver"
@@ -1204,8 +1224,8 @@ Examples:
   (interactive)
   (save-excursion
     (when-let* ((filename (buffer-file-name))
-	       (directory-name (file-name-directory filename))
-	       (files (magit-changed-files "HEAD")))
+		(directory-name (file-name-directory filename))
+		(files (magit-changed-files "HEAD")))
       (dolist (go-file files)
 	(when (s-suffix? ".go" go-file)
 	  (let* ((full-filename (expand-file-name go-file directory-name))
@@ -2089,6 +2109,7 @@ eglot does complete argument through yasnippet.
          (sh-mode . yas-minor-mode)
          (c-mode . yas-minor-mode)
          (c++-mode . yas-minor-mode)
+	 (objc-mode . yas-minor-mode)
          (go-ts-mode . yas-minor-mode)
          (json-mode . yas-minor-mode)
          (yaml-mode . yas-minor-mode)
@@ -2334,7 +2355,11 @@ eglot does complete argument through yasnippet.
 		js-ts-mode-hook
 		python-ts-mode-hook
 		python-mode-hook
-		c-ts-mode-hook c++-ts-mode-hook c-mode-hook c++-mode-hook
+		;; objc-mode-hook
+		;; c-ts-mode-hook
+		;; c++-ts-mode-hook
+		c-mode-hook
+		c++-mode-hook
 		clojure-mode
 		clojure-ts-mode
 		;; lua-mode-hook
@@ -2416,6 +2441,14 @@ eglot does complete argument through yasnippet.
 (use-package cpp-auto-include
   :vc (:url "https://github.com/emacsorphanage/cpp-auto-include" :branch "master" :rev :newest)
   :commands (cpp-auto-include))
+
+(use-package dummy-h-mode
+  :vc (:url "https://github.com/emacsattic/dummy-h-mode" :branch "master" :rev :newest)
+  :commands dummy-h-mode
+  :mode "\\.h\\'"
+  :custom
+  (dummy-h-mode-default-major-mode 'c-mode)
+  (dummy-h-mode-search-limit 60000))
 #+end_src
 ** Go Language
 #+begin_src emacs-lisp

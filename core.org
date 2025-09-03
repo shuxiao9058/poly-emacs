@@ -117,11 +117,11 @@ Core configuration of poly emacs, global variable declare.
 ;; (when (boundp 'comp-deferred-compilation)
 ;;   (setq comp-deferred-compilation t))
 
-;;; Scrolling
-;; Fix the whole huge-jumps-scrolling-between-windows nastiness.
-(setq scroll-conservatively 4)
-;; Don't hscroll unless needed.
-(setq hscroll-margin 1)
+;; ;;; Scrolling
+;; ;; Fix the whole huge-jumps-scrolling-between-windows nastiness.
+;; (setq scroll-conservatively 4)
+;; ;; Don't hscroll unless needed.
+;; ;; (setq hscroll-margin 1)
 ;; Start scrolling when 2 lines from top/bottom.  Set to 0 on systems where I
 ;; use ansi-term a lot.  Eshell is okay with this.  Disabling by default.
 ;; (setq scroll-margin 2)

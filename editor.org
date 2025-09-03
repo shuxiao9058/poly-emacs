@@ -34,6 +34,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; commands are hidden, since they are not used via M-x. This setting is
   ;; useful beyond Corfu.
   (read-extended-command-predicate #'command-completion-default-include-p)
+  (scroll-preserve-screen-position 'always)
   :init
   (setq trusted-content '("~/workspace"))
   (setq completion-cycle-threshold 3)
@@ -85,6 +86,14 @@ This is consulted on every `require', `load' and various path/io functions.  You
   ;; Enable indentation+completion using the TAB key.
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
+
+(use-package ultra-scroll
+  :vc (:url "https://github.com/jdtsmith/ultra-scroll")
+  :init
+  (setq scroll-conservatively 3 ; or whatever value you prefer, since v0.4
+        scroll-margin 0)        ; important: scroll-margin>0 not yet supported
+  :config
+  (ultra-scroll-mode 1))
 
 ;; Enhances built-in Emacs help with more information: A "better" Emacs *Help* buffer.
 (use-package helpful
@@ -241,7 +250,7 @@ This is consulted on every `require', `load' and various path/io functions.  You
       fast-but-imprecise-scrolling t
       inhibit-compacting-font-caches t
       scroll-step 1
-      scroll-conservatively 10000
+      ;; scroll-conservatively 10000
       auto-window-vscroll nil)
 
 (setq frame-title-format
@@ -1251,18 +1260,21 @@ don't pop windows everywhere!
     :config
     (show-paren-mode +1))
 
-;; (use-package elec-pair
-;;   :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
-;;   :hook
-;;   ((clojure-mode . electric-pair-mode)
-;;    (prog-mode . electric-pair-local-mode)
-;;    (eval-expression-minibuffer-setup . electric-pair-local-mode)
-;;    ;; (smartparens-mode . (lambda ()
-;;    ;;                       (electric-pair-local-mode -1)))
-;;    )
-;;   ;; :config
-;;   ;; (electric-pair-mode +1)
-;;   )
+(use-package elec-pair
+  :ensure nil
+  :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
+  :hook
+  ((clojure-mode . electric-pair-mode)
+   (go-ts-mode . electric-pair-mode)
+   ;; (prog-mode . electric-pair-local-mode)
+   ((c-mode c++-mode objc-mode swift-mode) . electric-pair-mode)
+   (eval-expression-minibuffer-setup . electric-pair-local-mode)
+   ;; (smartparens-mode . (lambda ()
+   ;;                       (electric-pair-local-mode -1)))
+   )
+  ;; :config
+  ;; (electric-pair-mode +1)
+  )
 #+end_src
 
 * colorful-mode
