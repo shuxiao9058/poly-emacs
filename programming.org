@@ -166,7 +166,7 @@ Configuration for programming and languages support.
 	  ;; clojure-ts-mode
 	  ;; web-mode
 	  ;; web-mode-prog-mode
-	  objc-mode
+	  ;; objc-mode
 	  swift-mode
 	  ;;  typescript-mode
 	  ;;  web-mode
@@ -356,7 +356,7 @@ Configuration for programming and languages support.
     (:features)
     (:format (format-all--buffer-easy executable "-")))
 
-  (define-format-all-formatter my-shfmt
+    (define-format-all-formatter my-shfmt
     (:executable "shfmt")
     (:install
      (macos "brew install shfmt")
@@ -382,7 +382,6 @@ Configuration for programming and languages support.
     (:languages "Shell")
     (:features)
     (:format (format-all--buffer-easy executable "-")))
-
 
   (define-format-all-formatter nginxfmt
     (:executable "nginxfmt")
@@ -771,9 +770,11 @@ Examples:
   (+eglot-register '(js-mode js-ts-mode tsx-ts-mode typescript-ts-mode typescript-mode) '("typescript-language-server" "--stdio"))
 
   (+eglot-register '(c-ts-mode c++-ts-mode c-mode c++-mode) '("/opt/local/bin/clangd" "-j=12" "--log=error"
+							      "--compile-commands-dir=build"
 							      ;; "--malloc-trim"
 							      "--background-index"
 							      "--clang-tidy"
+							      "--clang-tidy-checks=performance-*,bugprone-*"
 							      "--completion-style=detailed"
 							      "--pch-storage=memory"
 							      "--header-insertion=never"
@@ -789,12 +790,10 @@ Examples:
 	       '(dart-mode . dart-lsp-contact))
 
   ;; (when (executable-find "ccls")
-  ;;   (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode
-  ;; 						  ) "ccls"
-  ;; 					  "-init={\"compilationDatabaseDirectory\":\"build\"}")))
-
-  (when (executable-find "clangd")
-    (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode) "clangd")))
+  ;;   (add-to-list 'eglot-server-programs '((c-mode c++-mode objc-mode) "ccls"
+  ;; 					  "-init={\"compilationDatabaseDirectory\":\"build\",\"clang\":{\"extraArgs\":[\"-isysroot\",\"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk\"]}}"
+  ;; 						    ;; "-init={\"compilationDatabaseDirectory\":\"build\",\"clang\":{\"extraArgs\":[\"-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1\",\"-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include\",\"-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include\",\"-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\",\"-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks\"]}}"
+  ;; 						    )))
 
   (when (executable-find "pyright-langserver")
     (add-to-list 'eglot-server-programs '((python-ts-mode) "pyright-langserver"
@@ -2338,6 +2337,10 @@ eglot does complete argument through yasnippet.
 
 (defun poly/lsp-format-buffer()
   (interactive)
+  (when-let* ((file-name (buffer-file-name))
+	      (file-ext (file-name-extension file-name)))
+
+    (unless (s-equals-p "xm" file-ext)
   (if (bound-and-true-p lsp-mode)
       (progn
 	;; (call-interactively #'lsp-organize-imports)
@@ -2345,7 +2348,7 @@ eglot does complete argument through yasnippet.
     (when (bound-and-true-p eglot--managed-mode)
       (call-interactively #'eglot-format-buffer)
       ;; (call-interactively #'eglot-code-action-organize-imports)
-      )))
+      )))))
 
 (defun lsp-format-buffer-on-save ()
   (add-hook 'before-save-hook
@@ -2355,9 +2358,9 @@ eglot does complete argument through yasnippet.
 		js-ts-mode-hook
 		python-ts-mode-hook
 		python-mode-hook
-		;; objc-mode-hook
-		;; c-ts-mode-hook
-		;; c++-ts-mode-hook
+		objc-mode-hook
+		c-ts-mode-hook
+		c++-ts-mode-hook
 		c-mode-hook
 		c++-mode-hook
 		clojure-mode
@@ -2412,6 +2415,13 @@ eglot does complete argument through yasnippet.
   ;;           "--pch-storage=memory"
   ;;           "--suggest-missing-includes")))
   )
+
+;; ;; Disable electric indent with objc-mode in case xm file edit error
+;; (add-hook 'objc-mode-hook (lambda ()
+;; 			    (when (featurep 'electric-indent-mode)
+;; 			      (electric-indent-mode -1))
+;; 			    (setq-local auto-fill-mode-hook nil)
+;; 			    (setq-local indent-line-function nil)))
 
 (use-package modern-cpp-font-lock
   :ensure t

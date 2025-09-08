@@ -5867,15 +5867,6 @@ https://github.com/kzinmr/dotfiles/blob/db2c1a2578cec94a134d9f9483c315945a52c3f7
 (with-eval-after-load 'protobuf-mode
   (set-pair-key-map protobuf-mode-map))
 
-;; (with-eval-after-load 'objc-mode
-;;   (set-pair-key-map objc-mode-map))
-
-;; (with-eval-after-load 'c-ts-mode
-;;   (set-pair-key-map c-ts-mode-map))
-
-;; (with-eval-after-load 'c++-ts-mode
-;;   (set-pair-key-map c++-ts-mode-map))
-
 ;; (with-eval-after-load 'go-ts-mode
 ;;   (set-pair-key-map go-ts-mode-map))
 
