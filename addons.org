@@ -2443,8 +2443,7 @@ Enable diff-hl in based on major modes.
 
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
   (add-hook 'prog-mode-hook 'diff-hl-mode)
-  (add-hook 'conf-mode-hook 'diff-hl-mode)
-  )
+  (add-hook 'conf-mode-hook 'diff-hl-mode))
 #+end_src
 
 pulse
@@ -2571,8 +2570,8 @@ Magit with cz
   (default-input-method "rime")
   ;; (rime-cursor "˰")
   ;; (rime-librime-root (concat user-emacs-directory "librime/dist"))
-  (rime-librime-root "/opt/librime")
-  (rime-emacs-module-header-root "/opt/local/include/emacs")
+  (rime-librime-root "/opt/homebrew/")
+  (rime-emacs-module-header-root "/opt/homebrew/include/")
   (rime-show-preedit t)
   (rime-inline-ascii-holder ?a)
   (rime-cursor "|")
@@ -3118,7 +3117,7 @@ Easily persist and restore your Emacs editing sessions.
   (vterm-kill-buffer-on-exit t)
   (vterm-ignore-blink-cursor nil)
   (vterm-always-compile-module t)
-  (vterm-shell "/opt/local/bin/zsh")
+  (vterm-shell "/opt/homebrew/bin/zsh")
   (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
   :init
   (defun poly/vterm-compile-auto-exit ()
@@ -3311,8 +3310,8 @@ Easily persist and restore your Emacs editing sessions.
   (eat-kill-buffer-on-exit t)
   (eat-enable-shell-prompt-annotation nil)
   (eat-term-terminfo-directory (expand-file-name ".terminfo" "~"))
-  (explicit-shell-file-name "/opt/local/bin/zsh")
-  ;; (eat-shell '("/opt/local/bin/zsh" "-l"))
+  (explicit-shell-file-name "/opt/homebrew/bin/zsh")
+  ;; (eat-shell '("/opt/homebrew/bin/zsh" "-l"))
   ;; (eat-tramp-shells '("bash"))
   ;; (eat-ssh-shells '("bash"))
   ;; (eat-term-name "xterm-256color") ;; fix top command: Error opening terminal: eat-truecolor. edit issue
@@ -3928,12 +3927,13 @@ MSG is the email(only mu4e)."
 (use-package mu4e
   :vc nil
   ;; :ensure nil
-  :load-path "/Users/jiya/workspace/mu4e/build/mu4e";; (expand-file-name "workspace/mu4e/build/mu4e" "~")
+  ;; :load-path "/Users/jiya/workspace/mu4e/build/mu4e";; (expand-file-name "workspace/mu4e/build/mu4e" "~")
+  :load-path "/opt/homebrew/opt/mu/share/emacs/site-lisp/mu/mu4e"
   ;; :vc (:url "https://github.com/djcb/mu" :lisp-dir "mu4e/" :main-file "mu4e/mu4e.el")
   ;; :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/"  :branch "release/1.6" :rev :newest)
   :custom
   ;; (mu4e-mu-binary "/opt/local/bin/mu")
-  (mu4e-mu-binary "/Users/jiya/workspace/mu4e/build/mu/mu")
+  (mu4e-mu-binary "/opt/homebrew/opt/mu/bin/mu")
   (mu4e-update-interval (* 60 2))
   (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
   (mu4e-view-show-addresses t)

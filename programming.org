@@ -670,6 +670,7 @@ If INTERACTIVE, prompt user for details."
 	  c-or-c++-ts-mode
 	  objc-mode
 	  swift-mode
+	  asm-mode
 	  ;; java-mode
 	  ) . eglot-ensure)
   :after cape
@@ -805,6 +806,9 @@ Examples:
 
   (add-to-list 'eglot-server-programs
 	       `((swift-mode) ,(string-trim (shell-command-to-string "xcrun --find sourcekit-lsp"))))
+
+  (add-to-list 'eglot-server-programs
+	       '(asm-mode . ("asm-lsp")))
 
   (add-hook 'eglot-managed-mode-hook
 	    (lambda()
@@ -1899,7 +1903,6 @@ use-package will load java-lsp for us simply by calling this function."
           tab-width 2
           indent-tabs-mode t
           imenu-list-auto-resize t)
-    (setq electric-indent-inhibit nil)  ; Auto-indent code after e.g. {}
     (setq company-lsp-cache-candidates nil)  ; Company cache should be disabled for lsp-java
     (lsp-deferred))
   ;; (add-hook 'java-ts-mode-hook 'lsp)

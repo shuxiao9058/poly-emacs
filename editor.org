@@ -512,13 +512,13 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 	(project-find-file)
       (call-interactively #'find-file))))
 
-(use-package consult-project-extra
-  :defer t
-  :vc (consult-project-extra :url "https://github.com/Qkessler/consult-project-extra" :branch "main" :rev :newest)
-  :commands (consult-project-extra-find consult-project-extra-find-other-window)
-  :bind
-  ([remap project-find-file] . consult-project-extra-find)
-  ("C-x p 4 f" . consult-project-extra-find-other-window))
+;; (use-package consult-project-extra
+;;   :defer t
+;;   :vc (consult-project-extra :url "https://github.com/Qkessler/consult-project-extra" :branch "main" :rev :newest)
+;;   :commands (consult-project-extra-find consult-project-extra-find-other-window)
+;;   :bind
+;;   ([remap project-find-file] . consult-project-extra-find)
+;;   ("C-x p 4 f" . consult-project-extra-find-other-window))
 
 (use-package ag
   :commands (ag ag-regexp ag-project)
@@ -788,6 +788,7 @@ To find files/buffers and apply commands on project, use builtin package ~projec
   (rg-show-header t)
   :config
   (rg-enable-default-bindings)
+  :bind (("C-c s" . rg-menu))
   ;; (rg-define-search bl/rg-regexp-project
   ;;   :query ask
   ;;   :format regexp
@@ -1260,8 +1261,27 @@ don't pop windows everywhere!
     :config
     (show-paren-mode +1))
 
+
+#+end_src
+
+** elec-pair auto pair
+
+Stop electric from indent things automatically. Highlight matching pairs of characters.
+
+#+begin_src emacs-lisp
+(use-package electric
+  :ensure nil
+  :custom
+  (electric-indent-inhibit t)
+  ;; (electric-indent-inhibit nil)  ; Auto-indent code after e.g. {}
+  :config
+  (electric-indent-mode nil)) ;; disable auto-identation
+
 (use-package elec-pair
   :ensure nil
+  :after electric
+  :custom
+  (electric-pair-skip-self t)
   :init (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
   :hook
   ((clojure-mode . electric-pair-mode)
@@ -1590,7 +1610,7 @@ do not already have one."
 	  ;;  (file+headline +org-capture-gtd-file "P-GTD")
 	  ;;  "* TODO %?\n%i%U\n" :kill-buffer nil)
 	  ("t" "Personal todo" entry
-	   (file+olp +org-capture-work-gtd-file "P-GTD")
+	   (file+olp +org-capture-gtd-file "P-GTD")
 	   "* TODO %?\n%i%U\n" :kill-buffer nil)
 	  ("n" "Personal notes" entry
 	   (file+headline +org-capture-notes-file "P-Note")
@@ -3183,7 +3203,7 @@ mermaid.initialize({
 
 ** notdeft
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package notdeft
   :init
   (setenv "XAPIAN_CJK_NGRAM" "1")

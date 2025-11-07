@@ -364,7 +364,7 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 
   ;; Load path from zsh login shell
   (when (or IS-LINUX IS-MAC)
-    (defvar zsh-executable  "/opt/local/bin/zsh")
+    (defvar zsh-executable  "/opt/homebrew/bin/zsh")
     ;; (defvar zsh-executable  "/usr/bin/env zsh")
     (let* ((zshpath (shell-command-to-string
 		     (concat zsh-executable " -lc 'printenv PATH'")))
