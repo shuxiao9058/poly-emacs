@@ -2477,6 +2477,7 @@ eglot does complete argument through yasnippet.
     (gotests . "github.com/cweill/gotests/...")
     (goimports . "golang.org/x/tools/cmd/goimports")
     (staticcheck . ("honnef.co/go/tools/cmd/staticcheck" "master"))
+    (gojsonstruct . "github.com/twpayne/go-jsonstruct/v3/cmd/gojsonstruct")
     (fillstruct . "github.com/davidrjenni/reftools/cmd/fillstruct")
     (goconst . "github.com/jgautheron/goconst/cmd/goconst")
     (godoc . "golang.org/x/tools/cmd/godoc")

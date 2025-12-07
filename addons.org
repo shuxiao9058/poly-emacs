@@ -1,5 +1,4 @@
-﻿#+title: Addons
-
+﻿
 Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
@@ -906,6 +905,7 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 Setup deep complete backend (copilot or minuet).
 
 #+begin_src emacs-lisp
+
 (add-hook 'hack-local-variables-hook #'poly/setup-deep-completion)
 (defvar poly-deep-completion-enable-modes-list '(prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode))
 
@@ -1030,13 +1030,18 @@ fib(5)")
   ;; power. Once you have a reliable estimate of your local computing power,
   ;; you should adjust the context window to a larger value.
   ;; (setq minuet-context-window 2048) ;; 512
-  (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8000/v1/completions")
+
+  ;; (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8000/v1/completions")
+  ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:1.5b")
+
+  (plist-put minuet-openai-fim-compatible-options :end-point "http://192.168.199.230:11434/v1/completions")
+  (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:14b")
+
   ;; an arbitrary non-null environment variable as placeholder
   (plist-put minuet-openai-fim-compatible-options :name "llama")
   (plist-put minuet-openai-fim-compatible-options :api-key (defun my-tabby-api-key () "YE2z1ZHuHUxH8hCsBqD"))
   ;; The model is set by the llama-cpp server and cannot be altered
   ;; post-launch.
-  (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:1.5b")
   ;; (plist-put minuet-openai-fim-compatible-options :model "JetBrains_Mellum:4b")
 
   ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:3b")
@@ -2570,8 +2575,8 @@ Magit with cz
   (default-input-method "rime")
   ;; (rime-cursor "˰")
   ;; (rime-librime-root (concat user-emacs-directory "librime/dist"))
-  (rime-librime-root "/opt/homebrew/")
-  (rime-emacs-module-header-root "/opt/homebrew/include/")
+  (rime-librime-root "/opt/local/")
+  (rime-emacs-module-header-root "/opt/local/include/emacs-mac/")
   (rime-show-preedit t)
   (rime-inline-ascii-holder ?a)
   (rime-cursor "|")
@@ -3117,7 +3122,7 @@ Easily persist and restore your Emacs editing sessions.
   (vterm-kill-buffer-on-exit t)
   (vterm-ignore-blink-cursor nil)
   (vterm-always-compile-module t)
-  (vterm-shell "/opt/homebrew/bin/zsh")
+  (vterm-shell "/opt/Local/bin/zsh")
   (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
   :init
   (defun poly/vterm-compile-auto-exit ()
@@ -3310,7 +3315,7 @@ Easily persist and restore your Emacs editing sessions.
   (eat-kill-buffer-on-exit t)
   (eat-enable-shell-prompt-annotation nil)
   (eat-term-terminfo-directory (expand-file-name ".terminfo" "~"))
-  (explicit-shell-file-name "/opt/homebrew/bin/zsh")
+  (explicit-shell-file-name "/opt/local/bin/zsh")
   ;; (eat-shell '("/opt/homebrew/bin/zsh" "-l"))
   ;; (eat-tramp-shells '("bash"))
   ;; (eat-ssh-shells '("bash"))
@@ -3925,17 +3930,16 @@ MSG is the email(only mu4e)."
 ;; delete trashed files
 ;; mu find 'flag:trashed' --fields=l | gxargs -l grm
 (use-package mu4e
-  :vc nil
-  ;; :ensure nil
+  ;; :vc nil
+  :ensure nil
   ;; :load-path "/Users/jiya/workspace/mu4e/build/mu4e";; (expand-file-name "workspace/mu4e/build/mu4e" "~")
-  :load-path "/opt/homebrew/opt/mu/share/emacs/site-lisp/mu/mu4e"
+  :load-path "/opt/local/share/emacs/site-lisp/mu4e/";; (expand-file-name "workspace/mu4e/build/mu4e" "~")
   ;; :vc (:url "https://github.com/djcb/mu" :lisp-dir "mu4e/" :main-file "mu4e/mu4e.el")
   ;; :vc (:url "https://github.com/djcb/mu" lisp-dir "mu4e/"  :branch "release/1.6" :rev :newest)
   :custom
-  ;; (mu4e-mu-binary "/opt/local/bin/mu")
-  (mu4e-mu-binary "/opt/homebrew/opt/mu/bin/mu")
+  (mu4e-mu-binary "/opt/local/bin/mu")
   (mu4e-update-interval (* 60 2))
-  (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
+  ;; (mu4e-get-mail-command "/usr/local/bin/fdm fetch")
   (mu4e-view-show-addresses t)
   (mu4e-context-policy 'pick-first)
   (mu4e-maildir "~/Mail")
@@ -4090,17 +4094,18 @@ MSG is the email(only mu4e)."
 			      (:subject       .   nil)))
   )
 
-;;   ;;;###autoload
-;; (define-mail-user-agent 'mu4e-user-agent
-;;   'mu4e~compose-mail
-;;   'message-send-and-exit
-;;   'message-kill-buffer
-;;   'message-send-hook)
-;; Without this `mail-user-agent' cannot be set to `mu4e-user-agent'
-;; through customize, as the custom type expects a function.  Not
-;; sure whether this function is actually ever used; if it is then
-;; returning the symbol is probably the correct thing to do, as other
-;; such functions suggest.
+  ;;;###autoload
+(define-mail-user-agent 'mu4e-user-agent
+  'mu4e~compose-mail
+  'message-send-and-exit
+  'message-kill-buffer
+  'message-send-hook)
+
+;; ;; Without this `mail-user-agent' cannot be set to `mu4e-user-agent'
+;; ;; through customize, as the custom type expects a function.  Not
+;; ;; sure whether this function is actually ever used; if it is then
+;; ;; returning the symbol is probably the correct thing to do, as other
+;; ;; such functions suggest.
 ;; (defun mu4e-user-agent ()
 ;;   "Return the `mu4e-user-agent' symbol."
 ;;   'mu4e-user-agent)
@@ -4564,7 +4569,7 @@ there are no attachments."
   :vc (:url "https://github.com/shuxiao9058/notmuch-update" :branch "main" :rev :newest)
   :disabled
   :custom
-  (notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
+  ;; (notmuch-update-command "/opt/local/bin/fdm fetch && notmuch new")
   (notmuch-update-interval (* 5 60))
   :config
   (defun splinter-notmuch-refresh-non-show-buffers ()

@@ -428,26 +428,34 @@ Accepts the same arguments as `message'."
   (interactive)
   (set-face-attribute 'highlight nil :foreground 'unspecified)
   (set-face-attribute 'mode-line nil :background 'unspecified)
-  (set-face-attribute 'meow-keypad-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'red))
-  (set-face-attribute 'meow-insert-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'yellow))
-  (set-face-attribute 'meow-normal-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'green))
-  (set-face-attribute 'meow-motion-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'blue))
-  (set-face-attribute 'meow-beacon-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'purple))
+  (with-eval-after-load 'meow
+    (set-face-attribute 'meow-keypad-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'red))
+    (set-face-attribute 'meow-insert-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'yellow))
+    (set-face-attribute 'meow-normal-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'green))
+    (set-face-attribute 'meow-motion-indicator nil  :inherit 'mode-line :foreground (catppuccin-get-color 'blue))
+    (set-face-attribute 'meow-beacon-indicator nil  :inherit 'mode-line :foreground (or (catppuccin-get-color 'purple) 'unspecified))
 
-  (set-face-attribute 'meow-keypad-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'red))
-  (set-face-attribute 'meow-insert-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'yellow))
-  (set-face-attribute 'meow-normal-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'green))
-  (set-face-attribute 'meow-motion-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'blue))
-  (set-face-attribute 'meow-beacon-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'purple))
+    (set-face-attribute 'meow-keypad-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'red))
+    (set-face-attribute 'meow-insert-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'yellow))
+    (set-face-attribute 'meow-normal-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'green))
+    (set-face-attribute 'meow-motion-cursor nil  :inherit 'cursor :background (catppuccin-get-color 'blue))
+    (set-face-attribute 'meow-beacon-cursor nil  :inherit 'cursor :background (or (catppuccin-get-color 'purple) 'unspecified)))
 
-  (set-face-attribute 'calendar-today nil
-                      :underline 'unspecified
-                      :foreground (catppuccin-get-color 'green))
-  (set-face-attribute 'holiday nil
-                      :background 'unspecified
-                      :foreground (catppuccin-get-color 'red))
+  (with-eval-after-load 'calendar
+    (set-face-attribute 'calendar-today nil
+			:underline 'unspecified
+			:foreground (catppuccin-get-color 'green))
+
+    (set-face-attribute 'holiday nil
+			:background 'unspecified
+			:foreground (catppuccin-get-color 'red))
+    )
+
   (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
-  (nox/diff-hl-update-colors))
+
+  (with-eval-after-load 'diff-hl
+    (nox/diff-hl-update-colors))
+  )
 
 ;; (defun poly/reload-theme()
 ;;   "Reload theme."
