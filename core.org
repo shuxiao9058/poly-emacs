@@ -497,20 +497,20 @@ Accepts the same arguments as `message'."
   (nox/change-colors))
 
 ;; adding padding to ui elements to make doing tasks feel more comfortable
-(use-package spacious-padding
-  :after catppuccin-theme
-  :config
-  (setq spacious-padding-widths
-        '( :internal-border-width 5
-           :header-line-width 0
-           :mode-line-width 0
-           :tab-width 4
-           :right-divider-width 0
-           :scroll-bar-width 8
-           :fringe-width 8))
-  (if (daemonp)
-      (add-hook 'server-after-make-frame-hook #'spacious-padding-mode)
-    (spacious-padding-mode)))
+;; (use-package spacious-padding
+;;   :after catppuccin-theme
+;;   :config
+;;   (setq spacious-padding-widths
+;;         '( :internal-border-width 5
+;;            :header-line-width 0
+;;            :mode-line-width 0
+;;            :tab-width 4
+;;            :right-divider-width 0
+;;            :scroll-bar-width 8
+;;            :fringe-width 8))
+;;   (if (daemonp)
+;;       (add-hook 'server-after-make-frame-hook #'spacious-padding-mode)
+;;     (spacious-padding-mode)))
 #+end_src
 
 ** gc timer

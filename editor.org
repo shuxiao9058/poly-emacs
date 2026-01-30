@@ -475,7 +475,9 @@ To find files/buffers and apply commands on project, use builtin package ~projec
 (use-package project
   :ensure nil
   :custom
-  (project-switch-commands 'consult-project-extra-find)
+  ;; (project-switch-commands 'consult-project-extra-find)
+ ;; (project-switch-commands ((?f "File" project-find-file)
+;;			    (?g "Grep" project-find-regexp)))
   (project-vc-extra-root-markers '(".projectile" "requirements.txt" "package.json" "go.mod" "Cargo.toml"
                                    "project.clj"
                                    "pom.xml"
@@ -2961,13 +2963,13 @@ Prefix arguments are interpreted by `org-refile'."
 	     (status (nth 1 clock-info))
 	     (clock-string (nth 2 clock-info)))
 	(if clock-string
-            (tl/open-hammerspoon-url "Clocking" "status" status "state" state "clockString" clock-string)
-	  (tl/open-hammerspoon-url "Clocking" "status" status "state" state)))
+            (tl/open-hammerspoon-url "clocking" "status" status "state" state "clockString" clock-string)
+	  (tl/open-hammerspoon-url "clocking" "status" status "state" state)))
     (cond ((string= event "org-clock-out")
 	   (unless (org-pomodoro-active-p)
-	     (tl/open-hammerspoon-url "Clocking" "status" "No Task")))
+	     (tl/open-hammerspoon-url "clocking" "status" "No Task")))
 	  ((string= event "org-pomodoro-killed-or-break-finished")
-	   (tl/open-hammerspoon-url "Clocking" "status" "No Task")))))
+	   (tl/open-hammerspoon-url "clocking" "status" "No Task")))))
 
 (use-package org-pomodoro
   :ensure t
@@ -2991,9 +2993,9 @@ Prefix arguments are interpreted by `org-refile'."
             (lambda () (terminal-notify "A long break done, ready a new pomodoro !!!" "Pomo")))
 
   ;; init emacs startup
-  (add-hook 'after-init-hook (lambda() (tl/open-hammerspoon-url "Clocking" "status" "No Task")))
+  (add-hook 'after-init-hook (lambda() (tl/open-hammerspoon-url "clocking" "status" "No Task")))
 
-  (add-hook 'kill-emacs-hook (lambda() (tl/open-hammerspoon-url "Clocking" "status" "Emacs Stopped")))
+  (add-hook 'kill-emacs-hook (lambda() (tl/open-hammerspoon-url "clocking" "status" "Emacs Stopped")))
 
   ;; (setq org-pomodoro-tick-hook nil)
 
@@ -3475,4 +3477,23 @@ valign for org-mode & markdown table
 	meow--kbd-backward-char "<left>"
 	meow--kbd-forward-line "<down>"
 	meow--kbd-backward-line "<up>"))
+#+end_src
+
+
+* Load variable values from varibale table
+
+#+header: :var var-table=private.org:var-table
+#+begin_src emacs-lisp
+  (defun poly-read-var (key)
+     (let* ((item (alist-get key var-table nil nil 'equal))
+            (entry (cadr item))
+            (where (car item)))
+       (message "item %s entry %s where %s"
+                item entry where)
+       (cond
+        ((string-equal where "pass")
+         (password-store-get entry))
+
+        ((string-equal where "env")
+         (getenv entry)))))
 #+end_src

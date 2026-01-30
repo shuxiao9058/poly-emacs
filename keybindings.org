@@ -112,7 +112,7 @@
 ;; (unbind-key "C-x C-q")
 
 (when (and (fboundp 'window-system) (eq (window-system) 'mac))
- (bind-key (kbd "C-s-q") (lambda() (interactive) (tl/open-hammerspoon-url "lockScreen"))))
+ (bind-key (kbd "C-s-q") (lambda() (interactive) (tl/open-hammerspoon-url "lock_screen"))))
 #+end_src
 
 

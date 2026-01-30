@@ -350,8 +350,9 @@ This is a completion style, it's a back-end for completion and is used by a  fro
 	  (delq 'consult--source-project-buffer
 		(delq 'consult--source-project-file consult-buffer-sources)))
 
-    (setq consult--source-hidden-buffer
-	  (plist-put consult--source-hidden-buffer :narrow ?h)))
+    ;; (setq consult--source-hidden-buffer
+    ;; 	  (plist-put consult--source-hidden-buffer :narrow ?h))
+    )
   (advice-add #'multi-occur :override #'consult-multi-occur)
   (setq consult-narrow-key "<"
 	consult-line-numbers-widen t)
@@ -2544,12 +2545,24 @@ Magit with cz
   (when (eq major-mode 'markdown-mode)
     (member rime--current-input-key '(91 93 96))))
 
+(defun switch-to-buffer--activate-input-method (&rest _)
+  (if (or (string-match "vterm-mode" (symbol-name major-mode))
+	  (string-match "dired-mode" (symbol-name major-mode))
+	  (string-match "image-mode" (symbol-name major-mode))
+	  (string-match "compilation-mode" (symbol-name major-mode))
+	  (string-match "isearch-mode" (symbol-name major-mode))
+	  (string-match "minibuffer-mode" (symbol-name major-mode)))
+      (activate-input-method nil)
+    (activate-input-method "rime")))
+
+(advice-add #'switch-to-buffer :after #'switch-to-buffer--activate-input-method)
+
 (use-package rime
   :vc (:url "https://github.com/DogLooksGood/emacs-rime"
 	    :branch "master" :rev :newest)
   :defer t
   :custom
-  (rime-disable-predicates '(;; +rime-disable-predicate
+  (rime-disable-predicates '(+rime-disable-predicate
 			     meow-normal-mode-p
 			     meow-motion-mode-p
 			     meow-keypad-mode-p
@@ -2622,6 +2635,9 @@ Magit with cz
   (if (string= current-input-method "rime")
       (set-cursor-color cursor-activate-color)
     (set-cursor-color cursor-default-color)))
+
+(add-hook 'rime-active-mode-hook
+          (lambda () (tl/open-hammerspoon-url "update_input_method")))
 
 (add-hook 'input-method-activate-hook 'set-cursor-color-red)
 (add-hook 'input-method-deactivate-hook 'set-cursor-color-default)
@@ -3727,10 +3743,16 @@ switching to ~INSERT~ state, move the cursor to the end of buffer.
     ;; :if (file-exists-p "~/.password-store")
     :config (auth-source-pass-enable))
 
+(use-package pass
+  :custom
+  (pass-username-fallback-on-filename t)
+  (pass-show-keybindings nil))
+
 (use-package pinentry
+    :custom
+    (epa-pinentry-mode 'loopback)
     :config
-    (pinentry-start)
-    (setq epa-pinentry-mode 'loopback))
+    (pinentry-start))
 #+end_src
 
 * Mail

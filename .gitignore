@@ -38,3 +38,5 @@ workspace
 /themes/phoebe-theme.el
 /dape-breakpoints
 /projects.bak
+/_minted/
+/easysession/
