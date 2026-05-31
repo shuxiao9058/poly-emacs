@@ -21,7 +21,7 @@
     (which-key-idle-delay 0.5)
     (which-key-idle-secondary-delay 0.3)
     (which-key-sort-order #'which-key-prefix-then-key-order)
-    (which-key-sort-upperjcase-first nil)
+    (which-key-sort-uppercase-first nil)
     (which-key-add-column-padding 1)
     (which-key-max-display-columns nil)
     (which-key-min-display-lines 4)
@@ -74,11 +74,6 @@
         (clipboard-yank)
         (message "graphics active"))
     (insert (shell-command-to-string paste-from-clipboard-cmd))))
-
-;; comment with new line
-;; Fix M-j behaviour in block comments in js-mode
-(setq-local comment-multi-line t)
-(local-set-key [remap indent-new-comment-line] 'c-indent-new-comment-line)
 
 (bind-key "s-c" #'copy-to-clipboard)
 (bind-key "s-v" #'paste-from-clipboard)

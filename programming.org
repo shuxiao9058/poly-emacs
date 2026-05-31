@@ -3140,14 +3140,19 @@ Use clojure-mode for basic syntax support.
 #+end_src
 
 ** js-mode
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package js
   :mode ("\\.js$" . js-mode)
   :hook
   (;; (js-mode . lsp)
    (js-mode . (lambda ()
 		(require 'tide)
-		(tide-setup)))))
+		(tide-setup)
+		;; comment with new line
+		;; Fix M-j behaviour in block comments in js-mode
+		(setq-local comment-multi-line t)
+		(local-set-key [remap indent-new-comment-line]
+			       'c-indent-new-comment-line)))))
 #+end_src
 
 ** tagedit
