@@ -131,6 +131,7 @@ If FORCE-TANGLE is non-nil, always tangle before load."
 
 (if poly/debug
     (progn
+      (setq warning-display-at-bottom t)
       (setq warning-minimum-level :debug)
       (setq debug-on-error t)
       (setq stack-trace-on-error t))

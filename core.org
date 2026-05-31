@@ -460,20 +460,20 @@ Accepts the same arguments as `message'."
 ;; (defun poly/reload-theme()
 ;;   "Reload theme."
 ;;   (interactive)
-;;   ;; (require 'poly-dark-theme)
-;;   ;; (load-theme 'poly-dark t)
+;;   (require 'poly-dark-theme)
+;;   (load-theme 'poly-dark t)
 
 ;;   ;; (require 'vitesse-theme)
 ;;   ;; (load-theme 'vitesse t)
 ;;   ;; (load-theme 'phoebe t)
-;;   (require 'catppuccin-theme)
-;;   (setq catppuccin-flavor 'latte)
-;;   (poly/catppuccin-latte)
+;;   ;; (require 'catppuccin-theme)
+;;   ;; (setq catppuccin-flavor 'latte)
+;;   ;; (poly/catppuccin-latte)
 
 ;;   ;; (setq catppuccin-flavor 'macchiato)
 ;;   ;; (setq catppuccin-flavor 'frappe)
 ;;   ;; (load-theme 'catppuccin t)
-;;   (catppuccin-reload)
+;;   ;; (catppuccin-reload)
 ;;   )
 
 ;; (poly/reload-theme)

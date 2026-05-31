@@ -40,3 +40,5 @@ workspace
 /projects.bak
 /_minted/
 /easysession/
+/.agent-shell/
+/agent/
