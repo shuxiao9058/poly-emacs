@@ -478,15 +478,14 @@ Accepts the same arguments as `message'."
 
 ;; (poly/reload-theme)
 
-
-
 (use-package catppuccin-theme
   :custom
   (catppuccin-highlight-matches t)
   (catppuccin-italic-comments t)
   (catppuccin-italic-variables t)
   :config
-  (setq catppuccin-flavor 'latte)
+  ;; (setq catppuccin-flavor 'latte)
+  (setq catppuccin-flavor 'macchiato)
   ;; (catppuccin-set-color 'base "#000000" 'mocha)
   ;; (catppuccin-set-color 'mantle "#090909" 'mocha)
   ;; (catppuccin-set-color 'crust "#181825" 'mocha)

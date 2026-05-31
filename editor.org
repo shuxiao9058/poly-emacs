@@ -1499,6 +1499,9 @@ Visualizing Color Codes with rainbow-mode.
 	  ("KNOWNCAUSE" :foreground "yellow"  :weight bold)
 	  ("FIXED"      :foreground "green"   :weight bold)))
   (setq org-use-fast-todo-selection 'expert)
+
+  ;; shortcut
+  (setq org-special-ctrl-a/e t)
   ;; (org-use-fast-todo-selection 'auto)
   (setq org-enforce-todo-dependencies t)
   (setq org-enforce-todo-checkbox-dependencies t)
