@@ -21,8 +21,9 @@
 ;; (when (get-buffer "*Messages*")
 ;;   (kill-buffer "*Messages*"))
 
-;; Disable GC during initialization(for the case, early-init.el is not used)
-(setq gc-cons-threshold most-positive-fixnum)
+;; ;; Disable GC during initialization(for the case, early-init.el is not used)
+;; use gcmh
+;; (setq gc-cons-threshold most-positive-fixnum)
 
 ;; fix macOS 15 lose focus
 (select-frame-set-input-focus (selected-frame))
@@ -162,10 +163,13 @@ If FORCE-TANGLE is non-nil, always tangle before load."
     ;; Silence compiler warnings as they can be pretty disruptive
     (setq native-comp-async-report-warnings-errors nil
 	  native-comp-warning-on-missing-source nil)
-    (setq native-comp-jit-compilation nil
+    (setq native-comp-jit-compilation t
+          ;; libgccjit invokes gcc as a subprocess using the C-level environ,
+          ;; which is NOT affected by Emacs Lisp setenv calls.
+          ;; LIBRARY_PATH must be set in the shell before Emacs launches.
+          ;; Disable subr trampolines until LIBRARY_PATH is fixed at OS level.
           native-comp-enable-subr-trampolines nil)
-    ;; ;; Make native compilation happens asynchronously
-    ;; (setq native-comp-deferred-compilation t)
+
 
     ;; Set the right directory to store the native compilation cache
     ;; NOTE the method for setting the eln-cache directory depends on the emacs version

@@ -103,7 +103,8 @@ Core configuration of poly emacs, global variable declare.
   "Enable native compilation")
 
 (defvar poly-org-config-file-list
-  '(private editor writing programming addons)
+  '(private editor ;; writing
+	    programming addons)
   "Org config file list")
 
 ;; (defconst poly/using-native-comp (fboundp 'native-comp-available-p)
@@ -158,16 +159,23 @@ Core configuration of poly emacs, global variable declare.
 ;; Previously pgup/dn clobbers column position, moving it to the beginning of
 ;; the line.
 ;; http://www.dotemacs.de/dotfiles/ElijahDaniel.emacs.html
-(defadvice scroll-up (around ewd-scroll-up first act)
-  "Keep cursor in the same column."
+;; (defadvice scroll-up (around ewd-scroll-up first act)
+;;   "Keep cursor in the same column."
+;;   (let ((col (current-column)))
+;;     ad-do-it
+;;     (move-to-column col)))
+;; (defadvice scroll-down (around ewd-scroll-down first act)
+;;   "Keep cursor in the same column."
+;;   (let ((col (current-column)))
+;;     ad-do-it
+;;     (move-to-column col)))
+(defun poly/scroll-keep-column (orig-fn &rest args)
+  "Keep cursor in the same column when scrolling."
   (let ((col (current-column)))
-    ad-do-it
+    (apply orig-fn args)
     (move-to-column col)))
-(defadvice scroll-down (around ewd-scroll-down first act)
-  "Keep cursor in the same column."
-  (let ((col (current-column)))
-    ad-do-it
-    (move-to-column col)))
+(advice-add 'scroll-up   :around #'poly/scroll-keep-column)
+(advice-add 'scroll-down :around #'poly/scroll-keep-column)
 #+end_src
 
 ** custom package install path
@@ -268,16 +276,30 @@ of an error, just add the package to a list of missing packages."
   `(lambda (&rest _rest)
      (funcall ,fnc)))
 
-(defadvice message (before test-symbol activate)
-  (if (not (string-equal (ad-get-arg 0) "%s%s"))
+;; (defadvice message (before test-symbol activate)
+;;   (if (not (string-equal (ad-get-arg 0) "%s%s"))
+;;       (let ((deactivate-mark nil)
+;;             (inhibit-read-only t))
+;; 	(with-current-buffer "*Messages*"
+;;           (goto-char (point-max))
+;;           (if (not (bolp))
+;;               (newline))
+;;           (insert (current-time-microseconds)))
+;;         )))
+(defun poly/message-add-timestamp (&rest args)
+  "Prepend a microsecond timestamp before each message in *Messages*."
+  (when-let* (((not (string-equal (car args) "%s%s")))
+              (buf (get-buffer "*Messages*")))
+    (with-current-buffer buf
       (let ((deactivate-mark nil)
             (inhibit-read-only t))
-	(with-current-buffer "*Messages*"
-          (goto-char (point-max))
-          (if (not (bolp))
-              (newline))
-          (insert (current-time-microseconds)))
-        )))
+        (goto-char (point-max))
+        (unless (bolp)
+          (newline))
+        (insert (current-time-microseconds))))))
+
+(advice-add 'message :before #'poly/message-add-timestamp)
+
 ;;
 ;;; Public library
 
@@ -362,7 +384,7 @@ Accepts the same arguments as `message'."
 #+end_src
 
 ** ui
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; ;;; Automatic Optimization
 (defvar gc-cons-threshold-original gc-cons-threshold)
 ;; ;; (setq gc-cons-threshold-original gc-cons-threshold)

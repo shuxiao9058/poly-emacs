@@ -213,14 +213,13 @@ This is consulted on every `require', `load' and various path/io functions.  You
       blink-matching-paren-highlight-offscreen t
       backup-inhibited t
       kill-whole-line t
-      xref-history-storage 'xref-window-local-history
-      xref-prompt-for-identifier nil
-      xref-search-program 'ripgrep
       ;; xref-show-xrefs-function #'xref-show-definitions-completing-read
       ;; fix massed xref cross multiple project
       xref-history-storage 'xref-window-local-history
+      xref-prompt-for-identifier nil
+      xref-search-program 'ripgrep
       confirm-nonexistent-file-or-buffer nil
-      large-file-warning-threshold 100000000
+      large-file-warning-threshold 200000000
       resize-mini-windows t
       truncate-string-ellipsis "…"
       cursor-type '(hbar .  2)
@@ -232,7 +231,6 @@ This is consulted on every `require', `load' and various path/io functions.  You
       mouse-drag-and-drop-region-cross-program t
       mouse-drag-and-drop-region-scroll-margin t
       mouse-drag-copy-region 'non-empty
-      large-file-warning-threshold 200000000
       ;; silence ad-handle-definition about advised functions getting redefined
       ad-redefinition-action 'accept
       left-fringe-width 1

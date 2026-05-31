@@ -285,36 +285,37 @@ Configuration for programming and languages support.
 				       )))
 
   (define-format-all-formatter logos-format
-    (:executable "/Users/jiya/miniconda3/bin/python")
-    (:install
-     (macos "brew install clang-format")
-     (windows "scoop install llvm"))
-    (:languages "Objective-C")
-    (:features)
-    (:format
-     (format-all--buffer-easy
-      executable
-      "-W"
-      "ignore"
-      "/Users/jiya/workspace/iOS/logos-format/logos_format/logos_format.py"
-      "--assume-filename=/Users/jiya/workspace/iOS/logos-format/.clang-format"
-      ;; "-i"
-      "--files"
-      (buffer-file-name)
-      )))
+       (:executable (expand-file-name "miniconda3/bin/python" "~"))
+       (:install
+	(macos "brew install clang-format")
+	(windows "scoop install llvm"))
+       (:languages "Objective-C")
+       (:features)
+       (:format
+	(format-all--buffer-easy
+	 executable
+	 "-W"
+	 "ignore"
+	(expand-file-name "workspace/iOS/logos-format/logos_format/logos_format.py" "~")
+        (concat "--assume-filename="
+		(expand-file-name ".clang-format" logos-dir))
+	 ;; "-i"
+	 "--files"
+	 (buffer-file-name)
+	 )))
 
   (define-format-all-formatter buf-format
-    (:executable "buf")
-    (:install
-     (macos ""))
-    (:languages "Protocol Buffer")
-    (:features)
-    (:format
-     (format-all--buffer-easy
-      executable
-      "format"
-      (when (buffer-file-name)
-	(buffer-file-name)))))
+       (:executable "buf")
+       (:install
+	(macos ""))
+       (:languages "Protocol Buffer")
+       (:features)
+       (:format
+	(format-all--buffer-easy
+	 executable
+	 "format"
+	 (when (buffer-file-name)
+	   (buffer-file-name)))))
 
   (define-format-all-formatter goimports-gofmt
     (:executable "/bin/sh")
@@ -606,10 +607,13 @@ Use eglot as LSP client.
 ;; (defconst jdt-jar-path "~/.emacs.d/.local/jar/org.eclipse.equinox.launcher.jar")
 ;; (defconst jdt-jar-path "/opt/jdt-language-server/plugins/org.eclipse.equinox.launcher_1.6.0.v20200915-1508.jar")
 (defconst jdt-jar-path (expand-file-name "jdt-language-server/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar" "~/workspace"))
-(defconst jdt-extra-jvm-args '("-noverify"
-			       "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
+(defconst jdt-lombok-jar
+  (expand-file-name "jar/lombok.jar" poly-local-dir)
+  "Path to the Lombok JAR for Eclipse JDT language server.")
+(defconst jdt-extra-jvm-args (list "-noverify"
+			       (concat "-javaagent:" jdt-lombok-jar)
 			       ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
-			       "-Xbootclasspath/a:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
+			       (concat  "-Xbootclasspath/a:" jdt-lombok-jar)
 			       "--add-modules=ALL-SYSTEM"
 			       "--add-opens"
 			       "java.base/java.util=ALL-UNNAMED"

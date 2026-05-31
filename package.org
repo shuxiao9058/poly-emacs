@@ -388,18 +388,27 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
 	;; Using Emacs.app/Contents/MacOS/bin since it was compiled with
 	;; ./configure --prefix="$PWD/nextstep/Emacs.app/Contents/MacOS"
 	(add-to-list 'exec-path (concat invocation-directory "bin") t)
-	(setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
-				       (when (getenv "LIBRARY_PATH")
-					 ":")
-				       ;; This is where Homebrew puts gcc libraries.
-				       (car (file-expand-wildcards
-					     (expand-file-name "/opt/local/lib/gcc11/")))))
+	(let ((gcc-lib (car (last (file-expand-wildcards "/opt/local/lib/gcc[0-9]*")))))
+	  (when gcc-lib
+	    (dolist (var '("LIBRARY_PATH" "DYLD_LIBRARY_PATH"))
+	      (setenv var (string-join
+			   (delete-dups
+			    (cons gcc-lib
+				  (when (getenv var)
+				    (split-string (getenv var) ":" t))))
+			   ":")))))
+	;; (setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
+	;; 			       (when (getenv "LIBRARY_PATH")
+	;; 				 ":")
+	;; 			       ;; This is where Homebrew puts gcc libraries.
+	;; 			       (car (file-expand-wildcards
+	;; 				     (expand-file-name "/opt/local/lib/gcc11/")))))
 
-	(setenv "DYLD_LIBRARY_PATH" (concat (getenv "DYLD_LIBRARY_PATH")
-					    (when (getenv "DYLD_LIBRARY_PATH") ":")
-					    ;; This is where Homebrew puts gcc libraries.
-					    (car (file-expand-wildcards
-						  (expand-file-name "/opt/local/lib/gcc11/")))))
+	;; (setenv "DYLD_LIBRARY_PATH" (concat (getenv "DYLD_LIBRARY_PATH")
+	;; 				    (when (getenv "DYLD_LIBRARY_PATH") ":")
+	;; 				    ;; This is where Homebrew puts gcc libraries.
+	;; 				    (car (file-expand-wildcards
+	;; 					  (expand-file-name "/opt/local/lib/gcc11/")))))
 	;; Only set after LIBRARY_PATH can find gcc libraries.
 	(setq comp-deferred-compilation t))
     (message "Native comp is *not* available")))
@@ -731,19 +740,36 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
   :type '(list string)
   :group 'general)
 
-(defadvice message (around message-filter-by-regexp activate)
-  (if (not (ad-get-arg 0))
-      ad-do-it
-    (let ((formatted-string (apply 'format (ad-get-args 0))))
-      (if (and (stringp formatted-string)
-	       (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
-	  (let ((inhibit-read-only t))
-	    (with-current-buffer "*Messages*"
-	      (goto-char (point-max))
-	      (insert formatted-string "\n")))
-	(progn
-	  (ad-set-args 0 `("%s" ,formatted-string))
-	  ad-do-it)))))
+;; (defadvice message (around message-filter-by-regexp activate)
+;;   (if (not (ad-get-arg 0))
+;;       ad-do-it
+;;     (let ((formatted-string (apply 'format (ad-get-args 0))))
+;;       (if (and (stringp formatted-string)
+;; 	       (cl-some (lambda (re) (string-match re formatted-string)) message-filter-regexp-list))
+;; 	  (let ((inhibit-read-only t))
+;; 	    (with-current-buffer "*Messages*"
+;; 	      (goto-char (point-max))
+;; 	      (insert formatted-string "\n")))
+;; 	(progn
+;; 	  (ad-set-args 0 `("%s" ,formatted-string))
+;; 	  ad-do-it)))))
+
+(defun poly/message-filter-by-regexp (orig-fn &rest args)
+  "Filter messages matching `message-filter-regexp-list' from the echo area.
+Matching messages are still silently written to *Messages*."
+  (if (null (car args))
+      (apply orig-fn args)
+    (let ((formatted (apply #'format args)))
+      (if (cl-some (lambda (re) (string-match re formatted))
+                   message-filter-regexp-list)
+          (when-let* ((buf (get-buffer "*Messages*")))
+            (with-current-buffer buf
+              (let ((inhibit-read-only t))
+                (goto-char (point-max))
+                (insert formatted "\n"))))
+        (funcall orig-fn "%s" formatted)))))
+
+(advice-add 'message :around #'poly/message-filter-by-regexp)
 
 ;; Michael Hoffman at the comment of
 ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html

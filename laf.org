@@ -804,7 +804,7 @@ lines are selected, or the NxM dimensions of a block selection."
   (treemacs-silent-refresh t)
   (treemacs-follow-mode t)
   (treemacs-show-cursor                   t)
-  (treemacs-show-hidden-files             t)
+  (treemacs-show-hidden-files             nil)
   (treemacs-silent-filewatch              t)
   (treemacs-sorting                 'alphabetic-asc)
   (treemacs-select-when-already-in-treemacs 'move-back)
