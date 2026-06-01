@@ -611,17 +611,17 @@ Use eglot as LSP client.
   (expand-file-name "jar/lombok.jar" poly-local-dir)
   "Path to the Lombok JAR for Eclipse JDT language server.")
 (defconst jdt-extra-jvm-args (list "-noverify"
-			       (concat "-javaagent:" jdt-lombok-jar)
-			       ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
-			       (concat  "-Xbootclasspath/a:" jdt-lombok-jar)
-			       "--add-modules=ALL-SYSTEM"
-			       "--add-opens"
-			       "java.base/java.util=ALL-UNNAMED"
-			       "--add-opens"
-			       "java.base/java.lang=ALL-UNNAMED"
-			       ;; "-configuration"
-			       ;; "/opt/jdt-language-server/config_mac"
-			       ))
+				   (concat "-javaagent:" jdt-lombok-jar)
+				   ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
+				   (concat  "-Xbootclasspath/a:" jdt-lombok-jar)
+				   "--add-modules=ALL-SYSTEM"
+				   "--add-opens"
+				   "java.base/java.util=ALL-UNNAMED"
+				   "--add-opens"
+				   "java.base/java.lang=ALL-UNNAMED"
+				   ;; "-configuration"
+				   ;; "/opt/jdt-language-server/config_mac"
+				   ))
 
 (defun my-eclipse-jdt-contact (interactive)
   "Contact with the jdt server.
@@ -1918,36 +1918,26 @@ Examples:
   (defun java-lsp-init ()
     "We need to require java-lsp before loading lsp in a Java buffer.
 use-package will load java-lsp for us simply by calling this function."
-    (setq lsp-java-vmargs
-          `(;; "-noverify"
-            ;; "-Xmx1G"
-	    "-XX:+UseParallelGC"
-	    "-XX:GCTimeRatio=4"
-	    "-XX:AdaptiveSizePolicyWeight=90"
-	    "-Dsun.zip.disableMemoryMapping=true"
-	    "-Xmx6G"
-	    "-Xms2G"
-	    ;; "-Xmx3G"
-            ;; "-XX:+UseG1GC"
-            "-XX:+UseStringDeduplication"
-	    "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
-	    ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
-	    "-Xbootclasspath/a:~/.config/emacs/.local/jar/lombok.jar"
-	    ;;             ,(concat "-javaagent:" (expand-file-name "~") "/.emacs.d/.local/jar/lombok.jar")
-	    ;; ,(concat "-Xbootclasspath/a:" (expand-file-name "~") "/.emacs.d/.local/jar/lombok.jar")
-	    ;; "-javaagent:/Users/jiya/workspace/dotemacs.d/.local/jar/lombok.jar"
-	    ;; "-javaagent:[~/.emacs.d/.local/jar/lombok.jar][classes=META-INF/]"
-	    ;; "-Xbootclasspath/a:~/.config/emacs/.local/jar/lombok.jar"
-	    "--add-modules=ALL-SYSTEM"
-	    "--add-opens"
-	    "java.base/java.util=ALL-UNNAMED"
-	    "--add-opens"
-	    "java.base/java.lang=ALL-UNNAMED"
-	    ))
-    (setq c-basic-offset 2
-          tab-width 2
-          indent-tabs-mode t
-          imenu-list-auto-resize t)
+    (let ((lombok-jar (expand-file-name "jar/lombok.jar" poly-local-dir)))
+      (setq lsp-java-vmargs
+            (append
+             '("-XX:+UseParallelGC"
+	       "-XX:GCTimeRatio=4"
+	       "-XX:AdaptiveSizePolicyWeight=90"
+	       "-Dsun.zip.disableMemoryMapping=true"
+	       "-Xmx6G"
+	       "-Xms2G"
+	       "-XX:+UseStringDeduplication")
+             (when (file-exists-p lombok-jar)
+               (list (concat "-javaagent:" lombok-jar)
+                     (concat "-Xbootclasspath/a:" lombok-jar)))
+             '("--add-modules=ALL-SYSTEM"
+	       "--add-opens=java.base/java.util=ALL-UNNAMED"
+	       "--add-opens=java.base/java.lang=ALL-UNNAMED"))))
+    (setq-local c-basic-offset 2
+                tab-width 2
+                indent-tabs-mode t
+                imenu-list-auto-resize t)
     (setq company-lsp-cache-candidates nil)  ; Company cache should be disabled for lsp-java
     (lsp-deferred))
   ;; (add-hook 'java-ts-mode-hook 'lsp)

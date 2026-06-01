@@ -362,20 +362,20 @@ dependencies, which causes ~package-autoremove~ to remove them, hence the fix.
   (setenv "GOPROXY" "")
   (setenv "COLORTERM" "truecolor")
 
-  ;; Load path from zsh login shell
-  (when (or IS-LINUX IS-MAC)
-    (defvar zsh-executable  "/opt/local/bin/zsh")
-    ;; (defvar zsh-executable  "/usr/bin/env zsh")
-    (let* ((zshpath (shell-command-to-string
-		     (concat zsh-executable " -lc 'printenv PATH'")))
-	   (pathlst (split-string zshpath ":")))
-      (setq exec-path pathlst)
-      (setq eshell-path-env zshpath)
-      ;; (princ zshpath)
-      (setenv "PATH" zshpath))
+  ;; ;; Load path from zsh login shell
+  ;; (when (or IS-LINUX IS-MAC)
+  ;;   (defvar zsh-executable  "/opt/local/bin/zsh")
+  ;;   ;; (defvar zsh-executable  "/usr/bin/env zsh")
+  ;;   (let* ((zshpath (shell-command-to-string
+  ;; 		     (concat zsh-executable " -lc 'printenv PATH'")))
+  ;; 	   (pathlst (split-string zshpath ":")))
+  ;;     (setq exec-path pathlst)
+  ;;     (setq eshell-path-env zshpath)
+  ;;     ;; (princ zshpath)
+  ;;     (setenv "PATH" zshpath))
 
-    ;; use zsh as default shell
-    (setenv "SHELL" "zsh"))
+  ;;   ;; use zsh as default shell
+  ;;   (setenv "SHELL" "zsh"))
 
   (exec-path-from-shell-initialize)
 

@@ -2244,8 +2244,8 @@ Magit with cz
 	  ;; then, send the value to eat by ourselves.
 	  ;; We cannot advice `insert' here (temporary), because it's a native function and it would not work after `rime--commit' is byte-compiled
 	  (funcall old-fn "")
-	  (when eat-terminal
-	    (eat-term-send-string-as-yank eat-terminal value)))
+	  (when (bound-and-true-p eat-terminal)
+            (eat-term-send-string-as-yank eat-terminal args)))
       (apply old-fn args)))
 
     (defun my/rime-redisplay-if-active ()
@@ -3056,14 +3056,20 @@ Easily persist and restore your Emacs editing sessions.
               '((name . eat-eshell-only-when-active)))
   (defun eat-tab-change (original-fun &rest args)
     (interactive)
-    (message "eat-tab-change triggered")  ; Output to *Messages* buffer
+    (message "eat-tab-change triggered")
     (apply original-fun args)
-    (walk-windows (lambda (window)
-                    (with-current-buffer (window-buffer window)
-                      (when (eq major-mode 'eat-mode)
-			(end-of-buffer)
-			(evil-insert-state))))
-		  nil 'visible))
+    (walk-windows
+     (lambda (window)
+       (with-current-buffer (window-buffer window)
+         (when (derived-mode-p 'eat-mode)
+           (end-of-buffer)
+           (when (and (bound-and-true-p meow-global-mode)
+                      (fboundp 'meow-insert-mode))
+             (meow-insert-mode))
+           (when (and (fboundp 'eat-char-mode)
+                      (bound-and-true-p eat-terminal))
+             (eat-char-mode)))))
+     nil 'visible))
 
   (advice-add 'tab-bar-select-tab :around #'eat-tab-change)
   (defun kill-eat-processes ()
