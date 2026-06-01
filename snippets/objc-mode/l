@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: NSLog
+# key: l
+# --
+NSLog(@"$0");

@@ -901,383 +901,8 @@ This is a completion style, it's a back-end for completion and is used by a  fro
   )
 #+end_src
 
-**** minuet
-
-Setup deep complete backend (copilot or minuet).
-
-#+begin_src emacs-lisp
-
-(add-hook 'hack-local-variables-hook #'poly/setup-deep-completion)
-(defvar poly-deep-completion-enable-modes-list '(prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode))
-
-(defun poly/setup-deep-completion()
-  (when (derived-mode-p poly-deep-completion-enable-modes-list)
-    (if (bound-and-true-p poly-disable-copilot-completion)
-	(minuet-auto-suggestion-mode +1)
-      (copilot-mode +1))))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun bjodah/minuet-use-groq-llama ()
-  ;; GROQ for speed:
-  (plist-put minuet-openai-compatible-options :end-point "https://api.groq.com/openai/v1/chat/completions")
-  (plist-put minuet-openai-compatible-options :api-key (lambda () (getenv "GROQ_API_KEY")))
-  (plist-put minuet-openai-compatible-options :model "llama-3.3-70b-specdec")
-
-  ;; Prioritize throughput for faster completion
-					;(minuet-set-optional-options minuet-openai-compatible-options :provider '(:sort "throughput"))
-  (minuet-set-optional-options minuet-openai-compatible-options :max_tokens 256)
-  (minuet-set-optional-options minuet-openai-compatible-options :top_p 0.9)
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 16000) ;; 16k chars ~= 4000 tokens
-  (setq minuet-provider 'openai-compatible))
-
-(defun bjodah/minuet-use-deepseek ()
-  (interactive)
-  (setq minuet-openai-fim-compatible-options
-        '(:model "deepseek-chat"
-		 :end-point "https://api.deepseek.com/beta/completions"
-		 :api-key "DEEPSEEK_API_KEY"
-		 :name "Deepseek"
-		 :template (:prompt minuet--default-fim-prompt-function
-				    :suffix minuet--default-fim-suffix-function)
-		 :optional nil))
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 8000) ;; 8k chars ~= 2000 tokens
-  (setq minuet-provider 'openai-fim-compatible)
-  )
-
-(defun bjodah/minuet-use-gemini ()
-  "Switch minuet provider to Gemini"
-  (interactive)
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 16000) ;; 16k chars ~= 4000 tokens
-  (setq minuet-provider 'gemini)
-  (defvar mg-minuet-gemini-prompt
-    "You are the backend of an AI-powered code completion engine. Your task is to
-provide code suggestions based on the user's input. The user's code will be
-enclosed in markers:
-- `<contextAfterCursor>`: Code context after the cursor
-- `<cursorPosition>`: Current cursor location
-- `<contextBeforeCursor>`: Code context before the cursor
-")
-  (defvar mg-minuet-gemini-chat-input-template
-    "{{{:language-and-tab}}}
-<contextBeforeCursor>
-{{{:context-before-cursor}}}<cursorPosition>
-<contextAfterCursor>
-{{{:context-after-cursor}}}")
-  (defvar mg-minuet-gemini-fewshots
-    `((:role "user"
-             :content "# language: python
-<contextBeforeCursor>
-def fibonacci(n):
-    <cursorPosition>
-<contextAfterCursor>
-fib(5)")
-      ,(cadr minuet-default-fewshots)))
-  (minuet-set-optional-options minuet-gemini-options
-                               :prompt 'mg-minuet-gemini-prompt
-                               :system)
-  (minuet-set-optional-options minuet-gemini-options
-                               :template 'mg-minuet-gemini-chat-input-template
-                               :chat-input)
-  (plist-put minuet-gemini-options :fewshots 'mg-minuet-gemini-fewshots)
-  (minuet-set-optional-options minuet-gemini-options
-                               :generationConfig
-                               '(:maxOutputTokens 256
-                                                  :topP 0.9))
-  (minuet-set-optional-options minuet-gemini-options
-                               :safetySettings
-                               [(:category "HARM_CATEGORY_DANGEROUS_CONTENT"
-                                           :threshold "BLOCK_NONE")
-                                (:category "HARM_CATEGORY_HATE_SPEECH"
-                                           :threshold "BLOCK_NONE")
-                                (:category "HARM_CATEGORY_HARASSMENT"
-                                           :threshold "BLOCK_NONE")
-                                (:category "HARM_CATEGORY_SEXUALLY_EXPLICIT"
-                                           :threshold "BLOCK_NONE")])
-  )
-
-(defun bjodah/minuet-use-groq-coder ()
-  "Switch minuet provider to qwen2.5-Coder-32B via GROQ."
-  (interactive)
-  (plist-put minuet-openai-fim-compatible-options :end-point "https://api.groq.com/openai/v1/completions") ;; <--- GROQ only supports /chat/completions endpoint :/ (2025-03-31)
-  (plist-put minuet-openai-fim-compatible-options :name "GROQ/Qwen/Qwen2.5-Coder-32B")
-  (plist-put minuet-openai-fim-compatible-options :api-key (lambda () (getenv "GROQ_API_KEY")))
-  (plist-put minuet-openai-fim-compatible-options :model "qwen-2.5-coder-32b")
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :suffix nil :template)
-  (minuet-set-optional-options
-   minuet-openai-fim-compatible-options
-   :prompt
-   (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
-     (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
-             (plist-get ctx :language-and-tab)
-             (plist-get ctx :before-cursor)
-             (plist-get ctx :after-cursor)))
-   :template)
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 16000) ;; 16k chars ~= 4000 tokens
-  (setq minuet-provider 'openai-fim-compatible)
-  )
-
-(defun bjodah/minuet-use-localhost-fim ()
-  (setq minuet-n-completions 2) ;; 1 is recommended for Local LLM for resource saving
-  (setq minuet-context-window 512) ;; 4k chars ~= 1000 tokens
-  (setq minuet-provider 'openai-fim-compatible)
-  ;; I recommend beginning with a small context window size and incrementally
-  ;; expanding it, depending on your local computing power. A context window
-  ;; of 512, serves as an good starting point to estimate your computing
-  ;; power. Once you have a reliable estimate of your local computing power,
-  ;; you should adjust the context window to a larger value.
-  ;; (setq minuet-context-window 2048) ;; 512
-
-  ;; (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8000/v1/completions")
-  ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:1.5b")
-
-  (plist-put minuet-openai-fim-compatible-options :end-point "http://192.168.199.230:11434/v1/completions")
-  (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:14b")
-
-  ;; an arbitrary non-null environment variable as placeholder
-  (plist-put minuet-openai-fim-compatible-options :name "llama")
-  (plist-put minuet-openai-fim-compatible-options :api-key (defun my-tabby-api-key () "YE2z1ZHuHUxH8hCsBqD"))
-  ;; The model is set by the llama-cpp server and cannot be altered
-  ;; post-launch.
-  ;; (plist-put minuet-openai-fim-compatible-options :model "JetBrains_Mellum:4b")
-
-  ;; (plist-put minuet-openai-fim-compatible-options :model "qwen2.5-coder:3b")
-
-  ;; Llama.cpp does not support the `suffix` option in FIM completion.
-  ;; Therefore, we must disable it and manually populate the special
-  ;; tokens required for FIM completion.
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :suffix nil :template)
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :temperature 0.2)
-  (minuet-set-optional-options
-   minuet-openai-fim-compatible-options
-   :prompt
-   (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
-     (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
-             (plist-get ctx :language-and-tab)
-             (plist-get ctx :before-cursor)
-             (plist-get ctx :after-cursor)))
-   :template)
-  (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56) ; or 56 for local llm?
-  )
 
 
-(defun bjodah/minuet-use-llama-swap-ling ()
-  "Switch to Ling-Coder-lite on localhost (llama-swap container on port :8686"
-  (interactive)
-  (plist-put minuet-openai-compatible-options :end-point "http://localhost:8686/v1/chat/completions")
-  (plist-put minuet-openai-compatible-options :api-key (defun my-llama-swap-key () "sk-empty"))
-                                        ;(plist-put minuet-openai-compatible-options :model "HuggingFaceTB/SmolLM2-1.7B-Instruct")
-  (plist-put minuet-openai-compatible-options :model "llamacpp-Ling-Coder-lite")
-
-  ;; Prioritize throughput for faster completion
-  (minuet-set-optional-options minuet-openai-compatible-options :max_tokens 128)
-  (minuet-set-optional-options minuet-openai-compatible-options :top_p 0.9)
-  (setq minuet-n-completions 2)
-  (setq minuet-context-window 2000) ;; 2000 chars ~= 500 tokens
-  (setq minuet-provider 'openai-compatible))
-
-(defun bjodah/minuet-use-llama-swap-qwen-coder-14B ()
-  "Switch to Qwen/Qwen2.5-Coder-Instruct-14B on localhost (llama-swap container on port :8686"
-  (interactive)
-  (bjodah/minuet-use-localhost-fim) ;; we need to override port 8000, and model name.
-  (setq minuet-n-completions 4)
-  (plist-put minuet-openai-fim-compatible-options :end-point "http://localhost:8686/v1/completions")
-  (plist-put minuet-openai-fim-compatible-options :name "llama-swap-qwen-coder")
-  (plist-put minuet-openai-fim-compatible-options :api-key (defun my-llama-swap-key () "sk-empty"))
-  (plist-put minuet-openai-fim-compatible-options :model "exllamav2-Qwen2.5-Coder-14B-Instruct"))
-
-
-(use-package minuet
-  :vc (:url "https://github.com/milanglacier/minuet-ai.el"
-	    :rev :newest
-	    :branch "main")
-  :demand t ; Force immediate loading
-  ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
-  ;; 	 (lambda () (when poly-disable-copilot-completion
-  ;; 		 (message "enable minuet")
-  ;; 		 (minuet-auto-suggestion-mode +1))))
-  :custom
-  (minuet-add-single-line-entry nil)
-  (minuet-request-timeout 10)
-  (minuet-context-ratio 0.8)
-  :bind
-  (("M-o" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
-   ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
-   ("M-p" . #'minuet-configure-provider)
-   :map minuet-active-mode-map
-   ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
-   ("M-[" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
-   ("M-]" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-   ("<tab>" . #'minuet-accept-suggestion) ;; accept whole completion
-   ;; Accept the first line of completion, or N lines with a numeric-prefix:
-   ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
-   ("M-<return>" . #'minuet-accept-suggestion-line)
-   ("C-g" . #'minuet-dismiss-suggestion))
-  ;; :init
-  ;; ;; if you want to enable auto suggestion.
-  ;; ;; Note that you can manually invoke completions without enable minuet-auto-suggestion-mode
-  ;; (add-hook 'prog-mode-hook #'minuet-auto-suggestion-mode)
-  :config
-  (bjodah/minuet-use-localhost-fim) ; or bjodah/minuet-use-smollm2
-  (setq minuet-auto-suggestion-throttle-delay 1.5)
-  (setq minuet-auto-suggestion-debounce-delay 0.3)
-  ;; You can use M-x minuet-configure-provider to interactively configure provider and model
-
-  (defun +minuet-disable-suggestion()
-    (not
-     (meow-insert-mode-p)))
-
-  (add-to-list 'minuet-auto-suggestion-block-functions #'+minuet-disable-suggestion))
-#+end_src
-
-**** copilot
-
-#+begin_src emacs-lisp
-(use-package copilot
-  :vc (:url "https://github.com/copilot-emacs/copilot.el" :branch "main" :rev :newest)
-  ;; :hook ((prog-mode conf-mode text-mode vterm-mode org-msg-edit-mode) .
-  ;; 	 (lambda () (unless poly-disable-copilot-completion
-  ;; 		      (copilot-mode +1))))
-  :custom
-  (copilot-network-proxy
-   '(:host "127.0.0.1" :port 6152))
-  (copilot-max-char 1000000)
-  :bind (:map copilot-completion-map
-	      ("M-[" . copilot-previous-completion)
-	      ("M-]" . copilot-next-completion)
-	      ("<tab>" . copilot-accept-completion)
-	      ("M-f" . copilot-accept-completion-by-word))
-  :config
-  (setq copilot-enable-predicates nil
-        warning-suppress-types '((copilot copilot--infer-indentation-offset)))
-  (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojurec-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojurescript-mode 2))
-  (add-to-list 'copilot-disable-predicates
-	       #'(lambda ()
-                   (symbol-value 'meow-normal-mode))))
-#+end_src
-
-**** aider
-
-***** aidermacs
-
-#+begin_src emacs-lisp :tangle no
-(use-package aidermacs
-  :vc (:url "https://github.com/MatthewZMD/aidermacs" :branch "main" :rev :newest)
-  ;; :bind (("C-c a a m" . aidermacs-transient-menu)) ;; FIXME
-  :custom
-  (aidermacs-watch-files t)
-  (aidermacs-show-diff-after-change t)
-  (aidermacs-use-architect-mode t)
-  (aidermacs-default-chat-mode 'architect)
-  (aidermacs-default-model "gemini/gemini-2.0-flash")
-  (aidermacs-auto-commits nil)
-  (aidermacs-setup-minor-mode))
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-(use-package aider
-    :vc (:url "https://github.com/tninja/aider.el" :branch "main" :rev :newest)
-  :config
-  ;; For latest claude sonnet model
-  (setq aider-args '("--model" "gemini/gemini-2.0-flash" "--no-auto-accept-architect" "--no-auto-commits")) ;; add --no-auto-commits if you don't want it
-  ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
-  ;; Or chatgpt model
-  ;; (setq aider-args '("--model" "o4-mini"))
-  ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
-  ;; Or use your personal config file
-  ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
-  ;; ;;
-  ;; Optional: Set a key binding for the transient menu
-  ;; (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
-  ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
-  (aider-magit-setup-transients)) ;; add aider magit function to magit menu
-#+end_src
-
-
-** agent-shell
-
-**** shell-maker
-
-#+begin_src emacs-lisp
-#+end_src
-
-**** agent-shell
-
-#+begin_src emacs-lisp
-(use-package acp
-  :vc (:url "https://github.com/xenodium/acp.el" :branch "main")
-  :defer t)
-
-(use-package shell-maker
-  :vc (:url "https://github.com/xenodium/shell-maker" :branch "main")
-  :defer t)
-
-;; (use-package shell-maker
-;;   :ensure t
-;;   :custom
-;;   (shell-maker-transcript-default-path
-;;    (expand-file-name "agent-shell-archive/" emacs-assets-directory))
-;;   (shell-maker-transcript-default-filename
-;;    (lambda () (format-time-string "%F-%T-agent-shell.txt"))))
-
-(use-package agent-shell
-  :ensure t
-  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest)
-  :custom
-  (agent-shell-file-completion-enabled t)
-  (agent-shell-prefer-viewport-interaction t)
-  (agent-shell-session-strategy 'prompt) ; new for a new session
-  :config
-  (with-eval-after-load 'markdown-mode
-    (keymap-set agent-shell-viewport-edit-mode-map "M-o" markdown-mode-style-map))
-  (setq agent-shell-openai-codex-environment
-	(agent-shell-make-environment-variables :inherit-env t))
-  ;; (setq agent-shell-anthropic-claude-environment
-  ;; 	(agent-shell-make-environment-variables :inherit-env t))
-  ;; (defvar-keymap agent-shell-operation-map
-  ;;   :doc "Keymap for agent-shell operation"
-  ;;   :name "Agent-shell"
-  ;;   "a" '("Agent-shell"    . agent-shell)
-  ;;   "c" '("Compose"        . agent-shell-prompt-compose)
-  ;;   "f" '("Send file"      . agent-shell-send-file)
-  ;;   "j" '("Jump"           . agent-shell-attention-jump)
-  ;;   "n" '("New shell"      . agent-shell-new-shell)
-  ;;   "r" '("Send region"    . agent-shell-send-region)
-  ;;   "t" '("Toggle display" . agent-shell-toggle)
-  ;;   "u" '("Usage"          . agent-shell-show-usage))
-  ;; :bind-keymap ("C-c a"  . agent-shell-operation-map)
-  )
-
-;; Mode-line `AS:n' indicator counting agent buffers waiting on you.
-;; `M-x agent-shell-attention-jump' teleports to the oldest pending
-;; buffer; `C-u C-u' opens a dashboard of all live sessions.
-;; (use-package agent-shell-attention
-;;   :vc (:url "https://github.com/ultronozm/agent-shell-attention.el"
-;;        :rev :newest)
-;;   :after agent-shell
-;;   :config
-;;   (agent-shell-attention-mode 1))
-
-
-;; agent-shell auto-saves every conversation as Markdown under
-;; `.agent-shell/transcripts/' in the project root.  agent-recall
-;; indexes those, gives full-text search, and resumes past sessions.
-;; On MELPA — clean install.
-(use-package agent-recall
-  :after agent-shell
-  :commands (agent-recall-search agent-recall-browse)
-  ;; :custom
-  ;; ;; All source repos live under ~/src — agent-recall walks the
-  ;; ;; subtree looking for `.agent-shell/transcripts/'.
-  ;; (agent-recall-search-paths '("~/src"))
-  )
-#+end_src
 
 *** corfu-quick
 
@@ -2292,6 +1917,64 @@ To manage the git repository, use builtin package ~vc~.
   (setq code-review-gitlab-graphql-host nil)
   ;; (setq code-review-gitlab-graphql-host "git.17usoft.com/api")
   )
+
+(defvar my/gerrit-target-branches '("main" "master" "develop")
+  "Common target branches for `my/gerrit-push'.")
+
+(defun my/gerrit--git-root ()
+  "Return the current Git repository root, or signal a user error."
+  (or (locate-dominating-file default-directory ".git")
+      (user-error "Not inside a Git repository")))
+
+(defun my/gerrit-push (target-branch)
+  "Push HEAD to Gerrit refs/for/refs/heads/TARGET-BRANCH."
+  (interactive
+   (list
+    (completing-read "Target branch: " my/gerrit-target-branches
+		     nil nil nil nil (car my/gerrit-target-branches))))
+  (let ((target-branch (string-trim target-branch)))
+    (when (string-empty-p target-branch)
+      (user-error "Target branch cannot be empty"))
+    (save-some-buffers t)
+    (let* ((default-directory (my/gerrit--git-root))
+	   (refspec (format "HEAD:refs/for/refs/heads/%s" target-branch))
+	   (buffer (get-buffer-create "*Gerrit Push*")))
+      (with-current-buffer buffer
+	(let ((inhibit-read-only t))
+	  (read-only-mode -1)
+	  (erase-buffer)
+	  (insert (format "$ git push origin %s\n\nRunning...\n" refspec))))
+      (display-buffer buffer)
+      (make-process
+       :name "gerrit-push"
+       :buffer buffer
+       :command (list "git" "push" "origin" refspec)
+       :noquery t
+       :sentinel
+       (lambda (process _event)
+	 (when (memq (process-status process) '(exit signal))
+	   (let ((code (process-exit-status process)))
+	     (when-let ((process-buffer (process-buffer process)))
+	       (with-current-buffer process-buffer
+		 (let ((inhibit-read-only t))
+		   (goto-char (point-max))
+		   (insert (format "\n[exit code: %d]\n" code)))
+		 (read-only-mode 1)))
+	     (if (= code 0)
+		 (message "Gerrit push to %s finished." target-branch)
+	       (message "Gerrit push to %s failed. See *Gerrit Push*." target-branch)))))))))
+
+(defmacro my/gerrit-define-push-command (branch)
+  "Define an interactive command that pushes HEAD to Gerrit BRANCH."
+  (let ((name (intern (format "my/gerrit-push-%s" branch))))
+    `(defun ,name ()
+       ,(format "Push HEAD to refs/for/refs/heads/%s." branch)
+       (interactive)
+       (my/gerrit-push ,branch))))
+
+(my/gerrit-define-push-command "main")
+(my/gerrit-define-push-command "master")
+(my/gerrit-define-push-command "develop")
 #+end_src
 
 ****  Git sign-off line
@@ -2455,7 +2138,9 @@ Magit with cz
 
 (defun +rime-disable-predicate()
   (and (not (eq major-mode 'plantuml-mode))
-       (or (eq major-mode 'minibuffer-mode) (eq major-mode 'notdeft-mode))))
+       ;; (not (eq major-mode 'eat-mode))
+       (or (eq major-mode 'minibuffer-mode)
+	   (eq major-mode 'notdeft-mode))))
 
 (defun +rime-predicate-in-code-string ()
   (and (not (eq major-mode 'plantuml-mode))
@@ -2471,7 +2156,8 @@ Magit with cz
     (member rime--current-input-key '(91 93 96))))
 
 (defun switch-to-buffer--activate-input-method (&rest _)
-  (if (or (string-match "vterm-mode" (symbol-name major-mode))
+  (if (or (string-match "eat-mode" (symbol-name major-mode))
+	  (string-match "vterm-mode" (symbol-name major-mode))
 	  (string-match "dired-mode" (symbol-name major-mode))
 	  (string-match "image-mode" (symbol-name major-mode))
 	  (string-match "compilation-mode" (symbol-name major-mode))
@@ -2542,7 +2228,43 @@ Magit with cz
 	("<tab>" . rime-inline-ascii)
 	:map rime-mode-map
 	("C-$" . rime-send-keybinding)
-	("M-j" . rime-force-enable)))
+	("M-j" . rime-force-enable))
+  :config
+  ;; allow rime in eat mode
+  (define-advice rime--text-read-only-p (:around (old-fn) allow-eat-mode)
+    (if (eq major-mode 'eat-mode)
+        nil
+      (funcall old-fn)))
+
+  (define-advice rime--commit (:around (old-fn &rest args) allow-eat-mode)
+    (if (eq major-mode 'eat-mode)
+	(progn
+	  ;; run (rime--commit "") first, which calls (insert "") which is no-op
+	  ;; but it would correctly handle RIME states.
+	  ;; then, send the value to eat by ourselves.
+	  ;; We cannot advice `insert' here (temporary), because it's a native function and it would not work after `rime--commit' is byte-compiled
+	  (funcall old-fn "")
+	  (when eat-terminal
+	    (eat-term-send-string-as-yank eat-terminal value)))
+      (apply old-fn args)))
+
+    (defun my/rime-redisplay-if-active ()
+      (when rime-active-mode
+        (rime--redisplay)))
+
+    ;; rime.el have rime--init-hook-vterm which runs rime--redisplay after vterm--redraw
+    ;; this fixes the popup display when eat redraws
+    (with-eval-after-load 'eat
+      (add-hook 'eat-update-hook #'my/rime-redisplay-if-active))
+
+     ;; (defun my/eat-scroll-right-after-input-method ()
+     ;;   (when (eq major-mode 'eat-mode)
+     ;;     (scroll-right)))
+
+    ;; in eat-mode-hook
+    ;; (add-hook 'input-method-deactivate-hook #'my/eat-scroll-right-after-input-method 0 t)
+    ;; (add-hook 'evil-insert-state-exit-hook #'my/eat-scroll-right-after-input-method 0 t)
+  )
 
 ;; change the cursor color with the input-method changing
 (defvar cursor-default-color (face-background 'cursor))

@@ -104,7 +104,7 @@ Core configuration of poly emacs, global variable declare.
 
 (defvar poly-org-config-file-list
   '(private editor ;; writing
-	    programming addons)
+	    programming addons llm)
   "Org config file list")
 
 ;; (defconst poly/using-native-comp (fboundp 'native-comp-available-p)
