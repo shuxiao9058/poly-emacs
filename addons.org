@@ -3056,7 +3056,7 @@ Easily persist and restore your Emacs editing sessions.
               '((name . eat-eshell-only-when-active)))
   (defun eat-tab-change (original-fun &rest args)
     (interactive)
-    (message "eat-tab-change triggered")
+    ;; (message "eat-tab-change triggered")
     (apply original-fun args)
     (walk-windows
      (lambda (window)

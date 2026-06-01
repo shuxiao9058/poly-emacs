@@ -429,10 +429,17 @@ fib(5)")
 #+begin_src emacs-lisp
 (use-package codex
   :vc (:url "https://github.com/benthamite/codex")
-  :bind-keymap ("C-c x" . codex-command-map)
-  ;; :config
-  ;; ;; Optional: bind the command map to a prefix of your choice.
-  ;; (global-set-key (kbd "C-c x") codex-command-map)
+  :commands (codex codex-send-command codex-toggle codex-transient)
+  :ensure t
+  ;; :bind-keymap ("C-c x" . codex-command-map)
+  :custom
+  (codex-terminal-backend 'eat)
+  :init
+  ;; Optional: bind the command map to a prefix of your choice.
+  (global-set-key (kbd "C-c x") codex-command-map)
+  ;; :bind-keymap ("C-c x" . codex-command-map)
+  :config
+  (codex-mode 1)
   )
 #+end_src
 

@@ -815,13 +815,9 @@ Examples:
     (add-to-list 'eglot-server-programs '((protobuf-mode protobuf-ts-mode) "protobuf-language-server"
 					  )))
 
-  (let ((sourcekit-lsp
-	 (string-trim
-	  (shell-command-to-string "xcrun --find sourcekit-lsp 2>/dev/null"))))
-    (when (and (not (string-empty-p sourcekit-lsp))
-	       (file-executable-p sourcekit-lsp))
-      (add-to-list 'eglot-server-programs
-		   `((swift-mode swift-ts-mode) . (,sourcekit-lsp)))))
+  (when IS-MAC
+    (add-to-list 'eglot-server-programs
+                 '((swift-mode swift-ts-mode) . ("xcrun" "sourcekit-lsp"))))
 
   (add-to-list 'eglot-server-programs
 	       '(asm-mode . ("asm-lsp")))

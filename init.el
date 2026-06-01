@@ -8,7 +8,9 @@
   (poly-load-org-config "laf" t)
   (poly-load-org-config "editor" t)
   (poly-load-org-config "programming" t)
-  (poly-load-org-config "addons" t))
+  (poly-load-org-config "addons" t)
+  (poly-load-org-config "llm" t)
+  )
 
 ;; Define helper command for open configuration file.
 (defun poly-open-configuration ()
@@ -20,7 +22,9 @@
 				   "editor"
 				   "writing"
 				   "programming"
-				   "addons")
+				   "addons"
+				   "llm"
+				   )
 				 nil
 				 t)))
     (find-file (expand-file-name (format "%s.org" config) user-emacs-directory))))
@@ -45,3 +49,4 @@
 (poly-load-org-config "editor")
 (poly-load-org-config "programming")
 (poly-load-org-config "addons" t)
+(poly-load-org-config "llm" t)
