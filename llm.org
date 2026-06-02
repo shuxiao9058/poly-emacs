@@ -429,8 +429,8 @@ fib(5)")
 #+begin_src emacs-lisp
 (use-package codex
   :vc (:url "https://github.com/benthamite/codex")
-  :commands (codex codex-send-command codex-toggle codex-transient)
-  :ensure t
+  ;; :commands (codex codex-send-command codex-toggle codex-transient)
+  :ensure nil
   ;; :bind-keymap ("C-c x" . codex-command-map)
   :custom
   (codex-terminal-backend 'eat)
