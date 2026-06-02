@@ -155,8 +155,6 @@ This configuration sticks with Meow for modal editing.
 #+TBLNAME: normal-keybindings
 | key      | command                 |   |
 |----------+-------------------------+---|
-| M-DEL    | meow-backward-kill-word |   |
-| M-d      | meow-kill-word          |   |
 | 0        | meow-expand-0           |   |
 | 9        | meow-expand-9           |   |
 | 8        | meow-expand-8           |   |
@@ -443,7 +441,12 @@ This configuration sticks with Meow for modal editing.
 
   ;; meow-thing-register THING INNER BOUNDS
   (meow-thing-register 'arrow '(pair ("<") (">")) '(pair ("<") (">")))
-  (add-to-list 'meow-char-thing-table '(?a . arrow)))
+  (add-to-list 'meow-char-thing-table '(?a . arrow))
+
+  ;; some keybinds
+  (bind-key (kbd "M-d") #'meow-kill-word)
+  (bind-key (kbd "M-DEL") #'meow-backward-kill-word)
+  )
 
 (use-package meow-tree-sitter
   :vc (:url "https://github.com/skissue/meow-tree-sitter"

@@ -1942,23 +1942,21 @@ To manage the git repository, use builtin package ~vc~.
   "Handle Gerrit push PROCESS completion."
   (when (memq (process-status process) '(exit signal))
     (let ((code (process-exit-status process))
-          (branch (process-get process 'my/gerrit-target-branch)))
-      (when-let ((process-buffer (process-buffer process)))
-        (with-current-buffer process-buffer
+          (branch (process-get process 'my/gerrit-target-branch))
+          (buffer (process-buffer process)))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
           (let ((inhibit-read-only t))
             (goto-char (point-max))
             (insert (format "\n[exit code: %d]\n" code)))
           (read-only-mode 1)))
-      (if (= code 0)
-          (progn
-            (message "Gerrit push to %s finished." branch)
-            (when-let ((process-buffer (process-buffer process)))
-              (run-with-timer 0.5 nil
-                              #'my/gerrit--close-output-window
-                              process-buffer)))
-        (when-let ((process-buffer (process-buffer process)))
-          (my/gerrit--select-output-window process-buffer))
-        (message "Gerrit push to %s failed. See *Gerrit Push*." branch)))))
+      (cond
+       ((= code 0)
+        (message "Gerrit push to %s finished." branch)
+        (run-with-timer 0.5 nil #'my/gerrit--close-output-window buffer))
+       (t
+        (my/gerrit--select-output-window buffer)
+        (message "Gerrit push to %s failed. See *Gerrit Push*." branch))))))
 
 (defun my/gerrit-push (target-branch)
   "Push HEAD to Gerrit refs/for/refs/heads/TARGET-BRANCH."
