@@ -434,13 +434,13 @@ fib(5)")
   ;; :bind-keymap ("C-c x" . codex-command-map)
   :custom
   (codex-terminal-backend 'eat)
+  (codex-enable-hooks nil)
   :init
   ;; Optional: bind the command map to a prefix of your choice.
   (global-set-key (kbd "C-c x") codex-command-map)
   ;; :bind-keymap ("C-c x" . codex-command-map)
   :config
-  (codex-mode 1)
-  )
+  (codex-mode 1))
 #+end_src
 
 * GPTEL

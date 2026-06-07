@@ -84,7 +84,8 @@
 ;; updates GPG keys used by ELPA package manager
 ;; https://elpa.gnu.org/packages/gnu-elpa-keyring-update.html
 (use-package gnu-elpa-keyring-update
-  :ensure t)
+  :ensure t
+  :demand t)
 #+end_src
 
 ** [[https://github.com/formsandlines/dotfiles/blob/405498c15f2fa07bb75e7fe5e14cbd2e3cab0e26/.emacs.d/init.org#L78][use-package autoremove fix]]

@@ -692,7 +692,7 @@ If INTERACTIVE, prompt user for details."
   ;; (eglot-events-buffer-size 500000)
   (eglot-events-buffer-size 0)
   (eglot-stay-out-of '(;; imenu
-		       eldoc yasnippet))  ;; eglot reinits backends
+		       eldoc))  ;; eglot reinits backends
   (eldoc-echo-area-use-multiline-p nil)
   ;; (eglot-events-buffer-size 0)
   ;; disable symbol highlighting and documentation on hover
@@ -879,7 +879,7 @@ Examples:
 				     :constantValues         t           ;; bool false
 				     :functionTypeParameters :json-false ;; bool false
 				     ;; :parameterNames         :json-false ;; bool false
-				     :parameterNames         t ;; bool false
+				     :parameterNames         :json-false ;; bool false
 				     :rangeVariableTypes     :json-false           ;; bool false
 				     )
 			     ;; DIAGNOSTIC

@@ -1561,6 +1561,7 @@ To manage the git repository, use builtin package ~vc~.
   (git-commit-summary-max-length 50)
   (magit-log-section-commit-count 5)
   (magit-diff-options '("--minimal" "--patience" "-b"))
+  (magit-diff-visit-prefer-worktree t)
   (magit-tag-arguments '("--annotate" "--sign"))
   (magit-merge-arguments '("--no-ff"))
   (magit-rebase-arguments '("--autostash"))
@@ -2036,6 +2037,8 @@ Enable diff-hl in based on major modes.
 
 #+begin_src emacs-lisp
 (use-package diff-hl
+  :vc (:url "https://github.com/dgutov/diff-hl" :branch "master" :rev :newest)
+  :ensure t
   :custom-face
   (diff-hl-change ((t (:inherit diff-changed :foreground unspecified :background unspecified))))
   (diff-hl-insert ((t (:inherit diff-added :background unspecified))))
@@ -5516,6 +5519,21 @@ Version: 2020-02-13 2021-01-18 2022-08-04"
   (let ((dir (poly/project-root)))
     (if dir
 	(poly/run-shell-command-in-dir dir (list '("buf" "generate")))
+      (message "Project directory is not exist!"))))
+#+end_src
+
+*** fix-textinput
+
+#+begin_src emacs-lisp
+(defun poly/fix-textinput ()
+  "Fix textinput."
+  (interactive)
+  (when-let ((IS-MAC)
+	     (dir (poly/project-root)))
+    (if dir
+	(poly/run-shell-command-in-dir dir (list '("killall" "-HUP" "TextInputMenuAgent")
+						 '("killall" "-HUP" "TextInputSwitcher")
+						 ))
       (message "Project directory is not exist!"))))
 #+end_src
 
