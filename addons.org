@@ -1918,7 +1918,11 @@ To manage the git repository, use builtin package ~vc~.
   (setq code-review-gitlab-graphql-host nil)
   ;; (setq code-review-gitlab-graphql-host "git.17usoft.com/api")
   )
+#+end_src
 
+**** gerrit push
+
+#+begin_src emacs-lisp
 (defvar my/gerrit-target-branches '("main" "master" "develop")
   "Common target branches for `my/gerrit-push'.")
 
@@ -1969,7 +1973,7 @@ To manage the git repository, use builtin package ~vc~.
     (when (string-empty-p target-branch)
       (user-error "Target branch cannot be empty"))
     (save-some-buffers t)
-    (let* ((root (my/gerrit--git-root))
+    (let* ((default-directory (my/gerrit--git-root))
 	   (refspec (format "HEAD:refs/for/refs/heads/%s" target-branch))
 	   (buffer (get-buffer-create "*Gerrit Push*")))
       (with-current-buffer buffer
@@ -1983,7 +1987,6 @@ To manage the git repository, use builtin package ~vc~.
 	      :name "gerrit-push"
 	      :buffer buffer
 	      :command (list "git" "push" "origin" refspec)
-	      :default-directory root
 	      :noquery t
 	      :sentinel #'my/gerrit--process-sentinel)))
 	(process-put process 'my/gerrit-target-branch target-branch)))))

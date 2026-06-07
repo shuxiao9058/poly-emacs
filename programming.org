@@ -489,7 +489,10 @@ Configuration for programming and languages support.
   ;; (flycheck-add-mode 'typescript-tslint 'tsx-ts-mode)
   (dolist (lint '(go-errcheck ;; go-unconvert
 			      ;; go-staticcheck
-			      ))
+		  ;; remove org-lint in case of
+		  ;; Error from syntax checker org-lint: Wrong type argument: number-or-marker-p, #("1927" 0 4 (org-lint-marker #<marker at 68699 in addons.org>))
+		  org-lint
+		  ))
     (remove-from-list 'flycheck-checkers lint))
   ;; (remove-hook 'post-command-hook 'flycheck-display-error-at-point-soon)
   ;; (remove-hook 'focus-in-hook 'flycheck-display-error-at-point-soon)
