@@ -1,4 +1,4 @@
-﻿
+
 Configuration for addons, additional features provided by individual packages.
 
 #+begin_src emacs-lisp
@@ -1969,7 +1969,7 @@ To manage the git repository, use builtin package ~vc~.
     (when (string-empty-p target-branch)
       (user-error "Target branch cannot be empty"))
     (save-some-buffers t)
-    (let* ((default-directory (my/gerrit--git-root))
+    (let* ((root (my/gerrit--git-root))
 	   (refspec (format "HEAD:refs/for/refs/heads/%s" target-branch))
 	   (buffer (get-buffer-create "*Gerrit Push*")))
       (with-current-buffer buffer
@@ -1983,6 +1983,7 @@ To manage the git repository, use builtin package ~vc~.
 	      :name "gerrit-push"
 	      :buffer buffer
 	      :command (list "git" "push" "origin" refspec)
+	      :default-directory root
 	      :noquery t
 	      :sentinel #'my/gerrit--process-sentinel)))
 	(process-put process 'my/gerrit-target-branch target-branch)))))
